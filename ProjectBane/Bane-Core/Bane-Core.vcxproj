@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{C56B8D87-F1D5-4696-9DBC-EFED9AB81A93}</ProjectGuid>
+    <RootNamespace>BaneGame</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(SolutionDir)/Bane-Core/;$(SolutionDir)/Bane-Core/Engine/;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>$(ProjectDir)/ThirdParty/libs/;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(SolutionDir)/Bane-Core/;$(SolutionDir)/Bane-Core/Engine/;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>$(ProjectDir)/ThirdParty/libs/;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <AdditionalIncludeDirectories>$(ProjectDir)/;$(ProjectDir)/Engine/;$(ProjectDir)/Engine/Core/;$(ProjectDir)/ThirdParty/include;</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>d3d12.lib;d3dcompiler.lib;dxgi.lib;vulkan-1.lib;libfbxsdk.lib;</AdditionalDependencies>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>DevIL.lib;ILU.lib;ILUT.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib;kernel32.lib;user32.lib;gdi32.lib;vulkan-1.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <AdditionalIncludeDirectories>$(ProjectDir)/;$(ProjectDir)/Engine/;$(ProjectDir)/Engine/Core/;$(ProjectDir)/ThirdParty/include;</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>d3d12.lib;d3dcompiler.lib;dxgi.lib;vulkan-1.lib;libfbxsdk.lib;</AdditionalDependencies>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>DevIL.lib;ILU.lib;ILUT.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib;kernel32.lib;user32.lib;gdi32.lib;vulkan-1.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Engine\BaneObject\CoreComponents\LightComponent.cpp" />
+    <ClCompile Include="Engine\BaneObject\CoreComponents\SkyboxComponent.cpp" />
+    <ClCompile Include="Engine\Graphics\Interfaces\GraphicsDevice.cpp" />
+    <ClCompile Include="Engine\Graphics\IO\MeshCache.cpp" />
+    <ClCompile Include="Engine\Graphics\IO\ShaderTokenizer.cpp" />
+    <ClCompile Include="Engine\Graphics\Rendering\DefferedRenderer.cpp" />
+    <ClCompile Include="Engine\Application\Application.cpp" />
+    <ClCompile Include="Engine\Application\Input.cpp" />
+    <ClCompile Include="Engine\Application\Window.cpp" />
+    <ClCompile Include="Engine\BaneObject\CoreComponents\CameraComponent.cpp" />
+    <ClCompile Include="Engine\BaneObject\CoreComponents\MeshRenderingComponent.cpp" />
+    <ClCompile Include="Engine\BaneObject\Entity\BaneObjectGeneralAllocator.cpp" />
+    <ClCompile Include="Engine\BaneObject\Entity\ComponentBase.cpp" />
+    <ClCompile Include="Engine\BaneObject\Entity\Entity.cpp" />
+    <ClCompile Include="Engine\BaneObject\Entity\EntityManager.cpp" />
+    <ClCompile Include="Engine\BaneObject\Entity\Scene.cpp" />
+    <ClCompile Include="Engine\BaneObject\Entity\Transform.cpp" />
+    <ClCompile Include="Engine\Core\Containers\StackQueue.cpp" />
+    <ClCompile Include="Engine\Core\Data\Color.cpp" />
+    <ClCompile Include="Engine\Core\Data\Image.cpp" />
+    <ClCompile Include="Engine\Core\Systems\Assets\AssetItem.cpp" />
+    <ClCompile Include="Engine\Core\Systems\Assets\AssetManager.cpp" />
+    <ClCompile Include="Engine\Core\Systems\File\PlatformFile.cpp" />
+    <ClCompile Include="Engine\Core\Systems\File\WindowsPlatformFile.cpp" />
+    <ClCompile Include="Engine\Core\Systems\Logging\ConsoleLogTarget.cpp" />
+    <ClCompile Include="Engine\Core\Systems\Logging\Logger.cpp" />
+    <ClCompile Include="Engine\Graphics\D3D12\D3D12CommandQueue.cpp" />
+    <ClCompile Include="Engine\Graphics\D3D12\D3D12CommandContext.cpp" />
+    <ClCompile Include="Engine\Graphics\D3D12\D3D12GraphicsDevice.cpp" />
+    <ClCompile Include="Engine\Graphics\D3D12\D3D12GraphicsResource.cpp" />
+    <ClCompile Include="Engine\Graphics\D3D12\D3D12PipelineLibrary.cpp" />
+    <ClCompile Include="Engine\Graphics\D3D12\D3D12PipelineState.cpp" />
+    <ClCompile Include="Engine\Graphics\D3D12\D3D12Runtime.cpp" />
+    <ClCompile Include="Engine\Graphics\D3D12\D3D12SceneRenderer.cpp" />
+    <ClCompile Include="Engine\Graphics\D3D12\D3D12ShaderResourceViews.cpp" />
+    <ClCompile Include="Engine\Graphics\D3D12\D3D12ShaderSignature.cpp" />
+    <ClCompile Include="Engine\Graphics\D3D12\D3D12ShaderSignatureLibrary.cpp" />
+    <ClCompile Include="Engine\Graphics\D3D12\D3D12SwapChain.cpp" />
+    <ClCompile Include="Engine\Graphics\D3D12\D3D12Translator.cpp" />
+    <ClCompile Include="Engine\Graphics\D3D12\D3D12DescriptorAllocator.cpp" />
+    <ClCompile Include="Engine\Graphics\D3DCommon\D3DCommonTranslator.cpp" />
+    <ClCompile Include="Engine\Graphics\Interfaces\ApiRuntime.cpp" />
+    <ClCompile Include="Engine\Graphics\IO\PipelineCache.cpp" />
+    <ClCompile Include="Engine\Graphics\IO\ShaderCache.cpp" />
+    <ClCompile Include="Engine\Graphics\IO\TextureCache.cpp" />
+    <ClCompile Include="Engine\Graphics\Rendering\BasicForwardRenderer.cpp" />
+    <ClCompile Include="Engine\Graphics\Rendering\Camera.cpp" />
+    <ClCompile Include="Engine\Graphics\Rendering\Material.cpp" />
+    <ClCompile Include="Engine\Graphics\Rendering\Mesh.cpp" />
+    <ClCompile Include="Engine\Graphics\Rendering\RendererInterface.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine\BaneObject\CoreComponents\LightComponent.h" />
+    <ClInclude Include="Engine\BaneObject\CoreComponents\SkyboxComponent.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12Fence.h" />
+    <ClInclude Include="Engine\Graphics\IO\MeshCache.h" />
+    <ClInclude Include="Engine\Graphics\IO\ShaderTokenizer.h" />
+    <ClInclude Include="Engine\Graphics\Rendering\DefferedRenderer.h" />
+    <ClInclude Include="Engine\Application\Application.h" />
+    <ClInclude Include="Engine\Application\Input.h" />
+    <ClInclude Include="Engine\Application\Window.h" />
+    <ClInclude Include="Engine\BaneObject\CoreComponents\CameraComponent.h" />
+    <ClInclude Include="Engine\BaneObject\CoreComponents\MeshRenderingComponent.h" />
+    <ClInclude Include="Engine\BaneObject\CoreComponents\RenderComponent.h" />
+    <ClInclude Include="Engine\BaneObject\Entity\BaneObject.h" />
+    <ClInclude Include="Engine\BaneObject\Entity\BaneObjectGeneralAllocator.h" />
+    <ClInclude Include="Engine\BaneObject\Entity\ComponentBase.h" />
+    <ClInclude Include="Engine\BaneObject\Entity\Entity.h" />
+    <ClInclude Include="Engine\BaneObject\Entity\EntityManager.h" />
+    <ClInclude Include="Engine\BaneObject\Entity\Scene.h" />
+    <ClInclude Include="Engine\BaneObject\Entity\Transform.h" />
+    <ClInclude Include="Engine\Core\BaneMacros.h" />
+    <ClInclude Include="Engine\Core\Common.h" />
+    <ClInclude Include="Engine\Core\Containers\StackQueue.h" />
+    <ClInclude Include="Engine\Core\Data\Color.h" />
+    <ClInclude Include="Engine\Core\Data\Format.h" />
+    <ClInclude Include="Engine\Core\Data\Image.h" />
+    <ClInclude Include="Engine\Core\Data\stb_image_write.h" />
+    <ClInclude Include="Engine\Core\ExpanseMath.h" />
+    <ClInclude Include="Engine\Core\StringHelpers.h" />
+    <ClInclude Include="Engine\Core\Systems\Assets\AssetItem.h" />
+    <ClInclude Include="Engine\Core\Systems\Assets\AssetManager.h" />
+    <ClInclude Include="Engine\Core\Systems\File\JsonCPP.h" />
+    <ClInclude Include="Engine\Core\Systems\File\PlatformFile.h" />
+    <ClInclude Include="Engine\Core\Systems\File\WindowsPlatformFile.h" />
+    <ClInclude Include="Engine\Core\Systems\Logging\ConsoleLogTarget.h" />
+    <ClInclude Include="Engine\Core\Systems\Logging\Logger.h" />
+    <ClInclude Include="Engine\Core\Systems\Logging\LogTarget.h" />
+    <ClInclude Include="Engine\Engine.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12CommandContext.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12CommandQueue.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12GraphicsDevice.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12GraphicsResource.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12Helper.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12PipelineLibrary.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12PipelineState.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12Runtime.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12SceneRenderer.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12ShaderResourceViews.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12ShaderSignature.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12ShaderSignatureLibrary.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12SwapChain.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12Translator.h" />
+    <ClInclude Include="Engine\Graphics\D3D12\D3D12DescriptorAllocator.h" />
+    <ClInclude Include="Engine\Graphics\D3DCommon\D3DCommonTranslator.h" />
+    <ClInclude Include="Engine\Graphics\Graphics.h" />
+    <ClInclude Include="Engine\Graphics\Interfaces\ApiRuntime.h" />
+    <ClInclude Include="Engine\Graphics\Interfaces\CommandAllocator.h" />
+    <ClInclude Include="Engine\Graphics\Interfaces\DeviceTypes.h" />
+    <ClInclude Include="Engine\Graphics\Interfaces\GraphicsCommandList.h" />
+    <ClInclude Include="Engine\Graphics\Interfaces\GraphicsDevice.h" />
+    <ClInclude Include="Engine\Graphics\Interfaces\GraphicsResources.h" />
+    <ClInclude Include="Engine\Graphics\Interfaces\PipelineState.h" />
+    <ClInclude Include="Engine\Graphics\Interfaces\ResourceTypes.h" />
+    <ClInclude Include="Engine\Graphics\Interfaces\ShaderResourceView.h" />
+    <ClInclude Include="Engine\Graphics\IO\PipelineCache.h" />
+    <ClInclude Include="Engine\Graphics\IO\ShaderMacros.h" />
+    <ClInclude Include="Engine\Graphics\IO\TextureCache.h" />
+    <ClInclude Include="Engine\Graphics\Rendering\BasicForwardRenderer.h" />
+    <ClInclude Include="Engine\Graphics\Rendering\Camera.h" />
+    <ClInclude Include="Engine\Graphics\Rendering\LightData.h" />
+    <ClInclude Include="Engine\Graphics\Rendering\Material.h" />
+    <ClInclude Include="Engine\Graphics\Rendering\Mesh.h" />
+    <ClInclude Include="Engine\Graphics\Rendering\RendererInterface.h" />
+    <ClInclude Include="Engine\Graphics\Interfaces\SwapChainInterface.h" />
+    <ClInclude Include="Engine\Graphics\IO\ShaderCache.h" />
+    <ClInclude Include="Engine\Graphics\Rendering\RenderPass.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Engine\Core\BaneSTLNotes.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\assimp.v140.redist.3.2\build\native\assimp.v140.redist.targets" Condition="Exists('..\packages\assimp.v140.redist.3.2\build\native\assimp.v140.redist.targets')" />
+    <Import Project="..\packages\assimp.v140.3.2\build\native\assimp.v140.targets" Condition="Exists('..\packages\assimp.v140.3.2\build\native\assimp.v140.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\assimp.v140.redist.3.2\build\native\assimp.v140.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\assimp.v140.redist.3.2\build\native\assimp.v140.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\assimp.v140.3.2\build\native\assimp.v140.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\assimp.v140.3.2\build\native\assimp.v140.targets'))" />
+  </Target>
+</Project>

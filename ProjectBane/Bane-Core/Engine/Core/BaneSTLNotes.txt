@@ -1,0 +1,6 @@
+
+------ Bane STL ------ 
+
+	At the moment, not used, not a major reason for it yet
+	although I will consider using some of these implementations 
+	when allocation patterns prove it necessary
