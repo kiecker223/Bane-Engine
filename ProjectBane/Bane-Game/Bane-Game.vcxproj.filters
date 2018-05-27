@@ -34,6 +34,7 @@
     <FxCompile Include="Shaders\Bloom.hlsl" />
     <FxCompile Include="Shaders\SSR.hlsl" />
     <FxCompile Include="Shaders\RayTracingPS.hlsl" />
+    <FxCompile Include="Shaders\RayTracingCS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="TestPicture.bmp">

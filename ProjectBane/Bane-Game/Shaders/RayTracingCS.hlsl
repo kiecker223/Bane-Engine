@@ -1,3 +1,4 @@
+
 #define MAX_GEOMETRY 30
 #define MAX_LIGHTS 5
 
@@ -10,13 +11,11 @@ struct MATERIAL
 	float3 Color;
 	float Metallic;
 	float Roughness;
-	float P0, P1, P2;
 };
 
 struct POINT_LIGHT
 {
 	float3 Color;
-	float P0;
 	float3 Position;
 	float Intensity;
 };
@@ -24,9 +23,7 @@ struct POINT_LIGHT
 struct DIRECTIONAL_LIGHT
 {
 	float3 Direction;
-	float P0;
 	float3 Color;
-	float P1;
 };
 
 struct PLANE
@@ -35,7 +32,6 @@ struct PLANE
 	float3 Position;
 	float Size;
 	float3 Normal;
-	float P0;
 };
 
 struct SPHERE
@@ -49,57 +45,32 @@ struct BOX
 {
 	MATERIAL Material;
 	float3 Min;
-	float P0;
 	float3 Max;
-	float P1;
 };
 
-Resources
-{
-	cbuffer ScreenData : register(b0)
-	{
-		float2 ScreenDimensions;
-		float Frame;
-		int RayBounces;
-	}
 
-	cbuffer GeometryData : register(b1)
-	{
-		PLANE        Planes[30];
-		SPHERE       Spheres[30];
-		BOX          Boxes[30];
-		POINT_LIGHT	 PointLights[5];
-		DIRECTIONAL_LIGHT DirectionalLights[5];
-		int			 Padding01;
-		int          NumPlanes;
-		int	         NumSpheres;
-		int          NumBoxes;
-		int          NumPointLights;
-		int          NumDirectionalLights;
-	}
+cbuffer ScreenData : register(b0)
+{
+	float2 ScreenDimensions;
+	float Frame;
 }
 
-struct VS_INPUT
+cbuffer GeometryData : register(b1)
 {
-	float2 Position : POSITION;
-	float2 TexCoords : TEXCOORDS;
-};
-
-struct VS_OUTPUT
-{
-	float4 SystemPosition : SV_POSITION;
-	float4 Position : POSITION;
-	float2 TexCoords : TEXCOORDS;
-};
-
-VS_OUTPUT VSMain(VS_INPUT In)
-{
-	VS_OUTPUT Result;
-	Result.SystemPosition = float4(In.Position, 0.0f, 1.0f);
-	Result.Position = Result.SystemPosition;
-	Result.TexCoords = In.TexCoords;
-	return Result;
+	PLANE        Planes[MAX_GEOMETRY];
+	int          NumPlanes;
+	SPHERE       Spheres[MAX_GEOMETRY];
+	int	         NumSpheres;
+	BOX          Boxes[MAX_GEOMETRY];
+	int          NumBoxes;
+	POINT_LIGHT	 PointLights[MAX_LIGHTS];
+	int          NumPointLights;
+	DIRECTIONAL_LIGHT DirectionalLights[MAX_LIGHTS];
+	int          NumDirectionalLights;
 }
+
+RWTexture2D<float4> Image : register(u0);
+
 
 struct RAY
 {
@@ -112,30 +83,29 @@ struct HITRECORD
 {
 	float3 Normal;
 	float3 Position;
-	MATERIAL Material;
 };
 
 
 // Credit: https://gamedev.stackexchange.com/questions/32681/random-number-hlsl
-float rand(in float2 uv)
+float rand_1_05(in float2 uv)
 {
-	return (frac(sin(dot(uv, float2(12.9898, 78.233)*2.0)) * 43758.5453));
+	float2 noise = (frac(sin(dot(uv, float2(12.9898, 78.233)*2.0)) * 43758.5453));
+	return abs(noise.x + noise.y) * 0.5;
 }
 
 
-
-float HitSphere(in SPHERE Sphere, RAY Ray)
+float HitSphere(SPHERE Sphere, RAY Ray)
 {
 	float3 OriginMCenter = Ray.Pos - Sphere.Center;
 	float A = dot(Ray.Dir, Ray.Dir);
 	float B = 2 * dot(OriginMCenter, Ray.Dir);
-	float C = dot(OriginMCenter, OriginMCenter) - (Sphere.Radius * Sphere.Radius);
-	float Discriminate = (B * B) - (4 * A * C);
+	float C = dot(OriginMCenter, OriginMCenter) - Sphere.Radius * Sphere.Radius;
+	float Discriminate = B * B - 4 * A * C;
 	if (Discriminate < 0)
 	{
-		return -1.0f;
+		return -1;
 	}
-	return (-B - sqrt(Discriminate)) / (2 * A);
+	return -B * sqrt(Discriminate) / 2 * A;
 }
 
 float HitPlane(PLANE Plane, RAY Ray)
@@ -173,22 +143,29 @@ float3 PosAtTime(RAY InRay, float T)
 }
 
 // PixelCoord is just Input.Position.xy
-RAY BeginRay(float2 PixelCoord)
+RAY BeginRay(uint2 DispatchId)
 {
+	int2 ScreenDims = int2(ScreenDimensions.x, ScreenDimensions.y);
 	const float3 CameraPosition = float3(0.0f, 0.0f, 2.0f);
 	const float3 CameraForward = float3(0.0f, 0.0f, -1.0f);
 	const float FovX = 85.f;
 	float FovY = (ScreenDimensions.y / ScreenDimensions.x) * FovX;
+
+	float2 ScreenPos;
+	int2 HalfImgSize = ScreenDims / 2;
+	int2 ImgPos = DispatchId - (-HalfImgSize);
+	ScreenPos = float2(ImgPos.x, ImgPos.y);
+	ScreenPos /= (ScreenDimensions / 2);
 
 	RAY Result;
 	Result.Pos = CameraPosition;
 
 	float HalfFovX = FovX / 2.f;
 	float HalfFovY = FovY / 2.f;
-	
+
 	// TODO: Bughunt
-	float AngleX = radians(HalfFovX * (PixelCoord.x));
-	float AngleY = radians(HalfFovY * (PixelCoord.y));
+	float AngleX = radians(HalfFovX * (ScreenPos.x));
+	float AngleY = radians(HalfFovY * (ScreenPos.y));
 	float CosAngleX = cos(AngleX);
 	float SinAngleX = sin(AngleX);
 	float CosAngleY = cos(AngleY);
@@ -198,19 +175,11 @@ RAY BeginRay(float2 PixelCoord)
 		CosAngleX, 0, SinAngleX,
 		0, CosAngleY, -SinAngleY,
 		-SinAngleX, SinAngleY, CosAngleX + CosAngleY
-	);
+		);
 
 	Result.Dir = CameraForward;
 	Result.Dir = mul(Rot, Result.Dir);
 	Result.Dir = normalize(Result.Dir);
-	return Result;
-}
-
-RAY CreateRay(HITRECORD Record, RAY OldRay)
-{
-	RAY Result;
-	Result.Pos = Record.Position;
-	Result.Dir = normalize(reflect(OldRay.Dir, Record.Normal));
 	return Result;
 }
 
@@ -222,18 +191,18 @@ int CastToWorld(out float3 OutNormal, out float T, out MATERIAL OutMaterial, RAY
 	for (i = 0; i < NumSpheres; i++)
 	{
 		float Temp = HitSphere(Spheres[i], Ray);
-		if (Temp < T && Temp > 0.0f)
+		if (Temp < T)
 		{
 			T = Temp;
 			HitFlag = HIT_FLAG_SPHERE;
-			OutNormal = normalize(PosAtTime(Ray, T) - Spheres[i].Center);
+			OutNormal = PosAtTime(Ray, T) - Spheres[i].Center;
 			OutMaterial = Spheres[i].Material;
 		}
 	}
 	for (i = 0; i < NumPlanes; i++)
 	{
 		float Temp = HitPlane(Planes[i], Ray);
-		if (Temp < T && Temp > 0.0f)
+		if (Temp < T)
 		{
 			T = Temp;
 			HitFlag = HIT_FLAG_PLANE;
@@ -244,44 +213,47 @@ int CastToWorld(out float3 OutNormal, out float T, out MATERIAL OutMaterial, RAY
 	return HitFlag;
 }
 
-bool CastRay(RAY Ray, inout float3 Color, inout HITRECORD Record, int CurBounce, float2 RandSeed)
+
+float3 CastRay(RAY Ray, int Bounces, int MaxBounces, float3 LastColor, float2 RandSeed)
 {
-	float3 Normal;
-	float T;
-	MATERIAL Material;
-	if (CastToWorld(Normal, T, Material, Ray) > 0)
+	if (Bounces < MaxBounces)
 	{
-		Color *= Material.Color;
-		Record.Material = Material;
-		Record.Normal = normalize(Normal + (Material.Roughness * (rand(RandSeed) - 1.0f)));
-		Record.Position = PosAtTime(Ray, T);
-		return true;
-	}
-	Color += float3(0.1f, 0.1f, 0.1f);
-	return false;
-}
-
-float4 PSMain(VS_OUTPUT Input) : SV_TARGET0
-{
-	float3 Color = float3(1.0f, 1.0f, 1.0f);
-
-	RAY Ray = BeginRay(Input.Position.xy);
-
-	float2 RandSeed = Input.Position * rand(-Input.Position * Frame);
-
-	HITRECORD Record;
-	for (int i = 0; i < 5; i++)
-	{
-		if (CastRay(Ray, Color, Record, i, RandSeed))
+		float3 Color;
+		float T;
+		float3 Normal;
+		MATERIAL Material;
+		if (CastToWorld(Normal, T, Material, Ray) > 0)
 		{
-			Ray = CreateRay(Record, Ray);
+			Color = Material.Color;
+			HITRECORD Record;
+			Record.Normal = Normal;
+			Record.Position = PosAtTime(Ray, T);
+			if (Bounces == 0)
+			{
+				Color = Material.Color;
+			}
+			Record.Normal = Normal * (Material.Roughness * rand_1_05(RandSeed));
+			RAY NewRay;
+			NewRay.Pos = Record.Position;
+			NewRay.Dir = reflect(Ray.Dir, Record.Normal);
+			return Color * CastRay(NewRay, Bounces + 1, MaxBounces, Color, RandSeed * rand_1_05(RandSeed));
 		}
 		else
 		{
-			break;
+			return -Ray.Dir;
 		}
 	}
-
-	return float4(Color, 1.0f);
+	return LastColor;
 }
 
+[numthreads(16, 16, 1)]
+void CSMain( uint3 DTid : SV_DispatchThreadID )
+{
+	float3 Color = float3(0.1f, 0.1f, 0.1f);
+	float2 RandSeed = float2((float)DTid.x, (float)DTid.y);
+
+	RAY Ray = BeginRay(DTid.xy);
+	Color = CastRay(Ray, 0, 3, Color, RandSeed);
+
+	Image[DTid.xy] = float4(Color, 1.0f);
+}
