@@ -807,7 +807,7 @@ void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestT
 			SrvDesc.Texture2DArray.MostDetailedMip = InSubresource;
 		}
 	}
-	//SrvDesc.Texture2D.MostDetailedMip = 0;
+
 	if (SrvDesc.ViewDimension == D3D12_SRV_DIMENSION_TEXTURE2DARRAY)
 	{
 		SrvDesc.Texture2DArray.ArraySize = Texture->ArrayCount;

@@ -104,7 +104,7 @@ typedef struct GEOM_BOX {
 
 typedef struct GEOM_POINT_LIGHT {
 	XMFLOAT3 Color;
-	float P0;
+	float Range;
 	XMFLOAT3 Position;
 	float Intensity;
 } GEOM_POINT_LIGHT;
@@ -129,6 +129,11 @@ public:
 		return m_Device->GetSwapChain();
 	}
 
+	virtual void AddCamera(CameraComponent* InCamera)
+	{
+		MainCamera = InCamera;
+	}
+
 	void AddPlane(GEOM_PLANE InPlane);
 	void AddSphere(GEOM_SPHERE InSphere);
 	void AddBox(GEOM_BOX InBox);
@@ -137,11 +142,6 @@ public:
 
 private:
 
-	enum
-	{
-		ScreenData,
-		GeometryData
-	};
 
 	struct
 	{
@@ -149,7 +149,7 @@ private:
 		IIndexBuffer* IB;
 		IShaderResourceTable* Table;
 		IGraphicsPipelineState* Pipeline;
-		IConstantBuffer* CBs[2];
+		IConstantBuffer* CBs[3];
 	} m_OnScreenQuad;
 
 

@@ -207,17 +207,16 @@ void InitApplication()
 		Teapot->GetTransform()->Translate(-15.0f, 0.0f, 0.0f);
 		Teapot->GetTransform()->Scale(0.03f);
 	}
+	*/
 	{
 		Entity* camera = GetEntityManager()->CreateEntity("Camera");
 		CameraComponent* CamComponent = camera->AddComponent<CameraComponent>();
-		camera->GetTransform()->Translate(0.0f, 0.0f, -130.0f);
-		//camera->GetTransform()->Rotate(90.f, 0.0f, 0.0f);
+		camera->GetTransform()->Translate(0.0f, 0.0f, -3.0f);
 		CamComponent->SetPriority(1);
 		camera->AddComponent<CameraMovementComponent>();
 	}
 
-	*/
-	GetApplicationInstance()->GetSceneRenderer()->GetSwapChain()->SetSwapInterval(2);
+	GetApplicationInstance()->GetSceneRenderer()->GetSwapChain()->SetSwapInterval(0);
 }
 
 void UpdateApplication()

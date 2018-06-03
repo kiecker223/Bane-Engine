@@ -8,7 +8,10 @@ struct ScreenSizes
 
 ScreenSizes CBufferData = { };
 
-
+typedef struct RAYTRACING_CAMERA_CONSTANTS
+{
+	XMVECTOR CameraPosition, CameraForward;
+} RAYTRACING_CAMERA_CONSTANTS;
 
 void RayTracingRenderer::Initialize()
 {
@@ -50,13 +53,13 @@ void RayTracingRenderer::Initialize()
 	Sphere.Center = XMFLOAT3(1.0f, -0.2f, -2.7f);
 	Sphere.Material.Color = XMFLOAT3(0.6f, 0.9f, 0.1f);
 	Sphere.Material.Roughness = 0.0f;
-	Sphere.Radius = 0.5f;
+	Sphere.Radius = 0.8f;
 
 	AddSphere(Sphere);
 
 	GEOM_PLANE Plane = {
 		{
-			XMFLOAT3(0.9f, 0.7f, 0.1f),
+			XMFLOAT3(1.0f, 1.0f, 1.0f),
 			0.0f,
 			0.0f,
 			0.0f, 0.0f, 0.0f
@@ -69,6 +72,17 @@ void RayTracingRenderer::Initialize()
 
 	AddPlane(Plane);
 
+	GEOM_POINT_LIGHT PointLight = {
+		XMFLOAT3(1.0f, 1.0f, 1.0f),
+		18.f,
+		XMFLOAT3(0.0f, 3.0f, -2.0f),
+		10.0f
+	};
+
+	AddPointLight(PointLight);
+	AddPointLight(PointLight);
+
+
 	Window* AppWindow = GetApplicationInstance()->GetWindow();
 	float WindowWidth = (float)AppWindow->GetWidth();
 	float WindowHeight = (float)AppWindow->GetHeight();
@@ -78,19 +92,21 @@ void RayTracingRenderer::Initialize()
 	m_OnScreenQuad.IB = m_Device->CreateIndexBuffer(sizeof(indices), (uint8*)indices);
 	m_OnScreenQuad.Pipeline = GetShaderCache()->LoadGraphicsPipeline("Shaders/RayTracingPS.hlsl");
 	m_OnScreenQuad.Table = m_Device->CreateShaderTable(m_OnScreenQuad.Pipeline);
-	m_OnScreenQuad.CBs[0] = m_Device->CreateConstBuffer<ScreenSizes>();
-	m_OnScreenQuad.CBs[1] = m_Device->CreateConstBuffer<GEOMETRY_DATA>();
+	m_OnScreenQuad.CBs[0] = m_Device->CreateConstBuffer<RAYTRACING_CAMERA_CONSTANTS>();
+	m_OnScreenQuad.CBs[1] = m_Device->CreateConstBuffer<ScreenSizes>();
+	m_OnScreenQuad.CBs[2] = m_Device->CreateConstBuffer<GEOMETRY_DATA>();
 
 	IGraphicsCommandContext* ctx = m_Device->GetGraphicsContext();
 	ctx->Begin();
 	
-	memcpy(ctx->Map(m_OnScreenQuad.CBs[0]), (void*)&CBufferData, sizeof(ScreenSizes));
-	ctx->Unmap(m_OnScreenQuad.CBs[0]);
-	memcpy(ctx->Map(m_OnScreenQuad.CBs[1]), (void*)&m_GeometryData, sizeof(GEOMETRY_DATA));
+	memcpy(ctx->Map(m_OnScreenQuad.CBs[1]), (void*)&CBufferData, sizeof(ScreenSizes));
 	ctx->Unmap(m_OnScreenQuad.CBs[1]);
+	memcpy(ctx->Map(m_OnScreenQuad.CBs[2]), (void*)&m_GeometryData, sizeof(GEOMETRY_DATA));
+	ctx->Unmap(m_OnScreenQuad.CBs[2]);
 	ctx->End();
 	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_OnScreenQuad.CBs[0], 0);
 	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_OnScreenQuad.CBs[1], 1);
+	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_OnScreenQuad.CBs[2], 2);
 }
 
 void RayTracingRenderer::Render()
@@ -100,9 +116,27 @@ void RayTracingRenderer::Render()
 	Ctx->BeginPass(m_Device->GetBackBufferTargetPass());
 	CBufferData.Frame++;
 
-	void* Buff = Ctx->Map(m_OnScreenQuad.CBs[0]);
-	memcpy(Buff, (void*)&CBufferData, sizeof(ScreenSizes));
-	Ctx->Unmap(m_OnScreenQuad.CBs[0]);
+//	m_GeometryData.Spheres[0].Material.Roughness = (sin(CBufferData.Frame / 10) * 0.5f) + 0.5f;
+// 	m_GeometryData.Spheres[0].Center = XMFLOAT3((sin(CBufferData.Frame / 60) * 20) + 20, (sin(CBufferData.Frame / 30) * 5) + 5, (sin(CBufferData.Frame / 10) * 20) + 20);
+	m_GeometryData.PointLights[0].Position = XMFLOAT3(sin(CBufferData.Frame / 20) * 10, 2.0f, -2.f);
+	//m_GeometryData.PointLights[1].Position = XMFLOAT3(sin(-CBufferData.Frame / 20) * 10, 1.0f, -2.f);
+
+	{
+		RAYTRACING_CAMERA_CONSTANTS* Constants = (RAYTRACING_CAMERA_CONSTANTS*)Ctx->Map(m_OnScreenQuad.CBs[0]);
+		Constants->CameraPosition = XMLoadFloat3(&MainCamera->GetOwner()->GetTransform()->GetPosition());
+		Constants->CameraForward = MainCamera->GetOwner()->GetTransform()->GetForward();
+		Ctx->Unmap(m_OnScreenQuad.CBs[0]);
+	}
+	{
+		void* Buff = Ctx->Map(m_OnScreenQuad.CBs[1]);
+		memcpy(Buff, (void*)&CBufferData, sizeof(ScreenSizes));
+		Ctx->Unmap(m_OnScreenQuad.CBs[1]);
+	}
+	{
+		void* Buff = Ctx->Map(m_OnScreenQuad.CBs[2]);
+		memcpy(Buff, (void*)&m_GeometryData, sizeof(m_GeometryData));
+		Ctx->Unmap(m_OnScreenQuad.CBs[2]);
+	}
 
 	Ctx->SetGraphicsPipelineState(m_OnScreenQuad.Pipeline);
 	Ctx->SetGraphicsResourceTable(m_OnScreenQuad.Table);

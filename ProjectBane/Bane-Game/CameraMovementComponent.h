@@ -52,20 +52,20 @@ public:
 		if (InputState[0x51] & 0x80)
 		{
 			//GetOwner()->GetTransform()->Rotate(0.0f, 0.005f, 0.0f);
-			GetOwner()->GetTransform()->Rotate(0.005f, 0.0f, 0.0f);
+			GetOwner()->GetTransform()->Rotate(0.5f, 0.0f, 0.0f);
 		}
 		if (InputState[0x52] & 0x80)
 		{
-			GetOwner()->GetTransform()->Rotate(0.0f, 0.005f, 0.0f);
+			GetOwner()->GetTransform()->Rotate(0.0f, 0.5f, 0.0f);
 		}
 		if (InputState[0x46] & 0x80)
 		{
-			GetOwner()->GetTransform()->Rotate(0.0f, -0.005f, 0.0f);
+			GetOwner()->GetTransform()->Rotate(0.0f, -0.5f, 0.0f);
 		}
 		if (InputState[0x45] & 0x80)
 		{
 			//GetOwner()->GetTransform()->Rotate(0.0f, 0.005f, 0.0f);
-			GetOwner()->GetTransform()->Rotate(-0.005f, 0.0f, 0.0f);
+			GetOwner()->GetTransform()->Rotate(-0.5f, 0.0f, 0.0f);
 		}
 
 	}

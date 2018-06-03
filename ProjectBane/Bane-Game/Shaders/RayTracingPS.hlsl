@@ -16,7 +16,7 @@ struct MATERIAL
 struct POINT_LIGHT
 {
 	float3 Color;
-	float P0;
+	float Range;
 	float3 Position;
 	float Intensity;
 };
@@ -56,14 +56,20 @@ struct BOX
 
 Resources
 {
-	cbuffer ScreenData : register(b0)
+	cbuffer CameraInfo : register(b0)
+	{
+		float4 CameraPosition;
+		float4 CameraForward;
+	}
+
+	cbuffer ScreenData : register(b1)
 	{
 		float2 ScreenDimensions;
 		float Frame;
 		int RayBounces;
 	}
 
-	cbuffer GeometryData : register(b1)
+	cbuffer GeometryData : register(b2)
 	{
 		PLANE        Planes[30];
 		SPHERE       Spheres[30];
@@ -78,6 +84,10 @@ Resources
 		int          NumDirectionalLights;
 	}
 }
+
+#define MAX_FLOAT 3.402823466e+38F
+#define M_PI 3.14159265358979323846
+#define PI 3.141592654
 
 struct VS_INPUT
 {
@@ -96,7 +106,7 @@ VS_OUTPUT VSMain(VS_INPUT In)
 {
 	VS_OUTPUT Result;
 	Result.SystemPosition = float4(In.Position, 0.0f, 1.0f);
-	Result.Position = Result.SystemPosition;
+	Result.Position = float4(In.Position, 0.0f, 1.0f);
 	Result.TexCoords = In.TexCoords;
 	return Result;
 }
@@ -113,6 +123,7 @@ struct HITRECORD
 	float3 Normal;
 	float3 Position;
 	MATERIAL Material;
+	MATERIAL FirstBounceMaterial;
 };
 
 
@@ -131,11 +142,17 @@ float HitSphere(in SPHERE Sphere, RAY Ray)
 	float B = 2 * dot(OriginMCenter, Ray.Dir);
 	float C = dot(OriginMCenter, OriginMCenter) - (Sphere.Radius * Sphere.Radius);
 	float Discriminate = (B * B) - (4 * A * C);
-	if (Discriminate < 0)
+	float T = (-B - sqrt(Discriminate)) / (2 * A);
+	if (T < MAX_FLOAT && T > 1e-3)
 	{
-		return -1.0f;
+		return T;
 	}
-	return (-B - sqrt(Discriminate)) / (2 * A);
+	T = (-B + sqrt(Discriminate)) / (2 * A);
+	if (T < MAX_FLOAT && T > 1e-3)
+	{
+		return T;
+	}
+	return -1.0f;
 }
 
 float HitPlane(PLANE Plane, RAY Ray)
@@ -144,6 +161,10 @@ float HitPlane(PLANE Plane, RAY Ray)
 	if (abs(RDotPlaneNormal) > 1e-3)
 	{
 		float T = dot((Plane.Position - Ray.Pos), Plane.Normal) / RDotPlaneNormal;
+		if (T < 1e-3)
+		{
+			return -1.0f;
+		}
 		return T;
 	}
 	return -1.0f;
@@ -175,34 +196,16 @@ float3 PosAtTime(RAY InRay, float T)
 // PixelCoord is just Input.Position.xy
 RAY BeginRay(float2 PixelCoord)
 {
-	const float3 CameraPosition = float3(0.0f, 0.0f, 2.0f);
-	const float3 CameraForward = float3(0.0f, 0.0f, -1.0f);
-	const float FovX = 85.f;
-	float FovY = (ScreenDimensions.y / ScreenDimensions.x) * FovX;
-
 	RAY Result;
-	Result.Pos = CameraPosition;
+	Result.Pos = CameraPosition.xyz;
 
-	float HalfFovX = FovX / 2.f;
-	float HalfFovY = FovY / 2.f;
-	
-	// TODO: Bughunt
-	float AngleX = radians(HalfFovX * (PixelCoord.x));
-	float AngleY = radians(HalfFovY * (PixelCoord.y));
-	float CosAngleX = cos(AngleX);
-	float SinAngleX = sin(AngleX);
-	float CosAngleY = cos(AngleY);
-	float SinAngleY = sin(AngleY);
+	float FOV = radians(55.0f);
+	float HalfHeight = tan(FOV / 2.0f);
+	float HalfWidth = tan(FOV / 2.0f) * (ScreenDimensions.x / ScreenDimensions.y);
+	float3 Up = float3(0, 1, 0);
+	float3 Right = cross(CameraForward.xyz, Up);
 
-	float3x3 Rot = float3x3(
-		CosAngleX, 0, SinAngleX,
-		0, CosAngleY, -SinAngleY,
-		-SinAngleX, SinAngleY, CosAngleX + CosAngleY
-	);
-
-	Result.Dir = CameraForward;
-	Result.Dir = mul(Rot, Result.Dir);
-	Result.Dir = normalize(Result.Dir);
+	Result.Dir = normalize(CameraForward.xyz + (HalfHeight * PixelCoord.y * Up) + (HalfWidth * PixelCoord.x * Right));
 	return Result;
 }
 
@@ -244,6 +247,38 @@ int CastToWorld(out float3 OutNormal, out float T, out MATERIAL OutMaterial, RAY
 	return HitFlag;
 }
 
+float Attenuate(float Range, float Dist)
+{
+	return saturate(((1 / ((Dist * Dist) / Range)) - 0.002f));
+}
+
+// Returns the visibility of the light
+float CastShadowRay(HITRECORD Record)
+{
+	RAY Ray;
+	Ray.Pos = Record.Position;
+	float Brightness = 0.0;
+
+	for (int i = 0; i < NumPointLights; i++)
+	{
+		float3 ShadowRayDir = normalize(PointLights[i].Position - Record.Position);
+		Ray.Dir = ShadowRayDir;
+
+		// Unused
+		float3 Normal;
+		MATERIAL Mat;
+		float T;
+		// -----
+
+		if (CastToWorld(Normal, T, Mat, Ray) == 0 && T > 1e-3)
+		{
+			// If we didn't intersect calculate attenuation
+			Brightness += Attenuate(PointLights[i].Range, length(PointLights[i].Position - Record.Position));
+		}
+	}
+	return Brightness;
+}
+
 bool CastRay(RAY Ray, inout float3 Color, inout HITRECORD Record, int CurBounce, float2 RandSeed)
 {
 	float3 Normal;
@@ -251,24 +286,33 @@ bool CastRay(RAY Ray, inout float3 Color, inout HITRECORD Record, int CurBounce,
 	MATERIAL Material;
 	if (CastToWorld(Normal, T, Material, Ray) > 0)
 	{
-		Color *= Material.Color;
+		if (CurBounce == 0)
+		{
+			Record.FirstBounceMaterial = Material;
+			Color = Material.Color;
+		}
+		if (CurBounce >= 1)
+		{
+			// Hopefully this will give an average closer to the original color
+			Color *= lerp(Record.FirstBounceMaterial.Color, Material.Color * Record.FirstBounceMaterial.Color, 1 - Record.FirstBounceMaterial.Roughness);
+		}
 		Record.Material = Material;
 		Record.Normal = normalize(Normal + (Material.Roughness * (rand(RandSeed) - 1.0f)));
 		Record.Position = PosAtTime(Ray, T);
+		Color *= CastShadowRay(Record);  
 		return true;
 	}
-	Color += float3(0.1f, 0.1f, 0.1f);
+	//Color += float3(0.1f, 0.1f, 0.1f);
 	return false;
 }
 
 float4 PSMain(VS_OUTPUT Input) : SV_TARGET0
 {
-	float3 Color = float3(1.0f, 1.0f, 1.0f);
-
+	float3 Color = float3(0.1f, 0.1f, 0.1f);
+	
 	RAY Ray = BeginRay(Input.Position.xy);
 
 	float2 RandSeed = Input.Position * rand(-Input.Position * Frame);
-
 	HITRECORD Record;
 	for (int i = 0; i < 5; i++)
 	{

@@ -14,6 +14,7 @@ class Material;
 class IGraphicsCommandContext;
 class IDeviceSwapChain;
 class SkyboxComponent;
+class CameraComponent;
 
 
 
@@ -43,7 +44,7 @@ public:
 
 	virtual void AddOpaqueObject(const Mesh& InMesh, const Material& InMaterial, Entity* Owner) { }
 
-	virtual void AddCamera(class CameraComponent* InCamera) { }
+	virtual void AddCamera(CameraComponent* InCamera) { }
 
 	virtual void AddLight(class LightComponent* InLight) { }
 

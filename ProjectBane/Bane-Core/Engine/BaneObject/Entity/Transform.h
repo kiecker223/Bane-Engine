@@ -101,9 +101,9 @@ public:
 
 	ForceInline XMVECTOR GetForward() const
 	{
-		XMFLOAT3 ForwardDir(0.0f, 0.0f, 1.0f);
+		XMFLOAT3 ForwardDir(0.0f, 0.0f, -1.0f);
 		XMVECTOR Result = XMLoadFloat3(&ForwardDir);
-		XMMATRIX RotationMatrix = XMMatrixRotationQuaternion(m_Rotation);
+		XMMATRIX RotationMatrix = XMMatrixTranspose(XMMatrixRotationQuaternion(m_Rotation));
 		Result = XMVector3Transform(Result, RotationMatrix);
 		return Result;
 	}
