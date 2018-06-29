@@ -1,6 +1,7 @@
 #pragma once
 #include "Core/Common.h"
 #include "ResourceTypes.h"
+#include <string>
 
 
 class IGPUResource

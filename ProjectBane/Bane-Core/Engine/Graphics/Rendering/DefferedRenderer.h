@@ -44,7 +44,7 @@ public:
 
 private:
 
-	void RenderShadows(XMMATRIX LightMatrix, IRenderPassInfo* DestRenderPass, IGraphicsCommandContext* ctx);
+	void RenderShadows(matrix LightMatrix, IRenderPassInfo* DestRenderPass, IGraphicsCommandContext* ctx);
 
 	void GatherLights();
 
@@ -73,9 +73,9 @@ private:
 
 	typedef struct DEFFERED_RENDERER_LIGHT_DATA
 	{
-		XMFLOAT3				AmbientColor;
+		float3				AmbientColor;
 		float					Frame = 0;
-		XMFLOAT3				CameraPosition;
+		float3				CameraPosition;
 		float					Padding02;
 		DIRECTIONAL_LIGHT_DATA	DirectionalLights[MAX_LIGHTS];
 		POINT_LIGHT_DATA		PointLights[MAX_LIGHTS];

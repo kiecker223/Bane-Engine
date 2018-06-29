@@ -64,7 +64,7 @@ PS_INPUT VSMain(VS_INPUT Input)
 	Pos = mul(Pos, View);
 	Pos = mul(Pos, Projection);
 	Output.Position = Pos;
-	Output.WorldPos = float3(mul(float4(Input.Position, 1.0f), Model).xyz);
+	Output.WorldPos = mul(float4(Input.Position, 1.0f), Model).xyz;
 	Output.Normal =   normalize(mul(Input.Normal, (float3x3)Model));
 	float3 Binormal = normalize(mul(Input.Binormal, (float3x3)Model));
 	float3 Tangent =  normalize(mul(Input.Tangent, (float3x3)Model));

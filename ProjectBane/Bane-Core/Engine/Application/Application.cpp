@@ -1,7 +1,7 @@
 #include "Application.h"
 #include "Graphics/Rendering/RendererInterface.h"
 #include "Graphics/Rendering/DefferedRenderer.h"
-#include "BaneObject/Entity/EntityManager.h"
+#include "BaneObject/Entity/SceneManager.h"
 #include "Graphics/IO/TextureCache.h"
 #include "Graphics/IO/ShaderCache.h"
 #include <sstream>
@@ -57,8 +57,8 @@ void Application::InitSystems()
 	{
 		uint ScreenWidth  = GetSystemMetrics(SM_CXSCREEN);
 		uint ScreenHeight = GetSystemMetrics(SM_CYSCREEN);
-		ScreenWidth = ScreenWidth * (float)0.9;
-		ScreenHeight = ScreenHeight * (float)0.9;
+		ScreenWidth = uint(ScreenWidth *  (float)0.9);
+		ScreenHeight = uint(ScreenHeight * (float)0.9);
 		OpenApplicationWindow("Unnamed window", ScreenWidth, ScreenHeight);
 	}
 
@@ -68,25 +68,23 @@ void Application::InitSystems()
 	InitShaderCache();
 	InitializeTextureCache();
 
+	InitSceneManager();
+
 	if (m_SceneRenderer == nullptr)
 	{
 		m_SceneRenderer = new DefferedRenderer();
 	}
 	m_SceneRenderer->Initialize();
 
-	EntityManager::Initialize();
-
 	m_StartCallback();
-
-	GetEntityManager()->SubmitRenderingFeatures();
 }
 
 void Application::Run()
 {
 	while (!m_Window->QuitRequested())
 	{
-		m_UpdateCallback(); 
-		GetEntityManager()->TickOverEntities(0);
+		m_UpdateCallback();
+		GetCurrentScene()->Tick(0.f);
 		m_SceneRenderer->Render();
 		m_SceneRenderer->Present();
 	}
@@ -97,7 +95,7 @@ void Application::Shutdown()
 	m_CleanupCallback();
 	m_SceneRenderer->Shutdown();
 	delete m_SceneRenderer;
-	EntityManager::Shutdown();
+	ShutdownSceneManager();
 	DestroyShaderCache();
 	DestroyTextureCache();
 	GlobalLog::Cleanup();

@@ -31,7 +31,6 @@
     <FxCompile Include="Shaders\DefferredLighting.hlsl" />
     <FxCompile Include="Shaders\SkyboxShader.hlsl" />
     <FxCompile Include="Shaders\GenerateMips.hlsl" />
-    <FxCompile Include="Shaders\Bloom.hlsl" />
     <FxCompile Include="Shaders\SSR.hlsl" />
     <FxCompile Include="Shaders\RayTracingPS.hlsl" />
     <FxCompile Include="Shaders\RayTracingCS.hlsl" />
@@ -51,5 +50,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Shaders\Bloom.hlsl" />
   </ItemGroup>
 </Project>

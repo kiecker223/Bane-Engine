@@ -2,16 +2,17 @@
 #include <vector>
 #include <mutex>
 #include "ComponentBase.h"
+#define WIN32_LEAN_AND_MEAN
+#include "Windows.h"
 
 
-
-class BaneObjectGeneralAllocator
+class ComponentAllocator
 {
 public:
 
-	BaneObjectGeneralAllocator() : PtrBegin(nullptr), PtrCurrent(nullptr), PtrEnd(nullptr) { }
-	BaneObjectGeneralAllocator(uint NumBytes);
-	~BaneObjectGeneralAllocator();
+	ComponentAllocator() : PtrBegin(nullptr), PtrCurrent(nullptr), PtrEnd(nullptr) { }
+	ComponentAllocator(uint NumBytes);
+	~ComponentAllocator();
 
 	ForceInline uint GetNumBytesAllocated() const
 	{
@@ -74,6 +75,10 @@ public:
 	ForceInline void InternalFree()
 	{
 		HeapFree(GetProcessHeap(), HEAP_NO_SERIALIZE, (LPVOID)PtrBegin);
+		for (auto* c : AllocatedObjects)
+		{
+			delete c;
+		}
 		PtrBegin = nullptr;
 		PtrCurrent = nullptr;
 		PtrEnd = nullptr;

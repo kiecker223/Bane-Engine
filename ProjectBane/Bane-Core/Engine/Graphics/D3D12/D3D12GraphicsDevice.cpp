@@ -39,7 +39,7 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, Window* Rend
 {
 	m_SwapChain->Device = this;
 	uint AvailableThreadCount = std::thread::hardware_concurrency();
-	assert(AvailableThreadCount != 0);
+	BANE_CHECK(AvailableThreadCount != 0);
 	m_AvailableContexts.reserve(AvailableThreadCount);
 	m_AvailableContexts.resize(AvailableThreadCount);
 
@@ -91,7 +91,7 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, Window* Rend
 		ITexture2D* DepthTexture = CreateTexture2D(RenderingWindow->GetWidth(), RenderingWindow->GetHeight(), FORMAT_UNKNOWN, TEXTURE_USAGE_DEPTH_STENCIL, nullptr);
 		IDepthStencilView* DepthStencil = CreateDepthStencilView(DepthTexture);
 
-		m_BasicRenderPass = (D3D12RenderPassInfo*)IRuntimeGraphicsDevice::CreateRenderPass(m_BackBuffer, DepthStencil, XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f));
+		m_BasicRenderPass = (D3D12RenderPassInfo*)IRuntimeGraphicsDevice::CreateRenderPass(m_BackBuffer, DepthStencil, float4(0.3f, 0.3f, 0.3f, 0.0f));
 	}
 	
 	for (uint i = 0; i < COMMAND_CONTEXT_TYPE_NUM_TYPES; i++)
@@ -575,7 +575,7 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 		DirectContext->End();
 		DirectContext->Flush();
 		DirectContext->Begin();
-		D3D12Buffer* ConstBuff = (D3D12Buffer*)CreateConstBuffer<XMFLOAT4>();
+		D3D12Buffer* ConstBuff = (D3D12Buffer*)CreateConstBuffer<float4>();
 		for (uint b = 0; b < Texture->ArrayCount; b++)
 		{
 			for (uint i = 0; i < Texture->MipCount - 1; i++)
@@ -654,7 +654,7 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 					m_Device->CreateShaderResourceView(CopyRes, &SrvDesc, SrvAllocation.CpuHandle);
 				}
 				{
-					XMFLOAT2* pParams = (XMFLOAT2*)ConstBuff->MappedPointer;
+					float2* pParams = (float2*)ConstBuff->MappedPointer;
 					pParams->x = (1.0f / DstWidth);
 					pParams->y = (1.0f / DstHeight);
 				}
@@ -735,7 +735,7 @@ IInputLayout* D3D12GraphicsDevice::CreateInputLayout(const GFX_INPUT_LAYOUT_DESC
 	return new D3D12InputLayout(Desc, CreationDesc);
 }
 
-IRenderPassInfo* D3D12GraphicsDevice::CreateRenderPass(const IRenderTargetView** RenderTargets, uint NumRenderTargets, const IDepthStencilView* DepthStencil, const XMFLOAT4& ClearColor)
+IRenderPassInfo* D3D12GraphicsDevice::CreateRenderPass(const IRenderTargetView** RenderTargets, uint NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor)
 {
 	// Consider making this store the command list too? That would make alot of the task submission easier, but potentially less performant
 	D3D12RenderPassInfo* RenderPassInfo = new D3D12RenderPassInfo(RenderTargets, NumRenderTargets, DepthStencil, ClearColor);

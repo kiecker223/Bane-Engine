@@ -74,7 +74,7 @@ cbuffer GeometryData : register(b1)
 */
 
 typedef struct GEOM_MATERIAL {
-	XMFLOAT3 Color;
+	float3 Color;
 	float Metallic;
 	float Roughness;
 	float P0, P1, P2;
@@ -82,37 +82,37 @@ typedef struct GEOM_MATERIAL {
 
 typedef struct GEOM_PLANE {
 	GEOM_MATERIAL Material;
-	XMFLOAT3 Position;
+	float3 Position;
 	float Size;
-	XMFLOAT3 Normal;
+	float3 Normal;
 	float P0;
 } GEOM_PLANE;
 
 typedef struct GEOM_SPHERE {
 	GEOM_MATERIAL Material;
-	XMFLOAT3 Center;
+	float3 Center;
 	float Radius;
 } GEOM_SPHERE;
 
 typedef struct GEOM_BOX {
 	GEOM_MATERIAL Material;
-	XMFLOAT3 Min;
+	float3 Min;
 	float P0;
-	XMFLOAT3 Max;
+	float3 Max;
 	float P1;
 } GEOM_BOX;
 
 typedef struct GEOM_POINT_LIGHT {
-	XMFLOAT3 Color;
+	float3 Color;
 	float Range;
-	XMFLOAT3 Position;
+	float3 Position;
 	float Intensity;
 } GEOM_POINT_LIGHT;
 
 typedef struct GEOM_DIRECTIONAL_LIGHT {
-	XMFLOAT3 Direction;
+	float3 Direction;
 	float P0;
-	XMFLOAT3 Color;
+	float3 Color;
 	float P1;
 } GEOM_DIRECTIONAL_LIGHT;
 

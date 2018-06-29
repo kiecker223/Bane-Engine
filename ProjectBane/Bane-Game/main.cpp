@@ -12,7 +12,7 @@ public:
 
 	TestComponent2() { }
 
-	virtual void Tick(double DT) override final
+	virtual void Tick(float DT) override final
 	{
 		GetOwner()->GetTransform()->Translate(0.0f, 0.0f, -0.01f);
 		GetOwner()->GetTransform()->Rotate(0.0f, 0.01f, 0.0f);
@@ -31,9 +31,9 @@ class TestComponent3 : public Component
 public:
 	TestComponent3() { }
 
-	virtual void Tick(double DT) override final
+	virtual void Tick(float DT) override final
 	{
-		GetOwner()->GetTransform()->Rotate(0.0f, 0.01f, 0.0f);
+		GetOwner()->GetTransform()->Rotate(1.0f, 0.f, 1.0f);
 	}
 };
 
@@ -43,9 +43,9 @@ class TestComponent4 : public Component
 public:
 	TestComponent4() { }
 
-	virtual void Tick(double DT) override final
+	virtual void Tick(float DT) override final
 	{
-		GetOwner()->GetTransform()->Rotate(0.01f, 0.01f, 0.01f);
+		GetOwner()->GetTransform()->Rotate(1.f, 0.0f, 0.0f);
 	}
 
 };
@@ -65,7 +65,7 @@ public:
 	}
 
 	float Frame = 0.0f;
-	virtual void Tick(double DT) override final
+	virtual void Tick(float DT) override final
 	{
 		Frame += 1.f;
 		GetOwner()->GetTransform()->Translate(0.0f, 0.0f, sinf(Frame));
@@ -85,7 +85,7 @@ public:
 
 	float Frame = 0.0f;
 
-	void Tick(double DT) override final
+	void Tick(float DT) override final
 	{
 		Frame++;
 		LightComp->Intensity = abs(sinf(Frame / 100.f)) * 40.f;
@@ -109,7 +109,7 @@ public:
 
 	float Frame = 0.0f;
 
-	void Tick(double DT) override final
+	void Tick(float DT) override final
 	{
 		Frame++;
 		MATERIAL_PARAMETERS& Params = MeshComp->GetMaterialParameters();
@@ -119,14 +119,15 @@ public:
 
 };
 
+Scene* CurrentScene;
 
 void InitApplication()
 {
-	/*
+	CurrentScene = GetSceneManager()->LoadScene("NewScene");
 	// Mesh
-	Entity* entity = GetEntityManager()->CreateEntity("TestEntity");
-	//entity->AddComponent<TestComponent3>();
 	{
+		Entity* entity = CurrentScene->CreateEntity("TestEntity");
+		entity->AddComponent<TestComponent3>();
 		auto* mrc = entity->AddComponent<MeshRenderingComponent>();
 		entity->AddComponent<TestComponent7>();
 		mrc->RenderedMesh.LoadFromFile("plane.obj");
@@ -141,61 +142,60 @@ void InitApplication()
 	
 	//Skybox
 	{
-		Entity* Skybox = GetEntityManager()->CreateEntity("Skybox");
+		Entity* Skybox = CurrentScene->CreateEntity("Skybox");
 		auto* SkyboxMesh = Skybox->AddComponent<SkyboxComponent>();
 		SkyboxMesh->SetSkyboxShader("Shaders/SkyboxShader.hlsl");
 		SkyboxMesh->SetSkybox("TestSkybox", "nx.tga", "ny.tga", "nz.tga", "px.tga", "py.tga", "pz.tga");
 	}
 
 	{
-		Entity* light = GetEntityManager()->CreateEntity("TestLight");
+		Entity* light = CurrentScene->CreateEntity("TestLight");
 		auto* LightComp = light->AddComponent<LightComponent>();
 		light->GetTransform()->Translate(0.0f, 0.0f, 10.0f);
-		light->GetTransform()->Rotate(-90.0f, 0.0f, 0.0f);
-		LightComp->Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
+		light->GetTransform()->SetRotation(270.0f, 0.0f, 0.0f);
+		LightComp->Color = float3(1.0f, 1.0f, 1.0f);
 		LightComp->Intensity = 8.0f;
 		LightComp->Range = 15.0f;
-		//light->AddComponent<TestComponent4>();
 		LightComp->SetLightType(LIGHT_TYPE_DIRECTIONAL);
+		//light->AddComponent<TestComponent4>();
 	}
-	
 	{
-		Entity* Sphere = GetEntityManager()->CreateEntity("Sphere");
+		Entity* Sphere = CurrentScene->CreateEntity("Sphere");
 		auto* SphereMesh = Sphere->AddComponent<MeshRenderingComponent>();
 		auto& SphereMat = SphereMesh->RenderedMaterial;
 		SphereMesh->RenderedMesh.LoadFromFile("sphere.obj");
 		SphereMesh->RenderedMaterial.LoadFromFile("Shaders/TestRenderingShader.hlsl");
 		MATERIAL_PARAMETERS Parameters = { };
-		Parameters.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
+		Parameters.Color = float3(1.0f, 1.0f, 1.0f);
 		Parameters.SpecularFactor = 0.5f;
 		Parameters.Roughness = 0.7f;
 		SphereMesh->RenderedMaterial.SetMaterialParameters(Parameters);
 		SphereMat.SetTexture(GetTextureCache()->GetDefaultBlueTexture(), 0);
 		SphereMat.SetTexture(GetTextureCache()->GetDefaultNormal(), 1);
 		SphereMat.SetTexture(GetTextureCache()->GetDefaultWhiteTexture(), 2);
-		Sphere->GetTransform()->Scale(3.0f);
-		//Sphere->GetTransform()->Translate(0.0f, 0.0f, -8.f);
+		//Sphere->GetTransform()->Scale(3.0f);
+		Sphere->GetTransform()->Translate(0.0f, 0.0f, -8.f);
 	}
 
 	// Light2
-	{
-		Entity* light2 = GetEntityManager()->CreateEntity("TestLight2");
-		light2->GetTransform()->Translate(-8.0f, -8.0f, 8.0f);
-		auto* LightComp2 = light2->AddComponent<LightComponent>();
-		light2->AddComponent<TestComponent5>();
-		LightComp2->Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
-		LightComp2->Intensity = 10.0f;
-		LightComp2->Range = 16.0f;
-		LightComp2->SetLightType(LIGHT_TYPE_POINT);
-	}
+	//{
+	//	Entity* light2 = GetEntityManager()->CreateEntity("TestLight2");
+	//	light2->GetTransform()->Translate(-8.0f, -8.0f, 8.0f);
+	//	auto* LightComp2 = light2->AddComponent<LightComponent>();
+	//	light2->AddComponent<TestComponent5>();
+	//	LightComp2->Color = float3(1.0f, 1.0f, 1.0f);
+	//	LightComp2->Intensity = 10.0f;
+	//	LightComp2->Range = 16.0f;
+	//	LightComp2->SetLightType(LIGHT_TYPE_POINT);
+	//}
 
 	{
-		Entity* Teapot = GetEntityManager()->CreateEntity("Teapot");
+		Entity* Teapot = CurrentScene->CreateEntity("Teapot");
 		auto* mrc = Teapot->AddComponent<MeshRenderingComponent>();
 		auto& TeapotMesh = mrc->RenderedMesh;
 		auto& TeapotMaterial = mrc->RenderedMaterial;
 		MATERIAL_PARAMETERS Parameters = { };
-		Parameters.Color = XMFLOAT3(0.0f, 0.0f, 1.f);
+		Parameters.Color = float3(0.0f, 0.0f, 1.f);
 		Parameters.SpecularFactor = 32.f;
 		Parameters.Roughness = 0.4f;
 		TeapotMaterial.SetMaterialParameters(Parameters);
@@ -207,11 +207,12 @@ void InitApplication()
 		Teapot->GetTransform()->Translate(-15.0f, 0.0f, 0.0f);
 		Teapot->GetTransform()->Scale(0.03f);
 	}
-	*/
+	
 	{
-		Entity* camera = GetEntityManager()->CreateEntity("Camera");
+		Entity* camera = CurrentScene->CreateEntity("Camera");
 		CameraComponent* CamComponent = camera->AddComponent<CameraComponent>();
-		camera->GetTransform()->Translate(0.0f, 0.0f, -3.0f);
+		camera->GetTransform()->Translate(0.0f, 0.0f, 0.0f);
+		camera->GetTransform()->Rotate(0, 0, 0);
 		CamComponent->SetPriority(1);
 		camera->AddComponent<CameraMovementComponent>();
 	}
@@ -225,13 +226,13 @@ void UpdateApplication()
 
 void CleanupApplication()
 {
-
+	delete CurrentScene;
 }
 
 int main(int argc, char** argv)
 {
 	Application application;
-	application.SetSceneRenderer(new RayTracingRenderer());
+	//application.SetSceneRenderer(new RayTracingRenderer());
 	application.SetStartCallback(&InitApplication);
 	application.SetUpdateCallback(&UpdateApplication);
 	application.SetCleanupCallback(&CleanupApplication);

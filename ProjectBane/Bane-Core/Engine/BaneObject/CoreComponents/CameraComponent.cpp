@@ -7,7 +7,7 @@ CameraComponent* CameraComponent::GMainCamera = nullptr;
 
 CameraComponent::CameraComponent() :
 	Fov(60.0f),
-	ViewWidth(((float)GetApplicationInstance()->GetWindow()->GetWidth() / (float)GetApplicationInstance()->GetWindow()->GetHeight())),
+	ViewWidth(GetApplicationInstance()->GetWindow()->AspectYX()),
 	ViewHeight(1.0f),
 	ZNear(0.01f),
 	ZFar(1000.0f),
@@ -15,34 +15,31 @@ CameraComponent::CameraComponent() :
 {
 }
 
-XMMATRIX CameraComponent::GetProjection() const
+matrix CameraComponent::GetProjection() const
 {
 	if (ProjectionType == CAMERA_TYPE_ORTHO)
 	{
-		return XMMatrixOrthographicLH(ViewWidth, ViewHeight, ZNear, ZFar);
+		return matrix();
+		//return XMMatrixOrthographicLH(ViewWidth, ViewHeight, ZNear, ZFar);
 	}
 	else
 	{
-		return XMMatrixTranspose(XMMatrixPerspectiveFovLH(XMConvertToRadians(Fov), ViewWidth, ZNear, ZFar));
+		float Aspect = GetApplicationInstance()->GetWindow()->AspectXY();
+		return matProjection(Aspect, Fov, 0.01f, 1000.0f);
 	}
-	return XMMATRIX();
+	return matrix();
 }
 
-XMMATRIX CameraComponent::GetLookAt() const
+matrix CameraComponent::GetLookAt() const
 {
-	static const XMFLOAT3 UpDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	XMVECTOR Forward = GetOwner()->GetTransform()->GetForward();
-	XMVECTOR LookForward = XMLoadFloat3(&GetOwner()->GetTransform()->GetPosition()) + Forward;
-	//XMVECTOR UpVector = XMVector3Cross(XMLoadFloat3(&UpDirection), Forward);
+	static const float3 UpDirection = float3(0.0f, 1.0f, 0.0f);
+	float3 Forward = GetOwner()->GetTransform()->GetForward();
+	float3 Position = GetOwner()->GetTransform()->GetPosition();
 
-	return XMMatrixTranspose(XMMatrixLookAtLH(
-		XMLoadFloat3(&GetOwner()->GetTransform()->GetPosition()),
-		LookForward,
-		XMLoadFloat3(&UpDirection)
-	));
+	return matView(Position, Position + Forward, UpDirection);
 }
 
-void CameraComponent::Tick(double DT)
+void CameraComponent::Tick(float DT)
 {
 }
 

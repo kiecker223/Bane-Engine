@@ -45,7 +45,7 @@ public:
 	virtual void CopyBuffers(IBuffer* Src, IBuffer* Dst) = 0;
 	virtual void CopyBufferToTexture(IBuffer* Src, ITextureBase* Dst) = 0;
 	virtual void CopyTextures(ITextureBase* Src, uint SrcSubresource, ITextureBase* Dst, uint DstSubresource) = 0;
-	virtual void CopyTextures(ITextureBase* Src, XMINT3 SrcLocation, ITextureBase* Dst, XMINT3 DstLocation, XMINT3 DstSize) = 0;
+	virtual void CopyTextures(ITextureBase* Src, int3 SrcLocation, ITextureBase* Dst, int3 DstLocation, int3 DstSize) = 0;
 
 	virtual void* Map(IGPUResource* ResourceToMap, uint Subresource = 0) = 0;
 	virtual void Unmap(IGPUResource* ResourceToMap, uint Subresource = 0) = 0;

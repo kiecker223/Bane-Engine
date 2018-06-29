@@ -4,9 +4,9 @@
 
 struct FORWARD_CAMERA_CONSTANTS
 {
-	XMMATRIX Model;
-	XMMATRIX View;
-	XMMATRIX Projection;
+	matrix Model;
+	matrix View;
+	matrix Projection;
 } CameraConstants;
 
 void BasicForwardRenderer::Initialize()

@@ -1,25 +1,25 @@
-#include "BaneObjectGeneralAllocator.h"
+#include "ComponentAllocator.h"
 #include "Core/Systems/Logging/Logger.h"
 
 
-BaneObjectGeneralAllocator::BaneObjectGeneralAllocator(uint NumBytes)
+ComponentAllocator::ComponentAllocator(uint NumBytes)
 {
 	InternalAllocate(NumBytes);
 }
 
-BaneObjectGeneralAllocator::~BaneObjectGeneralAllocator()
+ComponentAllocator::~ComponentAllocator()
 {
 	InternalFree(); // Class is purely internal use, so go ahead and free it
 }
 
-void BaneObjectGeneralAllocator::Reserve(uint NumBytes)
+void ComponentAllocator::Reserve(uint NumBytes)
 {
 	InternalFree();
 	InternalAllocate(NumBytes);
 }
 
 
-void BaneObjectGeneralAllocator::ReserveAndCopy(uint NumBytes)
+void ComponentAllocator::ReserveAndCopy(uint NumBytes)
 {
 	uint8* PrevBegin = PtrBegin;
 	uint8* PrevCurrent = PtrCurrent;
@@ -46,7 +46,7 @@ void BaneObjectGeneralAllocator::ReserveAndCopy(uint NumBytes)
 }
 
 
-void BaneObjectGeneralAllocator::RemovePointer(Component* Position)
+void ComponentAllocator::RemovePointer(Component* Position)
 {
 	uint Size = Position->GetTypeSize();
 	Position->~Component();

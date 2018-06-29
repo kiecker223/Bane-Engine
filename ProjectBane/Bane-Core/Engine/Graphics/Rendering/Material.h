@@ -13,10 +13,10 @@ typedef enum ERENDER_FLAGS {
 
 typedef struct MATERIAL_PARAMETERS
 {
-	XMFLOAT3 Color;
+	float3 Color;
 	float SpecularFactor;
 private:
-	XMFLOAT2 P0;
+	float2 P0;
 public:
 	float Roughness;
 	float Metallic;
@@ -56,14 +56,10 @@ public:
 	ERENDER_FLAGS RenderFlags;
 
 private:
-
-
 	std::string m_MaterialName;
-
 	MATERIAL_PARAMETERS m_Parameters;
 	IConstantBuffer* m_MatCB;
 	IShaderResourceTable* m_Table;
 	IGraphicsPipelineState* m_Pipeline;
-	
 };
 

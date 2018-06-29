@@ -30,10 +30,10 @@ public:
 
 	ForceInline DIRECTIONAL_LIGHT_DATA GetDirectionalLight() const
 	{
-		assert(m_Type == LIGHT_TYPE_DIRECTIONAL);
+		BANE_CHECK(m_Type == LIGHT_TYPE_DIRECTIONAL);
 		DIRECTIONAL_LIGHT_DATA Result = { };
 		Result.Color = Color;
-		XMStoreFloat3(&Result.Direction, GetOwner()->GetTransform()->GetForward());
+		Result.Direction = GetOwner()->GetTransform()->GetForward();
 		Result.Range = Range;
 		Result.Intensity = Intensity;
 		return Result;
@@ -41,7 +41,7 @@ public:
 
 	ForceInline POINT_LIGHT_DATA GetPointLight() const
 	{
-		assert(m_Type == LIGHT_TYPE_POINT);
+		//BANE_CHECK(m_Type == LIGHT_TYPE_POINT);
 		POINT_LIGHT_DATA Result = { };
 		Result.Color = Color;
 		Result.Position = GetOwner()->GetTransform()->GetPosition();
@@ -52,10 +52,10 @@ public:
 
 	ForceInline SPOTLIGHT_DATA GetSpotLight() const
 	{
-		assert(m_Type == LIGHT_TYPE_SPOT);
+		//BANE_CHECK(m_Type == LIGHT_TYPE_SPOT);
 		SPOTLIGHT_DATA Result = { };
 		Result.Color = Color;
-		XMStoreFloat3(&Result.Direction, GetOwner()->GetTransform()->GetForward());
+		Result.Direction = GetOwner()->GetTransform()->GetForward();
 		Result.Position = GetOwner()->GetTransform()->GetPosition();
 		Result.Range = Range;
 		Result.SpotAngle = SpotAngle;
@@ -63,11 +63,10 @@ public:
 		return Result;
 	}
 	
-	XMFLOAT3 Color;
+	float3 Color;
 	float Range;
 	float Intensity;
 	float SpotAngle;
-
 
 private:
 

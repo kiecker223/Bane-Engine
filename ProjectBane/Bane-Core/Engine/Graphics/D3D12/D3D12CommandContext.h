@@ -141,7 +141,7 @@ public:
 	virtual void CopyBuffers(IBuffer* Src, IBuffer* Dst) final override;
 	virtual void CopyBufferToTexture(IBuffer* Src, ITextureBase* Dst) final override;
 	virtual void CopyTextures(ITextureBase* InSrc, uint SrcSubresource, ITexture2D* InDst, uint DstSubresource) final override;
-	virtual void CopyTextures(ITextureBase* Src, XMINT3 SrcLocation, ITextureBase* Dst, XMINT3 DstLocation, XMINT3 DstSize) final override;
+	virtual void CopyTextures(ITextureBase* Src, int3 SrcLocation, ITextureBase* Dst, int3 DstLocation, int3 DstSize) final override;
 
 	void FlushResourceTransitions();
 

@@ -2,7 +2,7 @@
 
 #include "RenderComponent.h"
 #include "../Entity/Entity.h"
-#include "Core/ExpanseMath.h"
+#include "Core/KieckerMath.h"
 #include "Graphics/Interfaces/GraphicsResources.h"
 
 
@@ -46,10 +46,10 @@ public:
 		return m_Priority;
 	}
 
-	XMMATRIX GetProjection() const;
-	XMMATRIX GetLookAt() const;
+	matrix GetProjection() const;
+	matrix GetLookAt() const;
 
-	void Tick(double DT) override final;
+	void Tick(float DT) override final;
 
 	void SubmitFeature(SceneRenderer* Renderer) final override;
 

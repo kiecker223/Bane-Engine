@@ -1,7 +1,7 @@
 #pragma once
 #include "Transform.h"
 #include "ComponentBase.h"
-#include "BaneObjectGeneralAllocator.h"
+#include "ComponentAllocator.h"
 #include <array>
 
 
@@ -104,12 +104,12 @@ class Entity
 public:
 
 	Entity() :
-		m_Allocator(128) // Allocate with 128 bytes
+		m_Allocator(2048) // Allocate with 1024 bytes
 	{
 	}
 
 	Entity(EntityIdentifier Id) :
-		m_Allocator(128),
+		m_Allocator(2048),
 		m_Id(Id)
 	{
 	}
@@ -128,6 +128,8 @@ public:
 		T* RetPointer = m_Allocator.AllocateObject<T>();
 		m_Components.push_back(T::ClassHash);
 		RetPointer->m_Owner = this;
+		RetPointer->m_Transform = &m_Transform;
+		RetPointer->Start();
 		return RetPointer;
 	}
 
@@ -139,6 +141,7 @@ public:
 		T* RetPointer = m_Allocator.AllocateObjectCtor<T>(Params...);
 		m_Components.push_back(T::ClassHash);
 		RetPointer->m_Owner = this;
+		RetPointer->m_Transform = &m_Transform;
 		return RetPointer;
 	}
 
@@ -152,7 +155,7 @@ public:
 
 	void AddChild(EntityIdentifier Child);
 	void RemoveChild(uint ChildIndex);
-	XMMATRIX GetMatrixAffectedByParents() const;
+	matrix GetMatrixAffectedByParents() const;
 
 	IdentifierList& GetChildren()
 	{
@@ -170,7 +173,7 @@ public:
 			m_Allocator.GetAllocatedObjects()[i]->Start();
 	}
 
-	ForceInline void Tick(double DT)
+	ForceInline void Tick(float DT)
 	{
 		for (uint i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
 			m_Allocator.GetAllocatedObjects()[i]->Tick(DT);
@@ -187,12 +190,11 @@ private:
 
 	Entity* GetParent() const;
 	
-
 	Transform m_Transform;
 	EntityIdentifier m_Id;
 	EntityIdentifier m_Parent;
 	IdentifierList m_Children;
 	
-	BaneObjectGeneralAllocator m_Allocator;
+	ComponentAllocator m_Allocator;
 	std::vector<uint64> m_Components;
 };

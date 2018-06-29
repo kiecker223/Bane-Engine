@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 #include "Core/Common.h"
-#include "Core/ExpanseMath.h"
+#include "Core/KieckerMath.h"
 #include "../Interfaces/GraphicsResources.h"
 #include "../Interfaces/PipelineState.h"
 
@@ -66,11 +66,11 @@ public:
 
 	struct Vertex
 	{
-		XMFLOAT3 Postition;
-		XMFLOAT3 Normal;
-		XMFLOAT3 Binormal;
-		XMFLOAT3 Tangent;
-		XMFLOAT2 UV;
+		float3 Postition;
+		float3 Normal;
+		float3 Binormal;
+		float3 Tangent;
+		float2 UV;
 	};
 
 	Mesh();

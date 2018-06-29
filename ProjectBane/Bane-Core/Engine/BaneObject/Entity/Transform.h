@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/ExpanseMath.h"
+#include "Core/KieckerMath.h"
 
 class Transform
 {
@@ -8,33 +8,33 @@ public:
 
 	Transform() :
 		m_Position(0.0f, 0.0f, 0.0f),
-		m_Rotation(XMQuaternionRotationRollPitchYaw(0.0f, 0.0f, 0.0f)),
+		m_Rotation(float3(0.f, 0.f, 0.f)),
 		m_Scale(1.0f, 1.0f, 1.0f)
 	{
 	}
-	Transform(const XMFLOAT3& InPosition, const XMVECTOR& InRotation, const XMFLOAT3& InScale) :
+	Transform(const float3& InPosition, const float3& InRotation, const float3& InScale) :
 		m_Position(InPosition),
 		m_Rotation(InRotation),
 		m_Scale(InScale)
 	{
 	}
 
-	ForceInline XMFLOAT3 GetPosition()
+	ForceInline float3 GetPosition()
 	{
 		return m_Position;
 	}
 
-	ForceInline XMVECTOR GetRotation()
+	ForceInline Quaternion GetRotation()
 	{
 		return m_Rotation;
 	}
 
-	ForceInline XMFLOAT3 GetScale()
+	ForceInline float3 GetScale()
 	{
 		return m_Scale;
 	}
 
-	ForceInline void Translate(const XMFLOAT3& Direction)
+	ForceInline void Translate(const float3& Direction)
 	{
 		m_Position.x += Direction.x;
 		m_Position.y += Direction.y;
@@ -43,40 +43,34 @@ public:
 
 	ForceInline void Translate(float X, float Y, float Z)
 	{
-		Translate(XMFLOAT3(X, Y, Z));
+		Translate(float3(X, Y, Z));
 	}
 
-	ForceInline void Translate(const XMVECTOR& Direction)
+	ForceInline void Rotate(const float3& Euler)
 	{
-		XMFLOAT3 Dir;
-		XMStoreFloat3(&Dir, Direction);
-		Translate(Dir);
-	}
-
-	ForceInline void Rotate(const XMFLOAT3& Euler)
-	{
-		XMVECTOR NewRotation = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(Euler.x), XMConvertToRadians(Euler.y), XMConvertToRadians(Euler.z));
-		m_Rotation = XMQuaternionMultiply(m_Rotation, NewRotation);
+		m_Rotation *= Quaternion(Euler);
+		m_Rotation.Normalize();
 	}
 
 	ForceInline void Rotate(float X, float Y, float Z)
 	{
-		Rotate(XMFLOAT3(X, Y, Z));
+		float3 Rot(X, Y, Z);
+		Rotate(Rot);
 	}
 
-	ForceInline void SetRotation(const XMFLOAT3& Euler)
+	ForceInline void SetRotation(const float3& Euler)
 	{
-		m_Rotation = XMQuaternionRotationRollPitchYaw(Euler.x, Euler.y, Euler.z);
+		m_Rotation = Quaternion(Euler).Normalized();
 	}
 
 	ForceInline void SetRotation(float X, float Y, float Z)
 	{
-		SetRotation(XMFLOAT3(X, Y, Z));
+		SetRotation(float3(X, Y, Z));
 	}
 
-	ForceInline void SetPosition(const XMFLOAT3& InPosition)
+	ForceInline void SetPosition(const float3& InPosition)
 	{
-		XMFLOAT3 Translation = XMFLOAT3(InPosition.x - m_Position.x, InPosition.y - m_Position.y, InPosition.z - m_Position.z);
+		float3 Translation = float3(InPosition.x - m_Position.x, InPosition.y - m_Position.y, InPosition.z - m_Position.z);
 		m_Position = InPosition;
 	}
 
@@ -87,32 +81,37 @@ public:
 		m_Scale.z = Scalar;
 	}
 
-	ForceInline void SetScale(const XMFLOAT3& InScale)
+	ForceInline void SetScale(const float3& InScale)
 	{
 		m_Scale = InScale;
 	}
 
-	ForceInline XMMATRIX GetMatrix() const
+	ForceInline matrix GetMatrix() const
 	{
-		return XMMatrixTranspose(XMMatrixScaling(m_Scale.x, m_Scale.y, m_Scale.z) *
-			(XMMatrixTranslation(m_Position.x, m_Position.y, m_Position.z)) *
-			(XMMatrixRotationQuaternion(m_Rotation)));
+		return matTransformation(m_Position, m_Rotation, m_Scale);
 	}
 
-	ForceInline XMVECTOR GetForward() const
+	ForceInline float3 GetForward() const
 	{
-		XMFLOAT3 ForwardDir(0.0f, 0.0f, -1.0f);
-		XMVECTOR Result = XMLoadFloat3(&ForwardDir);
-		XMMATRIX RotationMatrix = XMMatrixTranspose(XMMatrixRotationQuaternion(m_Rotation));
-		Result = XMVector3Transform(Result, RotationMatrix);
+		float3 Result(0.0f, 0.0f, 1.0f);
+		float3x3 RotationMat = (float3x3)m_Rotation.RotationMatrix();
+		Result = RotationMat * Result;
+		return Result;
+	}
+
+	ForceInline float3 GetUpVector() const
+	{
+		float3 Result(0.0f, 1.0f, 0.0f);
+		matrix RotationMat= m_Rotation.RotationMatrix();
+		Result = (float3x3)RotationMat * Result;
 		return Result;
 	}
 
 private:
 
-	XMFLOAT3 m_Position;
-	XMVECTOR m_Rotation;
-	XMFLOAT3 m_Scale;
+	float3 m_Position;
+	Quaternion m_Rotation;
+	float3 m_Scale;
 };
 
 

@@ -51,7 +51,7 @@ public:
 	virtual ISamplerState* GetDefaultSamplerState() final override;
 	virtual IInputLayout* CreateInputLayout(const GFX_INPUT_LAYOUT_DESC& Desc) final override;
 
-	virtual IRenderPassInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint NumRenderTargets, const IDepthStencilView* DepthStencil, const XMFLOAT4& ClearColor) final override;
+	virtual IRenderPassInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor) final override;
 	virtual IRenderPassInfo* GetBackBufferTargetPass() final override;
 	virtual IRenderTargetView* GetBackBuffer() final override;
 

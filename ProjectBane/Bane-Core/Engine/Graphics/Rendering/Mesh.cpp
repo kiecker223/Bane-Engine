@@ -52,11 +52,11 @@ void ProcessMesh(aiMesh* pMesh, std::vector<uint>& OutIndices, std::vector<Float
 		aiVector3D UV = pMesh->mTextureCoords[0][i];
 
 		Mesh::Vertex Vtx = { 
-			XMFLOAT3(Pos.x, Pos.y, Pos.z), 
-			XMFLOAT3(Norm.x, Norm.y, Norm.z), 
-			XMFLOAT3(Binormals.x, Binormals.y, Binormals.z), 
-			XMFLOAT3(Tangent.x, Tangent.y, Tangent.z), 
-			XMFLOAT2(UV.x, UV.y) 
+			float3(Pos.x, Pos.y, Pos.z), 
+			float3(Norm.x, Norm.y, Norm.z), 
+			float3(Binormals.x, Binormals.y, Binormals.z), 
+			float3(Tangent.x, Tangent.y, Tangent.z), 
+			float2(UV.x, UV.y) 
 		};
 
 		float* pFloats = reinterpret_cast<float*>(&Vtx);
@@ -140,7 +140,7 @@ void Mesh::Upload()
 Mesh Mesh::CreateSphere(uint NumPoints)
 {
 	Mesh Result;
-	uint NumSphereVertices = 0;
+/*	uint NumSphereVertices = 0;
 	uint NumSphereFaces = 0;
 	uint LatLines = NumPoints;
 	uint LongLines = NumPoints;
@@ -149,14 +149,14 @@ Mesh Mesh::CreateSphere(uint NumPoints)
 
 	float sphereYaw = 0.0f;
 	float spherePitch = 0.0f;
-	XMMATRIX Rotationx;
-	XMMATRIX Rotationy;
+	matrix Rotationx;
+	matrix Rotationy;
 
-	std::vector<XMFLOAT3> vertices(NumSphereVertices);
+	std::vector<float3> vertices(NumSphereVertices);
 
 	Result.GetLayout().AddItem("POSITION", INPUT_ITEM_FORMAT_FLOAT3);
 
-	XMVECTOR currVertPos = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+	float3 currVertPos = float3Set(0.0f, 0.0f, 1.0f, 0.0f);
 
 	vertices[0].x = 0.0f;
 	vertices[0].y = 0.0f;
@@ -170,18 +170,18 @@ Mesh Mesh::CreateSphere(uint NumPoints)
 		{
 			sphereYaw = j * (6.28 / (LongLines));
 			Rotationy = XMMatrixRotationZ(sphereYaw);
-			currVertPos = XMVector3TransformNormal(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), (Rotationx * Rotationy));
-			currVertPos = XMVector3Normalize(currVertPos);
-			vertices[i*LongLines + j + 1].x = XMVectorGetX(currVertPos);
-			vertices[i*LongLines + j + 1].y = XMVectorGetY(currVertPos);
-			vertices[i*LongLines + j + 1].z = XMVectorGetZ(currVertPos);
+			currVertPos = float33TransformNormal(float3Set(0.0f, 0.0f, 1.0f, 0.0f), (Rotationx * Rotationy));
+			currVertPos = float33Normalize(currVertPos);
+			vertices[i*LongLines + j + 1].x = float3GetX(currVertPos);
+			vertices[i*LongLines + j + 1].y = float3GetY(currVertPos);
+			vertices[i*LongLines + j + 1].z = float3GetZ(currVertPos);
 		}
 	}
 
 	vertices[NumSphereVertices - 1].x = 0.0f;
 	vertices[NumSphereVertices - 1].y = 0.0f;
 	vertices[NumSphereVertices - 1].z = -1.0f;
-	Result.SetVertexData<XMFLOAT3>(vertices);
+	Result.SetVertexData<float3>(vertices);
 
 	std::vector<uint> indices(NumSphereFaces * 3);
 
@@ -237,6 +237,7 @@ Mesh Mesh::CreateSphere(uint NumPoints)
 	indices[k + 1] = (NumSphereVertices - 1) - LongLines;
 	indices[k + 2] = NumSphereVertices - 2;
 	Result.SetIndices(indices);
+	*/
 	return Result;
 }
 

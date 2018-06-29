@@ -9,11 +9,6 @@ EntityIdentifier EntityIdentifier::FindIdentifierFromHash(uint64 InHash)
 	return EntityIdentifier();
 }
 
-Entity* GetEntityFromId(EntityIdentifier ID)
-{
-	return GetEntityManager()->FindEntity(ID);
-}
-
 Component* Entity::GetComponentByHash(uint64 Hash)
 {
 	int IndexToUse = -1;
@@ -59,10 +54,10 @@ void Entity::RemoveChild(uint ChildIndex)
 	m_Children.erase(m_Children.begin() + ChildIndex);
 }
 
-XMMATRIX Entity::GetMatrixAffectedByParents() const
+matrix Entity::GetMatrixAffectedByParents() const
 {
 	const Entity* Parent = this;
-	XMMATRIX Result = Parent->GetTransform()->GetMatrix();
+	matrix Result = Parent->GetTransform()->GetMatrix();
 
 	while (Parent = Parent->GetParent())
 	{
@@ -75,7 +70,7 @@ Entity* Entity::GetParent() const
 {
 	if (m_Parent.IsValid())
 	{
-		return GetEntityFromId(m_Parent);
+		//return GetEntityFromId(m_Parent);
 	}
 	return nullptr;
 }

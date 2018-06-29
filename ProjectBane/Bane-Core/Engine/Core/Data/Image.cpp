@@ -56,11 +56,11 @@ void Image::LoadFromMemory(void* pBuffer, EIMAGE_FORMAT Format, uint Width, uint
 
 	if (m_Buffer != nullptr)
 	{
-		HeapFree(GetProcessHeap(), 0, m_Buffer);
+		//HeapFree(GetProcessHeap(), 0, m_Buffer);
 		m_Buffer = nullptr;
 	}
 
-	m_Buffer = HeapAlloc(GetProcessHeap(), 0, ImageSizeInBytes);
+	//m_Buffer = HeapAlloc(GetProcessHeap(), 0, ImageSizeInBytes);
 
 	memcpy(m_Buffer, pBuffer, ImageSizeInBytes);
 }

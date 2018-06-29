@@ -11,3 +11,4 @@
 #include "BaneObject/Entity/EntityManager.h"
 #include "Application/Application.h"
 #include "Application/Window.h"
+#include "BaneObject/Entity/SceneManager.h"

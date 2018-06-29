@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/ExpanseMath.h"
+#include "Core/KieckerMath.h"
 
 class IGPUResource;
 
@@ -44,7 +44,7 @@ public:
 	virtual uint GetNumRenderTargets() const = 0;
 	virtual IRenderTargetView* GetRenderTarget(uint Index) const = 0;
 	virtual IDepthStencilView* GetDepthStencil() const = 0;
-	virtual XMFLOAT4 GetClearColor() const = 0;
+	virtual float4 GetClearColor() const = 0;
 };
 
 class IUnorderedAccessView

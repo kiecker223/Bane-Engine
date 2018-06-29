@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/ExpanseMath.h"
+#include "Core/KieckerMath.h"
 #include "PipelineState.h"
 #include "GraphicsResources.h"
 #include "GraphicsCommandList.h"
@@ -69,9 +69,9 @@ public:
 	
 	virtual IInputLayout* CreateInputLayout(const GFX_INPUT_LAYOUT_DESC& Desc) = 0;
 
-	virtual IRenderPassInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint NumRenderTargets, const IDepthStencilView* DepthStencil, const XMFLOAT4& ClearColor) = 0;
+	virtual IRenderPassInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor) = 0;
 	
-	inline IRenderPassInfo* CreateRenderPass(const IRenderTargetView* RenderTarget, const IDepthStencilView* DepthStencil, const XMFLOAT4& ClearColor)
+	inline IRenderPassInfo* CreateRenderPass(const IRenderTargetView* RenderTarget, const IDepthStencilView* DepthStencil, const float4& ClearColor)
 	{
 		return CreateRenderPass(&RenderTarget, 1U, DepthStencil, ClearColor);
 	}

@@ -51,7 +51,11 @@ constexpr uint64 GetDJB264BitHash_ConstExpr(const char* InString)
 	return GetDJB264BitHash_ConstExpr_Impl(InString, 5381, 0);
 }
 
-
+#ifdef _DEBUG
+#define BANE_CHECK(x) if (!x) { __debugbreak(); abort(); }
+#else
+#define BANE_CHECK(x) x
+#endif
 
 inline uint GetDXGIFormatSize(DXGI_FORMAT Format)
 {
@@ -117,6 +121,7 @@ inline uint GetDXGIFormatSize(DXGI_FORMAT Format)
 	}
 	return 0;
 }
+
 
 #ifdef _DEBUG
 #include <comdef.h>

@@ -31,11 +31,11 @@ public:
 
 	inline void FreeBuffer() 
 	{ 
-		if (m_Buffer != nullptr) 
-		{ 
-			HeapFree(GetProcessHeap(), 0, m_Buffer); 
-			m_Buffer = nullptr;
-		} 
+		//if (m_Buffer != nullptr) 
+		//{ 
+		//	HeapFree(GetProcessHeap(), 0, m_Buffer); 
+		//	m_Buffer = nullptr;
+		//} 
 		m_Width = 0;
 		m_Height = 0;
 	}

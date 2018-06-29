@@ -5,6 +5,7 @@
 #include <type_traits>
 
 class Entity;
+class Transform;
 
 class Component
 {
@@ -23,26 +24,36 @@ public:
 	{
 		return m_Owner;
 	}
-	
 
+	ForceInline Transform* GetTransform()
+	{
+		return m_Transform;
+	}
+
+	ForceInline Transform* GetTransform() const
+	{
+		return m_Transform;
+	}
+	
 	virtual void Start() { }
-	virtual void Tick(double DT) { }
+	virtual void Tick(float DT) { }
 	virtual void Dispose() { }
 	virtual void FixedTick() { } // Maybe not do this
 	virtual bool IsRenderComponent() const { return false; }
 
-	virtual uint GetTypeSize() const = 0; // AHA! A WAY TO MAKE THIS ABSTRACT
+	virtual uint GetTypeSize() const = 0; // Overridden by IMPLEMENT_COMPONENT(type)
 
 private:
 
 	Entity* m_Owner;
+	Transform* m_Transform;
 
 };
 
 
 constexpr const uint64 Component_HashImpl(uint64 InResult, const char* Pointer, uint Index)
 {
-	return (Pointer[Index] != 0) ? Component_HashImpl((((InResult << 5) + InResult) + Pointer[Index]), Pointer, Index + 1) : InResult;
+	return (Pointer[Index] != 0) ? Component_HashImpl((((InResult << 5) + InResult) + (uint64)Pointer[Index]), Pointer, Index + 1) : InResult;
 }
 
 

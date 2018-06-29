@@ -217,7 +217,7 @@ public:
 
 	inline uint GetUAVTableIndex() const
 	{
-		assert(HasUAVs());
+		BANE_CHECK(HasUAVs());
 		return GetSamplerTableIndex() + 1;
 	}
 

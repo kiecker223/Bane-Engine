@@ -107,7 +107,7 @@ INPUTS GetInputs(float2 UV)
 VS_OUTPUT VSMain(VS_INPUT Input)
 {
 	VS_OUTPUT Result;
-	Result.Position = float4(Input.Position, 1.0f);
+	Result.Position = float4(Input.Position.xy, 1e-4, 1.0f);
 	Result.UV = Input.TexCoords;
 	return Result;
 }
@@ -221,12 +221,13 @@ float4 PSMain(VS_OUTPUT Input) : SV_TARGET0
 	Inputs.Specular = 1 - Inputs.Roughness;// (sin(Frame / 20) * 0.5) + 0.5;
 	float3 Color = float3(0.0f, 0.0f, 0.0f);
 	
-	if (length(Inputs.Normal) < 0.00001)
+	if (length(Inputs.Normal) < 1e-3)
 	{
-		return float4(Inputs.Albedo * float3(0.1f, 0.1f, 0.1f), 1.0f);
+		return float4(Inputs.Albedo, 1.0f);
 	}
 	
 	Inputs.Normal = normalize(Inputs.Normal);
+	return float4(Inputs.Normal, 1.0f);
 	float3 FresnelFactor = float3(0.04, 0.04, 0.04);
 	FresnelFactor = lerp(Inputs.Albedo, FresnelFactor, Inputs.Metallic);
 	

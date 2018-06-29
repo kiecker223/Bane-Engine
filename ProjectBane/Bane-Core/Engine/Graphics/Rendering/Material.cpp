@@ -8,7 +8,7 @@ Material::Material() :
 	m_Table(nullptr),
 	m_Pipeline(nullptr)
 {
-	m_Parameters.Color = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	m_Parameters.Color = float3(1.0f, 1.0f, 1.0f);
 	m_Parameters.SpecularFactor = 0.5f;
 	m_Parameters.Roughness = 0.5f;
 }

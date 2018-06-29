@@ -10,7 +10,7 @@ ScreenSizes CBufferData = { };
 
 typedef struct RAYTRACING_CAMERA_CONSTANTS
 {
-	XMVECTOR CameraPosition, CameraForward;
+	float3 CameraPosition, CameraForward;
 } RAYTRACING_CAMERA_CONSTANTS;
 
 void RayTracingRenderer::Initialize()
@@ -39,19 +39,19 @@ void RayTracingRenderer::Initialize()
 
 	GEOM_SPHERE Sphere = {
 		{
-			XMFLOAT3(0.3f, 0.1f, 0.7f),
+			float3(0.3f, 0.1f, 0.7f),
 			0.0f,
 			0.0f,
 			0.0f, 0.0f, 0.0f
 		},
-		XMFLOAT3(-1.0f, -0.1f, -3.0f),
+		float3(-1.0f, -0.1f, -3.0f),
 		0.5f
 	};
 
 	AddSphere(Sphere);
 
-	Sphere.Center = XMFLOAT3(1.0f, -0.2f, -2.7f);
-	Sphere.Material.Color = XMFLOAT3(0.6f, 0.9f, 0.1f);
+	Sphere.Center = float3(1.0f, -0.2f, -2.7f);
+	Sphere.Material.Color = float3(0.6f, 0.9f, 0.1f);
 	Sphere.Material.Roughness = 0.0f;
 	Sphere.Radius = 0.8f;
 
@@ -59,23 +59,23 @@ void RayTracingRenderer::Initialize()
 
 	GEOM_PLANE Plane = {
 		{
-			XMFLOAT3(1.0f, 1.0f, 1.0f),
+			float3(1.0f, 1.0f, 1.0f),
 			0.0f,
 			0.0f,
 			0.0f, 0.0f, 0.0f
 		},
-		XMFLOAT3(0.0f, -0.5f, 0.0f),
+		float3(0.0f, -0.5f, 0.0f),
 		1.0f,
-		XMFLOAT3(0.0f, 1.0f, 0.0f),
+		float3(0.0f, 1.0f, 0.0f),
 		0.0f
 	};
 
 	AddPlane(Plane);
 
 	GEOM_POINT_LIGHT PointLight = {
-		XMFLOAT3(1.0f, 1.0f, 1.0f),
+		float3(1.0f, 1.0f, 1.0f),
 		18.f,
-		XMFLOAT3(0.0f, 3.0f, -2.0f),
+		float3(0.0f, 3.0f, -2.0f),
 		10.0f
 	};
 
@@ -117,13 +117,13 @@ void RayTracingRenderer::Render()
 	CBufferData.Frame++;
 
 //	m_GeometryData.Spheres[0].Material.Roughness = (sin(CBufferData.Frame / 10) * 0.5f) + 0.5f;
-// 	m_GeometryData.Spheres[0].Center = XMFLOAT3((sin(CBufferData.Frame / 60) * 20) + 20, (sin(CBufferData.Frame / 30) * 5) + 5, (sin(CBufferData.Frame / 10) * 20) + 20);
-	m_GeometryData.PointLights[0].Position = XMFLOAT3(sin(CBufferData.Frame / 20) * 10, 2.0f, -2.f);
-	//m_GeometryData.PointLights[1].Position = XMFLOAT3(sin(-CBufferData.Frame / 20) * 10, 1.0f, -2.f);
+// 	m_GeometryData.Spheres[0].Center = float3((sin(CBufferData.Frame / 60) * 20) + 20, (sin(CBufferData.Frame / 30) * 5) + 5, (sin(CBufferData.Frame / 10) * 20) + 20);
+	m_GeometryData.PointLights[0].Position = float3(sin(CBufferData.Frame / 20) * 10, 2.0f, -2.f);
+	//m_GeometryData.PointLights[1].Position = float3(sin(-CBufferData.Frame / 20) * 10, 1.0f, -2.f);
 
 	{
 		RAYTRACING_CAMERA_CONSTANTS* Constants = (RAYTRACING_CAMERA_CONSTANTS*)Ctx->Map(m_OnScreenQuad.CBs[0]);
-		Constants->CameraPosition = XMLoadFloat3(&MainCamera->GetOwner()->GetTransform()->GetPosition());
+		Constants->CameraPosition = MainCamera->GetOwner()->GetTransform()->GetPosition();
 		Constants->CameraForward = MainCamera->GetOwner()->GetTransform()->GetForward();
 		Ctx->Unmap(m_OnScreenQuad.CBs[0]);
 	}

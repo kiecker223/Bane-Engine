@@ -2,7 +2,7 @@
 #include "Application/Window.h"
 #include "Application/Application.h"
 #include "../Interfaces/ApiRuntime.h"
-#include "Core/ExpanseMath.h"
+#include "Core/KieckerMath.h"
 #include "Graphics/IO/ShaderCache.h"
 #include "Graphics/IO/TextureCache.h"
 #include "BaneObject/CoreComponents/CameraComponent.h"
@@ -10,12 +10,12 @@
 
 
 typedef struct DEFFERED_CAMERA_CONSTANTS {
-	XMMATRIX Model, View, Projection;
-	XMFLOAT3 CameraPosition;
+	matrix Model, View, Projection;
+	float3 CameraPosition;
 } DEFFERED_CAMERA_CONSTANTS;
 
 DEFFERED_CAMERA_CONSTANTS CameraConstants = { };
-XMMATRIX SkyboxModel;
+matrix SkyboxModel;
 DefferedRenderer::DefferedRenderer()
 {
 }
@@ -46,7 +46,7 @@ void DefferedRenderer::Initialize()
 		m_Device->CreateRenderTargetView(m_ParameterBuffer)
 	};
 
-	m_DefferedPass = m_Device->CreateRenderPass(&Views[0], 4, m_Device->GetDefaultDepthStencil(), XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f));
+	m_DefferedPass = m_Device->CreateRenderPass(&Views[0], 4, m_Device->GetDefaultDepthStencil(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
 	struct Vertex
 	{
@@ -93,17 +93,12 @@ void DefferedRenderer::Render()
 	IGraphicsCommandContext* ctx = m_Device->GetGraphicsContext();
 	ctx->BeginPass(m_DefferedPass);
 
+	float3 CameraPosition = MainCamera->GetOwner()->GetTransform()->GetPosition();
 	{
-		DEFFERED_CAMERA_CONSTANTS* CamConstants = (DEFFERED_CAMERA_CONSTANTS*)ctx->Map(m_CameraConstants);
-		CamConstants->CameraPosition = MainCamera->GetOwner()->GetTransform()->GetPosition();
-		CamConstants->View = MainCamera->GetLookAt();
-		CamConstants->Projection = MainCamera->GetProjection();
-		ctx->Unmap(m_CameraConstants);
+		CameraConstants.View = MainCamera->GetLookAt();
+		CameraConstants.Projection = MainCamera->GetProjection();
+		CameraConstants.CameraPosition = CameraPosition;
 	}
-	CameraConstants.View = MainCamera->GetLookAt();
-	CameraConstants.Projection = MainCamera->GetProjection();
-	XMFLOAT3 CameraPosition = MainCamera->GetOwner()->GetTransform()->GetPosition();
-	CameraConstants.CameraPosition = CameraPosition;
 
 	for (uint i = 0; i < m_DrawItems.size(); i++)
 	{
@@ -126,13 +121,13 @@ void DefferedRenderer::Render()
 	if (Skybox)
 	{
 		void* Buff = ctx->Map(m_CameraConstants);
-		CameraConstants.Model = XMMatrixTranspose(XMMatrixIdentity()) * XMMatrixTranspose(XMMatrixScaling(1.5f, 1.5f, 1.5f)) * XMMatrixTranspose(XMMatrixTranslation(CameraPosition.x, CameraPosition.y, CameraPosition.z));
+		CameraConstants.Model = matTransformation(CameraPosition, Quaternion(), float3(5.f, 5.f, 5.f));
 		memcpy(Buff, (void*)&CameraConstants, sizeof(DEFFERED_CAMERA_CONSTANTS));
 		ctx->Unmap(m_CameraConstants);
 		Skybox->SetCameraConstants(m_CameraConstants);
 		Skybox->Draw(ctx);
 	}
-	ctx->EndPass();// So right now its executing
+	ctx->EndPass(); // So right now its executing
 
 	ctx->BeginPass(m_Device->GetBackBufferTargetPass());
 	GatherLights();
@@ -141,8 +136,8 @@ void DefferedRenderer::Render()
 	memcpy(LightBuff, (void*)&m_LightCBData, sizeof(DEFFERED_RENDERER_LIGHT_DATA));
 	auto* pLightBuff = (DEFFERED_RENDERER_LIGHT_DATA*)LightBuff;
 	ctx->Unmap(m_LightBuffer);
-	ctx->SetGraphicsResourceTable(m_OnScreenQuad.Table);
 	ctx->SetGraphicsPipelineState(m_OnScreenQuad.Pipeline);
+	ctx->SetGraphicsResourceTable(m_OnScreenQuad.Table);
 	ctx->SetVertexBuffer(m_OnScreenQuad.VB);
 	ctx->SetIndexBuffer(m_OnScreenQuad.IB);
 	ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -198,7 +193,7 @@ void DefferedRenderer::AddLight(LightComponent* InLight)
 	m_Lights.push_back(InLight->GetOwner());
 }
 
-void DefferedRenderer::RenderShadows(XMMATRIX LightMatrix, IRenderPassInfo* DestRenderPass, IGraphicsCommandContext* ctx)
+void DefferedRenderer::RenderShadows(matrix LightMatrix, IRenderPassInfo* DestRenderPass, IGraphicsCommandContext* ctx)
 {
 
 }

@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClCompile Include="Engine\BaneObject\CoreComponents\LightComponent.cpp" />
     <ClCompile Include="Engine\BaneObject\CoreComponents\SkyboxComponent.cpp" />
+    <ClCompile Include="Engine\BaneObject\Entity\SceneManager.cpp" />
     <ClCompile Include="Engine\Graphics\Interfaces\GraphicsDevice.cpp" />
     <ClCompile Include="Engine\Graphics\IO\MeshCache.cpp" />
     <ClCompile Include="Engine\Graphics\IO\ShaderTokenizer.cpp" />
@@ -145,7 +146,7 @@
     <ClCompile Include="Engine\Application\Window.cpp" />
     <ClCompile Include="Engine\BaneObject\CoreComponents\CameraComponent.cpp" />
     <ClCompile Include="Engine\BaneObject\CoreComponents\MeshRenderingComponent.cpp" />
-    <ClCompile Include="Engine\BaneObject\Entity\BaneObjectGeneralAllocator.cpp" />
+    <ClCompile Include="Engine\BaneObject\Entity\ComponentAllocator.cpp" />
     <ClCompile Include="Engine\BaneObject\Entity\ComponentBase.cpp" />
     <ClCompile Include="Engine\BaneObject\Entity\Entity.cpp" />
     <ClCompile Include="Engine\BaneObject\Entity\EntityManager.cpp" />
@@ -188,6 +189,8 @@
   <ItemGroup>
     <ClInclude Include="Engine\BaneObject\CoreComponents\LightComponent.h" />
     <ClInclude Include="Engine\BaneObject\CoreComponents\SkyboxComponent.h" />
+    <ClInclude Include="Engine\BaneObject\Entity\EntityAllocator.h" />
+    <ClInclude Include="Engine\BaneObject\Entity\SceneManager.h" />
     <ClInclude Include="Engine\Graphics\D3D12\D3D12Fence.h" />
     <ClInclude Include="Engine\Graphics\IO\MeshCache.h" />
     <ClInclude Include="Engine\Graphics\IO\ShaderTokenizer.h" />
@@ -199,7 +202,7 @@
     <ClInclude Include="Engine\BaneObject\CoreComponents\MeshRenderingComponent.h" />
     <ClInclude Include="Engine\BaneObject\CoreComponents\RenderComponent.h" />
     <ClInclude Include="Engine\BaneObject\Entity\BaneObject.h" />
-    <ClInclude Include="Engine\BaneObject\Entity\BaneObjectGeneralAllocator.h" />
+    <ClInclude Include="Engine\BaneObject\Entity\ComponentAllocator.h" />
     <ClInclude Include="Engine\BaneObject\Entity\ComponentBase.h" />
     <ClInclude Include="Engine\BaneObject\Entity\Entity.h" />
     <ClInclude Include="Engine\BaneObject\Entity\EntityManager.h" />
@@ -212,7 +215,7 @@
     <ClInclude Include="Engine\Core\Data\Format.h" />
     <ClInclude Include="Engine\Core\Data\Image.h" />
     <ClInclude Include="Engine\Core\Data\stb_image_write.h" />
-    <ClInclude Include="Engine\Core\ExpanseMath.h" />
+    <ClInclude Include="Engine\Core\KieckerMath.h" />
     <ClInclude Include="Engine\Core\StringHelpers.h" />
     <ClInclude Include="Engine\Core\Systems\Assets\AssetItem.h" />
     <ClInclude Include="Engine\Core\Systems\Assets\AssetManager.h" />

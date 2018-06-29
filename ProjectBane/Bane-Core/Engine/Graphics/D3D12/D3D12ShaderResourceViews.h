@@ -39,7 +39,7 @@ class D3D12RenderPassInfo : public IRenderPassInfo
 {
 public:
 
-	D3D12RenderPassInfo(const IRenderTargetView** Rtvs, uint InNumRenderTargets, const IDepthStencilView* Dsv, const XMFLOAT4& InClearColor) :
+	D3D12RenderPassInfo(const IRenderTargetView** Rtvs, uint InNumRenderTargets, const IDepthStencilView* Dsv, const float4& InClearColor) :
 		NumRenderTargets(InNumRenderTargets),
 		DepthStencil((D3D12DepthStencilView*)Dsv),
 		ClearColor(InClearColor)
@@ -70,7 +70,7 @@ public:
 		return DepthStencil;
 	}
 
-	XMFLOAT4 GetClearColor() const final override
+	float4 GetClearColor() const final override
 	{
 		return ClearColor;
 	}
@@ -138,7 +138,7 @@ public:
 	D3D12RenderTargetView* RenderTargets[16];
 	uint NumRenderTargets;
 	D3D12DepthStencilView* DepthStencil;
-	const XMFLOAT4 ClearColor;
+	const float4 ClearColor;
 };
 
 // This class essentially just acts as a pool for other shader resources to be pulled from.

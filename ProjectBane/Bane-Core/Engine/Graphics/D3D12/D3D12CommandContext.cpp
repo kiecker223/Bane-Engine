@@ -211,7 +211,7 @@ void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* InSrc, uint SrcSubr
 	D3DCL->CopyTextureRegion(&DstCopyLocation, 0, 0, 0, &SrcCopyLocation, nullptr);
 }
 
-void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* InSrc, XMINT3 SrcLocation, ITextureBase* InDst, XMINT3 DstLocation, XMINT3 DstSize)
+void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* InSrc, int3 SrcLocation, ITextureBase* InDst, int3 DstLocation, int3 DstSize)
 {
 	D3D12TextureBase* Src = (D3D12TextureBase*)InSrc;
 	D3D12TextureBase* Dst = (D3D12TextureBase*)InDst;

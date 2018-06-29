@@ -2,8 +2,6 @@
 #include "Graphics/IO/ShaderCache.h"
 
 
-Window* Window::sm_WindowInstance;
-
 #define CUSTOM_SIZE_EVENT 0x0401
 
 LRESULT CALLBACK WndProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam)

@@ -108,7 +108,7 @@ inline std::string CutStringRange(std::string& InStr, const unsigned int Start, 
 
 inline std::string CutStringLocations(std::string& InStr, const unsigned int Start, const unsigned int End)
 {
-	assert(End > Start);
+	BANE_CHECK(End > Start);
 	std::string Result = InStr.substr(Start, End - Start);
 	InStr.erase(InStr.begin() + Start, InStr.begin() + End);
 	return Result;
