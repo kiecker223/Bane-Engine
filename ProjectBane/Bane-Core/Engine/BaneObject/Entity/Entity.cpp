@@ -1,6 +1,7 @@
 #include "Entity.h"
 #include "EntityManager.h"
 #include "Application/Application.h"
+#include "Scene.h"
 #include "../CoreComponents/RenderComponent.h"
 
 
@@ -34,12 +35,13 @@ void Entity::RemoveComponent(uint64 ComponentHash)
 
 void Entity::SubmitRenderingComponents()
 {
+	SceneRenderer* Renderer = GetApplicationInstance()->GetSceneRenderer();
 	for (auto Comp : m_Allocator.GetAllocatedObjects())
 	{
 		if (Comp->IsRenderComponent())
 		{
 			RenderComponent* rc = (RenderComponent*)Comp;
-			rc->SubmitFeature(GetApplicationInstance()->GetSceneRenderer());
+			rc->SubmitFeature(Renderer);
 		}
 	}
 }
@@ -57,11 +59,12 @@ void Entity::RemoveChild(uint ChildIndex)
 matrix Entity::GetMatrixAffectedByParents() const
 {
 	const Entity* Parent = this;
-	matrix Result = Parent->GetTransform()->GetMatrix();
+	matrix Result = GetTransform()->GetMatrix();
 
-	while (Parent = Parent->GetParent())
+	while (Parent)
 	{
 		Result *= Parent->GetTransform()->GetMatrix();
+		Parent = Parent->GetParent();
 	}
 	return Result;
 }
@@ -70,7 +73,12 @@ Entity* Entity::GetParent() const
 {
 	if (m_Parent.IsValid())
 	{
-		//return GetEntityFromId(m_Parent);
+		return GetEntityById(m_Parent);
 	}
 	return nullptr;
+}
+
+Entity* GetEntityById(const EntityIdentifier& Id)
+{
+	return GetCurrentScene()->FindEntity(Id.HashedName);
 }

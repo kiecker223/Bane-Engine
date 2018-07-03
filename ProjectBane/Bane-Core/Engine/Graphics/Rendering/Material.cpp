@@ -56,6 +56,11 @@ void Material::SetTexture(ITextureBase* Texture, uint TextureRegister)
 	SetTexture(Texture, nullptr, TextureRegister, 0);
 }
 
+void Material::SetTexture(const std::string& Texture, uint Register)
+{
+	SetTexture(GetTextureCache()->LoadTexture(Texture), Register);
+}
+
 void Material::SetConstantBuffer(IConstantBuffer* ConstantBuffer, uint Register)
 {
 	GetApiRuntime()->GetGraphicsDevice()->CreateShaderResourceView(m_Table, ConstantBuffer, Register);

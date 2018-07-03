@@ -7,11 +7,9 @@ cbuffer TexInfo : register(b0)
 	float4 TexelSize;
 }
 
-
 [numthreads(8, 8, 1)]
 void CSMain( uint3 DTid : SV_DispatchThreadID )
 {
 	float2 TexCoords = TexelSize.xy * (DTid.xy + 0.5);
 	DestTexture[DTid.xy] = SrcTexture.SampleLevel(Sampler, TexCoords, 0);
 }
-

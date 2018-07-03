@@ -123,7 +123,7 @@ Scene* CurrentScene;
 
 void InitApplication()
 {
-	CurrentScene = GetSceneManager()->LoadScene("NewScene");
+	CurrentScene = GetSceneManager()->CreateNewScene("NewScene");
 	// Mesh
 	{
 		Entity* entity = CurrentScene->CreateEntity("TestEntity");
@@ -226,7 +226,7 @@ void UpdateApplication()
 
 void CleanupApplication()
 {
-	delete CurrentScene;
+	SetCurrentScene(nullptr);
 }
 
 int main(int argc, char** argv)

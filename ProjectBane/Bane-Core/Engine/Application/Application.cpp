@@ -77,6 +77,7 @@ void Application::InitSystems()
 	m_SceneRenderer->Initialize();
 
 	m_StartCallback();
+	GetCurrentScene()->InitScene();
 }
 
 void Application::Run()

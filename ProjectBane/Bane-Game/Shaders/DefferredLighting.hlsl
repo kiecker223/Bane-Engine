@@ -227,7 +227,7 @@ float4 PSMain(VS_OUTPUT Input) : SV_TARGET0
 	}
 	
 	Inputs.Normal = normalize(Inputs.Normal);
-	return float4(Inputs.Normal, 1.0f);
+	
 	float3 FresnelFactor = float3(0.04, 0.04, 0.04);
 	FresnelFactor = lerp(Inputs.Albedo, FresnelFactor, Inputs.Metallic);
 	

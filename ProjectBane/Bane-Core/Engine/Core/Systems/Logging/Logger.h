@@ -21,7 +21,6 @@ public:
 		LogTarget->LogMessage(Message);
 	}
 	
-	
 	static GlobalLog* LogInstance;
 };
 
@@ -93,8 +92,10 @@ inline GlobalLog& operator << (GlobalLog& Logger, const std::string& Message)
 	return Logger;
 }
 
-
-
-
+inline GlobalLog& operator << (GlobalLog& Logger, const std::wstring& Message)
+{
+	Logger.LogTarget->LogMessage(std::string(Message.begin(), Message.end()));
+	return Logger;
+}
 
 

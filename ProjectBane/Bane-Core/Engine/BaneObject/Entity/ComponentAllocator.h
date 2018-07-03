@@ -74,11 +74,11 @@ public:
 
 	ForceInline void InternalFree()
 	{
-		HeapFree(GetProcessHeap(), HEAP_NO_SERIALIZE, (LPVOID)PtrBegin);
 		for (auto* c : AllocatedObjects)
 		{
-			delete c;
+			c->~Component();
 		}
+		HeapFree(GetProcessHeap(), HEAP_NO_SERIALIZE, (LPVOID)PtrBegin);
 		PtrBegin = nullptr;
 		PtrCurrent = nullptr;
 		PtrEnd = nullptr;

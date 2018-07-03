@@ -31,6 +31,11 @@ void D3D12Runtime::Initialize()
 	DxgiFactory->EnumAdapters(0, &Adapter);
 #endif
 
+	DXGI_ADAPTER_DESC AdapterDesc;
+	Adapter->GetDesc(&AdapterDesc);
+
+	BaneLog() << AdapterDesc.Description << END_LINE;
+	
 	ID3D12Device1* Device = nullptr;
 	D3D12ERRORCHECK(D3D12CreateDevice(Adapter, D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&Device)));
 

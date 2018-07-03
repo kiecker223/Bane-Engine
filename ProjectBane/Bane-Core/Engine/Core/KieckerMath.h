@@ -1573,10 +1573,9 @@ inline matrix matProjection(float Aspect, float FovY, float Near, float Far)
 }
 
 template<class T>
-TMultiRowColumnMathStruct<T::TType, T::ColCount, T::RowCount> transpose(const T& InMatrix)
+T transpose(const T& InMatrix)
 {
-	using ResultType = TMultiRowColumnMathStruct<T::TType, T::ColCount, T::RowCount>;
-	ResultType Result;
+	T Result;
 	for (uint y = 0; y < T::NumRows; y++)
 	{
 		for (uint x = 0; x < T::NumCols; x++)

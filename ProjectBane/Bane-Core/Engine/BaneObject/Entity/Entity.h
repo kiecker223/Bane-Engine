@@ -184,6 +184,11 @@ public:
 		return (Transform*)&m_Transform;
 	}
 
+	ForceInline void SetParent(EntityIdentifier Parent)
+	{
+		m_Parent = Parent;
+	}
+
 private:
 
 	friend class Entity;
@@ -198,3 +203,5 @@ private:
 	ComponentAllocator m_Allocator;
 	std::vector<uint64> m_Components;
 };
+
+Entity* GetEntityById(const EntityIdentifier& Id);

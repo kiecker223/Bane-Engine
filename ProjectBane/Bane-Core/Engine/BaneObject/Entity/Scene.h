@@ -16,6 +16,12 @@ class Scene
 public:
 
 	Scene();
+	Scene(const std::string& SceneName);
+
+	ForceInline const std::string& GetName() const
+	{
+		return m_Name;
+	}
 
 	Entity* CreateEntity(const std::string& EntityName);
 	Entity* FindEntity(const std::string& EntityName);
@@ -39,10 +45,14 @@ public:
 private:
 
 	static Scene* GCurrentScene;
-
+	std::string m_Name;
 	Entity* m_Root;
-	std::map<uint64, Entity*> m_Entities;
-
+	struct EntityHashEntry
+	{
+		uint64 Hash;
+		Entity* pEntity;
+	};
+	std::vector<EntityHashEntry> m_Entities;
 };
 
 ForceInline Scene* GetCurrentScene()
@@ -64,8 +74,7 @@ ForceInline void SetCurrentScene(Scene* InScene)
 	{
 		// Should setting it to nullptr be valid?
 	}
-	// For now its not
-	BANE_CHECK(pScene);
+	// BANE_CHECK(pScene);
 	pScene->InitScene();
 }
 

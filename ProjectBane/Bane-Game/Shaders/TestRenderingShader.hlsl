@@ -33,6 +33,7 @@ Pipeline
 	RasterState = 
 	{
 		Cull = false;
+		FillSolid = true;
 	};
 };
 

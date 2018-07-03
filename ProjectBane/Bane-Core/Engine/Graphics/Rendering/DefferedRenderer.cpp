@@ -33,10 +33,10 @@ void DefferedRenderer::Initialize()
 	uint Height = GetApplicationInstance()->GetWindow()->GetHeight();
 	uint Width = GetApplicationInstance()->GetWindow()->GetWidth();
 
-	m_AlbedoBuffer = m_Device->CreateTexture2D(Width, Height, FORMAT_R8G8B8A8_UNORM, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET | TEXTURE_USAGE_UNORDERED_ACCESS), nullptr);
-	m_NormalBuffer = m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
-	m_PositionBuffer = m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
-	m_ParameterBuffer = m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
+	m_AlbedoBuffer		= m_Device->CreateTexture2D(Width, Height, FORMAT_R8G8B8A8_UNORM,	  (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
+	m_NormalBuffer		= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
+	m_PositionBuffer	= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
+	m_ParameterBuffer	= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
 
 	const IRenderTargetView* Views[4] =
 	{
@@ -93,7 +93,7 @@ void DefferedRenderer::Render()
 	IGraphicsCommandContext* ctx = m_Device->GetGraphicsContext();
 	ctx->BeginPass(m_DefferedPass);
 
-	float3 CameraPosition = MainCamera->GetOwner()->GetTransform()->GetPosition();
+	float3 CameraPosition = MainCamera->GetTransform()->GetPosition();
 	{
 		CameraConstants.View = MainCamera->GetLookAt();
 		CameraConstants.Projection = MainCamera->GetProjection();
@@ -134,7 +134,6 @@ void DefferedRenderer::Render()
 	m_LightCBData.Frame = Frame;
 	void* LightBuff = ctx->Map(m_LightBuffer);
 	memcpy(LightBuff, (void*)&m_LightCBData, sizeof(DEFFERED_RENDERER_LIGHT_DATA));
-	auto* pLightBuff = (DEFFERED_RENDERER_LIGHT_DATA*)LightBuff;
 	ctx->Unmap(m_LightBuffer);
 	ctx->SetGraphicsPipelineState(m_OnScreenQuad.Pipeline);
 	ctx->SetGraphicsResourceTable(m_OnScreenQuad.Table);
@@ -200,7 +199,7 @@ void DefferedRenderer::RenderShadows(matrix LightMatrix, IRenderPassInfo* DestRe
 
 void DefferedRenderer::GatherLights()
 {
-	m_LightCBData.CameraPosition = MainCamera->GetOwner()->GetTransform()->GetPosition();
+	m_LightCBData.CameraPosition = MainCamera->GetTransform()->GetPosition();
 	for (uint i = 0; i < m_Lights.size(); i++)
 	{
 		LightComponent* Comp = m_Lights[i]->GetComponent<LightComponent>();

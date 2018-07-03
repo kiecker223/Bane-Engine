@@ -5,6 +5,14 @@ SceneManager* SceneManager::GInstance = nullptr;
 
 Scene* SceneManager::LoadScene(const std::string& SceneName)
 {
+//	Scene* Result = new Scene();
+//	SetCurrentScene(Result);
+//	return Result;
+	return nullptr;
+}
+
+Scene* SceneManager::CreateNewScene(const std::string& SceneName)
+{
 	Scene* Result = new Scene();
 	SetCurrentScene(Result);
 	return Result;

@@ -38,6 +38,7 @@ public:
 
 	void SetTexture(ITextureBase* Texture, ISamplerState* Sampler, uint TextureRegister, uint SamplerRegister);
 	void SetTexture(ITextureBase* Texture, uint TextureRegister);
+	void SetTexture(const std::string& Texture, uint Register);
 	void SetConstantBuffer(IConstantBuffer* ConstantBuffer, uint Register);
 
 	void SetMaterialParameters(const MATERIAL_PARAMETERS& Params);

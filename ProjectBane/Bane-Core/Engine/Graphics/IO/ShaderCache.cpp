@@ -807,23 +807,22 @@ static void FillDescriptor(const std::string& InDescStr, GFX_PIPELINE_STATE_DESC
 	}
 	{
 
-		size_t UseDepthStencilLoc = DescStr.find("DepthWrite", 0);
-		size_t EndOfDepthStenilLoc = DescStr.find(";", UseDepthStencilLoc);
 		bool bDepthWrite = true;
+		size_t UseDepthStencilLoc = DescStr.find("DepthWrite", 0);
 
 		if (UseDepthStencilLoc != std::string::npos)
 		{
+			size_t EndOfDepthStenilLoc = DescStr.find(";", UseDepthStencilLoc);
 			size_t EqualityOperatorLoc = DescStr.find('=', UseDepthStencilLoc);
-			BANE_CHECK(EqualityOperatorLoc < EndOfDepthStenilLoc);
 			std::string UseDepthStencilStr;
 			for (uint i = UseDepthStencilLoc; i < EndOfDepthStenilLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
 					UseDepthStencilStr.push_back(DescStr[i]);
-					bDepthWrite = ParseBool(UseDepthStencilStr);
 				}
 			}
+			bDepthWrite = ParseBool(UseDepthStencilStr);
 		}
 
 		if (bDepthWrite)
