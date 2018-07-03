@@ -5,12 +5,6 @@ class IGPUResource;
 
 
 
-class IShaderResourceView
-{
-public:
-	virtual ~IShaderResourceView() { }
-};
-
 class IShaderResourceTable
 {
 public:
@@ -47,11 +41,4 @@ public:
 	virtual float4 GetClearColor() const = 0;
 };
 
-class IUnorderedAccessView
-{
-public:
-	virtual ~IUnorderedAccessView() { }
-
-	virtual IGPUResource* GetResource() = 0;
-};
 

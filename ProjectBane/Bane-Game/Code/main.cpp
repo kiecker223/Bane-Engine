@@ -1,6 +1,6 @@
 #include "Engine/Engine.h"
 #include "CameraMovementComponent.h"
-#include "Code/RayTracingRenderer.h"
+#include "RayTracingRenderer.h"
 #include <memory>
 
 class TestComponent2 : public Component
@@ -147,7 +147,6 @@ void InitApplication()
 		SkyboxMesh->SetSkyboxShader("Shaders/SkyboxShader.hlsl");
 		SkyboxMesh->SetSkybox("TestSkybox", "nx.tga", "ny.tga", "nz.tga", "px.tga", "py.tga", "pz.tga");
 	}
-
 	{
 		Entity* light = CurrentScene->CreateEntity("TestLight");
 		auto* LightComp = light->AddComponent<LightComponent>();

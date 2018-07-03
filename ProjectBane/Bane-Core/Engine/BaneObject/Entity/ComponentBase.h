@@ -64,7 +64,6 @@ constexpr const uint64 BuildClassHash()
 	return Component_HashImpl(Result, T::ClassName, 0);
 }
 
-
 #define IMPLEMENT_COMPONENT(x) \
 public: \
 static constexpr const char* ClassName = #x; \

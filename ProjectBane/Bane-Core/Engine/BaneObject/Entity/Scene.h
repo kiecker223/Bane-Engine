@@ -73,8 +73,8 @@ ForceInline void SetCurrentScene(Scene* InScene)
 	if (InScene)
 	{
 		// Should setting it to nullptr be valid?
+		pScene->InitScene();
 	}
 	// BANE_CHECK(pScene);
-	pScene->InitScene();
 }
 

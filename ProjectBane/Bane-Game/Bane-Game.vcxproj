@@ -122,9 +122,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CameraMovementComponent.cpp" />
+    <ClCompile Include="Code\CameraMovementComponent.cpp" />
     <ClCompile Include="Code\RayTracingRenderer.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Code\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Bloom.hlsl">
@@ -202,7 +202,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CameraMovementComponent.h" />
+    <ClInclude Include="Code\CameraMovementComponent.h" />
     <ClInclude Include="Code\RayTracingRenderer.h" />
   </ItemGroup>
   <ItemGroup>

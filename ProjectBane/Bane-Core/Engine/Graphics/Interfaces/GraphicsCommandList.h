@@ -39,7 +39,7 @@ public:
 	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer) = 0;
 	virtual void SetIndexBuffer(const IIndexBuffer* IndexBuffer) = 0;
 	virtual void SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY Topology) = 0;
-	
+
 	virtual void SetGraphicsResourceTable(const IShaderResourceTable* InTable) = 0;
 
 	virtual void CopyBuffers(IBuffer* Src, IBuffer* Dst) = 0;

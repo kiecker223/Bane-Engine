@@ -87,7 +87,7 @@ public:
 	ForceInline IIndexBuffer* GetIndexBuffer() const { return m_IndexBuffer; }
 	ForceInline const uint GetVertexCount() const { return m_Vertices.size(); }
 	ForceInline const uint GetIndexCount() const { return m_Indices.size(); }
-	
+
 	ForceInline void SetName(const std::string& Name) { m_Name = Name; }
 	ForceInline std::string GetName() const { return m_Name; }
 
@@ -106,10 +106,7 @@ public:
 
 	void Upload(); // Call an explicit upload to gpu
 	
-	ForceInline bool HasUploadedToGPU() const
-	{
-		return (m_VertexBuffer != nullptr && m_IndexBuffer != nullptr);
-	}
+	ForceInline bool HasUploadedToGPU() const { return (m_VertexBuffer != nullptr && m_IndexBuffer != nullptr); }
 
 	ForceInline Mesh& operator = (const Mesh& Rhs)
 	{

@@ -19,6 +19,7 @@ public:
 	} FrameData[3]; // Three depth stenils are always allocated. Avoid race conditions
 
 	FRAME_DATA& GetCurrentFrame();
+
 };
 
 class D3D12RenderTargetView : public IRenderTargetView
