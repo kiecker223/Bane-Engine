@@ -33,7 +33,7 @@ void DefferedRenderer::Initialize()
 	uint Height = GetApplicationInstance()->GetWindow()->GetHeight();
 	uint Width = GetApplicationInstance()->GetWindow()->GetWidth();
 
-	m_AlbedoBuffer		= m_Device->CreateTexture2D(Width, Height, FORMAT_R8G8B8A8_UNORM,	  (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
+	m_AlbedoBuffer		= m_Device->CreateTexture2D(Width, Height, FORMAT_R8G8B8A8_UNORM, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
 	m_NormalBuffer		= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
 	m_PositionBuffer	= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
 	m_ParameterBuffer	= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
@@ -104,11 +104,11 @@ void DefferedRenderer::Render()
 	{
 		DrawItem& Item = m_DrawItems[i];
 
-		void* Buff = ctx->Map(Item.CB);
+		void* Buff = ctx->Map(Item.CameraCB);
 		CameraConstants.Model = Item.OwningEntity->GetTransform()->GetMatrix();
 		memcpy(Buff, (void*)&CameraConstants, sizeof(DEFFERED_CAMERA_CONSTANTS));
-		ctx->Unmap(Item.CB);
-		m_Device->CreateShaderResourceView(Item.RenderMaterial.GetTable(), Item.CB, 0);
+		ctx->Unmap(Item.CameraCB);
+		m_Device->CreateShaderResourceView(Item.RenderMaterial.GetTable(), Item.CameraCB, 0);
 
 		Item.RenderMaterial.UpdateMaterialParameters(ctx);
 		Item.RenderMaterial.Bind(ctx);
@@ -168,9 +168,9 @@ bool DefferedRenderer::SupportsAsyncContexts()
 	return (Api == API_D3D12 || Api == API_VULKAN);
 }
 
-void DefferedRenderer::AddBasicMesh(const Mesh& InMesh, const Material& InMaterial, Entity* Owner, IConstantBuffer* Constants)
+void DefferedRenderer::AddBasicMesh(const Mesh& InMesh, const Material& InMaterial, Entity* Owner, IConstantBuffer* CameraCB)
 {
-	m_DrawItems.push_back({ InMesh, InMaterial, Owner, Constants });
+	m_DrawItems.push_back({ InMesh, InMaterial, Owner, CameraCB });
 }
 
 void DefferedRenderer::AddCamera(CameraComponent* InCamera)
@@ -194,12 +194,14 @@ void DefferedRenderer::AddLight(LightComponent* InLight)
 
 void DefferedRenderer::RenderShadows(matrix LightMatrix, IRenderPassInfo* DestRenderPass, IGraphicsCommandContext* ctx)
 {
-
+	UNUSED(LightMatrix);
+	UNUSED(DestRenderPass);
+	UNUSED(ctx);
 }
 
 void DefferedRenderer::GatherLights()
 {
-	m_LightCBData.CameraPosition = MainCamera->GetTransform()->GetPosition();
+	m_LightCBData.CameraPosition = MainCamera->GetOwner()->GetTransform()->GetPosition();
 	for (uint i = 0; i < m_Lights.size(); i++)
 	{
 		LightComponent* Comp = m_Lights[i];

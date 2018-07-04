@@ -30,7 +30,6 @@ public:
 	Material();
 
 	void Bind(IGraphicsCommandContext* Context);
-	void Initialize(SceneRenderer* Renderer);
 
 	void SetDiffuseTexture(const std::string& FileName);
 	void SetNormalTexture(const std::string& FileName);
@@ -40,6 +39,11 @@ public:
 	void SetTexture(ITextureBase* Texture, uint TextureRegister);
 	void SetTexture(const std::string& Texture, uint Register);
 	void SetConstantBuffer(IConstantBuffer* ConstantBuffer, uint Register);
+
+	ForceInline IConstantBuffer* GetMaterialParameterCB()
+	{
+		return m_MatCB;
+	}
 
 	void SetMaterialParameters(const MATERIAL_PARAMETERS& Params);
 	void UpdateMaterialParameters(IGraphicsCommandContext* Ctx);

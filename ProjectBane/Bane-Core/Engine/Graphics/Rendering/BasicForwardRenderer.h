@@ -10,8 +10,6 @@ class BasicForwardRenderer : public SceneRenderer
 {
 public:
 
-	virtual void AllocateScene(Scene* pScene) override final { }
-
 	virtual void DumpCurrentScene() override final { }
 
 	virtual void Initialize() override final;
@@ -28,7 +26,7 @@ public:
 
 	virtual bool SupportsAsyncContexts() { return true; }
 
-	virtual void AddBasicMesh(const Mesh& InMesh, const Material& InMaterial, Entity* Owner, IConstantBuffer* CBs) override;
+	virtual void AddBasicMesh(const Mesh& InMesh, const Material& InMaterial, Entity* Owner, IConstantBuffer* CameraCB) override;
 
 	virtual void AddCamera(CameraComponent* InCamera);
 
@@ -39,6 +37,7 @@ private:
 		Mesh DrawnMesh;
 		Material UsedMaterial;
 		Entity* OwningEntity; // Rip cache 
+		IConstantBuffer* CameraCB;
 	};
 
 	IConstantBuffer* m_CameraConstants;

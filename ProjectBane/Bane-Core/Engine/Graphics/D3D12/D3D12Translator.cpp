@@ -256,7 +256,7 @@ D3D12_INPUT_LAYOUT_DESC D3D12_TranslateInputLayout(const GFX_INPUT_LAYOUT_DESC& 
 	}
 
 	Result.pInputElementDescs = ResultItems;
-	Result.NumElements = InDesc.InputItems.size();
+	Result.NumElements = static_cast<uint>(InDesc.InputItems.size());
 	return Result;
 }
 

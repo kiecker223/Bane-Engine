@@ -166,7 +166,7 @@ class D3D12ComputeCommandContext : public IComputeCommandContext
 {
 public:
 
-	D3D12ComputeCommandContext(D3D12GraphicsDevice* Device, ECOMMAND_CONTEXT_TYPE InContextType) :
+	D3D12ComputeCommandContext(D3D12GraphicsDevice* Device) :
 		CommandList(nullptr),
 		ParentDevice(Device)
 	{

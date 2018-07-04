@@ -113,6 +113,7 @@ void Scene::DumpScene()
 
 void Scene::LoadFromMetaData(const SCENE_DATA* Data)
 {
+	UNUSED(Data);
 }
 
 void Scene::InitScene()

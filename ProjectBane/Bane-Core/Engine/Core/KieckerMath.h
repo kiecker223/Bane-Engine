@@ -8,6 +8,8 @@
 #define _PI_ 3.141592654f
 #define _M_PI_ 3.14159265358979323846
 
+// Disable anonymous structures warnings
+#pragma warning(disable:4201)
 
 inline uint NextPowerOfTwo(uint Value)
 {

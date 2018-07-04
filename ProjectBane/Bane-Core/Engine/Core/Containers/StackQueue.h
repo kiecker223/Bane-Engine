@@ -3,14 +3,16 @@
 #include "Core/Common.h"
 #include <array>
 
-template<typename TType, uint MAX_SIZE>
+template<typename TType, uint TMAX_SIZE>
 class StackQueue
 {
 public:
 
+	static const uint MAX_SIZE = TMAX_SIZE;
 	typedef StackQueue<TType, MAX_SIZE> ThisType;
 
-	StackQueue()
+	StackQueue() : 
+		NumUsed(0)
 	{
 	}
 

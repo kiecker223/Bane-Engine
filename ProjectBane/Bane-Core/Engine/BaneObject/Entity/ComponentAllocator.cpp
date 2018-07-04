@@ -19,12 +19,10 @@ void ComponentAllocator::Reserve(uint NumBytes)
 }
 
 
-void ComponentAllocator::ReserveAndCopy(uint NumBytes)
+void ComponentAllocator::ReserveAndCopy(size_t NumBytes)
 {
 	uint8* PrevBegin = PtrBegin;
-	uint8* PrevCurrent = PtrCurrent;
-	uint8* PrevEnd = PtrEnd;
-	uint PrevNumBytes = GetNumBytesUsed();
+	size_t PrevNumBytes = GetNumBytesUsed();
 
 	// The behaviour of the realloc function here will not invalidate the previous pointer
 	// I want to avoid the InternalFree function
@@ -37,7 +35,7 @@ void ComponentAllocator::ReserveAndCopy(uint NumBytes)
 		{
 			// This is a really dumb fix but essentially just set the pointer equal to the
 			// position relative from the beginning that it used to be. COMPLETELY NOT THREAD SAFE
-			ulong Diff = ((uint8*)AllocatedObjects[i]) - PrevBegin;
+			int64 Diff = ((uint8*)AllocatedObjects[i]) - PrevBegin;
 			AllocatedObjects[i] = (Component*)(PtrBegin + Diff);
 		}
 		memcpy(PtrBegin, PrevBegin, PrevNumBytes);

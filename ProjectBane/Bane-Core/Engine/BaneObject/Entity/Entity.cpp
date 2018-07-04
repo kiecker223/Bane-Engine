@@ -5,10 +5,6 @@
 #include "../CoreComponents/RenderComponent.h"
 
 
-EntityIdentifier EntityIdentifier::FindIdentifierFromHash(uint64 InHash)
-{
-	return EntityIdentifier();
-}
 
 Component* Entity::GetComponentByHash(uint64 Hash)
 {

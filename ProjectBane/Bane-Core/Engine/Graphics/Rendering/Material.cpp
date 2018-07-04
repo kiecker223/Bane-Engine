@@ -13,10 +13,6 @@ Material::Material() :
 	m_Parameters.Roughness = 0.5f;
 }
 
-void Material::Initialize(SceneRenderer* Renderer)
-{
-}
-
 void Material::Bind(IGraphicsCommandContext* Context)
 {
 	GetApiRuntime()->GetGraphicsDevice()->CreateShaderResourceView(m_Table, m_MatCB, 1);

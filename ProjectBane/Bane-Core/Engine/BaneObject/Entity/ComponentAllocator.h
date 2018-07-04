@@ -14,14 +14,14 @@ public:
 	ComponentAllocator(uint NumBytes);
 	~ComponentAllocator();
 
-	ForceInline uint GetNumBytesAllocated() const
+	ForceInline size_t GetNumBytesAllocated() const
 	{
-		return (uint)PtrEnd - (uint)PtrBegin;
+		return PtrEnd - PtrBegin;
 	}
 
-	ForceInline uint GetNumBytesUsed() const
+	ForceInline size_t GetNumBytesUsed() const
 	{
-		return (uint)PtrCurrent - (uint)PtrBegin;
+		return PtrCurrent - PtrBegin;
 	}
 
 
@@ -30,7 +30,7 @@ public:
 	void Reserve(uint NumBytes);
 
 	// Dumps the current memory, copys it over
-	void ReserveAndCopy(uint NumBytes);
+	void ReserveAndCopy(size_t NumBytes);
 
 	// Clears the component at a specified point and moves it
 	// force move of all memory, or keep a free and allocated list?
@@ -84,10 +84,10 @@ public:
 		PtrEnd = nullptr;
 	}
 
-	ForceInline bool InternalReAlloc(uint ByteSize)
+	ForceInline bool InternalReAlloc(size_t ByteSize)
 	{
 		bool Result = true;
-		uint NumBytesUsed = GetNumBytesUsed();
+		size_t NumBytesUsed = GetNumBytesUsed();
 		uint8* PrevBegin = PtrBegin;
 
 		PtrBegin = (uint8*)HeapReAlloc(GetProcessHeap(), HEAP_NO_SERIALIZE, (LPVOID)PtrBegin, ByteSize);
@@ -102,14 +102,14 @@ public:
 		PtrEnd = PtrBegin + ByteSize;
 		for (uint i = 0; i < AllocatedObjects.size(); i++)
 		{
-			ulong Diff = ((uint8*)AllocatedObjects[i]) - PrevBegin;
+			int64 Diff = ((uint8*)AllocatedObjects[i]) - PrevBegin;
 			AllocatedObjects[i] = (Component*)(PtrBegin + Diff);
 		}
 
 		return Result;
 	}
 
-	ForceInline void InternalAllocate(uint ByteSize)
+	ForceInline void InternalAllocate(size_t ByteSize)
 	{
 		PtrBegin = (uint8*)HeapAlloc(GetProcessHeap(), HEAP_NO_SERIALIZE, ByteSize);
 

@@ -78,7 +78,7 @@ int ilImage::ilStartUp()
 	//ilutInit();
 	return true;
 }
-ILboolean ilImage::ilStartedUp = ilStartUp();
+ILboolean ilImage::ilStartedUp = static_cast<ILboolean>(ilStartUp());
 
 class ilFilters
 {
@@ -454,7 +454,7 @@ ILubyte ilImage::Bpp()
 {
 	if (this->Id) {
 		this->Bind();
-		return ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL);
+		return static_cast<ILubyte>(ilGetInteger(IL_IMAGE_BYTES_PER_PIXEL));
 	}
 	return 0;
 }
@@ -463,7 +463,7 @@ ILubyte ilImage::Bitpp()
 {
 	if (this->Id) {
 		this->Bind();
-		return ilGetInteger(IL_IMAGE_BITS_PER_PIXEL);
+		return static_cast<ILubyte>(ilGetInteger(IL_IMAGE_BITS_PER_PIXEL));
 	}
 	return 0;
 }

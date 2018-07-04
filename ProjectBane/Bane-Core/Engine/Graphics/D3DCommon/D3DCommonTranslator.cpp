@@ -30,6 +30,7 @@ DXGI_FORMAT D3D_TranslateFormat(EFORMAT Format)
 
 DXGI_SAMPLE_DESC D3D_TranslateMultisampleLevel(EMULTISAMPLE_LEVEL MultisampleLevel)
 {
+	UNUSED(MultisampleLevel);
 	DXGI_SAMPLE_DESC RetDesc = { };
 #if 0
 	switch (MultisampleLevel)

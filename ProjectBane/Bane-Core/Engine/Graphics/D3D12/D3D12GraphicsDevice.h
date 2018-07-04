@@ -72,7 +72,7 @@ public:
 	virtual EMULTISAMPLE_LEVEL GetMaximumMultisampleLevel() const final override;
 
 	ForceInline ID3D12Device1* GetDevice() { return m_Device; }
-	
+
 	ForceInline D3D12GraphicsCommandContext* GrabUploadContextForThread() { return m_UploadList; }
 
 	// This queue controls all of the drawing tasks

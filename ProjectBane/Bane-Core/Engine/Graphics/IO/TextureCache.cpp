@@ -188,10 +188,10 @@ void TextureCache::InternalLoadCubemap(
 	assert(bEqual);
 }
 
-static uint GetLocation(uint X, uint Y, uint Z, uint Width, uint Depth)
-{
-	return (X + ((Y * Width) + (Z * Width * Depth)));
-}
+// static uint GetLocation(uint X, uint Y, uint Z, uint Width, uint Depth)
+// {
+// 	return (X + ((Y * Width) + (Z * Width * Depth)));
+// }
 
 SUBRESOURCE_DATA TextureCache::CreateTexData(LOADED_IMAGE* InImages, uint& OutWidth, uint& OutHeight, uint& OutDepth)
 {

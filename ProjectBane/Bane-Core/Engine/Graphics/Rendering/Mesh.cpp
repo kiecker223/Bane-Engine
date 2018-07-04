@@ -129,16 +129,17 @@ void Mesh::Upload()
 	{
 		delete m_VertexBuffer;
 	}
-	m_VertexBuffer = Device->CreateVertexBuffer(m_Vertices.size() * sizeof(FloatInt), (uint8*)m_Vertices.data());
+	m_VertexBuffer = Device->CreateVertexBuffer(static_cast<uint>(m_Vertices.size()) * sizeof(FloatInt), (uint8*)m_Vertices.data());
 	if (m_IndexBuffer)
 	{
 		delete m_IndexBuffer;
 	}
-	m_IndexBuffer = Device->CreateIndexBuffer(m_Indices.size() * 4, (uint8*)m_Indices.data());
+	m_IndexBuffer = Device->CreateIndexBuffer(static_cast<uint>(m_Indices.size() * 4), (uint8*)m_Indices.data());
 }
 
 Mesh Mesh::CreateSphere(uint NumPoints)
 {
+	UNUSED(NumPoints);
 	Mesh Result;
 /*	uint NumSphereVertices = 0;
 	uint NumSphereFaces = 0;

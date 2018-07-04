@@ -17,17 +17,14 @@ using json = nlohmann::json;
 
 void SerializePipelines(const std::vector<IGraphicsPipelineState*>& GFXPipelines, const std::vector<IComputePipelineState*>& CMPPipelines)
 {
-	std::ifstream FileStream("PipelineDescriptors.json");
-
-	json JsonLib;
-	FileStream >> JsonLib;
-
-	
+	UNUSED(GFXPipelines);
+	UNUSED(CMPPipelines);
 }
 
 
 
 void DeserializePipelines(std::vector<IGraphicsPipelineState*>& GFXPipelines, const std::vector<IComputePipelineState*>& CMPPipelines)
 {
-
+	UNUSED(GFXPipelines);
+	UNUSED(CMPPipelines);
 }

@@ -85,8 +85,8 @@ public:
 
 	ForceInline IVertexBuffer* GetVertexBuffer() const { return m_VertexBuffer; }
 	ForceInline IIndexBuffer* GetIndexBuffer() const { return m_IndexBuffer; }
-	ForceInline const uint GetVertexCount() const { return m_Vertices.size(); }
-	ForceInline const uint GetIndexCount() const { return m_Indices.size(); }
+//	ForceInline const uint GetVertexCount() const { return m_Vertices.size(); }
+	ForceInline const uint GetIndexCount() const { return static_cast<uint>(m_Indices.size()); }
 
 	ForceInline void SetName(const std::string& Name) { m_Name = Name; }
 	ForceInline std::string GetName() const { return m_Name; }

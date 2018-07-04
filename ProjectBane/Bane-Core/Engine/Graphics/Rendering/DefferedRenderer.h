@@ -16,7 +16,7 @@ public:
 	DefferedRenderer();
 	~DefferedRenderer();
 
-	virtual void AllocateScene(Scene* pScene) override final { }
+	virtual void AllocateScene(Scene* pScene) override final { UNUSED(pScene); }
 
 	virtual void DumpCurrentScene() override final { }
 
@@ -34,7 +34,7 @@ public:
 
 	virtual bool SupportsAsyncContexts() override final;
 
-	virtual void AddBasicMesh(const Mesh& InMesh, const Material& InMaterial, Entity* Owner, IConstantBuffer* Constants) override final;
+	virtual void AddBasicMesh(const Mesh& InMesh, const Material& InMaterial, Entity* Owner, IConstantBuffer* CameraCB) override final;
 
 	virtual void AddCamera(class CameraComponent* InCamera) override final;
 
@@ -53,7 +53,7 @@ private:
 		Mesh RenderMesh;
 		Material RenderMaterial;
 		Entity* OwningEntity;
-		IConstantBuffer* CB;
+		IConstantBuffer* CameraCB;
 	};
 
 	std::vector<DrawItem> m_DrawItems;

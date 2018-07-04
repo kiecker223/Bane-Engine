@@ -27,7 +27,6 @@ matrix CameraComponent::GetProjection() const
 		float Aspect = GetApplicationInstance()->GetWindow()->AspectXY();
 		return matProjection(Aspect, Fov, 0.01f, 1000.0f);
 	}
-	return matrix();
 }
 
 matrix CameraComponent::GetLookAt() const
@@ -41,6 +40,7 @@ matrix CameraComponent::GetLookAt() const
 
 void CameraComponent::Tick(float DT)
 {
+	UNUSED(DT);
 }
 
 void CameraComponent::SubmitFeature(SceneRenderer* Renderer)

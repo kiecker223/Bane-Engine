@@ -36,7 +36,7 @@ public:
 	}
 	
 	virtual void Start() { }
-	virtual void Tick(float DT) { }
+	virtual void Tick(float DT) { UNUSED(DT); }
 	virtual void Dispose() { }
 	virtual void FixedTick() { } // Maybe not do this
 	virtual bool IsRenderComponent() const { return false; }

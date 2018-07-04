@@ -3,6 +3,8 @@
 #include "Core/Common.h"
 
 
+// Disable anonymous structures warnings
+#pragma warning(disable:4201)
 
 class ColorRGBA8
 {

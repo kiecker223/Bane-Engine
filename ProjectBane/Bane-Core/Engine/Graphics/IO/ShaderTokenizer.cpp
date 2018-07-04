@@ -16,18 +16,18 @@
 	}
 */
 
-void ShaderIO::TokenStream::InitializeStream(const std::string& InRawData)
-{
-	std::vector<std::string> ReadTokens;
-	for (uint TokenIdx = 0; TokenIdx < ReadTokens.size(); TokenIdx++)
-	{
-		std::string RawData = ReadTokens[TokenIdx];
-
-		// so here various things are tested
-	}
-}
-
-std::vector<std::string> ShaderIO::TokenStream::Tokenize(std::string InData)
-{
-	return std::vector<std::string>();
-}
+// void ShaderIO::TokenStream::InitializeStream(const std::string& InRawData)
+// {
+// 	std::vector<std::string> ReadTokens;
+// 	for (uint TokenIdx = 0; TokenIdx < ReadTokens.size(); TokenIdx++)
+// 	{
+// 		std::string RawData = ReadTokens[TokenIdx];
+// 
+// 		// so here various things are tested
+// 	}
+// }
+// 
+// std::vector<std::string> ShaderIO::TokenStream::Tokenize(std::string InData)
+// {
+// 	return std::vector<std::string>();
+// }

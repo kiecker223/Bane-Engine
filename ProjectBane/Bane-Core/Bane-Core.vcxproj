@@ -79,12 +79,13 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <AdditionalIncludeDirectories>$(ProjectDir)/;$(ProjectDir)/Engine/;$(ProjectDir)/Engine/Core/;$(ProjectDir)/ThirdParty/include;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d12.lib;d3dcompiler.lib;dxgi.lib;vulkan-1.lib;libfbxsdk.lib;</AdditionalDependencies>
@@ -168,7 +169,6 @@
     <ClCompile Include="Engine\Graphics\D3D12\D3D12PipelineLibrary.cpp" />
     <ClCompile Include="Engine\Graphics\D3D12\D3D12PipelineState.cpp" />
     <ClCompile Include="Engine\Graphics\D3D12\D3D12Runtime.cpp" />
-    <ClCompile Include="Engine\Graphics\D3D12\D3D12SceneRenderer.cpp" />
     <ClCompile Include="Engine\Graphics\D3D12\D3D12ShaderResourceViews.cpp" />
     <ClCompile Include="Engine\Graphics\D3D12\D3D12ShaderSignature.cpp" />
     <ClCompile Include="Engine\Graphics\D3D12\D3D12ShaderSignatureLibrary.cpp" />
@@ -234,7 +234,6 @@
     <ClInclude Include="Engine\Graphics\D3D12\D3D12PipelineLibrary.h" />
     <ClInclude Include="Engine\Graphics\D3D12\D3D12PipelineState.h" />
     <ClInclude Include="Engine\Graphics\D3D12\D3D12Runtime.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12SceneRenderer.h" />
     <ClInclude Include="Engine\Graphics\D3D12\D3D12ShaderResourceViews.h" />
     <ClInclude Include="Engine\Graphics\D3D12\D3D12ShaderSignature.h" />
     <ClInclude Include="Engine\Graphics\D3D12\D3D12ShaderSignatureLibrary.h" />

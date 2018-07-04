@@ -108,7 +108,7 @@ static FUNCTION_INFO GetFunctionInfo(std::string FunctionDecl)
 			char C = FunctionDecl[i];
 			if (C == ':')
 			{
-				bHasSemantic == true;
+				bHasSemantic = true;
 				break;
 			}
 		}
@@ -457,22 +457,22 @@ static ECOMPARISON_FUNCTION ParseComparisonFunction(const std::string& Compariso
 #undef CHECK_COMPARISON_FUNC
 }
 
-static ESTENCIL_OP ParseStencilOp(const std::string StencilOpStr)
-{
-#define CHECK_STENCIL_OP(x) if (StencilOpStr == #x) { return x; }
-
-	CHECK_STENCIL_OP(STENCIL_OP_KEEP);
-	CHECK_STENCIL_OP(STENCIL_OP_ZERO);
-	CHECK_STENCIL_OP(STENCIL_OP_REPLACE);
-	CHECK_STENCIL_OP(STENCIL_OP_INCR_SAT);
-	CHECK_STENCIL_OP(STENCIL_OP_DECR_SAT);
-	CHECK_STENCIL_OP(STENCIL_OP_INVERT);
-	CHECK_STENCIL_OP(STENCIL_OP_INCR);
-	CHECK_STENCIL_OP(STENCIL_OP_DECR);
-	return (ESTENCIL_OP)0;
-
-#undef CHECK_STENCIL_OP
-}
+//static ESTENCIL_OP ParseStencilOp(const std::string StencilOpStr)
+//{
+//#define CHECK_STENCIL_OP(x) if (StencilOpStr == #x) { return x; }
+//
+//	CHECK_STENCIL_OP(STENCIL_OP_KEEP);
+//	CHECK_STENCIL_OP(STENCIL_OP_ZERO);
+//	CHECK_STENCIL_OP(STENCIL_OP_REPLACE);
+//	CHECK_STENCIL_OP(STENCIL_OP_INCR_SAT);
+//	CHECK_STENCIL_OP(STENCIL_OP_DECR_SAT);
+//	CHECK_STENCIL_OP(STENCIL_OP_INVERT);
+//	CHECK_STENCIL_OP(STENCIL_OP_INCR);
+//	CHECK_STENCIL_OP(STENCIL_OP_DECR);
+//	return (ESTENCIL_OP)0;
+//
+//#undef CHECK_STENCIL_OP
+//}
 
 static std::string ParseToEndOfScope(const std::string& InStr, size_t StartParse)
 {
@@ -542,7 +542,7 @@ static void ParseRenderTargetDesc(const std::string& DescStr, GFX_RENDER_TARGET_
 			std::string BlendEnableStr;
 			size_t AssignmentOperatorLoc = DescStr.find("=", BlendEnableLoc);
 			size_t EndAssignmentLoc = DescStr.find(";", AssignmentOperatorLoc);
-			for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+			for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -559,7 +559,7 @@ static void ParseRenderTargetDesc(const std::string& DescStr, GFX_RENDER_TARGET_
 			std::string LogicEnableStr;
 			size_t AssignmentOperatorLoc = DescStr.find("=", LogicEnableLoc);
 			size_t EndAssignmentLoc = DescStr.find(";", AssignmentOperatorLoc);
-			for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+			for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -576,7 +576,7 @@ static void ParseRenderTargetDesc(const std::string& DescStr, GFX_RENDER_TARGET_
 			std::string SrcBlendStr;
 			size_t AssignmentOperatorLoc = DescStr.find("=", SrcBlendLoc);
 			size_t EndAssignmentLoc = DescStr.find(";", AssignmentOperatorLoc);
-			for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+			for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -593,7 +593,7 @@ static void ParseRenderTargetDesc(const std::string& DescStr, GFX_RENDER_TARGET_
 			std::string DstBlendStr;
 			size_t AssignmentOperatorLoc = DescStr.find("=", DstBlendLoc);
 			size_t EndAssignmentLoc = DescStr.find(";", AssignmentOperatorLoc);
-			for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+			for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -610,7 +610,7 @@ static void ParseRenderTargetDesc(const std::string& DescStr, GFX_RENDER_TARGET_
 			std::string BlendOpStr;
 			size_t AssignmentOperatorLoc = DescStr.find("=", BlendOpLoc);
 			size_t EndAssignmentLoc = DescStr.find(";", AssignmentOperatorLoc);
-			for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+			for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -627,7 +627,7 @@ static void ParseRenderTargetDesc(const std::string& DescStr, GFX_RENDER_TARGET_
 			std::string SrcBlendAlphaStr;
 			size_t AssignmentOperatorLoc = DescStr.find("=", SrcBlendAlphaLoc);
 			size_t EndAssignmentLoc = DescStr.find(";", AssignmentOperatorLoc);
-			for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+			for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -644,7 +644,7 @@ static void ParseRenderTargetDesc(const std::string& DescStr, GFX_RENDER_TARGET_
 			std::string DstBlendAlphaStr;
 			size_t AssignmentOperatorLoc = DescStr.find("=", DstBlendAlphaLoc);
 			size_t EndAssignmentLoc = DescStr.find(";", AssignmentOperatorLoc);
-			for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+			for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -661,7 +661,7 @@ static void ParseRenderTargetDesc(const std::string& DescStr, GFX_RENDER_TARGET_
 			std::string AlphaBlendOpStr;
 			size_t AssignmentOperatorLoc = DescStr.find("=", AlphaBlendOpLoc);
 			size_t EndAssignmentLoc = DescStr.find(";", AssignmentOperatorLoc);
-			for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+			for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -678,7 +678,7 @@ static void ParseRenderTargetDesc(const std::string& DescStr, GFX_RENDER_TARGET_
 			std::string LogicOpStr;
 			size_t AssignmentOperatorLoc = DescStr.find("=", LogicOpLoc);
 			size_t EndAssignmentLoc = DescStr.find(";", AssignmentOperatorLoc);
-			for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+			for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -695,7 +695,7 @@ static void ParseRenderTargetDesc(const std::string& DescStr, GFX_RENDER_TARGET_
 			std::string FormatStr;
 			size_t AssignmentOperatorLoc = DescStr.find("=", FormatLoc);
 			size_t EndAssignmentLoc = DescStr.find(";", AssignmentOperatorLoc);
-			for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+			for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -707,6 +707,7 @@ static void ParseRenderTargetDesc(const std::string& DescStr, GFX_RENDER_TARGET_
 	}
 }
 
+/*
 static void ParseStencilOpDesc(const std::string& DescStr, GFX_DEPTH_STENCIL_OP_DESC& OutDesc)
 {
 	OutDesc = { STENCIL_OP_KEEP, STENCIL_OP_KEEP, STENCIL_OP_KEEP, COMPARISON_FUNCTION_LESS };
@@ -718,7 +719,7 @@ static void ParseStencilOpDesc(const std::string& DescStr, GFX_DEPTH_STENCIL_OP_
 			std::string StencilFailOpStr;
 			size_t AssignmentOperatorLoc = DescStr.find("=", StencilFailOpLoc);
 			size_t EndAssignmentLoc = DescStr.find(";", AssignmentOperatorLoc);
-			for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+			for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -735,7 +736,7 @@ static void ParseStencilOpDesc(const std::string& DescStr, GFX_DEPTH_STENCIL_OP_
 			std::string StencilDepthFailOpStr;
 			size_t AssignmentOperatorLoc = DescStr.find("=", StencilDepthFailOpLoc);
 			size_t EndAssignmentLoc = DescStr.find(";", AssignmentOperatorLoc);
-			for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+			for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -752,7 +753,7 @@ static void ParseStencilOpDesc(const std::string& DescStr, GFX_DEPTH_STENCIL_OP_
 			std::string StencilPassOpStr;
 			size_t AssignmentOperatorLoc = DescStr.find("=", StencilPassOpLoc);
 			size_t EndAssignmentLoc = DescStr.find(";", AssignmentOperatorLoc);
-			for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+			for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -769,7 +770,7 @@ static void ParseStencilOpDesc(const std::string& DescStr, GFX_DEPTH_STENCIL_OP_
 			std::string ComparisonFuncStr;
 			size_t AssignmentOperatorLoc = DescStr.find("=", ComparisonFuncOp);
 			size_t EndAssignmentLoc = DescStr.find(";", AssignmentOperatorLoc);
-			for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+			for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -780,6 +781,7 @@ static void ParseStencilOpDesc(const std::string& DescStr, GFX_DEPTH_STENCIL_OP_
 		}
 	}
 }
+*/
 
 static void FillDescriptor(const std::string& InDescStr, GFX_PIPELINE_STATE_DESC& OutDesc, IDepthStencilState* DepthStateEnable, IDepthStencilState* DepthStateDisable)
 {
@@ -790,7 +792,7 @@ static void FillDescriptor(const std::string& InDescStr, GFX_PIPELINE_STATE_DESC
 
 	{
 		std::string SearchStr = "RenderTarget__";
-		for (uint i = 0; i < 8; i++)
+		for (size_t i = 0; i < 8; i++)
 		{
 			SearchStr[13] = std::to_string(i)[0];
 			size_t DeclPos = DescStr.find(SearchStr, 0);
@@ -813,9 +815,8 @@ static void FillDescriptor(const std::string& InDescStr, GFX_PIPELINE_STATE_DESC
 		if (UseDepthStencilLoc != std::string::npos)
 		{
 			size_t EndOfDepthStenilLoc = DescStr.find(";", UseDepthStencilLoc);
-			size_t EqualityOperatorLoc = DescStr.find('=', UseDepthStencilLoc);
 			std::string UseDepthStencilStr;
-			for (uint i = UseDepthStencilLoc; i < EndOfDepthStenilLoc; i++)
+			for (size_t i = UseDepthStencilLoc; i < EndOfDepthStenilLoc; i++)
 			{
 				if (DescStr[i] != ' ' && DescStr[i] != '\n')
 				{
@@ -851,7 +852,7 @@ static void FillDescriptor(const std::string& InDescStr, GFX_PIPELINE_STATE_DESC
 				std::string FormatStr;
 				size_t AssignmentOperatorLoc = DepthStencilDesc.find("=", FormatLoc);
 				size_t EndAssignmentLoc = DepthStencilDesc.find(";", AssignmentOperatorLoc);
-				for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+				for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 				{
 					if (DepthStencilDesc[i] != ' ' && DepthStencilDesc[i] != '\n')
 					{
@@ -868,7 +869,7 @@ static void FillDescriptor(const std::string& InDescStr, GFX_PIPELINE_STATE_DESC
 				std::string DepthEnableStr;
 				size_t AssignmentOperatorLoc = DepthStencilDesc.find("=", DepthEnableLoc);
 				size_t EndAssignmentLoc = DepthStencilDesc.find(";", AssignmentOperatorLoc);
-				for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+				for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 				{
 					if (DepthStencilDesc[i] != ' ' && DepthStencilDesc[i] != '\n')
 					{
@@ -885,7 +886,7 @@ static void FillDescriptor(const std::string& InDescStr, GFX_PIPELINE_STATE_DESC
 				std::string DepthFunctionStr;
 				size_t AssignmentOperatorLoc = DepthStencilDesc.find("=", DepthFuncitionLoc);
 				size_t EndAssignmentLoc = DepthStencilDesc.find(";", AssignmentOperatorLoc);
-				for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+				for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 				{
 					if (DepthStencilDesc[i] != ' ' && DepthStencilDesc[i] != '\n')
 					{
@@ -902,7 +903,7 @@ static void FillDescriptor(const std::string& InDescStr, GFX_PIPELINE_STATE_DESC
 				std::string StencilEnableStr;
 				size_t AssignmentOperatorLoc = DepthStencilDesc.find("=", DepthEnableLoc);
 				size_t EndAssignmentLoc = DepthStencilDesc.find(";", AssignmentOperatorLoc);
-				for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+				for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 				{
 					if (DepthStencilDesc[i] != ' ' && DepthStencilDesc[i] != '\n')
 					{
@@ -931,7 +932,7 @@ static void FillDescriptor(const std::string& InDescStr, GFX_PIPELINE_STATE_DESC
 				std::string FillSolidStr;
 				size_t AssignmentOperatorLoc = RasterDescStr.find("=", FillSolidLoc);
 				size_t EndAssignmentLoc = RasterDescStr.find(";", AssignmentOperatorLoc);
-				for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+				for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 				{
 					if (RasterDescStr[i] != ' ' && RasterDescStr[i] != '\n')
 					{
@@ -948,7 +949,7 @@ static void FillDescriptor(const std::string& InDescStr, GFX_PIPELINE_STATE_DESC
 				std::string CullEnableStr;
 				size_t AssignmentOperatorLoc = RasterDescStr.find("=", CullEnableLoc);
 				size_t EndAssignmentLoc = RasterDescStr.find(";", AssignmentOperatorLoc);
-				for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+				for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 				{
 					if (RasterDescStr[i] != ' ' && RasterDescStr[i] != '\n')
 					{
@@ -965,7 +966,7 @@ static void FillDescriptor(const std::string& InDescStr, GFX_PIPELINE_STATE_DESC
 				std::string CounterClockwiseForwardStr;
 				size_t AssignmentOperatorLoc = RasterDescStr.find("=", CounterClockwiseForwardLoc);
 				size_t EndAssignmentLoc = RasterDescStr.find(";", AssignmentOperatorLoc);
-				for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+				for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 				{
 					if (RasterDescStr[i] != ' ' && RasterDescStr[i] != '\n')
 					{
@@ -982,7 +983,7 @@ static void FillDescriptor(const std::string& InDescStr, GFX_PIPELINE_STATE_DESC
 				std::string DepthClipEnableStr;
 				size_t AssignmentOperatorLoc = RasterDescStr.find("=", DepthClipEnableLoc);
 				size_t EndAssignmentLoc = RasterDescStr.find(";", AssignmentOperatorLoc);
-				for (uint i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
+				for (size_t i = AssignmentOperatorLoc + 1; i < EndAssignmentLoc; i++)
 				{
 					if (RasterDescStr[i] != ' ' && RasterDescStr[i] != '\n')
 					{
@@ -1020,7 +1021,7 @@ static std::string FindStructDeclaration(const std::string& InFile, const std::s
 
 	bool bFound = false;
 	
-	for (uint i = 0; i < 800; i++)
+	for (size_t i = 0; i < 800; i++)
 	{
 		if (i == 799)
 		{
@@ -1093,7 +1094,6 @@ static std::string FindFunctionDeclaration(const std::string& File, const std::s
 	CurrentPos--;
 
 	size_t EndFuncDecl = File.find(')', FuncNameDecl);
-	size_t NewLine = File.find('\n', FuncNameDecl);
 
 	for (; CurrentPos < EndFuncDecl + 2; CurrentPos++)
 	{
@@ -1188,7 +1188,8 @@ void ShaderCache::ReloadGraphicsShader(const std::string& ShaderFile)
 		{
 			delete Desc.GS;
 		}
-		GetApiRuntime()->GetGraphicsDevice()->RecompilePipelineState(PipelineFind->second, &InternalParseGraphicsShader(ReadEntireFile(ShaderFile), ShaderFile));
+		GFX_PIPELINE_STATE_DESC NewPipelineDesc = InternalParseGraphicsShader(ReadEntireFile(ShaderFile), ShaderFile);
+		GetApiRuntime()->GetGraphicsDevice()->RecompilePipelineState(PipelineFind->second, &NewPipelineDesc);
 		return;
 	}
 	else
@@ -1300,7 +1301,7 @@ GFX_PIPELINE_STATE_DESC ShaderCache::InternalParseGraphicsShader(const std::stri
 	std::string File = InFile;
 	RemoveComments(File);
 	IRuntimeGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
-	IInputLayout* VSLayout = nullptr;
+	//IInputLayout* VSLayout = nullptr;
 
 	GFX_PIPELINE_STATE_DESC PipelineDesc(INIT_DEFAULT);
 
@@ -1351,7 +1352,7 @@ GFX_PIPELINE_STATE_DESC ShaderCache::InternalParseGraphicsShader(const std::stri
 		FUNCTION_INFO VSMainInfo = GetFunctionInfo(FindFunctionDeclaration(File, "VSMain"));
 		
 		std::vector<VARIABLE_INFO> VSInputs;
-		for (uint i = 0; i < VSMainInfo.Parameters.size(); i++)
+		for (size_t i = 0; i < VSMainInfo.Parameters.size(); i++)
 		{
 			VARIABLE_INFO& VarInfo = VSMainInfo.Parameters[i];
 
@@ -1397,7 +1398,7 @@ GFX_PIPELINE_STATE_DESC ShaderCache::InternalParseGraphicsShader(const std::stri
 
 	{
 		std::string SearchStr = "SV_TARGET_";
-		for (uint i = 0; i < 8; i++)
+		for (size_t i = 0; i < 8; i++)
 		{
 			SearchStr[9] = std::to_string(i)[0];
 			size_t RTFoundLoc = File.find(SearchStr, 0);
@@ -1474,7 +1475,7 @@ GFX_PIPELINE_STATE_DESC ShaderCache::InternalParseGraphicsShader(const std::stri
 		}
 	}
 
-	PipelineDesc.NumRenderTargets = NumRenderTargets;
+	PipelineDesc.NumRenderTargets = static_cast<uint>(NumRenderTargets);
 	
 	return PipelineDesc;
 }

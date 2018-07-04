@@ -27,16 +27,20 @@ static D3D12_COMMAND_LIST_TYPE FromContextType(ECOMMAND_CONTEXT_TYPE ContextType
 }
 
 D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, Window* RenderingWindow, ID3D12Device1* Device, ID3D12CommandQueue* MainQueue) :
-	m_CommandQueues{
-		D3D12CommandQueue(MainQueue, Device, "D3D12GraphicsDevice::m_DirectQueue", COMMAND_CONTEXT_TYPE_GRAPHICS),
-		D3D12CommandQueue({ D3D12_COMMAND_LIST_TYPE_COMPUTE, 100, D3D12_COMMAND_QUEUE_FLAG_NONE, 1 }, Device, "D3D12GraphicsDevice::m_ComputeQueue", COMMAND_CONTEXT_TYPE_COMPUTE),
-		D3D12CommandQueue({ D3D12_COMMAND_LIST_TYPE_COPY, 100, D3D12_COMMAND_QUEUE_FLAG_NONE, 1 }, Device, "D3D12GraphicsDevice::m_UploadList", COMMAND_CONTEXT_TYPE_COPY)
-	},
 	m_Device(Device),
 	m_SwapChain(SwapChain),
 	m_GenerateMipsPipeline2D(nullptr),
 	m_GenerateMipsTable2D(nullptr)
 {
+	m_CommandQueues[0].Initialize(MainQueue, Device, "D3D12GraphicsDevice::m_DirectQueue", COMMAND_CONTEXT_TYPE_GRAPHICS);
+	m_CommandQueues[0].SetParentDevice(this);
+	
+	m_CommandQueues[1].Initialize({ D3D12_COMMAND_LIST_TYPE_COMPUTE, 100, D3D12_COMMAND_QUEUE_FLAG_NONE, 1 }, Device, "D3D12GraphicsDevice::m_ComputeQueue", COMMAND_CONTEXT_TYPE_COMPUTE);
+	m_CommandQueues[1].SetParentDevice(this);
+	
+	m_CommandQueues[2].Initialize({ D3D12_COMMAND_LIST_TYPE_COPY, 100, D3D12_COMMAND_QUEUE_FLAG_NONE, 1 }, Device, "D3D12GraphicsDevice::m_UploadList", COMMAND_CONTEXT_TYPE_COPY);
+	m_CommandQueues[2].SetParentDevice(this);
+	
 	m_SwapChain->Device = this;
 	uint AvailableThreadCount = std::thread::hardware_concurrency();
 	BANE_CHECK(AvailableThreadCount != 0);
@@ -118,7 +122,7 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, Window* Rend
 	{
 		m_AvailableContexts[i] = new D3D12GraphicsCommandContext(this, COMMAND_CONTEXT_TYPE_GRAPHICS, m_Rect, m_ViewPort);
 	}
-	m_ComputeContext = new D3D12ComputeCommandContext(this, COMMAND_CONTEXT_TYPE_COMPUTE);
+	m_ComputeContext = new D3D12ComputeCommandContext(this);
 	m_UploadList = new D3D12GraphicsCommandContext(this, COMMAND_CONTEXT_TYPE_COPY, m_Rect, m_ViewPort);
 	m_CommandQueues[0].SetParentDevice(this);
 	m_CommandQueues[1].SetParentDevice(this);
@@ -554,7 +558,12 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 	{
 		{
 			D3D12_HEAP_PROPERTIES HeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-			D3D12_RESOURCE_DESC ResourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(D3D_TranslateFormat(Texture->Format), Texture->Width, Texture->Height, Texture->ArrayCount, Texture->MipCount);
+			D3D12_RESOURCE_DESC ResourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
+							D3D_TranslateFormat(Texture->Format), 
+							Texture->Width, Texture->Height, 
+							static_cast<uint16>(Texture->ArrayCount), 
+							static_cast<uint16>(Texture->MipCount)
+			);
 			ResourceDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 			D3D12ERRORCHECK(
 				m_Device->CreateCommittedResource(
@@ -1009,7 +1018,6 @@ void D3D12GraphicsDevice::EnsureAllUploadsOccured()
 {
 	if (m_UploadList->HasBegun()) // If there is work for it to do
 	{
-		D3D12CommandList* CL = m_UploadList->CommandList;
 		m_UploadList->End(); // End it, Begin will be called again when someone wants to upload
 		GetCopyQueue().StallForFinish();
 		m_UploadList->Begin();

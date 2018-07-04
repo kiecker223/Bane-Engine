@@ -77,7 +77,7 @@ void DisposeOfRootSignatureDescriptor(D3D12_ROOT_SIGNATURE_DESC& Desc)
 	delete[] Desc.pParameters;
 }
 
-D3D12ShaderSignature CreateRootSignature(ID3D12Device1* Device, D3D12_ROOT_SIGNATURE_INFO& InDesc)
+D3D12ShaderSignature CreateRootSignature(ID3D12Device1* Device, D3D12_ROOT_SIGNATURE_INFO InDesc)
 {
 	D3D12ShaderSignature Result;
 	ID3DBlob* ByteCode = nullptr;
@@ -252,6 +252,7 @@ ED3D12_SHADER_SIGNATURE_TIER D3D12ShaderSignatureLibrary::GetTier(const D3D12Sha
 
 	uint NumOfLargestParam = Data.GetLargestParameterSize();
 
+	Tier = D3D12_SHADER_SIGNATURE_TIER_1CBV_1SRV_1SAMPLER;
 	switch (NumOfLargestParam)
 	{
 		case 0:

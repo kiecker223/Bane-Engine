@@ -171,10 +171,6 @@ public:
 
 	D3D12GPUResource() : CurrentState(D3D12_RESOURCE_STATE_COMMON), PendingState(D3D12_RESOURCE_STATE_INVALID_STATE), ResourceOwnership(COMMAND_CONTEXT_TYPE_INVALID) { }
 
-	D3D12GPUResource(ID3D12Resource* InResource, D3D12_RESOURCE_STATES InitialState, D3D12GraphicsDevice* InDevice) 
-	{
-	}
-
 	inline bool CheckResourceTransitionValid(D3D12_RESOURCE_STATES NewState)
 	{
 		if (PendingState == NewState)
@@ -245,12 +241,12 @@ class D3D12Buffer : public IBuffer, public D3D12GPUResource
 {
 public:
 
-	D3D12Buffer(D3D12GraphicsDevice* InDevice, uint InSize, EBUFFER_USAGE InUsage);
+	D3D12Buffer(D3D12GraphicsDevice* InDevice, uint64 InSize, EBUFFER_USAGE InUsage);
 
 	void UploadDataToGPU(D3D12GraphicsCommandContext* Ctx, uint8* Buffer);
 
 	virtual EBUFFER_USAGE GetUsage() const final override { return Usage; }
-	virtual uint GetSizeInBytes() const final override { return SizeInBytes; }
+	virtual uint GetSizeInBytes() const final override { return static_cast<uint>(SizeInBytes); }
 
 	void SetDebugName(const std::string& DebugName) override
 	{
@@ -266,7 +262,7 @@ public:
 	{
 		D3D12_VERTEX_BUFFER_VIEW View = { };
 		View.BufferLocation = GetGPUVirtualAddress();
-		View.SizeInBytes = SizeInBytes;
+		View.SizeInBytes = GetSizeInBytes();
 		View.StrideInBytes = GetLayoutStride(Layout);
 		return View;
 	}
@@ -276,7 +272,7 @@ public:
 		D3D12_INDEX_BUFFER_VIEW View = { };
 		View.BufferLocation = GetGPUVirtualAddress();
 		View.Format = DXGI_FORMAT_R32_UINT;
-		View.SizeInBytes = SizeInBytes;
+		View.SizeInBytes = GetSizeInBytes();
 		return View;
 	}
 
@@ -285,7 +281,7 @@ public:
 		return Resource.Location;
 	}
 
-	uint SizeInBytes;
+	uint64 SizeInBytes;
 	EBUFFER_USAGE Usage;
 };
 

@@ -99,16 +99,16 @@ inline std::vector<std::string> Tokenize(const std::string& InRawStr, const std:
 }
 
 // Parameter is called count for readability
-inline std::string CutStringRange(std::string& InStr, const unsigned int Start, const unsigned int Count)
+inline std::string CutStringRange(std::string& InStr, const size_t Start, const size_t Count)
 {
 	std::string Result = InStr.substr(Start, Count);
 	InStr.erase((size_t)Start, (size_t)Count);
 	return Result;
 }
 
-inline std::string CutStringLocations(std::string& InStr, const unsigned int Start, const unsigned int End)
+inline std::string CutStringLocations(std::string& InStr, const size_t Start, const size_t End)
 {
-	BANE_CHECK(End > Start);
+	BANE_CHECK((End > Start));
 	std::string Result = InStr.substr(Start, End - Start);
 	InStr.erase(InStr.begin() + Start, InStr.begin() + End);
 	return Result;

@@ -60,8 +60,6 @@ public:
 		return IsValid();
 	}
 
-	static EntityIdentifier FindIdentifierFromHash(uint64 InHash);
-	
 	mutable uint64 HashedName;
 	std::string Name;
 };

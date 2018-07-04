@@ -55,7 +55,7 @@ void D3D12GPUResource::PushUAVBarrier(D3D12ComputeCommandContext* Ctx)
 	Ctx->PendingTransitions.Push(Transition);
 }
 
-D3D12Buffer::D3D12Buffer(D3D12GraphicsDevice* InDevice, uint InSize, EBUFFER_USAGE InUsage) :
+D3D12Buffer::D3D12Buffer(D3D12GraphicsDevice* InDevice, uint64 InSize, EBUFFER_USAGE InUsage) :
 	SizeInBytes(InSize),
 	Usage(InUsage)
 {
@@ -66,7 +66,7 @@ D3D12Buffer::D3D12Buffer(D3D12GraphicsDevice* InDevice, uint InSize, EBUFFER_USA
 
 	ID3D12Device1* Device = InDevice->GetDevice();
 
-	D3D12_RESOURCE_STATES InitialState;
+	D3D12_RESOURCE_STATES InitialState = D3D12_RESOURCE_STATE_INVALID_STATE;
 
 	switch (Usage)
 	{
@@ -139,7 +139,7 @@ D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint InWidth, 
 
 	if (IsShaderResource())
 	{
-		MipCount = std::floor(std::log2(max(InWidth, InHeight))) + 1;
+		MipCount = static_cast<uint>(std::floor(std::log2(max(InWidth, InHeight))) + 1);
 	}
 	if (IsUnorderedAccess())
 	{
@@ -172,11 +172,11 @@ D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint InWidth, 
 		{
 			DepthOrArraySize = InDepth;
 		}
-		ResourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(D3D_TranslateFormat(Format), Width, Height, DepthOrArraySize, MipCount);
+		ResourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(D3D_TranslateFormat(Format), Width, Height, static_cast<uint16>(DepthOrArraySize), static_cast<uint16>(MipCount));
 	}
 	else if (InDepth > 1)
 	{
-		ResourceDesc = CD3DX12_RESOURCE_DESC::Tex3D(D3D_TranslateFormat(Format), Width, Height, Depth, MipCount);
+		ResourceDesc = CD3DX12_RESOURCE_DESC::Tex3D(D3D_TranslateFormat(Format), Width, Height, static_cast<uint16>(Depth), static_cast<uint16>(MipCount));
 	}
 
 	ResourceDesc.Flags = AdditionalFlags;

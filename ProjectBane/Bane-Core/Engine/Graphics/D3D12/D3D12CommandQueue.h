@@ -9,26 +9,61 @@
 
 class D3D12CommandQueue
 {
+
+	friend class D3D12CommandQueue;
 public:
 
 	typedef StackQueue<D3D12CommandList*, 16> Queue;
 
-	D3D12CommandQueue(ID3D12CommandQueue* CommandQueue, ID3D12Device1* Device, const std::string& QueueName, ECOMMAND_CONTEXT_TYPE InContextType) :
-		m_ContextType(InContextType),
-		m_CommandQueue(CommandQueue)
+	D3D12CommandQueue() :
+		m_FenceValue(0)
 	{
-		D3D12ERRORCHECK(Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_Fence)));
-		m_CompletionEvent = CreateEventExA(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
-		assert(GetLastError() == 0);
+	}
+
+	D3D12CommandQueue(ID3D12CommandQueue* CommandQueue, ID3D12Device1* Device, const std::string& QueueName, ECOMMAND_CONTEXT_TYPE InContextType) :
+		m_FenceValue(0)
+	{
+		Initialize(CommandQueue, Device, QueueName, InContextType);
 	}
 	
 	D3D12CommandQueue(D3D12_COMMAND_QUEUE_DESC CreationDesc, ID3D12Device1* Device, const std::string& QueueName, ECOMMAND_CONTEXT_TYPE InContextType) :
-		m_ContextType(InContextType)
+		m_FenceValue(0)
 	{
-		D3D12ERRORCHECK(Device->CreateCommandQueue(&CreationDesc, IID_PPV_ARGS(&m_CommandQueue)));
+		Initialize(CreationDesc, Device, QueueName, InContextType);
+	}
+
+	ForceInline void Initialize(ID3D12CommandQueue* CommandQueue, ID3D12Device1* Device, const std::string& QueueName, ECOMMAND_CONTEXT_TYPE InContextType)
+	{
+		m_ContextType = InContextType;
+		m_CommandQueue = CommandQueue;
 		D3D12ERRORCHECK(Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_Fence)));
 		m_CompletionEvent = CreateEventExA(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
+		m_CommandQueue->SetName(std::wstring(QueueName.begin(), QueueName.end()).c_str());
 		assert(GetLastError() == 0);
+	}
+
+	ForceInline void Initialize(D3D12_COMMAND_QUEUE_DESC CreationDesc, ID3D12Device1* Device, const std::string& QueueName, ECOMMAND_CONTEXT_TYPE InContextType)
+	{
+		m_ContextType = InContextType;
+		D3D12ERRORCHECK(Device->CreateCommandQueue(&CreationDesc, IID_PPV_ARGS(&m_CommandQueue)));
+		D3D12ERRORCHECK(Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_Fence)));
+		m_CommandQueue->SetName(std::wstring(QueueName.begin(), QueueName.end()).c_str());
+		m_CompletionEvent = CreateEventExA(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
+		assert(GetLastError() == 0);
+	}
+
+	D3D12CommandQueue& operator = (const D3D12CommandQueue& Rhs)
+	{
+		m_GraphicsDevice = Rhs.m_GraphicsDevice;
+		m_CompletionEvent = Rhs.m_CompletionEvent;
+		m_FenceValue	 = Rhs.m_FenceValue;
+		m_Fence			 = Rhs.m_Fence;
+		m_WaitQueue		 = Rhs.m_WaitQueue;
+		m_ExecutionQueue = Rhs.m_ExecutionQueue;
+		m_CompletedQueue = Rhs.m_CompletedQueue;
+		m_CommandQueue	 = Rhs.m_CommandQueue;
+		m_ContextType	 = Rhs.m_ContextType;
+		return *this;
 	}
 
 	~D3D12CommandQueue()
@@ -85,7 +120,6 @@ public:
 		if (!IsFinished())
 		{
 			m_Fence->SetEventOnCompletion(m_FenceValue, m_CompletionEvent);
-			DWORD Error = GetLastError();
 			WaitForSingleObjectEx(m_CompletionEvent, INFINITE, FALSE);
 		}
 		CompleteExecution();

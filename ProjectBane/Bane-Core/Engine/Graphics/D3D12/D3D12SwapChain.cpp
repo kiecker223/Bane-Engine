@@ -2,8 +2,9 @@
 #include "D3D12GraphicsDevice.h"
 
 
-bool D3D12SwapChain::Initialize(IDXGIFactory2* Factory, IDXGIAdapter* Adapter, ID3D12CommandQueue* MainQueue, Window* RenderingWindow)
+bool D3D12SwapChain::Initialize(IDXGIFactory2* Factory, IDXGIAdapter* InAdapter, ID3D12CommandQueue* MainQueue, Window* RenderingWindow)
 {
+	Adapter = InAdapter;
 	const uint Width = RenderingWindow->GetWidth();
 	const uint Height = RenderingWindow->GetHeight();
 	HWND WindowHandle = RenderingWindow->GetHwnd();

@@ -94,7 +94,7 @@ public:
 		delete InputDesc.pInputElementDescs;
 	}
 
-	const GFX_INPUT_LAYOUT_DESC const& GetDesc() const final override 
+	GFX_INPUT_LAYOUT_DESC GetDesc() const final override 
 	{
 		return Desc;
 	}

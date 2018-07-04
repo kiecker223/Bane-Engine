@@ -72,14 +72,16 @@ void D3D12GraphicsCommandContext::SetVertexBuffer(const IBuffer* InVertexBuffer)
 {
 	D3D12Buffer* Buffer = (D3D12Buffer*)InVertexBuffer;
 	Buffer->TransitionResource(this, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-	D3DCL->IASetVertexBuffers(0, 1, &Buffer->GetVBView(PipelineState->Desc.InputLayout));
+	D3D12_VERTEX_BUFFER_VIEW VbView = Buffer->GetVBView(PipelineState->Desc.InputLayout);
+	D3DCL->IASetVertexBuffers(0, 1, &VbView);
 }
 
 void D3D12GraphicsCommandContext::SetIndexBuffer(const IBuffer* InIndexBuffer)
 {
 	D3D12Buffer* Buffer = (D3D12Buffer*)InIndexBuffer;
 	Buffer->TransitionResource(this, D3D12_RESOURCE_STATE_INDEX_BUFFER);
-	D3DCL->IASetIndexBuffer(&Buffer->GetIBView());
+	D3D12_INDEX_BUFFER_VIEW IbView = Buffer->GetIBView();
+	D3DCL->IASetIndexBuffer(&IbView);
 }
 
 void D3D12GraphicsCommandContext::SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY InTopology)
@@ -224,12 +226,12 @@ void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* InSrc, int3 SrcLoca
 	FlushResourceTransitions();
 
 	D3D12_BOX SrcBox = { };
-	SrcBox.left = DstLocation.x;
-	SrcBox.top = DstLocation.y;
-	SrcBox.front = DstLocation.z;
-	SrcBox.right = DstLocation.x + DstSize.x;
-	SrcBox.bottom = DstLocation.y + DstSize.y;
-	SrcBox.back = DstLocation.z + DstSize.z;
+	SrcBox.left = SrcLocation.x;
+	SrcBox.top = SrcLocation.y;
+	SrcBox.front = SrcLocation.z;
+	SrcBox.right = SrcLocation.x + DstSize.x;
+	SrcBox.bottom = SrcLocation.y + DstSize.y;
+	SrcBox.back = SrcLocation.z + DstSize.z;
 	D3DCL->CopyTextureRegion(&DstCopyLocation, DstLocation.x, DstLocation.y, DstLocation.z, &SrcCopyLocation, &SrcBox);
 }
 

@@ -293,7 +293,7 @@ class IInputLayout
 public:
 	virtual ~IInputLayout() { }
 
-	virtual const GFX_INPUT_LAYOUT_DESC& GetDesc() const = 0;
+	virtual GFX_INPUT_LAYOUT_DESC GetDesc() const = 0;
 
 };
 

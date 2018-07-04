@@ -24,7 +24,6 @@ void BasicForwardRenderer::Render()
 	Context->BeginPass(Device->GetBackBufferTargetPass());
 
 	void* Buff = Context->Map(m_CameraConstants);
-	FORWARD_CAMERA_CONSTANTS* pConstants = (FORWARD_CAMERA_CONSTANTS*)Buff;
 	
 	for (uint i = 0; i < m_DrawList.size(); i++)
 	{
@@ -58,9 +57,9 @@ void BasicForwardRenderer::Shutdown()
 	ApiRuntime::Shutdown();
 }
 
-void BasicForwardRenderer::AddBasicMesh(const Mesh& InMesh, const Material& InMaterial, Entity* Owner, IConstantBuffer* CB)
+void BasicForwardRenderer::AddBasicMesh(const Mesh& InMesh, const Material& InMaterial, Entity* Owner, IConstantBuffer* CameraCB)
 {
-	m_DrawList.push_back({ InMesh, InMaterial, Owner });
+	m_DrawList.push_back({ InMesh, InMaterial, Owner, CameraCB });
 }
 
 void BasicForwardRenderer::AddCamera(CameraComponent* InCamera)
