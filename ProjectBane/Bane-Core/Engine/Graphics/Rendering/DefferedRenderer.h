@@ -59,7 +59,7 @@ private:
 	std::vector<DrawItem> m_DrawItems;
 
 	uint m_MaxLights;
-	std::vector<Entity*> m_Lights;
+	std::vector<LightComponent*> m_Lights;
 
 	struct
 	{

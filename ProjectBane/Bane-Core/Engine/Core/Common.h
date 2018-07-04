@@ -22,7 +22,7 @@ typedef unsigned char byte;
 
 #define ForceInline __forceinline
 	
-ForceInline uint64 GetDJB264BitHash(const char* Ptr, uint Length) 
+ForceInline uint64 GetDJB264BitHash(const char* Ptr, size_t Length) 
 {
 	uint64 Result = 5381;
 

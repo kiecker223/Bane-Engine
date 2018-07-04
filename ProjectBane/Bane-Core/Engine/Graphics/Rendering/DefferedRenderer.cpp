@@ -189,7 +189,7 @@ void DefferedRenderer::AddCamera(CameraComponent* InCamera)
 
 void DefferedRenderer::AddLight(LightComponent* InLight)
 {
-	m_Lights.push_back(InLight->GetOwner());
+	m_Lights.push_back(InLight);
 }
 
 void DefferedRenderer::RenderShadows(matrix LightMatrix, IRenderPassInfo* DestRenderPass, IGraphicsCommandContext* ctx)
@@ -202,7 +202,7 @@ void DefferedRenderer::GatherLights()
 	m_LightCBData.CameraPosition = MainCamera->GetTransform()->GetPosition();
 	for (uint i = 0; i < m_Lights.size(); i++)
 	{
-		LightComponent* Comp = m_Lights[i]->GetComponent<LightComponent>();
+		LightComponent* Comp = m_Lights[i];
 		switch (Comp->GetLightType())
 		{
 			case LIGHT_TYPE_DIRECTIONAL:

@@ -39,11 +39,11 @@ public:
 		}
 		if (InputState[0x41] & 0x80)
 		{
-			ST->Translate(Right * 0.3f);
+			ST->Translate(-Right * 0.3f);
 		}
 		if (InputState[0x44] & 0x80)
 		{
-			ST->Translate(-Right * 0.3f);
+			ST->Translate(Right * 0.3f);
 		}
 		if (InputState[0x51] & 0x80)
 		{

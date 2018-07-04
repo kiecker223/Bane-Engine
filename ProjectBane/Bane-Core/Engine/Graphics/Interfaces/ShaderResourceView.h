@@ -4,7 +4,6 @@
 class IGPUResource;
 
 
-
 class IShaderResourceTable
 {
 public:

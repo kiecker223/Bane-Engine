@@ -225,7 +225,7 @@ void D3D12TextureBase::UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void*
 	}
 	else
 	{
-		uint RequiredSize = GetRequiredIntermediateSize(Resource.D3DResource, 0, 1);
+		uint64 RequiredSize = GetRequiredIntermediateSize(Resource.D3DResource, 0, 1);
 		D3D12Buffer* UploadBuffer = new D3D12Buffer(Resource.GetParentDevice(), RequiredSize, BUFFER_USAGE_UPLOAD);
 		D3D12_SUBRESOURCE_DATA ResourceData = { };
 		ResourceData.pData = Pointer;

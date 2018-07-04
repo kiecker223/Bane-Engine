@@ -51,9 +51,9 @@ private:
 };
 
 
-constexpr const uint64 Component_HashImpl(uint64 InResult, const char* Pointer, uint Index)
+constexpr const uint64 Component_HashImpl(uint64 InResult, const char* Pointer)
 {
-	return (Pointer[Index] != 0) ? Component_HashImpl((((InResult << 5) + InResult) + (uint64)Pointer[Index]), Pointer, Index + 1) : InResult;
+	return !*Pointer ? Component_HashImpl((((InResult << 5) + InResult) + *Pointer), Pointer + 1) : InResult;
 }
 
 
@@ -61,7 +61,7 @@ template<typename T>
 constexpr const uint64 BuildClassHash()
 {
 	constexpr uint64 Result = 5381;
-	return Component_HashImpl(Result, T::ClassName, 0);
+	return Component_HashImpl(Result, T::ClassName);
 }
 
 #define IMPLEMENT_COMPONENT(x) \
