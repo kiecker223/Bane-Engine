@@ -14,8 +14,8 @@ void TextureCache::InitCache()
 	{
 		uint8 R, G, B, A;
 	};
-	COL WhiteData[64 * 64];
-	memset(WhiteData, 255, 64 * 64 * 4);
+	COL ImgData[64 * 64];
+	memset(ImgData, 255, 64 * 64 * 4);
 
 	IRuntimeGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
 
@@ -24,18 +24,18 @@ void TextureCache::InitCache()
 	Data.Height = 64;
 	Data.Step = 4;
 	Data.Subresource = 0;
-	Data.Pointer = &WhiteData[0];
+	Data.Pointer = &ImgData[0];
 	m_DefaultWhite = Device->CreateTexture2D(64, 64, FORMAT_R8G8B8A8_UNORM, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
 
-	memset(WhiteData, 0, 64 * 64 * 4);
-	Data.Pointer = &WhiteData[0];
+	memset(ImgData, 0, 64 * 64 * 4);
+	Data.Pointer = &ImgData[0];
 	m_DefaultBlack = Device->CreateTexture2D(64, 64, FORMAT_R8G8B8A8_UNORM, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
 
 	for (uint y = 0; y < 64; y++)
 	{
 		for (uint x = 0; x < 64; x++)
 		{
-			WhiteData[x + (y * 64)] = { 0, 0, 255, 0 };
+			ImgData[x + (y * 64)] = { 0, 0, 255, 0 };
 		}
 	}
 	m_DefaultBlue = Device->CreateTexture2D(64, 64, FORMAT_R8G8B8A8_UNORM, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
@@ -44,7 +44,7 @@ void TextureCache::InitCache()
 	{
 		for (uint x = 0; x < 64; x++)
 		{
-			WhiteData[x + (y * 64)] = { 128, 128, 255, 0 };
+			ImgData[x + (y * 64)] = { 128, 128, 255, 0 };
 		}
 	}
 	m_DefaultNormal = Device->CreateTexture2D(64, 64, FORMAT_R8G8B8A8_UNORM, TEXTURE_USAGE_SHADER_RESOURCE, &Data);

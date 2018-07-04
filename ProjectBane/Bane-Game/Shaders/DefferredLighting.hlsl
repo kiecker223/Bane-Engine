@@ -223,7 +223,7 @@ float4 PSMain(VS_OUTPUT Input) : SV_TARGET0
 	
 	if (length(Inputs.Normal) < 1e-3)
 	{
-		return float4(Inputs.Albedo, 1.0f);
+		return float4(0.f, 0.f, 0.f, 1.0f);
 	}
 	
 	Inputs.Normal = normalize(Inputs.Normal);

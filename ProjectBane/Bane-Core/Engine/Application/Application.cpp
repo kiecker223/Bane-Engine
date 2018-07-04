@@ -75,7 +75,7 @@ void Application::InitSystems()
 		m_SceneRenderer = new DefferedRenderer();
 	}
 	m_SceneRenderer->Initialize();
-
+	
 	m_StartCallback();
 	GetCurrentScene()->InitScene();
 }

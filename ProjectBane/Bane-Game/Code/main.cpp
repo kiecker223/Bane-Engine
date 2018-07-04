@@ -216,7 +216,7 @@ void InitApplication()
 		camera->AddComponent<CameraMovementComponent>();
 	}
 
-	GetApplicationInstance()->GetSceneRenderer()->GetSwapChain()->SetSwapInterval(0);
+	GetApplicationInstance()->GetSceneRenderer()->GetSwapChain()->SetSwapInterval(1);
 }
 
 void UpdateApplication()

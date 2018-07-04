@@ -8,6 +8,10 @@ Resources
 
 Pipeline
 {
+	RenderTarget_0 =
+	{
+		Format = FORMAT_R8G8B8A8_UNORM;
+	};
 	DepthStencilState = 
 	{
 		DepthFunction = COMPARISON_FUNCTION_LESS_EQUAL;
@@ -31,15 +35,15 @@ struct PS_INPUT
 	float3 UVW : TEXCOORD;
 };
 
+
 PS_INPUT VSMain(VS_INPUT Input)
 {
 	PS_INPUT Result;
 	Result.UVW = Input.Position;
 	float3 Pos = Input.Position;
-	float3 Position = mul(Pos, (float3x3)View);
-	Position = mul(Position, (float3x3)Projection);
+	float3 Position = mul(Pos, (float3x3)Projection);
 	Position = mul(Position, (float3x3)Model);
-	Result.Position = float4(Position.xy, 1.0f, 1.0f);
+	Result.Position = float4(Position.xy, 1.f, 1.f);
 	return Result;
 }	
 
