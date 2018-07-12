@@ -24,7 +24,7 @@ public:
 		const std::string& PZ);
 	void SetSkyboxShader(const std::string& ShaderFile);
 	void SetCameraConstants(IConstantBuffer* Buffer);
-	ForceInline ITexture3D* GetSkyboxTexture() { return m_Skybox; }
+	inline ITexture3D* GetSkyboxTexture() { return m_Skybox; }
 
 	void Draw(IGraphicsCommandContext* Ctx);
 

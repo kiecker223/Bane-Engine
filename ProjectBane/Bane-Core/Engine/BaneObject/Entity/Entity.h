@@ -2,6 +2,7 @@
 #include "Transform.h"
 #include "ComponentBase.h"
 #include "ComponentAllocator.h"
+#include "Core/Hash.h"
 #include <array>
 
 
@@ -33,29 +34,29 @@ public:
 	{
 	}
 
-	ForceInline EntityIdentifier& operator = (const EntityIdentifier& Other)
+	inline EntityIdentifier& operator = (const EntityIdentifier& Other)
 	{
 		HashedName = Other.HashedName;
 		Name = Other.Name;
 		return *this;
 	}
 
-	ForceInline operator uint64& ()
+	inline operator uint64& ()
 	{
 		return HashedName;
 	}
 
-	ForceInline operator uint64& () const
+	inline operator uint64& () const
 	{
 		return HashedName;
 	}
 
-	ForceInline bool IsValid() const
+	inline bool IsValid() const
 	{
 		return HashedName != 0;
 	}
 
-	ForceInline operator bool() const
+	inline operator bool() const
 	{
 		return IsValid();
 	}
@@ -64,32 +65,32 @@ public:
 	std::string Name;
 };
 
-ForceInline bool operator == (const EntityIdentifier& Left, const EntityIdentifier& Right)
+inline bool operator == (const EntityIdentifier& Left, const EntityIdentifier& Right)
 {
 	return Left.HashedName == Right.HashedName;
 }
 
-ForceInline bool operator != (const EntityIdentifier& Left, const EntityIdentifier& Right)
+inline bool operator != (const EntityIdentifier& Left, const EntityIdentifier& Right)
 {
 	return !(Left == Right);
 }
 
-ForceInline bool operator > (const EntityIdentifier& Left, const EntityIdentifier& Right)
+inline bool operator > (const EntityIdentifier& Left, const EntityIdentifier& Right)
 {
 	return (Left.HashedName > Right.HashedName);
 }
 
-ForceInline bool operator < (const EntityIdentifier& Left, const EntityIdentifier& Right)
+inline bool operator < (const EntityIdentifier& Left, const EntityIdentifier& Right)
 {
 	return (Left.HashedName < Right.HashedName);
 }
 
-ForceInline bool operator >= (const EntityIdentifier& Left, const EntityIdentifier& Right)
+inline bool operator >= (const EntityIdentifier& Left, const EntityIdentifier& Right)
 {
 	return (Left.HashedName >= Right.HashedName);
 }
 
-ForceInline bool operator <= (const EntityIdentifier& Left, const EntityIdentifier& Right)
+inline bool operator <= (const EntityIdentifier& Left, const EntityIdentifier& Right)
 {
 	return (Left.HashedName <= Right.HashedName);
 }
@@ -113,7 +114,7 @@ public:
 	}
 
 	template<typename T>
-	ForceInline T* GetComponent()
+	inline T* GetComponent()
 	{
 		return (T*)GetComponentByHash(T::ClassHash);
 	}
@@ -121,7 +122,7 @@ public:
 	Component* GetComponentByHash(uint64 Hash);
 
 	template<typename T>
-	ForceInline T* AddComponent()
+	inline T* AddComponent()
 	{
 		T* RetPointer = m_Allocator.AllocateObject<T>();
 		m_Components.push_back(T::ClassHash);
@@ -134,7 +135,7 @@ public:
 	void SubmitRenderingComponents();
 
 	template<class T, class... U>
-	ForceInline T* AddAndConstructComponent(U&&... Params)
+	inline T* AddAndConstructComponent(U&&... Params)
 	{
 		T* RetPointer = m_Allocator.AllocateObjectCtor<T>(Params...);
 		m_Components.push_back(T::ClassHash);
@@ -146,7 +147,7 @@ public:
 	void RemoveComponent(uint64 ComponentHash);
 
 	template<typename T>
-	ForceInline void RemoveComponentByType()
+	inline void RemoveComponentByType()
 	{
 		RemoveComponent(T::ClassHash);
 	}
@@ -165,24 +166,24 @@ public:
 		return m_Id;
 	}
 
-	ForceInline void Start()
+	inline void Start()
 	{
 		for (uint i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
 			m_Allocator.GetAllocatedObjects()[i]->Start();
 	}
 
-	ForceInline void Tick(float DT)
+	inline void Tick(float DT)
 	{
 		for (uint i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
 			m_Allocator.GetAllocatedObjects()[i]->Tick(DT);
 	}
 
-	ForceInline Transform* GetTransform() const
+	inline Transform* GetTransform() const
 	{
 		return (Transform*)&m_Transform;
 	}
 
-	ForceInline void SetParent(EntityIdentifier Parent)
+	inline void SetParent(EntityIdentifier Parent)
 	{
 		m_Parent = Parent;
 	}

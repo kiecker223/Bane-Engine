@@ -48,32 +48,32 @@ public:
 	~Application();
 
 	static bool RegisterApplication(Application* App);
-	ForceInline static Application* GetInstance()
+	inline static Application* GetInstance()
 	{
 		return GApplication;
 	}
 
-	ForceInline SceneRenderer* GetSceneRenderer()
+	inline SceneRenderer* GetSceneRenderer()
 	{
 		return m_SceneRenderer;
 	}
 
-	ForceInline Window* GetWindow()
+	inline Window* GetWindow()
 	{
 		return m_Window;
 	}
 
-	ForceInline void SetStartCallback(PFNApplicationStartCallback StartCallback)
+	inline void SetStartCallback(PFNApplicationStartCallback StartCallback)
 	{
 		m_StartCallback = StartCallback;
 	}
 
-	ForceInline void SetUpdateCallback(PFNApplicationUpdateCallback UpdateCallback)
+	inline void SetUpdateCallback(PFNApplicationUpdateCallback UpdateCallback)
 	{
 		m_UpdateCallback = UpdateCallback;
 	}
 
-	ForceInline void SetCleanupCallback(PFNApplicationCleanupCallback CleanupCallback)
+	inline void SetCleanupCallback(PFNApplicationCleanupCallback CleanupCallback)
 	{
 		m_CleanupCallback = CleanupCallback;
 	}
@@ -107,7 +107,7 @@ private:
 
 
 
-ForceInline Application* GetApplicationInstance()
+inline Application* GetApplicationInstance()
 {
 	return Application::GetInstance();
 }

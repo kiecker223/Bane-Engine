@@ -1,0 +1,87 @@
+#pragma once
+
+#include "Core/Types.h"
+#include <dxgiformat.h>
+
+
+inline uint GetDXGIFormatSize(DXGI_FORMAT Format)
+{
+	switch (Format)
+	{
+	case DXGI_FORMAT_R8_SINT:
+	case DXGI_FORMAT_R8_SNORM:
+	case DXGI_FORMAT_R8_TYPELESS:
+	case DXGI_FORMAT_R8_UINT:
+	case DXGI_FORMAT_R8_UNORM:
+		return 1;
+	case DXGI_FORMAT_R16_FLOAT:
+	case DXGI_FORMAT_R16_SINT:
+	case DXGI_FORMAT_R16_SNORM:
+	case DXGI_FORMAT_R16_TYPELESS:
+	case DXGI_FORMAT_R16_UINT:
+	case DXGI_FORMAT_D16_UNORM:
+	case DXGI_FORMAT_R8G8_SINT:
+	case DXGI_FORMAT_R8G8_B8G8_UNORM:
+	case DXGI_FORMAT_R8G8_SNORM:
+	case DXGI_FORMAT_R8G8_TYPELESS:
+	case DXGI_FORMAT_R8G8_UINT:
+	case DXGI_FORMAT_R8G8_UNORM:
+		return 2;
+	case DXGI_FORMAT_R8G8B8A8_SINT:
+	case DXGI_FORMAT_R8G8B8A8_SNORM:
+	case DXGI_FORMAT_R8G8B8A8_TYPELESS:
+	case DXGI_FORMAT_R8G8B8A8_UINT:
+	case DXGI_FORMAT_R8G8B8A8_UNORM:
+	case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+	case DXGI_FORMAT_B8G8R8A8_TYPELESS:
+	case DXGI_FORMAT_B8G8R8A8_UNORM:
+	case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+	case DXGI_FORMAT_R16G16_FLOAT:
+	case DXGI_FORMAT_R16G16_SINT:
+	case DXGI_FORMAT_R16G16_SNORM:
+	case DXGI_FORMAT_R16G16_TYPELESS:
+	case DXGI_FORMAT_R16G16_UINT:
+	case DXGI_FORMAT_R16G16_UNORM:
+	case DXGI_FORMAT_D32_FLOAT:
+	case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+	case DXGI_FORMAT_R32_FLOAT:
+	case DXGI_FORMAT_R32_UINT:
+	case DXGI_FORMAT_R32_SINT:
+	case DXGI_FORMAT_R32_TYPELESS:
+	case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
+		return 4;
+	case DXGI_FORMAT_R32G32_FLOAT:
+	case DXGI_FORMAT_R32G32_SINT:
+	case DXGI_FORMAT_R32G32_TYPELESS:
+	case DXGI_FORMAT_R32G32_UINT:
+		return 8;
+	case DXGI_FORMAT_R32G32B32_FLOAT:
+	case DXGI_FORMAT_R32G32B32_SINT:
+	case DXGI_FORMAT_R32G32B32_TYPELESS:
+	case DXGI_FORMAT_R32G32B32_UINT:
+		return 12;
+	case DXGI_FORMAT_R32G32B32A32_FLOAT:
+	case DXGI_FORMAT_R32G32B32A32_SINT:
+	case DXGI_FORMAT_R32G32B32A32_TYPELESS:
+	case DXGI_FORMAT_R32G32B32A32_UINT:
+		return 16;
+	}
+	return 0;
+}
+
+
+#ifdef _DEBUG
+#include <comdef.h>
+#include <sstream>
+inline std::string D3D_BuildErrorMessage(uint Line, const char* File, const char* Function, HRESULT Res)
+{
+	std::stringstream Str;
+	std::string ErrorMessage = _com_error(Res).ErrorMessage();
+	Str << "Direct 3D error on line: " << Line << "\nin file: " << File << "\nin function: " << Function << "\nWith error code: " << std::to_string(Res);
+	return Str.str();
+}
+
+#define D3D12ERRORCHECK(x) { HRESULT HResult = x; if (FAILED(HResult)) { MessageBoxA(nullptr, D3D_BuildErrorMessage(__LINE__, __FILE__, __FUNCTION__, HResult).c_str(), "D3D12 ERROR:", MB_OK); __debugbreak(); } }
+#else
+#define D3D12ERRORCHECK(x) x
+#endif

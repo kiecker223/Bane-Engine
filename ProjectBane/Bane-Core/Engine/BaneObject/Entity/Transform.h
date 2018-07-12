@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/KieckerMath.h"
+#include "KieckerMath.h"
 
 class Transform
 {
@@ -19,79 +19,79 @@ public:
 	{
 	}
 
-	ForceInline float3 GetPosition()
+	inline float3 GetPosition()
 	{
 		return m_Position;
 	}
 
-	ForceInline Quaternion GetRotation()
+	inline Quaternion GetRotation()
 	{
 		return m_Rotation;
 	}
 
-	ForceInline float3 GetScale()
+	inline float3 GetScale()
 	{
 		return m_Scale;
 	}
 
-	ForceInline void Translate(const float3& Direction)
+	inline void Translate(const float3& Direction)
 	{
 		m_Position.x += Direction.x;
 		m_Position.y += Direction.y;
 		m_Position.z += Direction.z;
 	}
 
-	ForceInline void Translate(float X, float Y, float Z)
+	inline void Translate(float X, float Y, float Z)
 	{
 		Translate(float3(X, Y, Z));
 	}
 
-	ForceInline void Rotate(const float3& Euler)
+	inline void Rotate(const float3& Euler)
 	{
 		m_Rotation *= Quaternion(Euler);
 		m_Rotation.Normalize();
 	}
 
-	ForceInline void Rotate(float X, float Y, float Z)
+	inline void Rotate(float X, float Y, float Z)
 	{
 		float3 Rot(X, Y, Z);
 		Rotate(Rot);
 	}
 
-	ForceInline void SetRotation(const float3& Euler)
+	inline void SetRotation(const float3& Euler)
 	{
 		m_Rotation = Quaternion(Euler).Normalized();
 	}
 
-	ForceInline void SetRotation(float X, float Y, float Z)
+	inline void SetRotation(float X, float Y, float Z)
 	{
 		SetRotation(float3(X, Y, Z));
 	}
 
-	ForceInline void SetPosition(const float3& InPosition)
+	inline void SetPosition(const float3& InPosition)
 	{
 		float3 Translation = float3(InPosition.x - m_Position.x, InPosition.y - m_Position.y, InPosition.z - m_Position.z);
 		m_Position = InPosition;
 	}
 
-	ForceInline void Scale(float Scalar)
+	inline void Scale(float Scalar)
 	{
 		m_Scale.x = Scalar;
 		m_Scale.y = Scalar;
 		m_Scale.z = Scalar;
 	}
 
-	ForceInline void SetScale(const float3& InScale)
+	inline void SetScale(const float3& InScale)
 	{
 		m_Scale = InScale;
 	}
 
-	ForceInline matrix GetMatrix() const
+	inline matrix GetMatrix() const
 	{
 		return matTransformation(m_Position, m_Rotation, m_Scale);
 	}
 
-	ForceInline float3 GetForward() const
+	inline float3 GetForward() const
 	{
 		float3 Result(0.0f, 0.0f, 1.0f);
 		float3x3 RotationMat = (float3x3)m_Rotation.RotationMatrix();
@@ -99,12 +99,18 @@ public:
 		return Result;
 	}
 
-	ForceInline float3 GetUpVector() const
+	inline float3 GetUpVector() const
 	{
 		float3 Result(0.0f, 1.0f, 0.0f);
-		matrix RotationMat= m_Rotation.RotationMatrix();
+		matrix RotationMat = m_Rotation.RotationMatrix();
 		Result = (float3x3)RotationMat * Result;
 		return Result;
+	}
+
+	inline float3 GetRightVector() const
+	{
+		static const float3 Up(0.f, 1.f, 0.f);
+		return cross(GetForward(), Up);
 	}
 
 private:

@@ -18,7 +18,7 @@ public:
 	Scene();
 	Scene(const std::string& SceneName);
 
-	ForceInline const std::string& GetName() const
+	inline const std::string& GetName() const
 	{
 		return m_Name;
 	}
@@ -37,7 +37,7 @@ public:
 	void LoadFromMetaData(const SCENE_DATA* Data);
 	void InitScene();
 	
-	ForceInline Entity* GetSceneRoot()
+	inline Entity* GetSceneRoot()
 	{
 		return m_Root;
 	}
@@ -55,12 +55,12 @@ private:
 	std::vector<EntityHashEntry> m_Entities;
 };
 
-ForceInline Scene* GetCurrentScene()
+inline Scene* GetCurrentScene()
 {
 	return Scene::GCurrentScene;
 }
 
-ForceInline void SetCurrentScene(Scene* InScene)
+inline void SetCurrentScene(Scene* InScene)
 {
 	Scene* pScene = GetCurrentScene();
 	if (pScene)

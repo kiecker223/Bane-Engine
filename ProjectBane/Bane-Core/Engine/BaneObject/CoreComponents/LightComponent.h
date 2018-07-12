@@ -23,12 +23,12 @@ public:
 
 	void SetLightType(ELIGHT_TYPE LightType);
 
-	ForceInline ELIGHT_TYPE GetLightType() const
+	inline ELIGHT_TYPE GetLightType() const
 	{
 		return m_Type;
 	}
 
-	ForceInline DIRECTIONAL_LIGHT_DATA GetDirectionalLight() const
+	inline DIRECTIONAL_LIGHT_DATA GetDirectionalLight() const
 	{
 		BANE_CHECK(m_Type == LIGHT_TYPE_DIRECTIONAL);
 		DIRECTIONAL_LIGHT_DATA Result = { };
@@ -39,7 +39,7 @@ public:
 		return Result;
 	}
 
-	ForceInline POINT_LIGHT_DATA GetPointLight() const
+	inline POINT_LIGHT_DATA GetPointLight() const
 	{
 		//BANE_CHECK(m_Type == LIGHT_TYPE_POINT);
 		POINT_LIGHT_DATA Result = { };
@@ -50,7 +50,7 @@ public:
 		return Result;
 	}
 
-	ForceInline SPOTLIGHT_DATA GetSpotLight() const
+	inline SPOTLIGHT_DATA GetSpotLight() const
 	{
 		//BANE_CHECK(m_Type == LIGHT_TYPE_SPOT);
 		SPOTLIGHT_DATA Result = { };

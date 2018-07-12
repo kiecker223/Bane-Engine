@@ -259,7 +259,7 @@ float CastShadowRay(HITRECORD Record)
 	Ray.Pos = Record.Position;
 	float Brightness = 0.0;
 
-	for (int i = 0; i < NumPointLights; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		float3 ShadowRayDir = normalize(PointLights[i].Position - Record.Position);
 		Ray.Dir = ShadowRayDir;

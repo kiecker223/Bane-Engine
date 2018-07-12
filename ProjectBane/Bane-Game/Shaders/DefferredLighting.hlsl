@@ -206,7 +206,7 @@ float3 CalculateSkyboxReflection(float3 InNormal, float3 InCameraPosition, float
 {
 	float3 IncidinceAngle = normalize(Position - InCameraPosition);
 	float3 Reflection = reflect(IncidinceAngle, normalize(InNormal));
-	return SkyboxTexture.SampleLevel(SkySampler, Reflection, ((sin(Frame / 100.0f) * 0.5) + 0.5) * 11);
+	return SkyboxTexture.Sample(SkySampler, Reflection);
 }
 float3 CalculateAttenuation(float Range, float Dist)
 {
@@ -216,17 +216,19 @@ float3 CalculateAttenuation(float Range, float Dist)
 float4 PSMain(VS_OUTPUT Input) : SV_TARGET0
 {
 	INPUTS Inputs = GetInputs(Input.UV);
-	Inputs.Roughness = 0.5f; //(sin(Frame / 20) * 0.5) + 0.5;
-	Inputs.Metallic = 0.5f;// (sin(Frame / 10) * 0.5) + 0.5;
-	Inputs.Specular = 1 - Inputs.Roughness;// (sin(Frame / 20) * 0.5) + 0.5;
+	Inputs.Roughness = 0.5f;
+	Inputs.Metallic = 0.5f;
+	Inputs.Specular = 1 - Inputs.Roughness;
 	float3 Color = float3(0.0f, 0.0f, 0.0f);
 	
 	if (length(Inputs.Normal) < 1e-3)
 	{
 		return float4(0.f, 0.f, 0.f, 1.0f);
 	}
-	
+
+
 	Inputs.Normal = normalize(Inputs.Normal);
+	//return float4(CalculateSkyboxReflection(Inputs.Normal, CameraPosition, Inputs.Position), 1.0f);
 	
 	float3 FresnelFactor = float3(0.04, 0.04, 0.04);
 	FresnelFactor = lerp(Inputs.Albedo, FresnelFactor, Inputs.Metallic);
@@ -237,23 +239,17 @@ float4 PSMain(VS_OUTPUT Input) : SV_TARGET0
 	float3 Specular = (0.0f, 0.0f, 0.0f);
     for (i = 0; i < NumDirectionalLights; i++)
     {
-		DIRECTIONAL_LIGHT Light = DirectionalLights[i];
-		float3 RayDir = normalize(Light.Direction);
-		float NDotL = saturate(dot(Inputs.Normal, RayDir));
-		float NDotV = saturate(dot(Inputs.Normal, EyeDir));
-		Color += NDotL * DisneyDiffuse(Inputs, RayDir, EyeDir, Inputs.Position, Inputs.Normal, FresnelFactor) * Light.Color * Light.Intensity;
-		Specular += NDotL * DisneyGGX(Inputs, RayDir, EyeDir, Inputs.Position, Inputs.Normal, FresnelFactor) * Light.Color * Light.Intensity;
-    }
+	}
 
 	for (i = 0; i < NumPointLights; i++)
 	{
-	//	POINT_LIGHT Light = PointLights[i];
-	//	float Attenuation = CalculateAttenuation(Light.Range, Inputs.Position);
-	//	float3 RayDir = normalize(Light.Position - Inputs.Position);
-	//	float NDotL = saturate(dot(Inputs.Normal, RayDir));
-	//	float NDotV = saturate(dot(Inputs.Normal, EyeDir));
+		POINT_LIGHT Light = PointLights[i];
+		float Attenuation = CalculateAttenuation(Light.Range, Inputs.Position);
+		float3 RayDir = normalize(Light.Position - Inputs.Position);
+		float NDotL = saturate(dot(Inputs.Normal, RayDir));
+		float NDotV = saturate(dot(Inputs.Normal, EyeDir));
     }
-	float3 FinalColor = Inputs.Albedo * Color + (Specular * IBL(Inputs, Inputs.Normal, EyeDir)); 
+	float3 FinalColor = Inputs.Albedo * Color + (Specular); // *IBL(Inputs, Inputs.Normal, EyeDir));
 	FinalGamma(FinalColor);
 	return float4(FinalColor, 1.0f);
 }

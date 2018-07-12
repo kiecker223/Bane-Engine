@@ -14,12 +14,12 @@ public:
 	ComponentAllocator(uint NumBytes);
 	~ComponentAllocator();
 
-	ForceInline size_t GetNumBytesAllocated() const
+	inline size_t GetNumBytesAllocated() const
 	{
 		return PtrEnd - PtrBegin;
 	}
 
-	ForceInline size_t GetNumBytesUsed() const
+	inline size_t GetNumBytesUsed() const
 	{
 		return PtrCurrent - PtrBegin;
 	}
@@ -39,7 +39,7 @@ public:
 	// This just handles putting the object in memory
 	// all tracking is handled by the Entity object
 	template<typename C>
-	ForceInline C* AllocateObject()
+	inline C* AllocateObject()
 	{
 		if (PtrCurrent + sizeof(C) > PtrEnd)
 		{
@@ -53,7 +53,7 @@ public:
 	}
 
 	template<typename C, class... U>
-	ForceInline C* AllocateObjectCtor(U&&... Params)
+	inline C* AllocateObjectCtor(U&&... Params)
 	{
 		if (PtrCurrent + sizeof(C) > PtrEnd)
 		{
@@ -67,12 +67,12 @@ public:
 	}
 
 	template<typename C>
-	ForceInline void RemovePointer(C* Position)
+	inline void RemovePointer(C* Position)
 	{
 		RemovePointer((C*)Position, sizeof(C));
 	}
 
-	ForceInline void InternalFree()
+	inline void InternalFree()
 	{
 		for (auto* c : AllocatedObjects)
 		{
@@ -84,7 +84,7 @@ public:
 		PtrEnd = nullptr;
 	}
 
-	ForceInline bool InternalReAlloc(size_t ByteSize)
+	inline bool InternalReAlloc(size_t ByteSize)
 	{
 		bool Result = true;
 		size_t NumBytesUsed = GetNumBytesUsed();
@@ -109,7 +109,7 @@ public:
 		return Result;
 	}
 
-	ForceInline void InternalAllocate(size_t ByteSize)
+	inline void InternalAllocate(size_t ByteSize)
 	{
 		PtrBegin = (uint8*)HeapAlloc(GetProcessHeap(), HEAP_NO_SERIALIZE, ByteSize);
 
@@ -125,7 +125,7 @@ public:
 	std::vector<Component*> AllocatedObjects;
 	std::mutex ThreadLock;
 	
-	ForceInline std::vector<Component*>& GetAllocatedObjects()
+	inline std::vector<Component*>& GetAllocatedObjects()
 	{
 		// std::lock_guard<std::mutex> LockGuard(ThreadLock);
 		return AllocatedObjects;

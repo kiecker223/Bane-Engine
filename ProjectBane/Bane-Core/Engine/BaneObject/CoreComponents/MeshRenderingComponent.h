@@ -16,7 +16,7 @@ public:
 	virtual void Start() override;
 	virtual void SubmitFeature(SceneRenderer* Renderer) override;
 
-	ForceInline MATERIAL_PARAMETERS& GetMaterialParameters()
+	inline MATERIAL_PARAMETERS& GetMaterialParameters()
 	{
 		return RenderedMaterial.GetMaterialParameters();
 	}

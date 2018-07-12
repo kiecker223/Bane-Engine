@@ -21,17 +21,17 @@ private:
 	static SceneManager* GInstance;
 };
 
-ForceInline void InitSceneManager()
+inline void InitSceneManager()
 {
 	SceneManager::GInstance = new SceneManager();
 }
 
-ForceInline void ShutdownSceneManager()
+inline void ShutdownSceneManager()
 {
 	delete SceneManager::GInstance;
 }
 
-ForceInline SceneManager* GetSceneManager()
+inline SceneManager* GetSceneManager()
 {
 	return SceneManager::GInstance;
 }

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{1851A5CD-3C8A-4E3E-A4BD-45869C249860}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>BaneGraphics</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Graphics\D3D12\D3D12CommandContext.h" />
+    <ClInclude Include="Graphics\D3D12\D3D12CommandQueue.h" />
+    <ClInclude Include="Graphics\D3D12\D3D12DescriptorAllocator.h" />
+    <ClInclude Include="Graphics\D3D12\D3D12Fence.h" />
+    <ClInclude Include="Graphics\D3D12\D3D12GraphicsDevice.h" />
+    <ClInclude Include="Graphics\D3D12\D3D12GraphicsResource.h" />
+    <ClInclude Include="Graphics\D3D12\D3D12Helper.h" />
+    <ClInclude Include="Graphics\D3D12\D3D12PipelineLibrary.h" />
+    <ClInclude Include="Graphics\D3D12\D3D12PipelineState.h" />
+    <ClInclude Include="Graphics\D3D12\D3D12Runtime.h" />
+    <ClInclude Include="Graphics\D3D12\D3D12ShaderResourceViews.h" />
+    <ClInclude Include="Graphics\D3D12\D3D12ShaderSignature.h" />
+    <ClInclude Include="Graphics\D3D12\D3D12ShaderSignatureLibrary.h" />
+    <ClInclude Include="Graphics\D3D12\D3D12SwapChain.h" />
+    <ClInclude Include="Graphics\D3D12\D3D12Translator.h" />
+    <ClInclude Include="Graphics\D3DCommon\D3DCommon.h" />
+    <ClInclude Include="Graphics\D3DCommon\D3DCommonTranslator.h" />
+    <ClInclude Include="Graphics\Graphics.h" />
+    <ClInclude Include="Graphics\Interfaces\ApiRuntime.h" />
+    <ClInclude Include="Graphics\Interfaces\CommandAllocator.h" />
+    <ClInclude Include="Graphics\Interfaces\DeviceTypes.h" />
+    <ClInclude Include="Graphics\Interfaces\GraphicsCommandList.h" />
+    <ClInclude Include="Graphics\Interfaces\GraphicsDevice.h" />
+    <ClInclude Include="Graphics\Interfaces\GraphicsResources.h" />
+    <ClInclude Include="Graphics\Interfaces\PipelineState.h" />
+    <ClInclude Include="Graphics\Interfaces\ResourceTypes.h" />
+    <ClInclude Include="Graphics\Interfaces\ShaderResourceView.h" />
+    <ClInclude Include="Graphics\Interfaces\SwapChainInterface.h" />
+    <ClInclude Include="Graphics\IO\MeshCache.h" />
+    <ClInclude Include="Graphics\IO\PipelineCache.h" />
+    <ClInclude Include="Graphics\IO\ShaderCache.h" />
+    <ClInclude Include="Graphics\IO\ShaderMacros.h" />
+    <ClInclude Include="Graphics\IO\ShaderTokenizer.h" />
+    <ClInclude Include="Graphics\IO\TextureCache.h" />
+    <ClInclude Include="Graphics\Rendering\BasicForwardRenderer.h" />
+    <ClInclude Include="Graphics\Rendering\DefferedRenderer.h" />
+    <ClInclude Include="Graphics\Rendering\LightData.h" />
+    <ClInclude Include="Graphics\Rendering\Material.h" />
+    <ClInclude Include="Graphics\Rendering\Mesh.h" />
+    <ClInclude Include="Graphics\Rendering\RendererInterface.h" />
+    <ClInclude Include="Graphics\Rendering\RenderPass.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Graphics\D3D12\D3D12CommandContext.cpp" />
+    <ClCompile Include="Graphics\D3D12\D3D12CommandQueue.cpp" />
+    <ClCompile Include="Graphics\D3D12\D3D12DescriptorAllocator.cpp" />
+    <ClCompile Include="Graphics\D3D12\D3D12GraphicsDevice.cpp" />
+    <ClCompile Include="Graphics\D3D12\D3D12GraphicsResource.cpp" />
+    <ClCompile Include="Graphics\D3D12\D3D12PipelineLibrary.cpp" />
+    <ClCompile Include="Graphics\D3D12\D3D12PipelineState.cpp" />
+    <ClCompile Include="Graphics\D3D12\D3D12Runtime.cpp" />
+    <ClCompile Include="Graphics\D3D12\D3D12ShaderResourceViews.cpp" />
+    <ClCompile Include="Graphics\D3D12\D3D12ShaderSignature.cpp" />
+    <ClCompile Include="Graphics\D3D12\D3D12ShaderSignatureLibrary.cpp" />
+    <ClCompile Include="Graphics\D3D12\D3D12SwapChain.cpp" />
+    <ClCompile Include="Graphics\D3D12\D3D12Translator.cpp" />
+    <ClCompile Include="Graphics\D3DCommon\D3DCommonTranslator.cpp" />
+    <ClCompile Include="Graphics\Interfaces\ApiRuntime.cpp" />
+    <ClCompile Include="Graphics\Interfaces\GraphicsDevice.cpp" />
+    <ClCompile Include="Graphics\IO\MeshCache.cpp" />
+    <ClCompile Include="Graphics\IO\PipelineCache.cpp" />
+    <ClCompile Include="Graphics\IO\ShaderCache.cpp" />
+    <ClCompile Include="Graphics\IO\ShaderTokenizer.cpp" />
+    <ClCompile Include="Graphics\IO\TextureCache.cpp" />
+    <ClCompile Include="Graphics\Rendering\BasicForwardRenderer.cpp" />
+    <ClCompile Include="Graphics\Rendering\DefferedRenderer.cpp" />
+    <ClCompile Include="Graphics\Rendering\Material.cpp" />
+    <ClCompile Include="Graphics\Rendering\Mesh.cpp" />
+    <ClCompile Include="Graphics\Rendering\RendererInterface.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Math\Math.vcxproj">
+      <Project>{90274931-3b40-4e58-876d-8797f096a259}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

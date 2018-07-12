@@ -20,7 +20,7 @@ public:
 
 	CameraComponent();
 
-	ForceInline static CameraComponent* GetMainCamera()
+	inline static CameraComponent* GetMainCamera()
 	{
 		return GMainCamera;
 	}
@@ -32,7 +32,7 @@ public:
 	float ZFar;
 	ECAMERA_TYPE ProjectionType;
 	
-	ForceInline void SetPriority(uint Priority)
+	inline void SetPriority(uint Priority)
 	{
 		m_Priority = Priority;
 		if (m_Priority == 1)
@@ -41,7 +41,7 @@ public:
 		}
 	}
 
-	ForceInline uint GetPriority() const
+	inline uint GetPriority() const
 	{
 		return m_Priority;
 	}

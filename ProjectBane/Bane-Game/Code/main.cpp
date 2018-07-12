@@ -124,6 +124,7 @@ Scene* CurrentScene;
 void InitApplication()
 {
 	CurrentScene = GetSceneManager()->CreateNewScene("NewScene");
+	
 	// Mesh
 	{
 		Entity* entity = CurrentScene->CreateEntity("TestEntity");
@@ -156,7 +157,7 @@ void InitApplication()
 		LightComp->Intensity = 8.0f;
 		LightComp->Range = 15.0f;
 		LightComp->SetLightType(LIGHT_TYPE_DIRECTIONAL);
-		//light->AddComponent<TestComponent4>();
+		light->AddComponent<TestComponent4>();
 	}
 	{
 		Entity* Sphere = CurrentScene->CreateEntity("Sphere");
@@ -210,7 +211,7 @@ void InitApplication()
 	{
 		Entity* camera = CurrentScene->CreateEntity("Camera");
 		CameraComponent* CamComponent = camera->AddComponent<CameraComponent>();
-		camera->GetTransform()->Translate(0.0f, 0.0f, 0.0f);
+		camera->GetTransform()->Translate(0.0f, 0.0f, 3.0f);
 		camera->GetTransform()->Rotate(0, 0, 0);
 		CamComponent->SetPriority(1);
 		camera->AddComponent<CameraMovementComponent>();

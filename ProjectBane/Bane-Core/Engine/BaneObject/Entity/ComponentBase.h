@@ -15,22 +15,22 @@ public:
 
 	virtual ~Component() { }
 	
-	ForceInline Entity* GetOwner()
+	inline Entity* GetOwner()
 	{
 		return m_Owner;
 	}
 
-	ForceInline Entity* GetOwner() const
+	inline Entity* GetOwner() const
 	{
 		return m_Owner;
 	}
 
-	ForceInline Transform* GetTransform()
+	inline Transform* GetTransform()
 	{
 		return m_Transform;
 	}
 
-	ForceInline Transform* GetTransform() const
+	inline Transform* GetTransform() const
 	{
 		return m_Transform;
 	}

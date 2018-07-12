@@ -138,10 +138,6 @@
     <ClCompile Include="Engine\BaneObject\CoreComponents\LightComponent.cpp" />
     <ClCompile Include="Engine\BaneObject\CoreComponents\SkyboxComponent.cpp" />
     <ClCompile Include="Engine\BaneObject\Entity\SceneManager.cpp" />
-    <ClCompile Include="Engine\Graphics\Interfaces\GraphicsDevice.cpp" />
-    <ClCompile Include="Engine\Graphics\IO\MeshCache.cpp" />
-    <ClCompile Include="Engine\Graphics\IO\ShaderTokenizer.cpp" />
-    <ClCompile Include="Engine\Graphics\Rendering\DefferedRenderer.cpp" />
     <ClCompile Include="Engine\Application\Application.cpp" />
     <ClCompile Include="Engine\Application\Input.cpp" />
     <ClCompile Include="Engine\Application\Window.cpp" />
@@ -153,48 +149,21 @@
     <ClCompile Include="Engine\BaneObject\Entity\EntityManager.cpp" />
     <ClCompile Include="Engine\BaneObject\Entity\Scene.cpp" />
     <ClCompile Include="Engine\BaneObject\Entity\Transform.cpp" />
-    <ClCompile Include="Engine\Core\Containers\StackQueue.cpp" />
-    <ClCompile Include="Engine\Core\Data\Color.cpp" />
-    <ClCompile Include="Engine\Core\Data\Image.cpp" />
-    <ClCompile Include="Engine\Core\Systems\Assets\AssetItem.cpp" />
-    <ClCompile Include="Engine\Core\Systems\Assets\AssetManager.cpp" />
-    <ClCompile Include="Engine\Core\Systems\File\PlatformFile.cpp" />
-    <ClCompile Include="Engine\Core\Systems\File\WindowsPlatformFile.cpp" />
-    <ClCompile Include="Engine\Core\Systems\Logging\ConsoleLogTarget.cpp" />
-    <ClCompile Include="Engine\Core\Systems\Logging\Logger.cpp" />
-    <ClCompile Include="Engine\Graphics\D3D12\D3D12CommandQueue.cpp" />
-    <ClCompile Include="Engine\Graphics\D3D12\D3D12CommandContext.cpp" />
-    <ClCompile Include="Engine\Graphics\D3D12\D3D12GraphicsDevice.cpp" />
-    <ClCompile Include="Engine\Graphics\D3D12\D3D12GraphicsResource.cpp" />
-    <ClCompile Include="Engine\Graphics\D3D12\D3D12PipelineLibrary.cpp" />
-    <ClCompile Include="Engine\Graphics\D3D12\D3D12PipelineState.cpp" />
-    <ClCompile Include="Engine\Graphics\D3D12\D3D12Runtime.cpp" />
-    <ClCompile Include="Engine\Graphics\D3D12\D3D12ShaderResourceViews.cpp" />
-    <ClCompile Include="Engine\Graphics\D3D12\D3D12ShaderSignature.cpp" />
-    <ClCompile Include="Engine\Graphics\D3D12\D3D12ShaderSignatureLibrary.cpp" />
-    <ClCompile Include="Engine\Graphics\D3D12\D3D12SwapChain.cpp" />
-    <ClCompile Include="Engine\Graphics\D3D12\D3D12Translator.cpp" />
-    <ClCompile Include="Engine\Graphics\D3D12\D3D12DescriptorAllocator.cpp" />
-    <ClCompile Include="Engine\Graphics\D3DCommon\D3DCommonTranslator.cpp" />
-    <ClCompile Include="Engine\Graphics\Interfaces\ApiRuntime.cpp" />
-    <ClCompile Include="Engine\Graphics\IO\PipelineCache.cpp" />
-    <ClCompile Include="Engine\Graphics\IO\ShaderCache.cpp" />
-    <ClCompile Include="Engine\Graphics\IO\TextureCache.cpp" />
-    <ClCompile Include="Engine\Graphics\Rendering\BasicForwardRenderer.cpp" />
-    <ClCompile Include="Engine\Graphics\Rendering\Camera.cpp" />
-    <ClCompile Include="Engine\Graphics\Rendering\Material.cpp" />
-    <ClCompile Include="Engine\Graphics\Rendering\Mesh.cpp" />
-    <ClCompile Include="Engine\Graphics\Rendering\RendererInterface.cpp" />
+    <ClCompile Include="Core\Containers\StackQueue.cpp" />
+    <ClCompile Include="Core\Data\Color.cpp" />
+    <ClCompile Include="Core\Data\Image.cpp" />
+    <ClCompile Include="Core\Systems\Assets\AssetItem.cpp" />
+    <ClCompile Include="Core\Systems\Assets\AssetManager.cpp" />
+    <ClCompile Include="Core\Systems\File\PlatformFile.cpp" />
+    <ClCompile Include="Core\Systems\File\WindowsPlatformFile.cpp" />
+    <ClCompile Include="Core\Systems\Logging\ConsoleLogTarget.cpp" />
+    <ClCompile Include="Core\Systems\Logging\Logger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\BaneObject\CoreComponents\LightComponent.h" />
     <ClInclude Include="Engine\BaneObject\CoreComponents\SkyboxComponent.h" />
     <ClInclude Include="Engine\BaneObject\Entity\EntityAllocator.h" />
     <ClInclude Include="Engine\BaneObject\Entity\SceneManager.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12Fence.h" />
-    <ClInclude Include="Engine\Graphics\IO\MeshCache.h" />
-    <ClInclude Include="Engine\Graphics\IO\ShaderTokenizer.h" />
-    <ClInclude Include="Engine\Graphics\Rendering\DefferedRenderer.h" />
     <ClInclude Include="Engine\Application\Application.h" />
     <ClInclude Include="Engine\Application\Input.h" />
     <ClInclude Include="Engine\Application\Window.h" />
@@ -208,67 +177,33 @@
     <ClInclude Include="Engine\BaneObject\Entity\EntityManager.h" />
     <ClInclude Include="Engine\BaneObject\Entity\Scene.h" />
     <ClInclude Include="Engine\BaneObject\Entity\Transform.h" />
-    <ClInclude Include="Engine\Core\BaneMacros.h" />
-    <ClInclude Include="Engine\Core\Common.h" />
-    <ClInclude Include="Engine\Core\Containers\StackQueue.h" />
-    <ClInclude Include="Engine\Core\Data\Color.h" />
-    <ClInclude Include="Engine\Core\Data\Format.h" />
-    <ClInclude Include="Engine\Core\Data\Image.h" />
-    <ClInclude Include="Engine\Core\Data\stb_image_write.h" />
-    <ClInclude Include="Engine\Core\KieckerMath.h" />
-    <ClInclude Include="Engine\Core\StringHelpers.h" />
-    <ClInclude Include="Engine\Core\Systems\Assets\AssetItem.h" />
-    <ClInclude Include="Engine\Core\Systems\Assets\AssetManager.h" />
-    <ClInclude Include="Engine\Core\Systems\File\JsonCPP.h" />
-    <ClInclude Include="Engine\Core\Systems\File\PlatformFile.h" />
-    <ClInclude Include="Engine\Core\Systems\File\WindowsPlatformFile.h" />
-    <ClInclude Include="Engine\Core\Systems\Logging\ConsoleLogTarget.h" />
-    <ClInclude Include="Engine\Core\Systems\Logging\Logger.h" />
-    <ClInclude Include="Engine\Core\Systems\Logging\LogTarget.h" />
-    <ClInclude Include="Engine\Engine.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12CommandContext.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12CommandQueue.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12GraphicsDevice.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12GraphicsResource.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12Helper.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12PipelineLibrary.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12PipelineState.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12Runtime.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12ShaderResourceViews.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12ShaderSignature.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12ShaderSignatureLibrary.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12SwapChain.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12Translator.h" />
-    <ClInclude Include="Engine\Graphics\D3D12\D3D12DescriptorAllocator.h" />
-    <ClInclude Include="Engine\Graphics\D3DCommon\D3DCommonTranslator.h" />
-    <ClInclude Include="Engine\Graphics\Graphics.h" />
-    <ClInclude Include="Engine\Graphics\Interfaces\ApiRuntime.h" />
-    <ClInclude Include="Engine\Graphics\Interfaces\CommandAllocator.h" />
-    <ClInclude Include="Engine\Graphics\Interfaces\DeviceTypes.h" />
-    <ClInclude Include="Engine\Graphics\Interfaces\GraphicsCommandList.h" />
-    <ClInclude Include="Engine\Graphics\Interfaces\GraphicsDevice.h" />
-    <ClInclude Include="Engine\Graphics\Interfaces\GraphicsResources.h" />
-    <ClInclude Include="Engine\Graphics\Interfaces\PipelineState.h" />
-    <ClInclude Include="Engine\Graphics\Interfaces\ResourceTypes.h" />
-    <ClInclude Include="Engine\Graphics\Interfaces\ShaderResourceView.h" />
-    <ClInclude Include="Engine\Graphics\IO\PipelineCache.h" />
-    <ClInclude Include="Engine\Graphics\IO\ShaderMacros.h" />
-    <ClInclude Include="Engine\Graphics\IO\TextureCache.h" />
-    <ClInclude Include="Engine\Graphics\Rendering\BasicForwardRenderer.h" />
-    <ClInclude Include="Engine\Graphics\Rendering\Camera.h" />
-    <ClInclude Include="Engine\Graphics\Rendering\LightData.h" />
-    <ClInclude Include="Engine\Graphics\Rendering\Material.h" />
-    <ClInclude Include="Engine\Graphics\Rendering\Mesh.h" />
-    <ClInclude Include="Engine\Graphics\Rendering\RendererInterface.h" />
-    <ClInclude Include="Engine\Graphics\Interfaces\SwapChainInterface.h" />
-    <ClInclude Include="Engine\Graphics\IO\ShaderCache.h" />
-    <ClInclude Include="Engine\Graphics\Rendering\RenderPass.h" />
+    <ClInclude Include="Core\Containers\StackQueue.h" />
+    <ClInclude Include="Core\Data\Color.h" />
+    <ClInclude Include="Core\Data\Format.h" />
+    <ClInclude Include="Core\Data\Image.h" />
+    <ClInclude Include="Core\Data\stb_image_write.h" />
+    <ClInclude Include="Core\Systems\Assets\AssetItem.h" />
+    <ClInclude Include="Core\Systems\Assets\AssetManager.h" />
+    <ClInclude Include="Core\Systems\File\JsonCPP.h" />
+    <ClInclude Include="Core\Systems\File\PlatformFile.h" />
+    <ClInclude Include="Core\Systems\File\WindowsPlatformFile.h" />
+    <ClInclude Include="Core\Systems\Logging\ConsoleLogTarget.h" />
+    <ClInclude Include="Core\Systems\Logging\Logger.h" />
+    <ClInclude Include="Core\Systems\Logging\LogTarget.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Engine\Core\BaneSTLNotes.txt" />
+    <Text Include="Core\BaneSTLNotes.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Bane-Common\Bane-Common.vcxproj">
+      <Project>{4c20f7ea-bfab-4e3b-b51c-0656b603c33c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Bane-Math\Bane-Math.vcxproj">
+      <Project>{90274931-3b40-4e58-876d-8797f096a259}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
