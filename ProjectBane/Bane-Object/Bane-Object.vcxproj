@@ -19,32 +19,41 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="KieckerMath.h" />
-    <ClInclude Include="Math\2ComponentVector.h" />
-    <ClInclude Include="Math\2RowColMatrix.h" />
-    <ClInclude Include="Math\3ComponentVector.h" />
-    <ClInclude Include="Math\3RowColMatrix.h" />
-    <ClInclude Include="Math\4ComponentVector.h" />
-    <ClInclude Include="Math\4RowColMatrix.h" />
-    <ClInclude Include="Math\MathFunctions.h" />
-    <ClInclude Include="Math\Quaternion.h" />
+    <ClCompile Include="BaneObject\Components\ComponentAllocator.cpp" />
+    <ClCompile Include="BaneObject\Components\ComponentBase.cpp" />
+    <ClCompile Include="BaneObject\Entity\Entity.cpp" />
+    <ClCompile Include="BaneObject\Scene\Scene.cpp" />
+    <ClCompile Include="BaneObject\Scene\SceneManager.cpp" />
+    <ClCompile Include="BaneObject\Entity\Transform.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BaneObject\Entity\BaneObject.h" />
+    <ClInclude Include="BaneObject\Components\ComponentAllocator.h" />
+    <ClInclude Include="BaneObject\Components\ComponentBase.h" />
+    <ClInclude Include="BaneObject\Entity\Entity.h" />
+    <ClInclude Include="BaneObject\Entity\EntityAllocator.h" />
+    <ClInclude Include="BaneObject\Scene\Scene.h" />
+    <ClInclude Include="BaneObject\Scene\SceneManager.h" />
+    <ClInclude Include="BaneObject\Entity\Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Bane-Common\Bane-Common.vcxproj">
       <Project>{4c20f7ea-bfab-4e3b-b51c-0656b603c33c}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Bane-Math\Bane-Math.vcxproj">
+      <Project>{90274931-3b40-4e58-876d-8797f096a259}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{90274931-3B40-4E58-876D-8797F096A259}</ProjectGuid>
+    <ProjectGuid>{72176562-128D-47F5-BAD1-F2972CF8BB63}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Math</RootNamespace>
+    <RootNamespace>BaneObject</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
-    <ProjectName>Bane-Math</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Utility</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -57,13 +66,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Utility</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Utility</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -89,7 +98,6 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)/Bane-Common/;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -99,7 +107,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)/Bane-Common/;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -114,9 +121,6 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <Lib>
-      <TreatLibWarningAsErrors>true</TreatLibWarningAsErrors>
-    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -167,9 +171,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <Lib>
-      <TreatLibWarningAsErrors>true</TreatLibWarningAsErrors>
-    </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

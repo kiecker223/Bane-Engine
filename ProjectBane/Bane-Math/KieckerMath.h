@@ -2,7 +2,7 @@
 #ifndef __BANE_MATH_H__
 #define __BANE_MATH_H__
 
-#include "Types.h"
+#include "Common/Types.h"
 #include <math.h>
 #include <string>
 

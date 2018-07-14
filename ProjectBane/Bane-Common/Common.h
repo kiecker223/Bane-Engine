@@ -1,5 +1,5 @@
 #pragma once
 
-#include "Types.h"
-#include "BaneMacros.h"
+#include "Common/Types.h"
+#include "Common/BaneMacros.h"
 

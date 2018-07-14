@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Types.h"
+#include "Common/Types.h"
 #include "2ComponentVector.h"
 
 struct int3

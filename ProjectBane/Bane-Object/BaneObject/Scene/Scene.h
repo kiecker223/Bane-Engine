@@ -3,7 +3,9 @@
 #include <fstream>
 #include <string>
 #include <map>
-#include "Entity.h"
+#include "Common/Types.h"
+#include "Common/Hash.h"
+#include "../Entity/Entity.h"
 
 typedef struct SCENE_DATA {
 	void* unused;
@@ -53,6 +55,7 @@ private:
 		Entity* pEntity;
 	};
 	std::vector<EntityHashEntry> m_Entities;
+	std::vector<Entity*> m_EntityAddList;
 };
 
 inline Scene* GetCurrentScene()

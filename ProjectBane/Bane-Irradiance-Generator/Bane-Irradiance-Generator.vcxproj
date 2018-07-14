@@ -164,7 +164,7 @@
     <ProjectReference Include="..\Bane-Math\Bane-Math.vcxproj">
       <Project>{90274931-3b40-4e58-876d-8797f096a259}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Math\Math.vcxproj">
+    <ProjectReference Include="..\Bane-Math\Bane-Math.vcxproj">
       <Project>{90274931-3b40-4e58-876d-8797f096a259}</Project>
     </ProjectReference>
   </ItemGroup>
