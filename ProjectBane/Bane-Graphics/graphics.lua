@@ -28,7 +28,7 @@ project "BaneGraphicsCore"
 
 project "BaneGraphicsRenderer"
     kind "StaticLib"
-    links {"BaneCore", "BaneGraphicsCore", "assimp-vc140-mt"}
+    links {"BaneCore", "BaneGraphicsCore"}
     includedirs { 
         "../Bane-Common",  
         "../Bane-Core",
