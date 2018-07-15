@@ -1,7 +1,11 @@
 #pragma once
 
-#include "Engine/Engine.h"
-
+#include "BaneObject/Components/ComponentBase.h"
+#include <windows.h>
+#include <WinUser.h>
+#include "KieckerMath.h"
+#include "BaneObject/Entity/Transform.h"
+#include "Common.h"
 
 class CameraMovementComponent : public Component
 {
@@ -21,6 +25,8 @@ public:
 
 	void Tick(float Dt) override final
 	{
+		UNUSED(Dt);
+
 		Transform* ST = GetTransform();
 		GetKeyboardState(InputState);
 		static const float3 Up(0.0f, 1.0f, 0.0f);

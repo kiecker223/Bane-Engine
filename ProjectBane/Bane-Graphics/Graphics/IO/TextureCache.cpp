@@ -1,9 +1,8 @@
 #include "TextureCache.h"
 #include "../Interfaces/ApiRuntime.h"
 #include <IL/il.h>
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "Core/Data/stb_image_write.h"
 #include <IL/devil_cpp_wrapper.hpp>
+
 
 
 TextureCache* TextureCache::GInstance = nullptr;
@@ -185,7 +184,7 @@ void TextureCache::InternalLoadCubemap(
 			bEqual = (OutImages[i].Width == OutImages[x].Width && OutImages[i].Height == OutImages[x].Height && OutImages[i].Step == OutImages[x].Step);
 		}
 	}
-	assert(bEqual);
+	//assert(bEqual);
 }
 
 // static uint GetLocation(uint X, uint Y, uint Z, uint Width, uint Depth)

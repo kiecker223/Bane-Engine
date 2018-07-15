@@ -2,7 +2,7 @@
 
 #include <d3d12.h>
 #include <vector>
-#include "Core/Common.h"
+#include "Common.h"
 #include "../D3DCommon/D3DCommon.h"
 
 class D3D12DescriptorAllocation

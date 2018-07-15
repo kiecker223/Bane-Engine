@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Core/Common.h"
-#include "Core/StringHelpers.h"
+#include "Common.h"
+#include "Common/StringHelpers.h"
 
 
 // Gross

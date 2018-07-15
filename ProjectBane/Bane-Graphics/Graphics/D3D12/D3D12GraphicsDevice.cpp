@@ -1,5 +1,5 @@
 #include "D3D12GraphicsDevice.h"
-#include "Systems/Logging/Logger.h"
+#include "Core/Systems/Logging/Logger.h"
 #include "D3D12Translator.h"
 #include "../IO/ShaderCache.h"
 #include "D3D12PipelineLibrary.h"

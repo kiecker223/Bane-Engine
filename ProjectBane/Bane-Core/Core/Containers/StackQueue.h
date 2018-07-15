@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Common.h"
+#include "Common.h"
 #include <array>
 
 template<typename TType, uint TMAX_SIZE>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Common.h"
+#include "Common.h"
 #include "../D3DCommon/D3DCommon.h"
 #include "D3D12Helper.h"
 #include "../D3DCommon/D3DCommon.h"

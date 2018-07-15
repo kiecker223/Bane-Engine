@@ -1,10 +1,10 @@
 #include <thread>
 #include "ShaderCache.h"
 #include "Core/Systems/Logging/Logger.h"
-#include "Core/Common.h"
+#include "Common.h"
 #include "Core/Systems/File/PlatformFile.h"
 #include "../Interfaces/ApiRuntime.h"
-#include "Core/StringHelpers.h"
+#include "Common/StringHelpers.h"
 #include <string>
 #include <iostream>
 

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Engine/Graphics/Rendering/RendererInterface.h"
+#include "RendererInterface.h"
 #include "../Interfaces/ApiRuntime.h"
 #include "../Interfaces/ShaderResourceView.h"
 #include "Mesh.h"
 #include "Material.h"
-#include "BaneObject/CoreComponents/LightComponent.h"
+#include "BaneObject/Components/LightComponent.h"
 
 
 #define MAX_LIGHTS 30

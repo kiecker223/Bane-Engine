@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/Common.h"
+#include "Common.h"
 #include "Core/Data/Format.h"
 #include "../D3D12/D3D12Helper.h"
 #include <vector>

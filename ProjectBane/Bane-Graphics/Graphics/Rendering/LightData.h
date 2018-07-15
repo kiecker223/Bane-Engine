@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/KieckerMath.h"
+#include "KieckerMath.h"
 
 
 typedef struct DIRECTIONAL_LIGHT_DATA {

@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/KieckerMath.h"
+#include "KieckerMath.h"
 #include "PipelineState.h"
 #include "GraphicsResources.h"
 #include "GraphicsCommandList.h"

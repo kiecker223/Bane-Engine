@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/KieckerMath.h"
+#include "KieckerMath.h"
 
 class IGPUResource;
 

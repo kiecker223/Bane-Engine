@@ -1,7 +1,7 @@
 #pragma once
-#include "Core/Common.h"
+#include "Common.h"
 #include <string>
-#include "Core/Systems/Logging/Logger.h"
+#include "../../Core/Systems/Logging/Logger.h"
 
 
 typedef enum EMESH_QUALITY {

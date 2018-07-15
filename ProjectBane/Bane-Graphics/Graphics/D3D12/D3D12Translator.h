@@ -1,8 +1,8 @@
 #pragma once
 #include <d3d12.h>
-#include "Graphics/Interfaces/PipelineState.h"
-#include "Graphics/Interfaces/GraphicsCommandList.h"
-#include "Core/Common.h"
+#include "../Interfaces/PipelineState.h"
+#include "../Interfaces/GraphicsCommandList.h"
+#include "Common.h"
 #include "../D3DCommon/D3DCommonTranslator.h"
 #include "D3D12ShaderSignatureLibrary.h"
 

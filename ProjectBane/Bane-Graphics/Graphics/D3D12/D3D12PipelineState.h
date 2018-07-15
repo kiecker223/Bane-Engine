@@ -2,7 +2,7 @@
 
 #include "../Interfaces/PipelineState.h"
 #include "../D3DCommon/D3DCommon.h"
-#include "Core/Types.h"
+#include "Common/Types.h"
 #include "D3D12ShaderSignature.h"
 
 template<ESHADER_STAGE ShaderStage>

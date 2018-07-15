@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Graphics/Rendering/RendererInterface.h"
+#include "RendererInterface.h"
 #include "../Interfaces/ApiRuntime.h"
 #include "Mesh.h"
 #include "Material.h"

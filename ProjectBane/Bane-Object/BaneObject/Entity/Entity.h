@@ -1,8 +1,8 @@
 #pragma once
 #include "Transform.h"
-#include "ComponentBase.h"
-#include "ComponentAllocator.h"
-#include "Core/Hash.h"
+#include "../Components/ComponentBase.h"
+#include "../Components/ComponentAllocator.h"
+#include "Common/Hash.h"
 #include <array>
 
 

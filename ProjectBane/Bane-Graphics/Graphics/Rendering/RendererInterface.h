@@ -1,11 +1,9 @@
 #pragma once
 
-#include "Core/KieckerMath.h"
+#include "KieckerMath.h"
 #include "../Interfaces/GraphicsCommandList.h"
 #include "Core/Systems/Logging/Logger.h"
 #include "LightData.h"
-#include "BaneObject/Entity/Entity.h"
-
 #include <vector>
 
 class Scene;
@@ -15,6 +13,7 @@ class IGraphicsCommandContext;
 class IDeviceSwapChain;
 class SkyboxComponent;
 class CameraComponent;
+class Entity;
 
 
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Types.h"
+#include "Common/Types.h"
 #include <dxgiformat.h>
 
 
@@ -71,17 +71,26 @@ inline uint GetDXGIFormatSize(DXGI_FORMAT Format)
 
 
 #ifdef _DEBUG
-#include <comdef.h>
-#include <sstream>
-inline std::string D3D_BuildErrorMessage(uint Line, const char* File, const char* Function, HRESULT Res)
+#include <windows.h>
+
+inline void D3D_BuildErrorMessage(HRESULT Res)
 {
-	std::stringstream Str;
-	std::string ErrorMessage = _com_error(Res).ErrorMessage();
-	Str << "Direct 3D error on line: " << Line << "\nin file: " << File << "\nin function: " << Function << "\nWith error code: " << std::to_string(Res);
-	return Str.str();
+	LPSTR output;
+	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM |
+		FORMAT_MESSAGE_IGNORE_INSERTS |
+		FORMAT_MESSAGE_ALLOCATE_BUFFER,
+		NULL,
+		Res,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR)&output,
+		0,
+		NULL);
+
+	MessageBox(nullptr, output, "D3D12 ERROR:", MB_OK); 
+	__debugbreak();
 }
 
-#define D3D12ERRORCHECK(x) { HRESULT HResult = x; if (FAILED(HResult)) { MessageBoxA(nullptr, D3D_BuildErrorMessage(__LINE__, __FILE__, __FUNCTION__, HResult).c_str(), "D3D12 ERROR:", MB_OK); __debugbreak(); } }
+#define D3D12ERRORCHECK(x) { HRESULT HResult = x; if (FAILED(HResult)) { D3D_BuildErrorMessage(HResult); } }
 #else
 #define D3D12ERRORCHECK(x) x
 #endif

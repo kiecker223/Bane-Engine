@@ -2,8 +2,8 @@
 
 #include <vector>
 #include <memory>
-#include "Core/Common.h"
-#include "Core/KieckerMath.h"
+#include "Common.h"
+#include "KieckerMath.h"
 #include "../Interfaces/GraphicsResources.h"
 #include "../Interfaces/PipelineState.h"
 

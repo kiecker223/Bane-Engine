@@ -3,7 +3,7 @@
 #include "../Interfaces/GraphicsResources.h"
 #include "../Interfaces/ShaderResourceView.h"
 #include "../Interfaces/GraphicsCommandList.h"
-#include "Graphics/Rendering/RendererInterface.h"
+#include "RendererInterface.h"
 
 
 typedef enum ERENDER_FLAGS {

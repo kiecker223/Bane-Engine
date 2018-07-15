@@ -1,5 +1,5 @@
 #include "Window.h"
-#include "Graphics/IO/ShaderCache.h"
+//#include "Graphics/IO/ShaderCache.h"
 
 
 #define CUSTOM_SIZE_EVENT 0x0401
@@ -86,7 +86,7 @@ bool Window::QuitRequested()
 			auto Key = message.wParam;
 			if (Key == 0x50)
 			{
-				GetShaderCache()->TransitionToReloadState();
+				//GetShaderCache()->TransitionToReloadState();
 			}
 #endif
 		} break;

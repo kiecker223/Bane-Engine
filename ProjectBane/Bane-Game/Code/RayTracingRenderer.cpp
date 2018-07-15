@@ -1,4 +1,6 @@
 #include "RayTracingRenderer.h"
+#include "Graphics/Interfaces/ApiRuntime.h"
+#include "BaneObject/Components/CameraComponent.h"
 
 struct ScreenSizes
 {
@@ -83,30 +85,30 @@ void RayTracingRenderer::Initialize()
 	AddPointLight(PointLight);
 
 
-	Window* AppWindow = GetApplicationInstance()->GetWindow();
-	float WindowWidth = (float)AppWindow->GetWidth();
-	float WindowHeight = (float)AppWindow->GetHeight();
-	CBufferData = { WindowWidth, WindowHeight, 0.0f, 3 };
+	//Window* AppWindow = GetApplicationInstance()->GetWindow();
+	//float WindowWidth = (float)AppWindow->GetWidth();
+	//float WindowHeight = (float)AppWindow->GetHeight();
+	//CBufferData = { WindowWidth, WindowHeight, 0.0f, 3 };
 
-	m_OnScreenQuad.VB = m_Device->CreateVertexBuffer(sizeof(vertices), (uint8*)vertices);
-	m_OnScreenQuad.IB = m_Device->CreateIndexBuffer(sizeof(indices), (uint8*)indices);
-	m_OnScreenQuad.Pipeline = GetShaderCache()->LoadGraphicsPipeline("Shaders/RayTracingPS.hlsl");
-	m_OnScreenQuad.Table = m_Device->CreateShaderTable(m_OnScreenQuad.Pipeline);
-	m_OnScreenQuad.CBs[0] = m_Device->CreateConstBuffer<RAYTRACING_CAMERA_CONSTANTS>();
-	m_OnScreenQuad.CBs[1] = m_Device->CreateConstBuffer<ScreenSizes>();
-	m_OnScreenQuad.CBs[2] = m_Device->CreateConstBuffer<GEOMETRY_DATA>();
+	//m_OnScreenQuad.VB = m_Device->CreateVertexBuffer(sizeof(vertices), (uint8*)vertices);
+	//m_OnScreenQuad.IB = m_Device->CreateIndexBuffer(sizeof(indices), (uint8*)indices);
+	//m_OnScreenQuad.Pipeline = GetShaderCache()->LoadGraphicsPipeline("Shaders/RayTracingPS.hlsl");
+	//m_OnScreenQuad.Table = m_Device->CreateShaderTable(m_OnScreenQuad.Pipeline);
+	//m_OnScreenQuad.CBs[0] = m_Device->CreateConstBuffer<RAYTRACING_CAMERA_CONSTANTS>();
+	//m_OnScreenQuad.CBs[1] = m_Device->CreateConstBuffer<ScreenSizes>();
+	//m_OnScreenQuad.CBs[2] = m_Device->CreateConstBuffer<GEOMETRY_DATA>();
 
-	IGraphicsCommandContext* ctx = m_Device->GetGraphicsContext();
-	ctx->Begin();
-	
-	memcpy(ctx->Map(m_OnScreenQuad.CBs[1]), (void*)&CBufferData, sizeof(ScreenSizes));
-	ctx->Unmap(m_OnScreenQuad.CBs[1]);
-	memcpy(ctx->Map(m_OnScreenQuad.CBs[2]), (void*)&m_GeometryData, sizeof(GEOMETRY_DATA));
-	ctx->Unmap(m_OnScreenQuad.CBs[2]);
-	ctx->End();
-	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_OnScreenQuad.CBs[0], 0);
-	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_OnScreenQuad.CBs[1], 1);
-	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_OnScreenQuad.CBs[2], 2);
+	//IGraphicsCommandContext* ctx = m_Device->GetGraphicsContext();
+	//ctx->Begin();
+	//
+	//memcpy(ctx->Map(m_OnScreenQuad.CBs[1]), (void*)&CBufferData, sizeof(ScreenSizes));
+	//ctx->Unmap(m_OnScreenQuad.CBs[1]);
+	//memcpy(ctx->Map(m_OnScreenQuad.CBs[2]), (void*)&m_GeometryData, sizeof(GEOMETRY_DATA));
+	//ctx->Unmap(m_OnScreenQuad.CBs[2]);
+	//ctx->End();
+	//m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_OnScreenQuad.CBs[0], 0);
+	//m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_OnScreenQuad.CBs[1], 1);
+	//m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_OnScreenQuad.CBs[2], 2);
 }
 
 void RayTracingRenderer::Render()
