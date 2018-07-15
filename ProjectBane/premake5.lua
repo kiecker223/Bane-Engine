@@ -56,10 +56,22 @@ workspace "ProjectBane"
     language "C++"
     characterset "ASCII"
     startproject "BaneIrradianceGenerator"
+
+    vpaths {
+      ["Lua"] = "**.lua"
+    }
     
     filter "system:windows"
       SetupWinSDK()
 
+project "BuildFiles"
+    kind "None"
+    files {"**.lua"}
+
+project("Regenerate premake")
+    kind "Utility"
+    prebuildcommands("%{prj.location}../Tools/premake5.exe --file=%{prj.location}../premake5.lua vs2017")
+    
 
 include "Bane-Common/common.lua"
 include "Bane-Core/core.lua"
