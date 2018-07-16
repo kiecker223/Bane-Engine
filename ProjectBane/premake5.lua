@@ -71,8 +71,9 @@ project "BuildFiles"
 project("Regenerate premake")
     kind "Utility"
     prebuildcommands("%{prj.location}../Tools/premake5.exe --file=%{prj.location}../premake5.lua vs2017")
-    
-
+   
+include "Bane-Executable/executable.lua"
+include "Bane-Systems/platform.lua"
 include "Bane-Common/common.lua"
 include "Bane-Core/core.lua"
 include "Bane-Object/object.lua"

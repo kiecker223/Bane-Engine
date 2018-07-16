@@ -19,8 +19,8 @@
 #undef ILUT_USE_DIRECTX8
 //#define ILUT_USE_DIRECTX9
 //#define ILUT_USE_DIRECTX10
-#define ILUT_USE_OPENGL
+//#define ILUT_USE_OPENGL
 //#define ILUT_USE_SDL
-#define ILUT_USE_WIN32
+//#define ILUT_USE_WIN32
 
 #endif//__ILUT_CONFIG_H__

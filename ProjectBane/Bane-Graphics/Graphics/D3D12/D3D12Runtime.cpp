@@ -43,7 +43,8 @@ void D3D12Runtime::Initialize()
 	ID3D12CommandQueue* CommandQueue = nullptr;
 	Device->CreateCommandQueue(&CmdDesc, IID_PPV_ARGS(&CommandQueue));
 
-	Window* RenderingWindow = GetApplicationInstance()->GetWindow();
+	Application* pApp = GetApplicationInstance();
+	Window* RenderingWindow = pApp->GetWindow();
 
 	m_SwapChain->Initialize(DxgiFactory, Adapter, CommandQueue, RenderingWindow);
 	m_Device = new D3D12GraphicsDevice(m_SwapChain, RenderingWindow, Device, CommandQueue);

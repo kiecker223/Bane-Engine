@@ -1,6 +1,6 @@
 group "Core"
 project "BaneCommon"
-    kind "StaticLib"
+    kind "Utility"
     includedirs { "*", "Common/**.h" }
     files { "Common/**.h", 
             "Common/**.cpp" }

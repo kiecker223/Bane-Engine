@@ -141,7 +141,7 @@ public:
 
 Scene* CurrentScene;
 
-void InitApplication()
+extern "C" void InitApplication()
 {
 	CurrentScene = GetSceneManager()->CreateNewScene("NewScene");
 	
