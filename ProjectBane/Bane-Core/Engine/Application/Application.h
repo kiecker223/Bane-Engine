@@ -1,7 +1,8 @@
 #pragma once
 #include "Common.h"
 #include <string>
-#include "../../Core/Systems/Logging/Logger.h"
+#include <Platform/System/Window.h>
+#include <Platform/System/AssemblyLoader.h>
 
 
 typedef enum EMESH_QUALITY {
@@ -34,7 +35,6 @@ typedef struct RENDERING_SETTINGS {
 
 
 class SceneRenderer;
-class Window;
 
 typedef void(*PFNApplicationStartCallback)();
 typedef void(*PFNApplicationUpdateCallback)();
@@ -85,27 +85,25 @@ public:
 	void Run();
 
 	void Shutdown();
-	
+
 	inline void SetSceneRenderer(SceneRenderer* InSceneRenderer)
 	{
 		m_SceneRenderer = InSceneRenderer;
 	}
 
 private:
-	
+
 	static Application* GApplication;
 
 	PFNApplicationStartCallback m_StartCallback;
 	PFNApplicationUpdateCallback m_UpdateCallback;
 	PFNApplicationCleanupCallback m_CleanupCallback;
 
+	Assembly* m_GameAssembly;
 	SceneRenderer* m_SceneRenderer;
 	Window* m_Window = nullptr;
 
 };
-
-
-
 
 inline Application* GetApplicationInstance()
 {

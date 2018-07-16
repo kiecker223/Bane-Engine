@@ -1,14 +1,13 @@
 group "App"
 project "BaneExecutable"
     kind "ConsoleApp"
-    links { "BaneObject", "BaneCore", "BaneGraphicsCore", "BaneEngine", "BanePlatform" }
+    links { "BaneObject", "BaneCore", "BaneGraphicsCore", "BaneEngine" }
     includedirs {
         "../Bane-Common",
         "../Bane-Math",
         "../Bane-Object",
         "../Bane-Core",
         "../Bane-Graphics",
-		"../Bane-Systems",
         "../External/include"
     }
 	characterset "ASCII"

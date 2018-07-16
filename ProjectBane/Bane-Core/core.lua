@@ -12,12 +12,13 @@ project "BaneCore"
 
 project "BaneEngine"
     kind "StaticLib"
-    links {"BaneGraphicsRenderer", "BaneObject", "BaneCore"}
+    links {"BaneGraphicsRenderer", "BaneObject", "BaneCore", "BanePlatform"}
     includedirs { 
         "../Bane-Common", 
         "../Bane-Graphics", 
         "../Bane-Object",
         "../Bane-Math",
+		"../Bane-Systems",
         "../Bane-Core", }
     files { "Engine/Application/**.h",
             "Engine/Application/**.cpp"}

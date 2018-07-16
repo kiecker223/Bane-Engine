@@ -24,7 +24,6 @@ public:
 
 private:
 
-
 	uint m_width, m_height;
 	HWND m_windowHandle;
 };

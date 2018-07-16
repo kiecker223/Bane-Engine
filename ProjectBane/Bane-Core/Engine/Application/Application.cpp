@@ -5,7 +5,6 @@
 #include "Graphics/IO/TextureCache.h"
 #include "Graphics/IO/ShaderCache.h"
 #include <sstream>
-#include "Window.h"
 
 
 Application* Application::GApplication = nullptr;
@@ -42,7 +41,8 @@ void Application::OpenApplicationWindow(const std::string& Name, uint Width, uin
 	{
 		delete m_Window;
 	}
-	m_Window = new Window(Name.c_str(), Width, Height);
+	Window* pWindow = new Window(Name.c_str(), Width, Height);
+	m_Window = pWindow;
 }
 
 void Application::InitSystems()
@@ -55,7 +55,7 @@ void Application::InitSystems()
 
 	if (!m_Window)
 	{
-		uint ScreenWidth  = GetSystemMetrics(SM_CXSCREEN);
+		uint ScreenWidth = GetSystemMetrics(SM_CXSCREEN);
 		uint ScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 		ScreenWidth = uint(ScreenWidth *  (float)0.9);
 		ScreenHeight = uint(ScreenHeight * (float)0.9);
@@ -75,7 +75,11 @@ void Application::InitSystems()
 		m_SceneRenderer = new DefferedRenderer();
 	}
 	m_SceneRenderer->Initialize();
-	
+
+	AssemblyLoader Loader;
+	m_GameAssembly = Loader.LoadAssembly("BaneGame.dll");
+	m_StartCallback = (PFNApplicationStartCallback)m_GameAssembly->LoadProc("InitApplication");
+
 	m_StartCallback();
 	Scene* pScene = GetCurrentScene();
 	if (pScene)
@@ -88,7 +92,7 @@ void Application::Run()
 {
 	while (!m_Window->QuitRequested())
 	{
-		m_UpdateCallback();
+		//m_UpdateCallback();
 		GetCurrentScene()->Tick(0.f);
 		m_SceneRenderer->Render();
 		m_SceneRenderer->Present();
@@ -97,7 +101,6 @@ void Application::Run()
 
 void Application::Shutdown()
 {
-	m_CleanupCallback();
 	m_SceneRenderer->Shutdown();
 	delete m_SceneRenderer;
 	ShutdownSceneManager();
