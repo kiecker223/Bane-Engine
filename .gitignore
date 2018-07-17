@@ -334,3 +334,5 @@ ASALocalRun/
 *.filters
 
 ProjectBane/Generated/
+
+ProjectBane/ProjectBane\.sln

@@ -15,7 +15,7 @@ workspace "ProjectBane"
     configurations { "Debug", "Release" }
     platforms { "x64" }
     warnings "Extra"
-    location "Generated/"
+-- location "Generated/"
 
     filter "platforms:x64"
       architecture "x86_64"
