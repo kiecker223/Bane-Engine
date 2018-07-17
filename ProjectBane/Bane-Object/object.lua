@@ -8,7 +8,7 @@ project "BaneObject"
         "../Bane-Math",
         "../Bane-Graphics"}
 
-    files { "BaneObject/**.h",
-            "BaneObject/**.cpp"}
+    files { "**.h",
+            "**.cpp"}
 
     excludes { "BaneObject/Entity/Transform.cpp", "BaneObject/Components/ComponentBase.cpp" }

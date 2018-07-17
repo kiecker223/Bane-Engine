@@ -12,16 +12,10 @@ project "BaneExecutable"
     }
 	characterset "ASCII"
     libdirs {"../External/libs/"}
-
     filter "system:windows"
         links {"d3d12", "assimp-vc140-mt", "DevIL.lib", "ILU.lib", "dxgi", "d3dcompiler", }
         includedirs {"../Bane-Systems/Platform-Windows/"}
-
-    files {"Executable/**.h", "Executable/**.cpp"}
-
-	postbuildcommands {
-        "{COPY} ../External/dlls/*.dll %{cfg.targetdir}"
-    }
+    files {"**.h", "**.cpp"}
 
 
 

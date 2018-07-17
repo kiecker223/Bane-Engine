@@ -1,11 +1,5 @@
 -- premake5.lua
 
-newoption {
-  trigger = "andrew",
-  description = "Make shit suck less",
-}
-
-
 function SetupWinSDK()
   if os.getversion().majorversion == 10 then
     local sRegArch = iif( os.is64bit(), "\\Wow6432Node\\", "\\" )
@@ -21,10 +15,7 @@ workspace "ProjectBane"
     configurations { "Debug", "Release" }
     platforms { "x64" }
     warnings "Extra"
-
-    if _OPTIONS["ANDREW"] then
-      location "Generated/"
-    end
+    --location "Generated/"
 
     filter "platforms:x64"
       architecture "x86_64"
@@ -64,7 +55,7 @@ workspace "ProjectBane"
     cppdialect "C++17"
     language "C++"
     characterset "ASCII"
-    startproject "BaneIrradianceGenerator"
+    startproject "BaneExecutable"
 
     vpaths {
       ["Lua"] = "**.lua"
@@ -82,11 +73,14 @@ project("Regenerate premake")
     prebuildcommands("%{prj.location}../Tools/premake5.exe --file=%{prj.location}../premake5.lua vs2017")
    
 include "Bane-Executable/executable.lua"
-include "Bane-Systems/platform.lua"
+include "Bane-Platform/platform.lua"
 include "Bane-Common/common.lua"
 include "Bane-Core/core.lua"
 include "Bane-Object/object.lua"
-include "Bane-Graphics/graphics.lua"
+include "Bane-Graphics-Core/graphics_core.lua"
+include "Bane-Rendering/rendering.lua"
 include "Bane-Math/math.lua"
 include "Bane-Irradiance-Generator/irradiance.lua"
+include "Bane-Core-Components/core_components.lua"
 include "Bane-Game/game.lua"
+include "Bane-Application/application.lua"
