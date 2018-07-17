@@ -1,5 +1,11 @@
 -- premake5.lua
 
+newoption {
+  trigger = "andrew",
+  description = "Make shit suck less",
+}
+
+
 function SetupWinSDK()
   if os.getversion().majorversion == 10 then
     local sRegArch = iif( os.is64bit(), "\\Wow6432Node\\", "\\" )
@@ -15,7 +21,10 @@ workspace "ProjectBane"
     configurations { "Debug", "Release" }
     platforms { "x64" }
     warnings "Extra"
--- location "Generated/"
+
+    if _OPTIONS["ANDREW"] then
+      location "Generated/"
+    end
 
     filter "platforms:x64"
       architecture "x86_64"
