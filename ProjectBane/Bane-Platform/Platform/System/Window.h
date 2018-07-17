@@ -16,7 +16,7 @@ public:
 		virtual ~WindowsHandle() { }
 
 	protected:
-		virtual void* GetHandle();
+		virtual void* GetHandle() = 0;
 	};
 
 	Window();
