@@ -1,8 +1,9 @@
+#include "Application.h"
 #include "D3D12Runtime.h"
-#include "Engine/Application/Application.h"
 #include "D3D12GraphicsDevice.h"
 #include "D3D12SwapChain.h"
 #include "Common.h"
+#include "System/Logging/Logger.h"
 
 #define USE_WARP 0
 #define USE_DEBUG_INTERFACE 0

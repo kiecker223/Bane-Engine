@@ -1,7 +1,7 @@
 #include "D3D12GraphicsResource.h"
 #include "D3D12GraphicsDevice.h"
 #include "D3D12Translator.h"
-#include "Core/Systems/Logging/Logger.h"
+#include "System/Logging/Logger.h"
 #include "D3D12Helper.h"
 
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RenderComponent.h"
-#include "../Entity/Entity.h"
+#include "BaneObject/Entity/Entity.h"
 #include "KieckerMath.h"
 #include "Graphics/Interfaces/GraphicsResources.h"
 

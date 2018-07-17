@@ -22,8 +22,51 @@ LRESULT CALLBACK WndProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam
 }
 
 
+class OsWindowsHandle : public Window::WindowsHandle {
+public:
+	static Window::WindowsHandle* Create(LPCSTR className, const char* name, uint width, uint height, HINSTANCE instance);
+
+	OsWindowsHandle(HWND);
+	virtual ~OsWindowsHandle();
+	virtual void Destroy();
+
+protected:
+	virtual void* GetHandle();
+private:
+	const HWND osHandle;
+};
+
+OsWindowsHandle::OsWindowsHandle(HWND handle)
+	: osHandle(handle)
+{
+
+}
+
+void OsWindowsHandle::Destroy() {
+	delete this;
+}
+
+OsWindowsHandle::~OsWindowsHandle() {
+	DestroyWindow(osHandle);
+}
+
+void* OsWindowsHandle::GetHandle() {
+	return osHandle;
+}
+
+Window::WindowsHandle* OsWindowsHandle::Create(LPCSTR className, const char* name, uint width, uint height, HINSTANCE instance) {
+
+	auto windows = CreateWindowA(
+		className, name, WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+		CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, instance, nullptr
+	);
+
+	return new OsWindowsHandle(windows);
+}
+
 Window::Window()
 {
+
 }
 
 Window::Window(const char *windowName, uint width, uint height, bool isFullscreen)
@@ -33,7 +76,7 @@ Window::Window(const char *windowName, uint width, uint height, bool isFullscree
 
 Window::~Window()
 {
-	DestroyWindow((HWND)m_windowHandle);
+	m_windowHandle->Destroy();
 	UnregisterClassA("GAME-WINDOW-CLASS-NAME", GetModuleHandle(nullptr));
 }
 
@@ -51,10 +94,7 @@ void Window::Open(const char* windowName, uint width, uint height, bool isFullsc
 
 	if (!isFullscreen)
 	{
-		m_windowHandle = (void*)CreateWindowA(
-			wndClass.lpszClassName, windowName, WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-			CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, instance, nullptr
-		);
+		m_windowHandle = OsWindowsHandle::Create(wndClass.lpszClassName, windowName, width, height, instance);
 	}
 	m_width = width;
 	m_height = height;

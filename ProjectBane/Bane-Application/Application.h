@@ -1,8 +1,8 @@
 #pragma once
 #include "Common.h"
 #include <string>
-#include <Platform/System/Window.h>
-#include <Platform/System/AssemblyLoader.h>
+#include "System/Window.h"
+#include "System/AssemblyLoader.h"
 
 
 typedef enum EMESH_QUALITY {

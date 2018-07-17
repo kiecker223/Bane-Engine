@@ -1,5 +1,13 @@
 -- premake5.lua
 
+newoption {
+ 
+  trigger = "andrew",
+  description = "Make shit suck less",
+ 
+}
+ 
+
 function SetupWinSDK()
   if os.getversion().majorversion == 10 then
     local sRegArch = iif( os.is64bit(), "\\Wow6432Node\\", "\\" )
@@ -15,7 +23,11 @@ workspace "ProjectBane"
     configurations { "Debug", "Release" }
     platforms { "x64" }
     warnings "Extra"
-    --location "Generated/"
+
+    if _OPTIONS["ANDREW"] then
+      location "Generated/"
+    end
+ 
 
     filter "platforms:x64"
       architecture "x86_64"
@@ -71,7 +83,8 @@ project "BuildFiles"
 project("Regenerate premake")
     kind "Utility"
     prebuildcommands("%{prj.location}../Tools/premake5.exe --file=%{prj.location}../premake5.lua vs2017")
-   
+
+include "Bane-Application/application.lua"
 include "Bane-Executable/executable.lua"
 include "Bane-Platform/platform.lua"
 include "Bane-Common/common.lua"
@@ -83,4 +96,3 @@ include "Bane-Math/math.lua"
 include "Bane-Irradiance-Generator/irradiance.lua"
 include "Bane-Core-Components/core_components.lua"
 include "Bane-Game/game.lua"
-include "Bane-Application/application.lua"

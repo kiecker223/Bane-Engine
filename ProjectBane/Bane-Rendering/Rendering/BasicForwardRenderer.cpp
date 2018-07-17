@@ -1,5 +1,5 @@
 #include "BasicForwardRenderer.h"
-#include "BaneObject/Components/CameraComponent.h"
+#include "CoreComponents/CameraComponent.h"
 
 
 struct FORWARD_CAMERA_CONSTANTS

@@ -9,7 +9,12 @@ group "Engine"
 		"../Bane-Core",
 		"../Bane-Platform",
 		"../Bane-Graphics-Core",
-		"../Bane-Object"
+		"../Bane-Rendering",
+		"../Bane-Object",
+		"../Bane-Platform/Platform",
+		"../Bane-Core-Components",
+		"../Bane-Math"
+
 	}
 	links {
 		"BaneCore",

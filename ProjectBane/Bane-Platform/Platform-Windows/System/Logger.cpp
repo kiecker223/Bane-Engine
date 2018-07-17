@@ -1,5 +1,5 @@
-#include "Logger.h"
-#include "ConsoleLogTarget.h"
+#include "../../Platform/System/Logging/Logger.h"
+#include "../../Platform/System/Logging/ConsoleLogTarget.h"
 
 GlobalLog* GlobalLog::LogInstance = nullptr;
 

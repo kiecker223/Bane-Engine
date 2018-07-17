@@ -1,8 +1,8 @@
 #include <thread>
 #include "ShaderCache.h"
-#include "Core/Systems/Logging/Logger.h"
+#include "System/Logging/Logger.h"
 #include "Common.h"
-#include "Core/Systems/File/PlatformFile.h"
+#include "System/File/PlatformFile.h"
 #include "../Interfaces/ApiRuntime.h"
 #include "Common/StringHelpers.h"
 #include <string>

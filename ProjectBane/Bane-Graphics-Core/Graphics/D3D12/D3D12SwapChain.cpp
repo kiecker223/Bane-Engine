@@ -7,7 +7,7 @@ bool D3D12SwapChain::Initialize(IDXGIFactory2* Factory, IDXGIAdapter* InAdapter,
 	Adapter = InAdapter;
 	const uint Width = RenderingWindow->GetWidth();
 	const uint Height = RenderingWindow->GetHeight();
-	HWND WindowHandle = RenderingWindow->GetHwnd();
+	HWND WindowHandle = RenderingWindow->GetHandle()->GetNativeHandle<HWND>();
 	DXGI_SWAP_CHAIN_DESC1 Desc = { };
 	Desc.Width = Width;
 	Desc.Height = Height;

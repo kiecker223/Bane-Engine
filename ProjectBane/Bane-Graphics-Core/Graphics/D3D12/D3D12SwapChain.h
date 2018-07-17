@@ -3,7 +3,7 @@
 #include <dxgi1_5.h>
 #include <d3d12.h>
 #include "../Interfaces/SwapChainInterface.h"
-#include <Platform/System/Window.h>
+#include <System/Window.h>
 
 class D3D12GraphicsDevice;
 

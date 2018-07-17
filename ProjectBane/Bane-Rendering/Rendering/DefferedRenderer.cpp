@@ -1,11 +1,13 @@
 #include "DefferedRenderer.h"
-#include "Engine/Application/Application.h"
-#include "../Interfaces/ApiRuntime.h"
+#include "Application.h"
+#include "Graphics/Interfaces/ApiRuntime.h"
 #include "KieckerMath.h"
-#include "../IO/ShaderCache.h"
-#include "../IO/TextureCache.h"
-#include "BaneObject/Components/CameraComponent.h"
-#include "BaneObject/Components/SkyboxComponent.h"
+#include "Graphics/IO/ShaderCache.h"
+#include "Graphics/IO/TextureCache.h"
+#include "CoreComponents/CameraComponent.h"
+#include "CoreComponents/SkyboxComponent.h"
+#include "CoreComponents/LightComponent.h"
+#include "LightData.h"
 
 
 typedef struct DEFFERED_CAMERA_CONSTANTS {

@@ -1,6 +1,7 @@
 #include "CameraComponent.h"
-#include "Engine/Application/Window.h"
-#include "Engine/Application/Application.h"
+#include "System/Window.h"
+#include "Application.h"
+#include "Rendering/RendererInterface.h"
 
 
 CameraComponent* CameraComponent::GMainCamera = nullptr;

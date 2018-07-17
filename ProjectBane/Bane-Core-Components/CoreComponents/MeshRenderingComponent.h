@@ -1,8 +1,8 @@
 #pragma once
 
 #include "RenderComponent.h"
-#include "Graphics/Rendering/Mesh.h"
-#include "Graphics/Rendering/Material.h"
+#include "Rendering/Mesh.h"
+#include "Rendering/Material.h"
 
 
 class MeshRenderingComponent : public RenderComponent

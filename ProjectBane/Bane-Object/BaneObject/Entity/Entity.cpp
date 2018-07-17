@@ -1,5 +1,5 @@
 #include "Entity.h"
-#include "Engine/Application/Application.h"
+//#include "Engine/Application/Application.h"
 #include "../Scene/Scene.h"
 
 

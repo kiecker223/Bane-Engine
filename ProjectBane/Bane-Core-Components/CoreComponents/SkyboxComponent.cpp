@@ -1,7 +1,8 @@
 #include "SkyboxComponent.h"
 #include "Graphics/IO/TextureCache.h"
 #include "Graphics/IO/ShaderCache.h"
-#include "Graphics/Rendering/Mesh.h"
+#include "Rendering/Mesh.h"
+#include "Rendering/RendererInterface.h"
 
 
 SkyboxComponent::~SkyboxComponent()

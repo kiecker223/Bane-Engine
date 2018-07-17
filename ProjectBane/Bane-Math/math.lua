@@ -7,5 +7,7 @@ project "BaneMath"
         "../Bane-Core",
         "../Bane-Object",
         "../Bane-Core-Components"}
+
     files { "Math/**.h",
-            "Math/**.cpp"}
+            "Math/**.cpp",
+            "KieckerMath.h"}

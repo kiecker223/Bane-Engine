@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RendererInterface.h"
-#include "../Interfaces/ApiRuntime.h"
+#include "Graphics/Interfaces/ApiRuntime.h"
 #include "Mesh.h"
 #include "Material.h"
 

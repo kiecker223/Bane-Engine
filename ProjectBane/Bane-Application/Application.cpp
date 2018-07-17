@@ -1,6 +1,6 @@
 #include "Application.h"
-#include "Graphics/Rendering/RendererInterface.h"
-#include "Graphics/Rendering/DefferedRenderer.h"
+#include "Rendering/RendererInterface.h"
+#include "Rendering/DefferedRenderer.h"
 #include <BaneObject/Scene/SceneManager.h>
 #include "Graphics/IO/TextureCache.h"
 #include "Graphics/IO/ShaderCache.h"

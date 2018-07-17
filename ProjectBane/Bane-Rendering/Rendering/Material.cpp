@@ -1,7 +1,7 @@
 #include "Material.h"
-#include "../Interfaces/ApiRuntime.h"
-#include "../IO/TextureCache.h"
-#include "../IO/ShaderCache.h"
+#include "Graphics/Interfaces/ApiRuntime.h"
+#include "Graphics/IO/TextureCache.h"
+#include "Graphics/IO/ShaderCache.h"
 
 
 Material::Material() :

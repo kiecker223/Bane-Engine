@@ -1,13 +1,14 @@
 group "Graphics"
 project "BaneGraphicsCore"
     kind "StaticLib"
-    links { "BaneCore", "BanePlatform" }
+    links { "BaneCore", "BanePlatform"}
     includedirs { 
         "../Bane-Common",  
         "../Bane-Core",
         "../Bane-Object",
         "../Bane-Math",
-		"../Bane-Platform",
+        "../Bane-Platform/Platform",
+        "../Bane-Application",
         "../External/include",
     }
     files { "Graphics/D3D12/**.h",
@@ -17,9 +18,7 @@ project "BaneGraphicsCore"
             "Graphics/Interfaces/**.h",
             "Graphics/Interfaces/**.cpp",
             "Graphics/IO/**.h",
-            "Graphics/IO/**.cpp",
-            "Graphics/Rendering/RendererInterface.h",
-            "Graphics/Rendering/RendererInterface.cpp"
+            "Graphics/IO/**.cpp"
             }
 
     excludes { "Graphics/D3D12/D3D12ShaderSignature.cpp", "Graphics/Interfaces/GraphicsDevice.cpp", "Graphics/IO/ShaderTokenizer.cpp" }

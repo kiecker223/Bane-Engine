@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../Interfaces/GraphicsResources.h"
-#include "../Interfaces/ShaderResourceView.h"
-#include "../Interfaces/GraphicsCommandList.h"
+#include "Graphics/Interfaces/GraphicsResources.h"
+#include "Graphics/Interfaces/ShaderResourceView.h"
+#include "Graphics/Interfaces/GraphicsCommandList.h"
 #include "RendererInterface.h"
 
 

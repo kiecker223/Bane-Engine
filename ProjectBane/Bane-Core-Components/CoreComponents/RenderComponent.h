@@ -1,10 +1,11 @@
 #pragma once
 
-#include "ComponentBase.h"
-#include "Graphics/Rendering/RendererInterface.h"
+#include "BaneObject/Components/ComponentBase.h"
 
 // The only thing significant about this class is that it
 // helps with sending things to the renderer
+
+class SceneRenderer;
 
 class RenderComponent : public Component
 {

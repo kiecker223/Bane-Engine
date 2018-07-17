@@ -1,6 +1,6 @@
 #pragma once
 #include "Common.h"
-#include "../Rendering/Mesh.h"
+//#include "../Rendering/Mesh.h"
 #include <map>
 
 class MeshCache

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "KieckerMath.h"
-#include "../Interfaces/GraphicsCommandList.h"
-#include "Core/Systems/Logging/Logger.h"
+#include "Graphics/Interfaces/GraphicsCommandList.h"
+#include "System/Logging/Logger.h"
 #include "LightData.h"
 #include <vector>
 

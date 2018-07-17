@@ -1,9 +1,30 @@
 #pragma once
 
 #include "RenderComponent.h"
-#include "Graphics/Rendering/LightData.h"
-#include "../Entity/Entity.h"
+#include "BaneObject/Entity/Entity.h"
 
+typedef struct DIRECTIONAL_LIGHT_DATA {
+	float3 Direction;
+	float Range;
+	float3 Color;
+	float Intensity;
+} DIRECTIONAL_LIGHT_DATA;
+
+typedef struct POINT_LIGHT_DATA {
+	float3 Position;
+	float Range;
+	float3 Color;
+	float Intensity;
+} POINT_LIGHT_DATA;
+
+typedef struct SPOTLIGHT_DATA {
+	float3 Position;
+	float Range;
+	float3 Direction;
+	float Intensity;
+	float3 Color;
+	float SpotAngle;
+} SPOTLIGHT_DATA;
 
 typedef enum ELIGHT_TYPE {
 	LIGHT_TYPE_NONE,
@@ -29,40 +50,11 @@ public:
 		return m_Type;
 	}
 
-	inline DIRECTIONAL_LIGHT_DATA GetDirectionalLight() const
-	{
-		BANE_CHECK(m_Type == LIGHT_TYPE_DIRECTIONAL);
-		DIRECTIONAL_LIGHT_DATA Result = { };
-		Result.Color = Color;
-		Result.Direction = GetOwner()->GetTransform()->GetForward();
-		Result.Range = Range;
-		Result.Intensity = Intensity;
-		return Result;
-	}
+	inline DIRECTIONAL_LIGHT_DATA GetDirectionalLight() const;
 
-	inline POINT_LIGHT_DATA GetPointLight() const
-	{
-		//BANE_CHECK(m_Type == LIGHT_TYPE_POINT);
-		POINT_LIGHT_DATA Result = { };
-		Result.Color = Color;
-		Result.Position = GetOwner()->GetTransform()->GetPosition();
-		Result.Intensity = Intensity;
-		Result.Range = Range;
-		return Result;
-	}
+	inline POINT_LIGHT_DATA GetPointLight() const;
 
-	inline SPOTLIGHT_DATA GetSpotLight() const
-	{
-		//BANE_CHECK(m_Type == LIGHT_TYPE_SPOT);
-		SPOTLIGHT_DATA Result = { };
-		Result.Color = Color;
-		Result.Direction = GetOwner()->GetTransform()->GetForward();
-		Result.Position = GetOwner()->GetTransform()->GetPosition();
-		Result.Range = Range;
-		Result.SpotAngle = SpotAngle;
-		Result.Intensity = Intensity;
-		return Result;
-	}
+	inline SPOTLIGHT_DATA GetSpotLight() const;
 	
 	float3 Color;
 	float Range;

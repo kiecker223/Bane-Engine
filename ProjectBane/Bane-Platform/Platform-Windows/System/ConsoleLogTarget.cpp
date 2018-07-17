@@ -1,4 +1,4 @@
-#include "ConsoleLogTarget.h"
+#include "../../Platform/System/Logging/ConsoleLogTarget.h"
 #include <iostream>
 
 
