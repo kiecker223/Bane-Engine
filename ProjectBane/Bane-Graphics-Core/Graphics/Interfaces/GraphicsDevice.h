@@ -13,6 +13,7 @@ enum EGENERATE_MIPS_MODE
 	GENERATE_MIPS
 };
 
+#define GPU_BUFFER_MIN_SIZE KILOBYTE(65)
 
 class IRuntimeGraphicsDevice
 {
@@ -79,7 +80,7 @@ public:
 	virtual IRenderPassInfo* GetBackBufferTargetPass() = 0; // This just returns the screen target
 	virtual IRenderTargetView* GetBackBuffer() = 0;
 
-	virtual void CreateShaderResourceView(IShaderResourceTable* DestTable, IBuffer* Buffer, uint Slot, uint Subresource = 0) = 0;
+	virtual void CreateShaderResourceView(IShaderResourceTable* DestTable, IBuffer* Buffer, uint Slot, uint64 Offset = 0) = 0;
 	virtual void CreateUnorderedAccessView(IShaderResourceTable* DestTable, IBuffer* Buffer, uint Slot, uint Subresource = 0) = 0;
 	virtual void CreateShaderResourceView(IShaderResourceTable* DestTable, ITextureBase* Texture, uint Slot, uint Subresource = 0) = 0;
 	virtual void CreateUnorderedAccessView(IShaderResourceTable* DestTable, ITextureBase* Texture, uint Slot, uint Subresource = 0) = 0;

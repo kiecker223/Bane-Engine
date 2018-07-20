@@ -1,5 +1,5 @@
 #include "ComponentAllocator.h"
-#include "Core/Systems/Logging/Logger.h"
+#include <Platform/System/Logging/Logger.h>
 
 
 ComponentAllocator::ComponentAllocator(uint NumBytes)

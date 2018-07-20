@@ -1,7 +1,7 @@
 #include "Material.h"
-#include "Graphics/Interfaces/ApiRuntime.h"
-#include "Graphics/IO/TextureCache.h"
-#include "Graphics/IO/ShaderCache.h"
+#include "../Interfaces/ApiRuntime.h"
+#include "../IO/TextureCache.h"
+#include "../IO/ShaderCache.h"
 
 
 Material::Material() :
@@ -13,12 +13,6 @@ Material::Material() :
 	m_Parameters.Roughness = 0.5f;
 }
 
-void Material::Bind(IGraphicsCommandContext* Context)
-{
-	GetApiRuntime()->GetGraphicsDevice()->CreateShaderResourceView(m_Table, m_MatCB, 1);
-	Context->SetGraphicsPipelineState(m_Pipeline);
-	Context->SetGraphicsResourceTable(m_Table);
-}
 
 void Material::SetDiffuseTexture(const std::string& FileName)
 {
@@ -67,18 +61,10 @@ void Material::SetMaterialParameters(const MATERIAL_PARAMETERS& Params)
 	m_Parameters = Params;
 }
 
-void Material::UpdateMaterialParameters(IGraphicsCommandContext* Ctx)
-{
-	void* pBuff = Ctx->Map(m_MatCB);
-	memcpy(pBuff, (void*)&m_Parameters, sizeof(MATERIAL_PARAMETERS));
-	Ctx->Unmap(m_MatCB);
-}
-
 void Material::LoadFromFile(const std::string& ShaderName)
 {
 	IRuntimeGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
 	m_MaterialName = ShaderName;
 	m_Pipeline = GetShaderCache()->LoadGraphicsPipeline(ShaderName);
 	m_Table = Device->CreateShaderTable(m_Pipeline);
-	m_MatCB = Device->CreateConstBuffer<MATERIAL_PARAMETERS>();
 }

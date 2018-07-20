@@ -4,8 +4,8 @@
 #include <memory>
 #include "Common.h"
 #include "KieckerMath.h"
-#include "Graphics/Interfaces/GraphicsResources.h"
-#include "Graphics/Interfaces/PipelineState.h"
+#include "../Interfaces/GraphicsResources.h"
+#include "../Interfaces/PipelineState.h"
 
 
 union FloatInt

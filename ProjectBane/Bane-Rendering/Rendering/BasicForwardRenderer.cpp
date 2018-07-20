@@ -1,7 +1,7 @@
 #include "BasicForwardRenderer.h"
-#include "CoreComponents/CameraComponent.h"
+//#include <BaneObject/CoreComponents/CameraComponent.h>
 
-
+/*
 struct FORWARD_CAMERA_CONSTANTS
 {
 	matrix Model;
@@ -29,7 +29,7 @@ void BasicForwardRenderer::Render()
 	{
 		MeshDrawArgs& DrawItem = m_DrawList[i];
 
-		CameraConstants.Model = DrawItem.OwningEntity->GetTransform()->GetMatrix();
+		//CameraConstants.Model = DrawItem.OwningEntity->GetTransform()->GetMatrix();
 		CameraConstants.Projection = MainCamera->GetProjection();
 		CameraConstants.View = MainCamera->GetLookAt();
 		memcpy(Buff, &CameraConstants, sizeof(FORWARD_CAMERA_CONSTANTS));
@@ -56,22 +56,4 @@ void BasicForwardRenderer::Shutdown()
 {
 	ApiRuntime::Shutdown();
 }
-
-void BasicForwardRenderer::AddBasicMesh(const Mesh& InMesh, const Material& InMaterial, Entity* Owner, IConstantBuffer* CameraCB)
-{
-	m_DrawList.push_back({ InMesh, InMaterial, Owner, CameraCB });
-}
-
-void BasicForwardRenderer::AddCamera(CameraComponent* InCamera)
-{
-	Cameras.push_back(InCamera);
-	if (InCamera->GetPriority() == 1)
-	{
-		if (MainCamera != nullptr)
-		{
-			BaneLog() << "Uhh, not supposed to be another camera here!";
-			return;
-		}
-		MainCamera = InCamera;
-	}
-}
+*/

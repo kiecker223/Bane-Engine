@@ -5,7 +5,5 @@
 #include <fstream>
 
 
-std::string ReadEntireFile(const std::string& FileName);
-
 
 

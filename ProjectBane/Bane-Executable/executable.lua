@@ -1,7 +1,7 @@
 group "App"
 project "BaneExecutable"
     kind "ConsoleApp"
-    links { "BaneObject", "BaneCore", "BaneGraphicsCore", "BaneApplicaton", "BaneGraphicsRenderer", "BaneCoreComponents"}
+    links { "BaneObject", "BaneCore", "BaneGraphicsCore", "BaneApplicaton", "BaneGraphicsRenderer" }
     includedirs {
         "../Bane-Common",
         "../Bane-Math",

@@ -1,7 +1,7 @@
 group "Game"
 project "BaneGame"
     kind "SharedLib"
-    links {"BaneObject", "BaneCore", "BaneGraphicsCore", "BaneEngine"}
+    links {"BaneObject", "BaneCore", "BaneGraphicsCore" }
     includedirs { 
         "../Bane-Common",  
         "../Bane-Math",
@@ -15,3 +15,4 @@ project "BaneGame"
         links { "d3d12", "assimp-vc140-mt", "DevIL.lib", "ILU.lib", "ILUT.lib", "dxgi", "d3dcompiler"}
 
     files { "Code/**.h", "Code/**.cpp"}
+	excludes { "Code/RayTracingRenderer.h", "Code/RayTracingRenderer.cpp" }

@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Graphics/Interfaces/GraphicsResources.h"
-#include "Graphics/Interfaces/ShaderResourceView.h"
-#include "Graphics/Interfaces/GraphicsCommandList.h"
-#include "RendererInterface.h"
+#include "../Interfaces/GraphicsResources.h"
+#include "../Interfaces/ShaderResourceView.h"
+#include "../Interfaces/GraphicsCommandList.h"
 
 
 typedef enum ERENDER_FLAGS {
@@ -11,13 +10,11 @@ typedef enum ERENDER_FLAGS {
 	RENDER_FLAG_NO_SHADOWS	= 0x00000010
 } ERENDER_FLAGS;
 
-typedef struct MATERIAL_PARAMETERS
+typedef SHADER_ALIGNMENT struct MATERIAL_PARAMETERS
 {
 	float3 Color;
+	float Padding0;
 	float SpecularFactor;
-private:
-	float2 P0;
-public:
 	float Roughness;
 	float Metallic;
 } MATERIAL_PARAMETERS;
@@ -29,8 +26,6 @@ public:
 
 	Material();
 
-	void Bind(IGraphicsCommandContext* Context);
-
 	void SetDiffuseTexture(const std::string& FileName);
 	void SetNormalTexture(const std::string& FileName);
 	void SetSpecularTexture(const std::string& FileName);
@@ -40,20 +35,15 @@ public:
 	void SetTexture(const std::string& Texture, uint Register);
 	void SetConstantBuffer(IConstantBuffer* ConstantBuffer, uint Register);
 
-	inline IConstantBuffer* GetMaterialParameterCB()
-	{
-		return m_MatCB;
-	}
-
 	void SetMaterialParameters(const MATERIAL_PARAMETERS& Params);
-	void UpdateMaterialParameters(IGraphicsCommandContext* Ctx);
 
 	inline IShaderResourceTable* GetTable() const { return m_Table; }
+	inline IGraphicsPipelineState* GetShaderConfiguration() const { return m_Pipeline; }
 
 	void LoadFromFile(const std::string& ShaderName);
 	inline std::string GetMaterialName() const { return m_MaterialName; }
 
-	inline MATERIAL_PARAMETERS& GetMaterialParameters()
+	inline MATERIAL_PARAMETERS GetMaterialParameters() const
 	{
 		return m_Parameters;
 	}
@@ -63,7 +53,6 @@ public:
 private:
 	std::string m_MaterialName;
 	MATERIAL_PARAMETERS m_Parameters;
-	IConstantBuffer* m_MatCB;
 	IShaderResourceTable* m_Table;
 	IGraphicsPipelineState* m_Pipeline;
 };

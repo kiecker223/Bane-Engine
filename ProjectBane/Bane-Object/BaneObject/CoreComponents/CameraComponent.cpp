@@ -1,14 +1,12 @@
 #include "CameraComponent.h"
-#include "System/Window.h"
-#include "Application.h"
-#include "Rendering/RendererInterface.h"
+#include <Platform/System/Window.h>
 
 
 CameraComponent* CameraComponent::GMainCamera = nullptr;
 
 CameraComponent::CameraComponent() :
 	Fov(60.0f),
-	ViewWidth(GetApplicationInstance()->GetWindow()->AspectYX()),
+	ViewWidth(Window::GetMainWindow()->AspectYX()),
 	ViewHeight(1.0f),
 	ZNear(0.01f),
 	ZFar(1000.0f),
@@ -25,7 +23,7 @@ matrix CameraComponent::GetProjection() const
 	}
 	else
 	{
-		float Aspect = GetApplicationInstance()->GetWindow()->AspectXY();
+		float Aspect = Window::GetMainWindow()->AspectXY();
 		return matProjection(Aspect, Fov, 0.01f, 1000.0f);
 	}
 }
@@ -44,7 +42,8 @@ void CameraComponent::Tick(float DT)
 	UNUSED(DT);
 }
 
-void CameraComponent::SubmitFeature(SceneRenderer* Renderer)
+void CameraComponent::GraphicsUpdate(RenderLoop& Loop)
 {
-	Renderer->AddCamera(this);
+	UNUSED(Loop);
+//	Renderer->AddCamera(this);
 }

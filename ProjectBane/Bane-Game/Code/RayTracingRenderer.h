@@ -2,8 +2,7 @@
 
 
 #include "KieckerMath.h"
-#include "Graphics/Rendering/RendererInterface.h"
-#include "Graphics/Interfaces/GraphicsDevice.h"
+
 
 /*
 struct MATERIAL

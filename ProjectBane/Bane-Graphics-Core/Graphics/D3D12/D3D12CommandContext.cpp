@@ -102,9 +102,10 @@ void D3D12GraphicsCommandContext::SetGraphicsResourceTable(const IShaderResource
 
 	for (uint i = 0; i < Table->ConstantBuffers.size(); i++)
 	{
-		if (Table->ConstantBuffers[i] != nullptr)
+		if (Table->ConstantBuffers[i].ConstantBuffer != nullptr)
 		{
-			D3DCL->SetGraphicsRootConstantBufferView(i, Table->ConstantBuffers[i]->GetGPUVirtualAddress());
+			const auto& ConstBuffOffsetPair = Table->ConstantBuffers[i];
+			D3DCL->SetGraphicsRootConstantBufferView(i, ConstBuffOffsetPair.ConstantBuffer->GetGPUVirtualAddress() + ConstBuffOffsetPair.Offset);
 		}
 	}
 
@@ -377,9 +378,10 @@ void D3D12ComputeCommandContext::SetComputeResourceTable(const IShaderResourceTa
 
 	for (uint i = 0; i < Table->ConstantBuffers.size(); i++)
 	{
-		if (Table->ConstantBuffers[i] != nullptr)
+		if (Table->ConstantBuffers[i].ConstantBuffer != nullptr)
 		{
-			D3DCL->SetComputeRootConstantBufferView(i, Table->ConstantBuffers[i]->GetGPUVirtualAddress());
+			const auto& ConstBuffOffsetPair = Table->ConstantBuffers[i];
+			D3DCL->SetComputeRootConstantBufferView(i, ConstBuffOffsetPair.ConstantBuffer->GetGPUVirtualAddress() + ConstBuffOffsetPair.Offset);
 		}
 	}
 

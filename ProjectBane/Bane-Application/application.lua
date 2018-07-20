@@ -20,5 +20,6 @@ group "Engine"
 		"BaneCore",
 		"BaneCommon",
 		"BanePlatform",
-		"BaneGraphicsCore"
+		"BaneGraphicsCore",
+		"BaneGraphicsRenderer"
 	}

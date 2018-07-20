@@ -1,30 +1,8 @@
 #pragma once
 
 #include "RenderComponent.h"
-#include "BaneObject/Entity/Entity.h"
-
-typedef struct DIRECTIONAL_LIGHT_DATA {
-	float3 Direction;
-	float Range;
-	float3 Color;
-	float Intensity;
-} DIRECTIONAL_LIGHT_DATA;
-
-typedef struct POINT_LIGHT_DATA {
-	float3 Position;
-	float Range;
-	float3 Color;
-	float Intensity;
-} POINT_LIGHT_DATA;
-
-typedef struct SPOTLIGHT_DATA {
-	float3 Position;
-	float Range;
-	float3 Direction;
-	float Intensity;
-	float3 Color;
-	float SpotAngle;
-} SPOTLIGHT_DATA;
+#include "../Entity/Entity.h"
+#include <Graphics/Data/RenderLoop.h>
 
 typedef enum ELIGHT_TYPE {
 	LIGHT_TYPE_NONE,
@@ -41,7 +19,7 @@ public:
 
 	LightComponent() : m_Type(LIGHT_TYPE_NONE) { }
 
-	void SubmitFeature(SceneRenderer* Renderer);
+	void GraphicsUpdate(RenderLoop& Loop);
 
 	void SetLightType(ELIGHT_TYPE LightType);
 

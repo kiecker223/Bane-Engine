@@ -1,9 +1,10 @@
 #include "LightComponent.h"
-#include "Rendering/RendererInterface.h"
 
-void LightComponent::SubmitFeature(SceneRenderer* Renderer)
+
+void LightComponent::GraphicsUpdate(RenderLoop& Loop)
 {
-	Renderer->AddLight(this);
+	UNUSED(Loop);
+//	Renderer->AddLight(this);
 }
 
 void LightComponent::SetLightType(ELIGHT_TYPE LightType)

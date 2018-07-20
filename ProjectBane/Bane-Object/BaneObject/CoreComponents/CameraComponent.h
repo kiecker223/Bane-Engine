@@ -1,9 +1,9 @@
 #pragma once
 
 #include "RenderComponent.h"
-#include "BaneObject/Entity/Entity.h"
+#include "../Entity/Entity.h"
 #include "KieckerMath.h"
-#include "Graphics/Interfaces/GraphicsResources.h"
+#include <Graphics/Data/RenderLoop.h>
 
 
 typedef enum ECAMERA_TYPE
@@ -51,7 +51,7 @@ public:
 
 	void Tick(float DT) override final;
 
-	void SubmitFeature(SceneRenderer* Renderer) final override;
+	void GraphicsUpdate(RenderLoop& Loop) final override;
 
 private:
 

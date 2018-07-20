@@ -55,7 +55,7 @@ public:
 	virtual IRenderPassInfo* GetBackBufferTargetPass() final override;
 	virtual IRenderTargetView* GetBackBuffer() final override;
 
-	virtual void CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* Buffer, uint Slot, uint Subresource = 0) final override;
+	virtual void CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* Buffer, uint Slot, uint64 Offset = 0) final override;
 	virtual void CreateUnorderedAccessView(IShaderResourceTable* InDestTable, IBuffer* Buffer, uint Slot, uint Subresource = 0) final override;
 	virtual void CreateShaderResourceView(IShaderResourceTable* InDestTable, ITextureBase* Texture, uint Slot, uint Subresource = 0) final override;
 	virtual void CreateUnorderedAccessView(IShaderResourceTable* InDestTable, ITextureBase* Texture, uint Slot, uint Subresource = 0) final override;

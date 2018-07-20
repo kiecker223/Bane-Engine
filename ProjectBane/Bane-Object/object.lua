@@ -1,12 +1,13 @@
 group "Engine"
 project "BaneObject"
     kind "StaticLib"
-    links {"BaneCore", "BaneGraphicsCore"}
+    links {"BaneCore", "BaneGraphicsCore", "BanePlatform"}
     includedirs { 
         "../Bane-Common",  
         "../Bane-Core",
         "../Bane-Math",
-        "../Bane-Graphics"}
+        "../Bane-Graphics-Core",
+		"../Bane-Platform"}
 
     files { "**.h",
             "**.cpp"}

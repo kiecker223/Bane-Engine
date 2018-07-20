@@ -35,6 +35,21 @@ typedef struct VARIABLE_INFO {
 	std::string Semantic;
 } VARIABLE_INFO;
 
+static std::string ReadEntireFile(const std::string& FileName)
+{
+	std::ifstream InStream(FileName);
+	std::string Result;
+	if (InStream.is_open())
+	{
+		std::string Buff;
+		while (std::getline(InStream, Buff))
+		{
+			Result += Buff + '\n';
+		}
+	}
+	return Result;
+}
+
 static bool VarHasSemantic(const VARIABLE_INFO& InVar)
 {
 	return InVar.Semantic.size() > 0;

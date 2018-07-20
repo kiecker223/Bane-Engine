@@ -4,6 +4,7 @@
 #include <BaneObject/Scene/SceneManager.h>
 #include "Graphics/IO/TextureCache.h"
 #include "Graphics/IO/ShaderCache.h"
+#include <Platform/System/Logging/Logger.h>
 #include <sstream>
 
 
@@ -42,6 +43,7 @@ void Application::OpenApplicationWindow(const std::string& Name, uint Width, uin
 		delete m_Window;
 	}
 	Window* pWindow = new Window(Name.c_str(), Width, Height);
+	Window::SetMainWindow(pWindow);
 	m_Window = pWindow;
 }
 
@@ -74,7 +76,7 @@ void Application::InitSystems()
 	{
 		m_SceneRenderer = new DefferedRenderer();
 	}
-	m_SceneRenderer->Initialize();
+	m_SceneRenderer->Initialize(m_Window);
 	
 	AssemblyLoader Loader;
 	m_GameAssembly = Loader.LoadAssembly("BaneGame.dll");

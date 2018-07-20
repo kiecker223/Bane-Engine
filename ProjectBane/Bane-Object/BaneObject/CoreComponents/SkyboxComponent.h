@@ -11,7 +11,7 @@ public:
 
 	~SkyboxComponent();
 
-	void SubmitFeature(SceneRenderer* Renderer);
+	void GraphicsUpdate(RenderLoop& Loop);
 
 	void SetSkybox(const std::string& Skybox);
 	void SetSkybox(
@@ -23,11 +23,7 @@ public:
 		const std::string& PY,
 		const std::string& PZ);
 	void SetSkyboxShader(const std::string& ShaderFile);
-	void SetCameraConstants(IConstantBuffer* Buffer);
-	inline ITexture3D* GetSkyboxTexture() { return m_Skybox; }
-
-	void Draw(IGraphicsCommandContext* Ctx);
-
+	
 private:
 
 	std::string m_SkyboxName;

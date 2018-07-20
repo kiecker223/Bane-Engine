@@ -145,6 +145,10 @@ public:
 };
 
 // This class essentially just acts as a pool for other shader resources to be pulled from.
+typedef struct D3D12_CONSTANT_BUFFER_OFFSET_PAIR {
+	D3D12Buffer* ConstantBuffer;
+	uint64 Offset;
+} D3D12_CONSTANT_BUFFER_OFFSET_PAIR;
 class D3D12ShaderResourceTable : public IShaderResourceTable
 {
 public:
@@ -187,7 +191,7 @@ public:
 		return (NumSMPs > 0);
 	}
 
-	std::vector<D3D12Buffer*> ConstantBuffers; 
+	std::vector<D3D12_CONSTANT_BUFFER_OFFSET_PAIR> ConstantBuffers; 
 	std::vector<D3D12SamplerState*> Samplers;
 	std::vector<D3D12GPUResource*> ShaderResources;
 	std::vector<D3D12GPUResource*> UnorderedAccessResources;

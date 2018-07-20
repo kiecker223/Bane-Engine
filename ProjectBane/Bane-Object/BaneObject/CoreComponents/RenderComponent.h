@@ -1,11 +1,11 @@
 #pragma once
 
-#include "BaneObject/Components/ComponentBase.h"
+#include "../Components/ComponentBase.h"
 
 // The only thing significant about this class is that it
 // helps with sending things to the renderer
 
-class SceneRenderer;
+class RenderLoop;
 
 class RenderComponent : public Component
 {
@@ -15,7 +15,8 @@ public:
 
 	virtual bool IsRenderComponent() const override { return true; }
 
-	virtual void SubmitFeature(SceneRenderer* Renderer) = 0;
+	virtual void GraphicsInit() { };
+	virtual void GraphicsUpdate(RenderLoop& InLoop) = 0;
 
 };
 

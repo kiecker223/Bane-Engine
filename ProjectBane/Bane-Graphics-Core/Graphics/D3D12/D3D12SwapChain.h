@@ -25,6 +25,8 @@ public:
 
 	virtual void Present() override final;
 
+	virtual IRuntimeGraphicsDevice* GetParent() override final;
+
 	D3D12GraphicsDevice* Device;
 
 	IDXGISwapChain4* SwapChain;

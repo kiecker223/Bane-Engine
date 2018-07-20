@@ -16,7 +16,7 @@ public:
 		virtual ~WindowsHandle() { }
 
 	protected:
-		virtual void* GetHandle();
+		virtual void* GetHandle() { return nullptr; }
 	};
 
 	Window();
@@ -33,8 +33,19 @@ public:
 
 	bool QuitRequested();
 
+	static inline void SetMainWindow(Window* pWindow)
+	{
+		GMainWindow = pWindow;
+	}
+
+	static inline Window* GetMainWindow()
+	{
+		return GMainWindow;
+	}
+
 private:
 
+	static Window* GMainWindow;
 	uint m_width, m_height;
 	WindowsHandle* m_windowHandle;
 };

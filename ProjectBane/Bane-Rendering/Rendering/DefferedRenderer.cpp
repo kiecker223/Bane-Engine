@@ -1,22 +1,10 @@
 #include "DefferedRenderer.h"
-#include "Application.h"
 #include "Graphics/Interfaces/ApiRuntime.h"
 #include "KieckerMath.h"
 #include "Graphics/IO/ShaderCache.h"
 #include "Graphics/IO/TextureCache.h"
-#include "CoreComponents/CameraComponent.h"
-#include "CoreComponents/SkyboxComponent.h"
-#include "CoreComponents/LightComponent.h"
-#include "LightData.h"
 
 
-typedef struct DEFFERED_CAMERA_CONSTANTS {
-	matrix Model, View, Projection;
-	float3 CameraPosition;
-} DEFFERED_CAMERA_CONSTANTS;
-
-DEFFERED_CAMERA_CONSTANTS CameraConstants = { };
-matrix SkyboxModel;
 DefferedRenderer::DefferedRenderer()
 {
 }
@@ -25,19 +13,22 @@ DefferedRenderer::~DefferedRenderer()
 {
 }
 
-void DefferedRenderer::Initialize()
+void DefferedRenderer::Initialize(const Window* pWindow)
 {
-	m_DrawItems.reserve(100);
-	m_Lights.reserve(100);
-
+	m_DrawCommits.reserve(100);
+	
 	m_Device = GetApiRuntime()->GetGraphicsDevice();
-	uint Height = GetApplicationInstance()->GetWindow()->GetHeight();
-	uint Width = GetApplicationInstance()->GetWindow()->GetWidth();
+	uint Height = pWindow->GetHeight();
+	uint Width =  pWindow->GetWidth();
 
 	m_AlbedoBuffer		= m_Device->CreateTexture2D(Width, Height, FORMAT_R8G8B8A8_UNORM, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
 	m_NormalBuffer		= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
 	m_PositionBuffer	= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
 	m_ParameterBuffer	= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
+
+	m_MaterialBuffer = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
+	m_CameraBuffer	 = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
+	m_LightBuffer	 = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
 
 	const IRenderTargetView* Views[4] =
 	{
@@ -49,41 +40,39 @@ void DefferedRenderer::Initialize()
 
 	m_DefferedPass = m_Device->CreateRenderPass(&Views[0], 4, m_Device->GetDefaultDepthStencil(), float4(0.0f, 0.0f, 0.0f, 0.0f));
 
-	struct Vertex
 	{
-		struct { float x, y, z; };
-		struct { float u, v; };
-	};
+		struct Vertex
+		{
+			struct { float x, y, z; };
+			struct { float u, v; };
+		};
 
-	Vertex vertices[4] = {
-		{ { -1.0f, -1.0f,  0.1f },{ 0.0f, 1.0f } },
-		{ { 1.0f, -1.0f,  0.1f },{ 1.0f, 1.0f } },
-		{ { 1.0f,  1.0f,  0.1f },{ 1.0f, 0.0f } },
-		{ { -1.0f,  1.0f,  0.1f },{ 0.0f, 0.0f } }
-	};
+		Vertex vertices[4] = {
+			{ { -1.0f, -1.0f,  0.1f },{ 0.0f, 1.0f } },
+			{ { 1.0f, -1.0f,  0.1f },{ 1.0f, 1.0f } },
+			{ { 1.0f,  1.0f,  0.1f },{ 1.0f, 0.0f } },
+			{ { -1.0f,  1.0f,  0.1f },{ 0.0f, 0.0f } }
+		};
 
-	uint indices[6] = {
-		0, 3, 2,
-		2, 1, 0
-	};
+		uint indices[6] = {
+			0, 3, 2,
+			2, 1, 0
+		};
 
-	m_OnScreenQuad.VB = m_Device->CreateVertexBuffer(sizeof(vertices), (uint8*)vertices);
-	m_OnScreenQuad.IB = m_Device->CreateIndexBuffer(sizeof(indices), (uint8*)indices);
-	m_OnScreenQuad.Pipeline = GetShaderCache()->LoadGraphicsPipeline("Shaders/DefferredLighting.hlsl");
-	m_OnScreenQuad.Table = m_Device->CreateShaderTable(m_OnScreenQuad.Pipeline);
-	m_OnScreenQuad.PointSampler = m_Device->GetDefaultSamplerState();
-	SAMPLER_DESC SamplerDesc = CreateDefaultSamplerDesc();
-	m_OnScreenQuad.SkySampler = m_Device->CreateSamplerState(SamplerDesc);
+		m_OnScreenQuad.VB = m_Device->CreateVertexBuffer(sizeof(vertices), (uint8*)vertices);
+		m_OnScreenQuad.IB = m_Device->CreateIndexBuffer(sizeof(indices), (uint8*)indices);
+		m_OnScreenQuad.Pipeline = GetShaderCache()->LoadGraphicsPipeline("Shaders/DefferredLighting.hlsl");
+		m_OnScreenQuad.Table = m_Device->CreateShaderTable(m_OnScreenQuad.Pipeline);
+		m_OnScreenQuad.PointSampler = m_Device->GetDefaultSamplerState();
+		SAMPLER_DESC SamplerDesc = CreateDefaultSamplerDesc();
+		m_OnScreenQuad.SkySampler = m_Device->CreateSamplerState(SamplerDesc);
+	}
 	
-	m_LightCBData.Frame = 0.0f;
-
 	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_AlbedoBuffer, 0);
 	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_NormalBuffer, 1);
 	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_PositionBuffer, 2);
 	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_ParameterBuffer, 3);
 
-	m_CameraConstants = m_Device->CreateConstBuffer<DEFFERED_CAMERA_CONSTANTS>();
-	m_LightBuffer = m_Device->CreateConstBuffer<DEFFERED_RENDERER_LIGHT_DATA>();
 	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_LightBuffer, 0);
 	m_Device->CreateSamplerView(m_OnScreenQuad.Table, m_OnScreenQuad.SkySampler, 1);
 }
@@ -92,58 +81,42 @@ void DefferedRenderer::Render()
 {
 	Frame++;
 	IGraphicsCommandContext* ctx = m_Device->GetGraphicsContext();
+	GatherSceneData(ctx);
 	ctx->BeginPass(m_DefferedPass);
 
-	float3 CameraPosition = MainCamera->GetTransform()->GetPosition();
+	for (uint i = 0; i < m_DrawCommits.size(); i++)
 	{
-		CameraConstants.View = MainCamera->GetLookAt();
-		CameraConstants.Projection = MainCamera->GetProjection();
-		CameraConstants.CameraPosition = CameraPosition;
+		auto& Commit = m_DrawCommits[i];
+		for (auto& DrawMesh : Commit.Meshes)
+		{
+			ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);
+			ctx->SetGraphicsResourceTable(DrawMesh.Table);
+			m_Device->CreateShaderResourceView(DrawMesh.Table, m_CameraBuffer, 0, Commit.CameraIdxOffset * sizeof(CAMERA_CONSTANT_BUFFER_DATA));
+			m_Device->CreateShaderResourceView(DrawMesh.Table, m_MaterialBuffer, 1, Commit.MeshData_Offset * sizeof(MESH_RENDER_DATA));
+			ctx->SetVertexBuffer(DrawMesh.VertexBuffer);
+			ctx->SetIndexBuffer(DrawMesh.IndexBuffer);
+			ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			ctx->DrawIndexed(DrawMesh.IndexCount, 0, 0);
+		}
 	}
-
-	for (uint i = 0; i < m_DrawItems.size(); i++)
+	bool bHasSkybox = RenderLoop::GRenderGlobals.SkyboxData.Cubemap != nullptr;
+	if (bHasSkybox)
 	{
-		DrawItem& Item = m_DrawItems[i];
-
-		void* Buff = ctx->Map(Item.CameraCB);
-		CameraConstants.Model = Item.OwningEntity->GetTransform()->GetMatrix();
-		memcpy(Buff, (void*)&CameraConstants, sizeof(DEFFERED_CAMERA_CONSTANTS));
-		ctx->Unmap(Item.CameraCB);
-		m_Device->CreateShaderResourceView(Item.RenderMaterial.GetTable(), Item.CameraCB, 0);
-
-		Item.RenderMaterial.UpdateMaterialParameters(ctx);
-		Item.RenderMaterial.Bind(ctx);
-		ctx->SetVertexBuffer(Item.RenderMesh.GetVertexBuffer());
-		ctx->SetIndexBuffer(Item.RenderMesh.GetIndexBuffer());
-		ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		ctx->DrawIndexed(Item.RenderMesh.GetIndexCount(), 0, 0);
-	}
-
-	if (Skybox)
-	{
-		void* Buff = ctx->Map(m_CameraConstants);
-		CameraConstants.Model = matTransformation(CameraPosition, Quaternion(), float3(5.f, 5.f, 5.f));
-		memcpy(Buff, (void*)&CameraConstants, sizeof(DEFFERED_CAMERA_CONSTANTS));
-		ctx->Unmap(m_CameraConstants);
-		Skybox->SetCameraConstants(m_CameraConstants);
-		Skybox->Draw(ctx);
+// 		void* Buff = ctx->Map(m_CameraConstants);
+// 		CameraConstants.Model = matTransformation(CameraPosition, Quaternion(), float3(5.f, 5.f, 5.f));
+// 		memcpy(Buff, (void*)&CameraConstants, sizeof(DEFFERED_CAMERA_CONSTANTS));
+// 		ctx->Unmap(m_CameraConstants);
+// 		Skybox->SetCameraConstants(m_CameraConstants);
+// 		Skybox->Draw(ctx);
 	}
 	ctx->EndPass(); // So right now its executing
-
 	ctx->BeginPass(m_Device->GetBackBufferTargetPass());
-	GatherLights();
-	m_LightCBData.Frame = Frame;
-	void* LightBuff = ctx->Map(m_LightBuffer);
-	memcpy(LightBuff, (void*)&m_LightCBData, sizeof(DEFFERED_RENDERER_LIGHT_DATA));
-	ctx->Unmap(m_LightBuffer);
 	ctx->SetGraphicsPipelineState(m_OnScreenQuad.Pipeline);
 	ctx->SetGraphicsResourceTable(m_OnScreenQuad.Table);
 	ctx->SetVertexBuffer(m_OnScreenQuad.VB);
 	ctx->SetIndexBuffer(m_OnScreenQuad.IB);
 	ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	ctx->DrawIndexed(6, 0, 0);
-
-	ZeroMemory(&m_LightCBData, sizeof(DEFFERED_RENDERER_LIGHT_DATA));
 
 	ctx->EndPass();
 }
@@ -155,7 +128,7 @@ void DefferedRenderer::Present()
 
 void DefferedRenderer::Shutdown()
 {
-
+	ApiRuntime::Shutdown();
 }
 
 IDeviceSwapChain* DefferedRenderer::GetSwapChain()
@@ -169,28 +142,12 @@ bool DefferedRenderer::SupportsAsyncContexts()
 	return (Api == API_D3D12 || Api == API_VULKAN);
 }
 
-void DefferedRenderer::AddBasicMesh(const Mesh& InMesh, const Material& InMaterial, Entity* Owner, IConstantBuffer* CameraCB)
+void DefferedRenderer::Submit(const RenderLoop& InRenderLoop)
 {
-	m_DrawItems.push_back({ InMesh, InMaterial, Owner, CameraCB });
-}
-
-void DefferedRenderer::AddCamera(CameraComponent* InCamera)
-{
-	Cameras.push_back(InCamera);
-	if (InCamera->GetPriority() == 1)
+	for (auto& Commit : InRenderLoop.GetCommitedData())
 	{
-		if (MainCamera != nullptr)
-		{
-			BaneLog() << "Uhh, not supposed to be another camera here!";
-			return;
-		}
-		MainCamera = InCamera;
+		m_DrawCommits.push_back(Commit);
 	}
-}
-
-void DefferedRenderer::AddLight(LightComponent* InLight)
-{
-	m_Lights.push_back(InLight);
 }
 
 void DefferedRenderer::RenderShadows(matrix LightMatrix, IRenderPassInfo* DestRenderPass, IGraphicsCommandContext* ctx)
@@ -200,39 +157,30 @@ void DefferedRenderer::RenderShadows(matrix LightMatrix, IRenderPassInfo* DestRe
 	UNUSED(ctx);
 }
 
-void DefferedRenderer::GatherLights()
+void DefferedRenderer::GatherSceneData(IGraphicsCommandContext* ctx)
 {
-	m_LightCBData.CameraPosition = MainCamera->GetOwner()->GetTransform()->GetPosition();
-	m_LightCBData.AmbientColor = float3(0.2f, 0.2f, 0.1f);
-	for (uint i = 0; i < m_Lights.size(); i++)
 	{
-		LightComponent* Comp = m_Lights[i];
-		switch (Comp->GetLightType())
-		{
-			case LIGHT_TYPE_DIRECTIONAL:
-			{
-				DIRECTIONAL_LIGHT_DATA& DirLight = m_LightCBData.DirectionalLights[m_LightCBData.NumDirectionalLights];
-				DirLight = Comp->GetDirectionalLight();
-				m_LightCBData.NumDirectionalLights++;
-			} break;
-			case LIGHT_TYPE_POINT:
-			{
-				POINT_LIGHT_DATA& PointLight = m_LightCBData.PointLights[m_LightCBData.NumPointLights];
-				PointLight = Comp->GetPointLight();
-				m_LightCBData.NumPointLights++;
-			} break;
-			case LIGHT_TYPE_SPOT:
-			{
-				SPOTLIGHT_DATA& SpotLight = m_LightCBData.SpotLights[m_LightCBData.NumSpotLights];
-				SpotLight = Comp->GetSpotLight();
-				m_LightCBData.NumSpotLights++;
-			} break;
-		}
+		byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_CameraBuffer));
+		memcpy(Buff, 
+			reinterpret_cast<void*>(RenderLoop::GRenderGlobals.CameraData.Buffer), 
+			RenderLoop::GRenderGlobals.CameraData.Size * sizeof(CAMERA_CONSTANT_BUFFER_DATA)
+		);
+		ctx->Unmap(m_CameraBuffer);
+	}
+	{
+		byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_CameraBuffer));
+		memcpy(Buff,
+			reinterpret_cast<void*>(RenderLoop::GRenderGlobals.MeshData.Buffer),
+			RenderLoop::GRenderGlobals.MeshData.Size * sizeof(MESH_RENDER_DATA)
+		);
+	}
+	{
+		byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_LightBuffer));
+		memcpy(Buff,
+			reinterpret_cast<void*>(&RenderLoop::GRenderGlobals.LightData),
+			sizeof(RenderLoop::GRenderGlobals.LightData)
+		);
+		ctx->Unmap(m_LightBuffer);
 	}
 }
 
-void DefferedRenderer::SetSkybox(SkyboxComponent* InSkybox)
-{
-	Skybox = InSkybox;
-	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, InSkybox->GetSkyboxTexture(), 4);
-}

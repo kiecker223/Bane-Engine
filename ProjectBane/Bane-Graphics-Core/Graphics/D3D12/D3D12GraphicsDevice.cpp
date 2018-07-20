@@ -761,30 +761,30 @@ IRenderTargetView* D3D12GraphicsDevice::GetBackBuffer()
 	return m_BackBuffer;
 }
 
-void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint InSlot, uint InSubresource)
+void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint InSlot, uint64 InOffset)
 {
-#ifdef _DEBUG
-	if (InSubresource != 0)
-	{
-		BaneLog() << "[WARN] D3D12 : Subresources not supported on buffer type views" << END_LINE;
-	}
-#endif
 	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
 	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
-	DestTable->ConstantBuffers[InSlot] = Buffer;
+	DestTable->ConstantBuffers[InSlot] = { Buffer, InOffset };
 }
 
 void D3D12GraphicsDevice::CreateUnorderedAccessView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint InSlot, uint InSubresource)
 {
-#ifdef _DEBUG
-	if (InSubresource != 0)
-	{
-		BaneLog() << "[WARN] D3D12 : Subresources not supported on buffer type views" << END_LINE;
-	}
-#endif
-	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
-	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
-	DestTable->ConstantBuffers[InSlot] = Buffer;
+	UNUSED(InDestTable);
+	UNUSED(InBuffer);
+	UNUSED(InSlot);
+	UNUSED(InSubresource);
+	// Why the actual fuck did I write this function
+	__debugbreak();
+//#ifdef _DEBUG
+//	if (InSubresource != 0)
+//	{
+//		BaneLog() << "[WARN] D3D12 : Subresources not supported on buffer type views" << END_LINE;
+//	}
+//#endif
+//	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
+//	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
+//	DestTable->ConstantBuffers[InSlot] = Buffer;
 }
 
 void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestTable, ITextureBase* InTexture, uint Slot, uint InSubresource)

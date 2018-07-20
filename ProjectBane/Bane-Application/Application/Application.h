@@ -34,7 +34,7 @@ typedef struct RENDERING_SETTINGS {
 } RENDERING_SETTINGS;
 
 
-class SceneRenderer;
+class ISceneRenderer;
 
 typedef void(*PFNApplicationStartCallback)();
 typedef void(*PFNApplicationUpdateCallback)();
@@ -53,7 +53,7 @@ public:
 		return GApplication;
 	}
 
-	inline SceneRenderer* GetSceneRenderer()
+	inline ISceneRenderer* GetSceneRenderer()
 	{
 		return m_SceneRenderer;
 	}
@@ -86,7 +86,7 @@ public:
 
 	void Shutdown();
 	
-	inline void SetSceneRenderer(SceneRenderer* InSceneRenderer)
+	inline void SetSceneRenderer(ISceneRenderer* InSceneRenderer)
 	{
 		m_SceneRenderer = InSceneRenderer;
 	}
@@ -100,7 +100,7 @@ private:
 	PFNApplicationCleanupCallback m_CleanupCallback;
 
 	Assembly* m_GameAssembly;
-	SceneRenderer* m_SceneRenderer;
+	ISceneRenderer* m_SceneRenderer;
 	Window* m_Window = nullptr;
 
 };

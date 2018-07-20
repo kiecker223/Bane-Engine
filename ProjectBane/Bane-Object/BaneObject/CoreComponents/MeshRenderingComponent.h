@@ -1,8 +1,7 @@
 #pragma once
 
 #include "RenderComponent.h"
-#include "Rendering/Mesh.h"
-#include "Rendering/Material.h"
+#include <Graphics/Data/RenderLoop.h>
 
 
 class MeshRenderingComponent : public RenderComponent
@@ -14,15 +13,15 @@ public:
 
 	MeshRenderingComponent();
 	virtual void Start() override;
-	virtual void SubmitFeature(SceneRenderer* Renderer) override;
+	virtual void GraphicsUpdate(RenderLoop& Loop) override;
 
-	inline MATERIAL_PARAMETERS& GetMaterialParameters()
+	inline MATERIAL_PARAMETERS GetMaterialParameters()
 	{
 		return RenderedMaterial.GetMaterialParameters();
 	}
 
-	Mesh RenderedMesh;
-	Material RenderedMaterial;
+	Mesh		RenderedMesh;
+	Material	RenderedMaterial;
 
 private:
 

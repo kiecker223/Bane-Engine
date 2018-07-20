@@ -5,6 +5,8 @@
 
 #define CUSTOM_SIZE_EVENT 0x0401
 
+Window* Window::GMainWindow = nullptr;
+
 LRESULT CALLBACK WndProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam)
 {
 	switch (message)
