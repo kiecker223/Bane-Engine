@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Interfaces/ApiRuntime.h"
+#include <Platform/System/Window.h>
 
 class D3D12Runtime : public ApiRuntime
 {
@@ -8,7 +9,7 @@ public:
 
 	virtual EAPI GetApiType() const final override { return EAPI::API_D3D12; }
 
-	virtual void Initialize() final override;
+	virtual void Initialize(const Window* pWindow) final override;
 	virtual void Destroy() final override;
 	virtual bool SupportsAsyncContexts() const final override { return true; }
 	

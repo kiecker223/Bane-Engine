@@ -6,6 +6,7 @@
 #include "D3D12CommandContext.h"
 #include "D3D12ShaderResourceViews.h"
 #include "D3D12DescriptorAllocator.h"
+#include <Platform/System/Window.h>
 
 
 class D3D12GraphicsDevice : public IRuntimeGraphicsDevice
@@ -15,7 +16,7 @@ class D3D12GraphicsDevice : public IRuntimeGraphicsDevice
 	friend class D3D12ComputeCommandContext;
 
 public:
-	D3D12GraphicsDevice(D3D12SwapChain* SwapChain, Window* RenderingWindow, ID3D12Device1* Device, ID3D12CommandQueue* MainQueue);
+	D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window* RenderingWindow, ID3D12Device1* Device, ID3D12CommandQueue* MainQueue);
 	~D3D12GraphicsDevice();
 
 	virtual IGraphicsCommandContext* CreateCommandContext(ECOMMAND_CONTEXT_TYPE Type) final override;
@@ -28,6 +29,13 @@ public:
 	virtual IGeometryShader* CreateGeometryShader(const std::string& ByteCode) final override;
 	virtual IHullShader* CreateHullShader(const std::string& ByteCode) final override;
 	virtual IComputeShader* CreateComputeShader(const std::string& ByteCode) final override;
+
+	virtual bool SupportsPrecompiledShaders() const final override { return true; }
+	virtual IVertexShader* CreateVertexShaderFromBytecode(const std::string& ByteCode) { UNUSED(ByteCode); return nullptr; }
+	virtual IPixelShader* CreatePixelShaderFromBytecode(const std::string& ByteCode) { UNUSED(ByteCode); return nullptr; }
+	virtual IGeometryShader* CreateGeometryShaderFromBytecode(const std::string& ByteCode) { UNUSED(ByteCode); return nullptr; }
+	virtual IHullShader* CreateHullShaderFromBytecode(const std::string& ByteCode) { UNUSED(ByteCode); return nullptr; }
+	virtual IComputeShader* CreateComputeShaderFromBytecode(const std::string& ByteCode) { UNUSED(ByteCode); return nullptr;  }
 
 	virtual IGraphicsPipelineState* CreatePipelineState(const GFX_PIPELINE_STATE_DESC* Desc) final override;
 	virtual IComputePipelineState* CreatePipelineState(const COMPUTE_PIPELINE_STATE_DESC* Desc) final override;

@@ -84,6 +84,7 @@ project("Regenerate premake")
     kind "Utility"
     prebuildcommands("%{prj.location}../Tools/premake5.exe --file=%{prj.location}../premake5.lua vs2017")
 
+include "Bane-Shader-Compiler/shader_compiler.lua"
 include "Bane-Application/application.lua"
 include "Bane-Executable/executable.lua"
 include "Bane-Platform/platform.lua"

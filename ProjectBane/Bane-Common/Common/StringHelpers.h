@@ -78,6 +78,7 @@ inline bool IsWhiteSpace(const std::string& TestStr)
 	return bWhiteSpace;
 }
 
+
 inline std::vector<std::string> Tokenize(const std::string& InRawStr, const std::string& Delimiters)
 {
 	std::vector<std::string> Result;

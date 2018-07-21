@@ -345,7 +345,7 @@ typedef struct GFX_PIPELINE_STATE_DESC {
 		NumRenderTargets = 1;
 		for (uint i = 0; i < 8; i++)
 		{
-			RtvDescs[0] = CreateDefaultGFXRenderTargetDesc();
+			RtvDescs[i] = CreateDefaultGFXRenderTargetDesc();
 		}
 	}
 

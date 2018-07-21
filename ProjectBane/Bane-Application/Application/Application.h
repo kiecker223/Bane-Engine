@@ -45,6 +45,7 @@ class Application
 {
 public:
 	Application();
+	Application(int argc, char** argv);
 	~Application();
 
 	static bool RegisterApplication(Application* App);

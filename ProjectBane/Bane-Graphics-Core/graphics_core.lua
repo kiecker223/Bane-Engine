@@ -6,7 +6,7 @@ project "BaneGraphicsCore"
         "../Bane-Common",  
         "../Bane-Core",
         "../Bane-Math",
-        "../Bane-Platform/Platform",
+        "../Bane-Platform",
         "../External/include",
     }
     files { "**.h", "**.cpp" }

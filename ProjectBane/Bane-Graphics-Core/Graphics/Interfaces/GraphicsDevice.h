@@ -34,6 +34,13 @@ public:
 	virtual IHullShader* CreateHullShader(const std::string& ByteCode) = 0;
 	virtual IComputeShader* CreateComputeShader(const std::string& ByteCode) = 0;
 
+	virtual bool SupportsPrecompiledShaders() const = 0;
+	virtual IVertexShader* CreateVertexShaderFromBytecode(const std::string& ByteCode) = 0;
+	virtual IPixelShader* CreatePixelShaderFromBytecode(const std::string& ByteCode) = 0;
+	virtual IGeometryShader* CreateGeometryShaderFromBytecode(const std::string& ByteCode) = 0;
+	virtual IHullShader* CreateHullShaderFromBytecode(const std::string& ByteCode) = 0;
+	virtual IComputeShader* CreateComputeShaderFromBytecode(const std::string& ByteCode) = 0;
+
 	virtual IGraphicsPipelineState* CreatePipelineState(const GFX_PIPELINE_STATE_DESC* Desc) = 0;
 	virtual IComputePipelineState* CreatePipelineState(const COMPUTE_PIPELINE_STATE_DESC* Desc) = 0;
 

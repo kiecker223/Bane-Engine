@@ -1,10 +1,10 @@
 #include "D3D12GraphicsDevice.h"
-#include "System/Logging/Logger.h"
 #include "D3D12Translator.h"
 #include "../IO/ShaderCache.h"
 #include "D3D12PipelineLibrary.h"
 #include "D3D12PipelineState.h"
 #include "D3D12GraphicsResource.h"
+#include <Platform/System/Logging/Logger.h>
 #include <thread>
 #include <d3dcompiler.h>
 
@@ -26,7 +26,7 @@ static D3D12_COMMAND_LIST_TYPE FromContextType(ECOMMAND_CONTEXT_TYPE ContextType
 	return (D3D12_COMMAND_LIST_TYPE)-1;
 }
 
-D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, Window* RenderingWindow, ID3D12Device1* Device, ID3D12CommandQueue* MainQueue) :
+D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window* RenderingWindow, ID3D12Device1* Device, ID3D12CommandQueue* MainQueue) :
 	m_Device(Device),
 	m_SwapChain(SwapChain),
 	m_GenerateMipsPipeline2D(nullptr),

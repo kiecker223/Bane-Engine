@@ -14,8 +14,15 @@ Application* Application::GApplication = nullptr;
 Application::Application() :
 	m_SceneRenderer(nullptr)
 {
+	
 }
 
+Application::Application(int argc, char** argv) :
+	m_SceneRenderer(nullptr)
+{
+	UNUSED(argc);
+	UNUSED(argv);
+}
 
 Application::~Application()
 {
@@ -65,7 +72,7 @@ void Application::InitSystems()
 	}
 
 	ApiRuntime::CreateRuntime();
-	GetApiRuntime()->Initialize();
+	GetApiRuntime()->Initialize(m_Window);
 
 	InitShaderCache();
 	InitializeTextureCache();

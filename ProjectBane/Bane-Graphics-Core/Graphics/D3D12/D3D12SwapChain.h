@@ -3,7 +3,7 @@
 #include <dxgi1_5.h>
 #include <d3d12.h>
 #include "../Interfaces/SwapChainInterface.h"
-#include <System/Window.h>
+#include <Platform/System/Window.h>
 
 class D3D12GraphicsDevice;
 
@@ -19,7 +19,7 @@ public:
 		Adapter->Release();
 	}
 
-	bool Initialize(IDXGIFactory2* Factory, IDXGIAdapter* Adapter, ID3D12CommandQueue* MainQueue, Window* RenderingWindow);
+	bool Initialize(IDXGIFactory2* Factory, IDXGIAdapter* Adapter, ID3D12CommandQueue* MainQueue, const Window* RenderingWindow);
 
 	virtual void SetSwapInterval(uint SyncInterval) override final;
 

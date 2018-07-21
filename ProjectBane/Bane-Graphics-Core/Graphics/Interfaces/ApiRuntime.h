@@ -3,6 +3,7 @@
 #include "GraphicsDevice.h"
 #include "SwapChainInterface.h"
 
+class Window;
 
 typedef enum EAPI {
 	API_D3D12,
@@ -23,7 +24,7 @@ public:
 
 	virtual EFORMAT GetBackBufferFormat() const { return FORMAT_R8G8B8A8_UNORM; }
 	virtual EAPI GetApiType() const = 0;
-	virtual void Initialize() = 0;
+	virtual void Initialize(const Window* pWindow) = 0;
 	virtual void Destroy() = 0;
 	virtual bool SupportsAsyncContexts() const = 0;
 

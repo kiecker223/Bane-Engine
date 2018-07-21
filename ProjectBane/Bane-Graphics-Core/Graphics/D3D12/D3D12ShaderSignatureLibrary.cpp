@@ -1,7 +1,7 @@
 #include "D3D12ShaderSignatureLibrary.h"
 #include "D3D12PipelineState.h"
 #include "KieckerMath.h"
-#include "System/Logging/Logger.h"
+#include "Platform/System/Logging/Logger.h"
 
 
 D3D12ShaderSignatureLibrary* D3D12ShaderSignatureLibrary::GD3D12ShaderSignatureLibraryInstance = nullptr;
