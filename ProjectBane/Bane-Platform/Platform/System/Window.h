@@ -16,7 +16,11 @@ public:
 		virtual ~WindowHandle() { }
 
 	protected:
+<<<<<<< HEAD
 		virtual void* GetHandle() { return nullptr; }
+=======
+		virtual void* GetHandle() = 0;
+>>>>>>> 63af680d424978a61b19e93dd0e77b490f0a6b80
 	};
 
 	Window();

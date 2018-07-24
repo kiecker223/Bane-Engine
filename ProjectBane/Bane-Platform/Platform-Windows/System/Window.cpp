@@ -34,6 +34,7 @@ public:
 
 protected:
 	virtual void* GetHandle();
+
 private:
 	const HWND osHandle;
 };
