@@ -2,6 +2,23 @@
 #include <Common/StringHelpers.h>
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <fstream>
+#include <string>
+
+std::string ReadEntireFile(const std::string& FileName)
+{
+	std::ifstream InStream(FileName);
+	std::string Result;
+	if (InStream.is_open())
+	{
+		std::string Buff;
+		while (std::getline(InStream, Buff))
+		{
+			Result += Buff + '\n';
+		}
+	}
+	return Result;
+}
 
 void EnsureFileDirectoryExists(const std::string& FileName)
 {
@@ -42,4 +59,28 @@ std::vector<std::string> GetAllFilesInFolder(const std::string& FolderName)
 		}
 	}
 	return Result;
+}
+
+uint8* ReadFileBinary(const std::string& FileName, uint& NumBytes)
+{
+	uint8* FileBinary = nullptr;
+	HANDLE FileHandle = CreateFile(FileName.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+	DWORD Error = GetLastError();
+	BANE_CHECK(Error == 0);
+	if (FileHandle != INVALID_HANDLE_VALUE)
+	{
+		DWORD BytesNeeded = GetFileSize(FileHandle, nullptr);
+		if (BytesNeeded == 0xffffffff)
+		{
+			// Fix me later
+			BANE_CHECK(false);
+		}
+		FileBinary = new uint8[BytesNeeded];
+		DWORD Stub;
+		ReadFile(FileHandle, (LPVOID)FileBinary, BytesNeeded, &Stub, nullptr);
+		BANE_CHECK(Stub == BytesNeeded);
+		NumBytes = static_cast<uint>(BytesNeeded);
+		CloseHandle(FileHandle);
+	}
+	return FileBinary;
 }

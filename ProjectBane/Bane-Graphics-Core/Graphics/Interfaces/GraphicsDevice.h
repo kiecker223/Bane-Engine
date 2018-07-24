@@ -35,11 +35,11 @@ public:
 	virtual IComputeShader* CreateComputeShader(const std::string& ByteCode) = 0;
 
 	virtual bool SupportsPrecompiledShaders() const = 0;
-	virtual IVertexShader* CreateVertexShaderFromBytecode(const std::string& ByteCode) = 0;
-	virtual IPixelShader* CreatePixelShaderFromBytecode(const std::string& ByteCode) = 0;
-	virtual IGeometryShader* CreateGeometryShaderFromBytecode(const std::string& ByteCode) = 0;
-	virtual IHullShader* CreateHullShaderFromBytecode(const std::string& ByteCode) = 0;
-	virtual IComputeShader* CreateComputeShaderFromBytecode(const std::string& ByteCode) = 0;
+	virtual IVertexShader*		CreateVertexShaderFromBytecode(const std::vector<uint8>& ByteCode) {	UNUSED(ByteCode); return nullptr; };
+	virtual IPixelShader*		CreatePixelShaderFromBytecode(const std::vector<uint8>& ByteCode) {		UNUSED(ByteCode); return nullptr; };
+	virtual IGeometryShader*	CreateGeometryShaderFromBytecode(const std::vector<uint8>& ByteCode) {	UNUSED(ByteCode); return nullptr; };
+	virtual IHullShader*		CreateHullShaderFromBytecode(const std::vector<uint8>& ByteCode) {		UNUSED(ByteCode); return nullptr; };
+	virtual IComputeShader*		CreateComputeShaderFromBytecode(const std::vector<uint8>& ByteCode) {	UNUSED(ByteCode); return nullptr; };
 
 	virtual IGraphicsPipelineState* CreatePipelineState(const GFX_PIPELINE_STATE_DESC* Desc) = 0;
 	virtual IComputePipelineState* CreatePipelineState(const COMPUTE_PIPELINE_STATE_DESC* Desc) = 0;
@@ -92,23 +92,9 @@ public:
 	virtual void CreateShaderResourceView(IShaderResourceTable* DestTable, ITextureBase* Texture, uint Slot, uint Subresource = 0) = 0;
 	virtual void CreateUnorderedAccessView(IShaderResourceTable* DestTable, ITextureBase* Texture, uint Slot, uint Subresource = 0) = 0;
 	virtual void CreateSamplerView(IShaderResourceTable* DestTable, ISamplerState* SamplerState, uint Slot) = 0;
-	virtual IShaderResourceTable* CreateShaderTable(IVertexShader* VS, IPixelShader* PS, IHullShader* HS = nullptr, IGeometryShader* GS = nullptr) = 0;
-
-	inline IShaderResourceTable* CreateShaderTable(IGraphicsPipelineState* Pipeline)
-	{
-		GFX_PIPELINE_STATE_DESC Desc = { };
-		Pipeline->GetDesc(&Desc);
-		return CreateShaderTable(Desc.VS, Desc.PS, Desc.HS, Desc.GS);
-	}
-
-	inline IShaderResourceTable* CreateShaderTable(IComputePipelineState* Pipeline)
-	{
-		COMPUTE_PIPELINE_STATE_DESC Desc = { };
-		Pipeline->GetDesc(&Desc);
-		return CreateShaderTable(Desc.CS);
-	}
-
-	virtual IShaderResourceTable* CreateShaderTable(IComputeShader* CS) = 0;
+	
+	virtual IShaderResourceTable* CreateShaderTable(IGraphicsPipelineState* Pipeline) = 0;
+	virtual IShaderResourceTable* CreateShaderTable(IComputePipelineState* Pipeline) = 0;
 
 	virtual IRenderTargetView* CreateRenderTargetView(ITexture2D* InTexture) = 0;
 	virtual IDepthStencilView* CreateDepthStencilView(ITexture2D* InTexture) = 0;

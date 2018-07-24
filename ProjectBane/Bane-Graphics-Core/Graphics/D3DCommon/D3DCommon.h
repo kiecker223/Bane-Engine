@@ -87,10 +87,9 @@ inline void D3D_BuildErrorMessage(HRESULT Res)
 		NULL);
 
 	MessageBox(nullptr, output, "D3D12 ERROR:", MB_OK); 
-	__debugbreak();
 }
 
-#define D3D12ERRORCHECK(x) { HRESULT HResult = x; if (FAILED(HResult)) { D3D_BuildErrorMessage(HResult); } }
+#define D3D12ERRORCHECK(x) { HRESULT HResult = x; if (FAILED(HResult)) { D3D_BuildErrorMessage(HResult); __debugbreak(); } }
 #else
 #define D3D12ERRORCHECK(x) x
 #endif

@@ -31,11 +31,11 @@ public:
 	virtual IComputeShader* CreateComputeShader(const std::string& ByteCode) final override;
 
 	virtual bool SupportsPrecompiledShaders() const final override { return true; }
-	virtual IVertexShader* CreateVertexShaderFromBytecode(const std::string& ByteCode) { UNUSED(ByteCode); return nullptr; }
-	virtual IPixelShader* CreatePixelShaderFromBytecode(const std::string& ByteCode) { UNUSED(ByteCode); return nullptr; }
-	virtual IGeometryShader* CreateGeometryShaderFromBytecode(const std::string& ByteCode) { UNUSED(ByteCode); return nullptr; }
-	virtual IHullShader* CreateHullShaderFromBytecode(const std::string& ByteCode) { UNUSED(ByteCode); return nullptr; }
-	virtual IComputeShader* CreateComputeShaderFromBytecode(const std::string& ByteCode) { UNUSED(ByteCode); return nullptr;  }
+	virtual IVertexShader* CreateVertexShaderFromBytecode(const std::vector<uint8>& ByteCode);
+	virtual IPixelShader* CreatePixelShaderFromBytecode(const std::vector<uint8>& ByteCode);
+	virtual IGeometryShader* CreateGeometryShaderFromBytecode(const std::vector<uint8>& ByteCode);
+	virtual IHullShader* CreateHullShaderFromBytecode(const std::vector<uint8>& ByteCode);
+	virtual IComputeShader* CreateComputeShaderFromBytecode(const std::vector<uint8>& ByteCode);
 
 	virtual IGraphicsPipelineState* CreatePipelineState(const GFX_PIPELINE_STATE_DESC* Desc) final override;
 	virtual IComputePipelineState* CreatePipelineState(const COMPUTE_PIPELINE_STATE_DESC* Desc) final override;
@@ -68,8 +68,8 @@ public:
 	virtual void CreateShaderResourceView(IShaderResourceTable* InDestTable, ITextureBase* Texture, uint Slot, uint Subresource = 0) final override;
 	virtual void CreateUnorderedAccessView(IShaderResourceTable* InDestTable, ITextureBase* Texture, uint Slot, uint Subresource = 0) final override;
 	virtual void CreateSamplerView(IShaderResourceTable* DestTable, ISamplerState* SamplerState, uint Slot) final override;
-	virtual IShaderResourceTable* CreateShaderTable(IVertexShader* VS, IPixelShader* PS, IHullShader* HS = nullptr, IGeometryShader* GS = nullptr) final override;
-	virtual IShaderResourceTable* CreateShaderTable(IComputeShader* CS) final override;
+	virtual IShaderResourceTable* CreateShaderTable(IGraphicsPipelineState* pState) final override;
+	virtual IShaderResourceTable* CreateShaderTable(IComputePipelineState* pState) final override;
 
 	virtual IRenderTargetView* CreateRenderTargetView(ITexture2D* InTexture) final override;
 	virtual IDepthStencilView* CreateDepthStencilView(ITexture2D* InTexture) final override;

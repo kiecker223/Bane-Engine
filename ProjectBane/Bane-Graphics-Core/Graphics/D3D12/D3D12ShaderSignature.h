@@ -128,6 +128,12 @@ class D3D12ShaderItemData
 public:
 
 	D3D12ShaderItemData() : NumCBVs(0), NumSRVs(0), NumUAVs(0), NumSMPs(0) { }
+	D3D12ShaderItemData(const PIPELINE_STATE_RESOURCE_COUNTS& Counts) :
+		NumCBVs(static_cast<uint>(Counts.NumConstantBuffers)),
+		NumSRVs(static_cast<uint>(Counts.NumShaderResourceViews)),
+		NumUAVs(static_cast<uint>(Counts.NumUnorderedAccessViews)),
+		NumSMPs(static_cast<uint>(Counts.NumSamplers))
+	{ }
 	D3D12ShaderItemData(uint InNumCBVs, uint InNumSRVs, uint InNumUAVs, uint InNumSMPs) : NumCBVs(InNumCBVs), NumSRVs(InNumSRVs), NumUAVs(InNumUAVs), NumSMPs(InNumSMPs) { }
 
 	inline ESHADER_PARAMETER_TYPE GetLargestParameterType() const
@@ -160,6 +166,16 @@ public:
 			return NumUAVs;
 		}
 		return 0;
+	}
+
+	PIPELINE_STATE_RESOURCE_COUNTS ToResourceCounts()
+	{
+		return { static_cast<uint8>(NumCBVs), static_cast<uint8>(NumSRVs), static_cast<uint8>(NumSMPs), static_cast<uint8>(NumUAVs) };
+	}
+
+	operator PIPELINE_STATE_RESOURCE_COUNTS ()
+	{
+		return ToResourceCounts();
 	}
 
 	inline uint TotalParameterCount() const

@@ -157,7 +157,7 @@ typedef struct GFX_RASTER_DESC {
 	bool bCull;
 	bool bIsCounterClockwiseForward;
 	bool bDepthClipEnable;
-	bool bAntiAliasedLineEnabled;
+	bool bAntialiasedLineEnabled;
 	bool bMultisampleEnable;
 	float DepthBiasClamp;
 	float SlopeScaledDepthBias;
@@ -171,7 +171,7 @@ inline GFX_RASTER_DESC CreateDefaultGFXRasterDesc()
 	Result.bCull = true;
 	Result.bIsCounterClockwiseForward = false;
 	Result.bDepthClipEnable = true;
-	Result.bAntiAliasedLineEnabled = false;
+	Result.bAntialiasedLineEnabled = false;
 	Result.bMultisampleEnable = false;
 	Result.DepthBiasClamp = 0.0f;
 	Result.SlopeScaledDepthBias = 0.0f;
@@ -310,7 +310,12 @@ public:
 	virtual const GFX_DEPTH_STENCIL_DESC GetDesc() const = 0;
 };
 
+typedef struct PIPELINE_STATE_RESOURCE_COUNTS {
+	uint8 NumConstantBuffers, NumShaderResourceViews, NumSamplers, NumUnorderedAccessViews;
+} PIPELINE_STATE_RESOURCE_COUNTS;
+
 typedef struct GFX_PIPELINE_STATE_DESC {
+	PIPELINE_STATE_RESOURCE_COUNTS Counts;
 	IVertexShader* VS;
 	IPixelShader* PS;
 	IHullShader* HS;
@@ -358,6 +363,7 @@ inline GFX_PIPELINE_STATE_DESC CreateDefaultGFXPipeline()
 }
 
 typedef struct COMPUTE_PIPELINE_STATE_DESC {
+	PIPELINE_STATE_RESOURCE_COUNTS Counts;
 	IComputeShader* CS;
 } COMPUTE_PIPELINE_STATE_DESC;
 

@@ -11,13 +11,8 @@ class NO_VTABLE D3D12Shader
 public:
 	static const ESHADER_STAGE Stage = ShaderStage;
 
-	D3D12Shader(const std::string& InByteCode, const std::vector<uint8>& InCompiledCode, uint InNumConstantBuffers, uint InNumShaderResourceViews, uint InNumSamplers, uint InNumUnorderedAccessViews) :
-		ByteCode(InByteCode),
-		CompiledCode(InCompiledCode),
-		NumConstantBuffers(InNumConstantBuffers),
-		NumShaderResourceViews(InNumShaderResourceViews),
-		NumSamplers(InNumSamplers),
-		NumUnorderedAccessViews(InNumUnorderedAccessViews)
+	D3D12Shader(const std::vector<uint8>& InCompiledCode) :
+		CompiledCode(InCompiledCode)
 	{
 	}
 
@@ -31,17 +26,13 @@ public:
 
 	std::string ByteCode;
 	std::vector<uint8> CompiledCode;
-	uint NumConstantBuffers;
-	uint NumShaderResourceViews;
-	uint NumSamplers;
-	uint NumUnorderedAccessViews;
 };
 
 class D3D12VertexShader : public IVertexShader, public D3D12Shader<SHADER_STAGE_VERTEX>
 {
 public:
-	D3D12VertexShader(const std::string& InByteCode, const std::vector<uint8>& InCompiledCode, uint InNumConstantBuffers, uint InNumShaderResourceViews, uint InNumSamplers, uint InNumUnorderedAccessViews)
-		: D3D12Shader(InByteCode, InCompiledCode, InNumConstantBuffers, InNumShaderResourceViews, InNumSamplers, InNumUnorderedAccessViews)
+	D3D12VertexShader(const std::vector<uint8>& InCompiledCode)
+		: D3D12Shader(InCompiledCode)
 	{
 	}
 };
@@ -49,8 +40,8 @@ public:
 class D3D12PixelShader : public IPixelShader, public D3D12Shader<SHADER_STAGE_PIXEL>
 {
 public:
-	D3D12PixelShader(const std::string& InByteCode, const std::vector<uint8>& InCompiledCode, uint InNumConstantBuffers, uint InNumShaderResourceViews, uint InNumSamplers, uint InNumUnorderedAccessViews)
-		: D3D12Shader(InByteCode, InCompiledCode, InNumConstantBuffers, InNumShaderResourceViews, InNumSamplers, InNumUnorderedAccessViews)
+	D3D12PixelShader(const std::vector<uint8>& InCompiledCode)
+		: D3D12Shader(InCompiledCode)
 	{
 	}
 };
@@ -58,8 +49,8 @@ public:
 class D3D12HullShader : public IHullShader, public D3D12Shader<SHADER_STAGE_HULL>
 {
 public:
-	D3D12HullShader(const std::string& InByteCode, const std::vector<uint8>& InCompiledCode, uint InNumConstantBuffers, uint InNumShaderResourceViews, uint InNumSamplers, uint InNumUnorderedAccessViews)
-		: D3D12Shader(InByteCode, InCompiledCode, InNumConstantBuffers, InNumShaderResourceViews, InNumSamplers, InNumUnorderedAccessViews)
+	D3D12HullShader(const std::vector<uint8>& InCompiledCode)
+		: D3D12Shader(InCompiledCode)
 	{
 	}
 };
@@ -67,8 +58,8 @@ public:
 class D3D12GeometryShader : public IGeometryShader, public D3D12Shader<SHADER_STAGE_GEOMETRY>
 {
 public:
-	D3D12GeometryShader(const std::string& InByteCode, const std::vector<uint8>& InCompiledCode, uint InNumConstantBuffers, uint InNumShaderResourceViews, uint InNumSamplers, uint InNumUnorderedAccessViews)
-		: D3D12Shader(InByteCode, InCompiledCode, InNumConstantBuffers, InNumShaderResourceViews, InNumSamplers, InNumUnorderedAccessViews)
+	D3D12GeometryShader(const std::vector<uint8>& InCompiledCode)
+		: D3D12Shader(InCompiledCode)
 	{
 	}
 };
@@ -76,8 +67,8 @@ public:
 class D3D12ComputeShader : public IComputeShader, public D3D12Shader<SHADER_STAGE_COMPUTE>
 {
 public:
-	D3D12ComputeShader(const std::string& InByteCode, const std::vector<uint8>& InCompiledCode, uint InNumConstantBuffers, uint InNumShaderResourceViews, uint InNumSamplers, uint InNumUnorderedAccessViews)
-		: D3D12Shader(InByteCode, InCompiledCode, InNumConstantBuffers, InNumShaderResourceViews, InNumSamplers, InNumUnorderedAccessViews)
+	D3D12ComputeShader(const std::vector<uint8>& InCompiledCode)
+		: D3D12Shader(InCompiledCode)
 	{
 	}
 };

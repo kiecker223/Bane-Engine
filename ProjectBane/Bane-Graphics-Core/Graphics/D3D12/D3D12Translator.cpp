@@ -301,7 +301,7 @@ D3D12_GRAPHICS_PIPELINE_STATE_DESC D3D12_TranslateGraphicsPipelineStateDesc(cons
 				OutDesc.GS = GeometryShader->GetShaderByteCode();
 			}
 		}
-		ShaderSignature = GetD3D12ShaderSignatureLibrary()->DetermineBestRootSignature(VertexShader, PixelShader, HullShader, GeometryShader);
+		ShaderSignature = GetD3D12ShaderSignatureLibrary()->DetermineBestRootSignature(InDesc->Counts);
 		*OutSignature = ShaderSignature;
 		OutDesc.pRootSignature = ShaderSignature.RootSignature;
 	}
@@ -347,7 +347,7 @@ D3D12_GRAPHICS_PIPELINE_STATE_DESC D3D12_TranslateGraphicsPipelineStateDesc(cons
 	OutDesc.RasterizerState.DepthClipEnable = InDesc->RasterDesc.bDepthClipEnable;
 	OutDesc.RasterizerState.MultisampleEnable = InDesc->RasterDesc.bMultisampleEnable;
 	OutDesc.RasterizerState.ForcedSampleCount = 0;
-	OutDesc.RasterizerState.AntialiasedLineEnable = InDesc->RasterDesc.bAntiAliasedLineEnabled;
+	OutDesc.RasterizerState.AntialiasedLineEnable = InDesc->RasterDesc.bAntialiasedLineEnabled;
 
 	if (InDesc->InputLayout)
 	{

@@ -11,10 +11,9 @@ typedef struct SCENE_DATA {
 	void* unused;
 } SCENE_DATA;
 
+
 class Scene
 {
-	friend Scene* GetCurrentScene();
-	friend void SetCurrentScene(Scene* InScene);
 public:
 
 	Scene();
@@ -46,7 +45,6 @@ public:
 
 private:
 
-	static Scene* GCurrentScene;
 	std::string m_Name;
 	Entity* m_Root;
 	struct EntityHashEntry
@@ -58,26 +56,5 @@ private:
 	std::vector<Entity*> m_EntityAddList;
 };
 
-inline Scene* GetCurrentScene()
-{
-	return Scene::GCurrentScene;
-}
-
-inline void SetCurrentScene(Scene* InScene)
-{
-	Scene* pScene = GetCurrentScene();
-	if (pScene)
-	{
-		pScene->DumpScene();
-		delete pScene;
-	}
-	Scene::GCurrentScene = InScene;
-	pScene = InScene;
-	if (InScene)
-	{
-		// Should setting it to nullptr be valid?
-		pScene->InitScene();
-	}
-	// BANE_CHECK(pScene);
-}
-
+// Scene* GetCurrentScene();
+// void SetCurrentScene(Scene* InScene);

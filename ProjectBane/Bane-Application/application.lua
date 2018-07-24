@@ -17,6 +17,7 @@ group "Engine"
 
 	}
 	links {
+		"BaneObject",
 		"BaneCore",
 		"BaneCommon",
 		"BanePlatform",

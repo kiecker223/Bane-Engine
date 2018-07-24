@@ -15,6 +15,8 @@
 #define MAKE_ALIGN(x) __declspec(align(x))
 #define SHADER_ALIGNMENT MAKE_ALIGN(sizeof(float4))
 
+
+
 #define NO_VTABLE __declspec(novtable)
 
 #define UNUSED(expr) do { (void)(expr); } while (0)

@@ -24,9 +24,9 @@ LRESULT CALLBACK WndProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam
 }
 
 
-class OsWindowsHandle : public Window::WindowsHandle {
+class OsWindowsHandle : public Window::WindowHandle {
 public:
-	static Window::WindowsHandle* Create(LPCSTR className, const char* name, uint width, uint height, HINSTANCE instance);
+	static Window::WindowHandle* Create(LPCSTR className, const char* name, uint width, uint height, HINSTANCE instance);
 
 	OsWindowsHandle(HWND);
 	virtual ~OsWindowsHandle();
@@ -56,7 +56,7 @@ void* OsWindowsHandle::GetHandle() {
 	return osHandle;
 }
 
-Window::WindowsHandle* OsWindowsHandle::Create(LPCSTR className, const char* name, uint width, uint height, HINSTANCE instance) {
+Window::WindowHandle* OsWindowsHandle::Create(LPCSTR className, const char* name, uint width, uint height, HINSTANCE instance) {
 
 	auto windows = CreateWindowA(
 		className, name, WS_OVERLAPPEDWINDOW | WS_VISIBLE,

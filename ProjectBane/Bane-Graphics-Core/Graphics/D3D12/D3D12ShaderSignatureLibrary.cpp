@@ -161,49 +161,16 @@ void D3D12ShaderSignatureLibrary::Shutdown()
 	}
 } 
 
-D3D12ShaderSignature D3D12ShaderSignatureLibrary::GetSignature(const D3D12ShaderItemData& ParameterList)
+D3D12ShaderSignature D3D12ShaderSignatureLibrary::GetSignature(const PIPELINE_STATE_RESOURCE_COUNTS& ParameterList)
 {
 	ED3D12_SHADER_SIGNATURE_TIER Tier = GetTier(ParameterList);
 	return m_TieredSignatures[(uint)Tier];
 }
 
-D3D12ShaderSignature D3D12ShaderSignatureLibrary::DetermineBestRootSignature(
-	D3D12VertexShader*	VertexShader,	D3D12PixelShader*		PixelShader, 
-	D3D12HullShader*	HullShader,		D3D12GeometryShader*	GeometryShader)
+D3D12ShaderSignature D3D12ShaderSignatureLibrary::DetermineBestRootSignature(const PIPELINE_STATE_RESOURCE_COUNTS& Counts)
 {
-	D3D12ShaderItemData ParameterList;
-	if (VertexShader)
-	{
-		ParameterList.NumCBVs += VertexShader->NumConstantBuffers;
-		ParameterList.NumSRVs += VertexShader->NumShaderResourceViews;
-		ParameterList.NumUAVs += VertexShader->NumUnorderedAccessViews;
-	}
-	if (PixelShader)
-	{
-		ParameterList.NumCBVs += PixelShader->NumConstantBuffers;
-		ParameterList.NumSRVs += PixelShader->NumShaderResourceViews;
-		ParameterList.NumUAVs += PixelShader->NumUnorderedAccessViews;
-	}
-	if (HullShader)
-	{
-		ParameterList.NumCBVs += HullShader->NumConstantBuffers;
-		ParameterList.NumSRVs += HullShader->NumShaderResourceViews;
-		ParameterList.NumUAVs += HullShader->NumUnorderedAccessViews;
-	}
-	if (GeometryShader)
-	{
-		ParameterList.NumCBVs += GeometryShader->NumConstantBuffers;
-		ParameterList.NumSRVs += GeometryShader->NumShaderResourceViews;
-		ParameterList.NumUAVs += GeometryShader->NumUnorderedAccessViews;
-	}
-
+	D3D12ShaderItemData ParameterList(Counts);
 	ED3D12_SHADER_SIGNATURE_TIER Tier = GetTier(ParameterList);
-	return m_TieredSignatures[(uint)Tier];
-}
-
-D3D12ShaderSignature D3D12ShaderSignatureLibrary::DetermineBestComputeSignature(D3D12ComputeShader* ComputeShader)
-{
-	ED3D12_SHADER_SIGNATURE_TIER Tier = GetTier(D3D12ShaderItemData(ComputeShader->NumConstantBuffers, ComputeShader->NumShaderResourceViews, ComputeShader->NumUnorderedAccessViews, ComputeShader->NumSamplers));
 	return m_TieredSignatures[(uint)Tier];
 }
 
@@ -221,30 +188,6 @@ ED3D12_SHADER_SIGNATURE_TIER D3D12ShaderSignatureLibrary::GetTier(const D3D12Sha
 	}
 
 	bool bHasUAVs = Data.NumUAVs != 0;
-
-//	if (Data.NumSRVs == 0 && (Data.NumUAVs >= 1 && Data.NumUAVs <= 2))
-//	{
-//		if (Data.NumCBVs == 0)
-//		{
-//			return D3D12_SHADER_SIGNATURE_TIER_2UAV;
-//		}
-//		else if (Data.NumCBVs >= 1 && Data.NumCBVs <= 2)
-//		{
-//			return D3D12_SHADER_SIGNATURE_TIER_2CBV_2UAV;
-//		}
-//	}
-//	if (Data.NumSRVs == 0 && (Data.NumUAVs > 2 && Data.NumUAVs <= 4))
-//	{
-//		if (Data.NumCBVs == 0)
-//		{
-//			return D3D12_SHADER_SIGNATURE_TIER_4UAV;
-//		}
-//		else if (Data.NumCBVs >= 1 && Data.NumCBVs <= 4)
-//		{
-//			return D3D12_SHADER_SIGNATURE_TIER_4CBV_4UAV;
-//		}
-//	}
-
 
 	Data.NumCBVs = NextPowerOfTwo(Data.NumCBVs);
 	Data.NumSRVs = NextPowerOfTwo(Data.NumSRVs);

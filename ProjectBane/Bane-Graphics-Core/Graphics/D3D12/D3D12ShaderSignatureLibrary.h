@@ -33,14 +33,9 @@ public:
 
 	void Initialize(ID3D12Device1* Device);
 	void Shutdown();
-	D3D12ShaderSignature GetSignature(const D3D12ShaderItemData& ParameterList);
+	D3D12ShaderSignature GetSignature(const PIPELINE_STATE_RESOURCE_COUNTS& ParameterList);
 
-	D3D12ShaderSignature DetermineBestRootSignature(
-		class D3D12VertexShader* VertexShader, 
-		class D3D12PixelShader* PixelShader, 
-		class D3D12HullShader* HullShader = nullptr, 
-		class D3D12GeometryShader* GeometryShader = nullptr);
-	D3D12ShaderSignature DetermineBestComputeSignature(class D3D12ComputeShader* ComputeShader);
+	D3D12ShaderSignature DetermineBestRootSignature(const PIPELINE_STATE_RESOURCE_COUNTS& Counts);
 
 	static D3D12ShaderSignatureLibrary* Get()
 	{

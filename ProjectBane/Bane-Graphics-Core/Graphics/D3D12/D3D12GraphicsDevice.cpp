@@ -285,7 +285,7 @@ IVertexShader* D3D12GraphicsDevice::CreateVertexShader(const std::string& ByteCo
 		return nullptr;
 	}
 #endif
-	return new D3D12VertexShader(ByteCode, CompiledCode, NumConstantBuffers, NumShaderResources, NumSamplers, NumUnorderedAccessViews);
+	return new D3D12VertexShader(CompiledCode);
 }
 
 IPixelShader* D3D12GraphicsDevice::CreatePixelShader(const std::string& ByteCode)
@@ -303,7 +303,7 @@ IPixelShader* D3D12GraphicsDevice::CreatePixelShader(const std::string& ByteCode
 	}
 #endif
 
-	return new D3D12PixelShader(ByteCode, CompiledCode, NumConstantBuffers, NumShaderResources, NumSamplers, NumUnorderedAccessViews);
+	return new D3D12PixelShader(CompiledCode);
 }
 
 IGeometryShader* D3D12GraphicsDevice::CreateGeometryShader(const std::string& ByteCode)
@@ -319,7 +319,7 @@ IGeometryShader* D3D12GraphicsDevice::CreateGeometryShader(const std::string& By
 		return nullptr;
 	}
 #endif
-	return new D3D12GeometryShader(ByteCode, CompiledCode, NumConstantBuffers, NumShaderResources, NumSamplers, NumUnorderedAccessViews);
+	return new D3D12GeometryShader(CompiledCode);
 }
 
 IHullShader* D3D12GraphicsDevice::CreateHullShader(const std::string& ByteCode)
@@ -335,7 +335,7 @@ IHullShader* D3D12GraphicsDevice::CreateHullShader(const std::string& ByteCode)
 		return nullptr;
 	}
 #endif
-	return new D3D12HullShader(ByteCode, CompiledCode, NumConstantBuffers, NumShaderResources, NumSamplers, NumUnorderedAccessViews);
+	return new D3D12HullShader(CompiledCode);
 }
 
 IComputeShader* D3D12GraphicsDevice::CreateComputeShader(const std::string& ByteCode)
@@ -351,7 +351,32 @@ IComputeShader* D3D12GraphicsDevice::CreateComputeShader(const std::string& Byte
 		return nullptr;
 	}
 #endif
-	return new D3D12ComputeShader(ByteCode, CompiledCode, NumConstantBuffers, NumShaderResources, NumSamplers, NumUnorderedAccessViews);
+	return new D3D12ComputeShader(CompiledCode);
+}
+
+IVertexShader* D3D12GraphicsDevice::CreateVertexShaderFromBytecode(const std::vector<uint8>& InByteCode)
+{
+	return new D3D12VertexShader(InByteCode);
+}
+
+IPixelShader* D3D12GraphicsDevice::CreatePixelShaderFromBytecode(const std::vector<uint8>& InByteCode)
+{
+	return new D3D12PixelShader(InByteCode);
+}
+
+IGeometryShader* D3D12GraphicsDevice::CreateGeometryShaderFromBytecode(const std::vector<uint8>& InByteCode)
+{
+	return new D3D12GeometryShader(InByteCode);
+}
+
+IHullShader* D3D12GraphicsDevice::CreateHullShaderFromBytecode(const std::vector<uint8>& InByteCode)
+{
+	return new D3D12HullShader(InByteCode);
+}
+
+IComputeShader* D3D12GraphicsDevice::CreateComputeShaderFromBytecode(const std::vector<uint8>& InByteCode)
+{
+	return new D3D12ComputeShader(InByteCode);
 }
 
 IGraphicsPipelineState* D3D12GraphicsDevice::CreatePipelineState(const GFX_PIPELINE_STATE_DESC* Desc)
@@ -364,7 +389,7 @@ IGraphicsPipelineState* D3D12GraphicsDevice::CreatePipelineState(const GFX_PIPEL
 IComputePipelineState* D3D12GraphicsDevice::CreatePipelineState(const COMPUTE_PIPELINE_STATE_DESC* Desc)
 {
 	D3D12ComputeShader* Shader = (D3D12ComputeShader*)Desc->CS;
-	D3D12ShaderSignature UsedSignature = GetD3D12ShaderSignatureLibrary()->DetermineBestComputeSignature(Shader);
+	D3D12ShaderSignature UsedSignature = GetD3D12ShaderSignatureLibrary()->DetermineBestRootSignature(Desc->Counts);
 	D3D12_COMPUTE_PIPELINE_STATE_DESC CreationDesc = { };
 	CreationDesc.pRootSignature = UsedSignature.RootSignature;
 	CreationDesc.NodeMask = 0;
@@ -384,7 +409,7 @@ void D3D12GraphicsDevice::RecompilePipelineState(IComputePipelineState* pState, 
 {
 	D3D12ComputePipelineState* PipelineState = (D3D12ComputePipelineState*)pState;
 	D3D12ComputeShader* Shader = (D3D12ComputeShader*)NewDesc->CS;
-	D3D12ShaderSignature UsedSignature = GetD3D12ShaderSignatureLibrary()->DetermineBestComputeSignature(Shader);
+	D3D12ShaderSignature UsedSignature = GetD3D12ShaderSignatureLibrary()->DetermineBestRootSignature(NewDesc->Counts);
 	D3D12_COMPUTE_PIPELINE_STATE_DESC CreationDesc = { };
 	CreationDesc.pRootSignature = UsedSignature.RootSignature;
 	CreationDesc.NodeMask = 0;
@@ -548,8 +573,8 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 
 	if (m_GenerateMipsPipeline2D == nullptr)
 	{
-		m_GenerateMipsPipeline2D = (D3D12ComputePipelineState*)GetShaderCache()->LoadComputePipeline("Shaders/GenerateMips.hlsl");
-		m_GenerateMipsTable2D = (D3D12ShaderResourceTable*)IRuntimeGraphicsDevice::CreateShaderTable((IComputePipelineState*)m_GenerateMipsPipeline2D);
+		m_GenerateMipsPipeline2D = (D3D12ComputePipelineState*)GetShaderCache()->LoadComputePipeline("GenerateMips.cmpt");
+		m_GenerateMipsTable2D = (D3D12ShaderResourceTable*)CreateShaderTable((IComputePipelineState*)m_GenerateMipsPipeline2D);
 	}
 
 	ID3D12Resource* CopyRes = nullptr;
@@ -873,58 +898,38 @@ void D3D12GraphicsDevice::CreateSamplerView(IShaderResourceTable* InDestTable, I
 	m_Device->CreateSampler(&SamplerState->CreationDesc, SlotAlloc.CpuHandle);
 }
 
-D3D12ShaderItemData GetShaderRequirements(IVertexShader* VS, IPixelShader* PS, IHullShader* HS, IGeometryShader* GS)
+D3D12ShaderItemData GetShaderRequirements(IGraphicsPipelineState* pState)
 {
-	D3D12VertexShader* VertexShader = (D3D12VertexShader*)VS;
-	D3D12PixelShader* PixelShader = (D3D12PixelShader*)PS;
-	D3D12ShaderItemData ParameterList;
-	if (VertexShader)
+	GFX_PIPELINE_STATE_DESC PipelineDesc;
 	{
-		ParameterList.NumCBVs += VertexShader->NumConstantBuffers;
-		ParameterList.NumSRVs += VertexShader->NumShaderResourceViews;
-		ParameterList.NumUAVs += VertexShader->NumUnorderedAccessViews;
-		ParameterList.NumSMPs += VertexShader->NumSamplers;
+		pState->GetDesc(&PipelineDesc);
 	}
-	if (PixelShader)
-	{
-		ParameterList.NumCBVs += PixelShader->NumConstantBuffers;
-		ParameterList.NumSRVs += PixelShader->NumShaderResourceViews;
-		ParameterList.NumUAVs += PixelShader->NumUnorderedAccessViews;
-		ParameterList.NumSMPs += PixelShader->NumSamplers;
-	}
-	if (HS)
-	{
-		D3D12HullShader* HullShader = (D3D12HullShader*)HS;
-		ParameterList.NumCBVs += HullShader->NumConstantBuffers;
-		ParameterList.NumSRVs += HullShader->NumShaderResourceViews;
-		ParameterList.NumUAVs += HullShader->NumUnorderedAccessViews;
-		ParameterList.NumSMPs += HullShader->NumSamplers;
-	}
-	if (GS)
-	{
-		D3D12GeometryShader* GeometryShader = (D3D12GeometryShader*)GS;
-		ParameterList.NumCBVs += GeometryShader->NumConstantBuffers;
-		ParameterList.NumSRVs += GeometryShader->NumShaderResourceViews;
-		ParameterList.NumUAVs += GeometryShader->NumUnorderedAccessViews;
-		ParameterList.NumSMPs += GeometryShader->NumSamplers;
-	}
+	auto& Counts = PipelineDesc.Counts;
+	D3D12ShaderItemData ParameterList(
+		static_cast<uint>(Counts.NumConstantBuffers), 
+		static_cast<uint>(Counts.NumShaderResourceViews), 
+		static_cast<uint>(Counts.NumUnorderedAccessViews), 
+		static_cast<uint>(Counts.NumSamplers)
+	);
 	return ParameterList;
 }
 
-D3D12ShaderItemData GetShaderRequirements(IComputeShader* CS)
+D3D12ShaderItemData GetShaderRequirements(IComputePipelineState* pState)
 {
-	D3D12ComputeShader* ComputeShader = (D3D12ComputeShader*)CS;
+	COMPUTE_PIPELINE_STATE_DESC Desc;
+	pState->GetDesc(&Desc);
+	auto& Counts = Desc.Counts;
 	D3D12ShaderItemData ParameterList;
-	ParameterList.NumCBVs = ComputeShader->NumConstantBuffers;
-	ParameterList.NumSRVs = ComputeShader->NumShaderResourceViews;
-	ParameterList.NumUAVs = ComputeShader->NumUnorderedAccessViews;
-	ParameterList.NumSMPs = ComputeShader->NumSamplers;
+	ParameterList.NumCBVs = Counts.NumConstantBuffers;
+	ParameterList.NumSRVs = Counts.NumShaderResourceViews;
+	ParameterList.NumUAVs = Counts.NumUnorderedAccessViews;
+	ParameterList.NumSMPs = Counts.NumSamplers;
 	return ParameterList;
 }
 
-IShaderResourceTable* D3D12GraphicsDevice::CreateShaderTable(IVertexShader* VS, IPixelShader* PS, IHullShader* HS, IGeometryShader* GS)
+IShaderResourceTable* D3D12GraphicsDevice::CreateShaderTable(IGraphicsPipelineState* pState)
 {
-	D3D12ShaderItemData Reqs = GetShaderRequirements(VS, PS, HS, GS);
+	D3D12ShaderItemData Reqs = GetShaderRequirements(pState);
 	D3D12DescriptorAllocation BaseSrvAllocation = m_SrvAllocator.AllocateMultiple(Reqs.NumSRVs); // Just allocate this many so we aren't overusing descriptors
 	D3D12DescriptorAllocation BaseSmpAllocation = m_SmpAllocator.AllocateMultiple(Reqs.NumSMPs);
 	D3D12DescriptorAllocation BaseUavAllocation = { }; // We can just leave an empty one here as, if there aren't any UAVs we won't be expected to use any
@@ -936,9 +941,9 @@ IShaderResourceTable* D3D12GraphicsDevice::CreateShaderTable(IVertexShader* VS, 
 	return Result;
 }
 
-IShaderResourceTable* D3D12GraphicsDevice::CreateShaderTable(IComputeShader* CS)
+IShaderResourceTable* D3D12GraphicsDevice::CreateShaderTable(IComputePipelineState* pState)
 {
-	D3D12ShaderItemData Reqs = GetShaderRequirements(CS);
+	D3D12ShaderItemData Reqs = GetShaderRequirements(pState);
 	D3D12DescriptorAllocation BaseSrvAllocation = m_SrvAllocator.AllocateMultiple(Reqs.NumSRVs); // Just allocate this many so we aren't overusing descriptors
 	D3D12DescriptorAllocation BaseSmpAllocation = m_SmpAllocator.AllocateMultiple(Reqs.NumSMPs);
 	D3D12DescriptorAllocation BaseUavAllocation = { }; // We can just leave an empty one here as, if there aren't any UAVs we won't be expected to use any

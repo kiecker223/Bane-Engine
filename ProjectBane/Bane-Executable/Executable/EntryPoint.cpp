@@ -3,9 +3,7 @@
 
 int main(int argc, char** argv)
 {
-	UNUSED(argc);
-	UNUSED(argv);
-	Application App;
+	Application App(argc, argv);
 	App.InitSystems();
 	App.Run();
 	App.Shutdown();

@@ -3,6 +3,7 @@
 #include "Common.h"
 #include "Scene.h"
 
+#pragma warning(disable:4273)
 
 class SceneManager
 {
@@ -15,6 +16,7 @@ public:
 	// For now just load a new scene?
 	Scene* LoadScene(const std::string& SceneName);
 	Scene* CreateNewScene(const std::string& SceneName);
+	Scene* CurrentScene;
 
 private:
 

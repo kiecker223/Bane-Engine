@@ -61,7 +61,7 @@ void DefferedRenderer::Initialize(const Window* pWindow)
 
 		m_OnScreenQuad.VB = m_Device->CreateVertexBuffer(sizeof(vertices), (uint8*)vertices);
 		m_OnScreenQuad.IB = m_Device->CreateIndexBuffer(sizeof(indices), (uint8*)indices);
-		m_OnScreenQuad.Pipeline = GetShaderCache()->LoadGraphicsPipeline("Shaders/DefferredLighting.hlsl");
+		m_OnScreenQuad.Pipeline = GetShaderCache()->LoadGraphicsPipeline("DeferredLighting.gfx");
 		m_OnScreenQuad.Table = m_Device->CreateShaderTable(m_OnScreenQuad.Pipeline);
 		m_OnScreenQuad.PointSampler = m_Device->GetDefaultSamplerState();
 		SAMPLER_DESC SamplerDesc = CreateDefaultSamplerDesc();

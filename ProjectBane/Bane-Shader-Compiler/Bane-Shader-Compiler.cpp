@@ -78,7 +78,15 @@ GFX_DEPTH_STENCIL_DESC GEnableDepthWriteDesc;
 GFX_DEPTH_STENCIL_DESC GDisableDepthWriteDesc;
 
 
+typedef struct PIPELINE_RESOURCE_COUNTERS {
+	uint8 NumConstantBuffers;
+	uint8 NumShaderResourceViews;
+	uint8 NumUnorderedAccessViews;
+	uint8 NumSamplers;
+} PIPELINE_RESOURCE_COUNTERS;
+
 typedef struct FULL_PIPELINE_DESCRIPTOR {
+	PIPELINE_RESOURCE_COUNTERS Counts;
 	SHADER_BYTECODE VS;
 	SHADER_BYTECODE PS;
 	SHADER_BYTECODE HS;
@@ -120,6 +128,7 @@ static FULL_PIPELINE_DESCRIPTOR CreateDefaultDescriptor()
 }
 
 typedef struct COMPUTE_PIPELINE_DESC {
+	PIPELINE_RESOURCE_COUNTERS Counts;
 	SHADER_BYTECODE CS;
 } COMPUTE_PIPELINE_DESC;
 
@@ -129,20 +138,6 @@ typedef struct VARIABLE_INFO {
 	std::string Semantic;
 } VARIABLE_INFO;
 
-static std::string ReadEntireFile(const std::string& FileName)
-{
-	std::ifstream InStream(FileName);
-	std::string Result;
-	if (InStream.is_open())
-	{
-		std::string Buff;
-		while (std::getline(InStream, Buff))
-		{
-			Result += Buff + '\n';
-		}
-	}
-	return Result;
-}
 
 static bool VarHasSemantic(const VARIABLE_INFO& InVar)
 {
@@ -567,22 +562,22 @@ static ECOMPARISON_FUNCTION ParseComparisonFunction(const std::string& Compariso
 #undef CHECK_COMPARISON_FUNC
 }
 
-//static ESTENCIL_OP ParseStencilOp(const std::string StencilOpStr)
-//{
-//#define CHECK_STENCIL_OP(x) if (StencilOpStr == #x) { return x; }
-//
-//	CHECK_STENCIL_OP(STENCIL_OP_KEEP);
-//	CHECK_STENCIL_OP(STENCIL_OP_ZERO);
-//	CHECK_STENCIL_OP(STENCIL_OP_REPLACE);
-//	CHECK_STENCIL_OP(STENCIL_OP_INCR_SAT);
-//	CHECK_STENCIL_OP(STENCIL_OP_DECR_SAT);
-//	CHECK_STENCIL_OP(STENCIL_OP_INVERT);
-//	CHECK_STENCIL_OP(STENCIL_OP_INCR);
-//	CHECK_STENCIL_OP(STENCIL_OP_DECR);
-//	return (ESTENCIL_OP)0;
-//
-//#undef CHECK_STENCIL_OP
-//}
+// static ESTENCIL_OP ParseStencilOp(const std::string StencilOpStr)
+// {
+// #define CHECK_STENCIL_OP(x) if (StencilOpStr == #x) { return x; }
+// 
+// 	CHECK_STENCIL_OP(STENCIL_OP_KEEP);
+// 	CHECK_STENCIL_OP(STENCIL_OP_ZERO);
+// 	CHECK_STENCIL_OP(STENCIL_OP_REPLACE);
+// 	CHECK_STENCIL_OP(STENCIL_OP_INCR_SAT);
+// 	CHECK_STENCIL_OP(STENCIL_OP_DECR_SAT);
+// 	CHECK_STENCIL_OP(STENCIL_OP_INVERT);
+// 	CHECK_STENCIL_OP(STENCIL_OP_INCR);
+// 	CHECK_STENCIL_OP(STENCIL_OP_DECR);
+// 	return (ESTENCIL_OP)0;
+// 
+// #undef CHECK_STENCIL_OP
+// }
 
 static std::string ItemFormatToString(EINPUT_ITEM_FORMAT InFormat)
 {
@@ -1572,6 +1567,58 @@ FULL_PIPELINE_DESCRIPTOR ParseGraphicsShader(const std::string& InFile, const st
 	size_t ResourcesStartLoc;
 	bool bUsesCustomDepthStencil = false;
 
+	{
+		uint8& OutNumConstantBuffers		= PipelineDesc.Counts.NumConstantBuffers;
+		uint8& OutNumSamplers				= PipelineDesc.Counts.NumSamplers;
+		uint8& OutNumShaderResourceViews	= PipelineDesc.Counts.NumShaderResourceViews;
+		uint8& OutNumUnorderedAccessViews	= PipelineDesc.Counts.NumUnorderedAccessViews;
+		std::string ByteCodeAsString = File;
+		{
+			uint8 NumConstBuffers = 0;
+
+			for (size_t i = 0; i < ByteCodeAsString.length(); i++)
+			{
+				i = ByteCodeAsString.find("register(b", i);
+				if (i == std::string::npos)
+					break;
+				NumConstBuffers++;
+			}
+			OutNumConstantBuffers = NumConstBuffers;
+		}
+		{
+			uint8 NumSamplers = 0;
+			for (size_t i = 0; i < ByteCodeAsString.length(); i++)
+			{
+				i = ByteCodeAsString.find("register(s", i);
+				if (i == std::string::npos)
+					break;
+				NumSamplers++;
+			}
+			OutNumSamplers = NumSamplers;
+		}
+		{
+			uint8 NumShaderResources = 0;
+			for (size_t i = 0; i < ByteCodeAsString.length(); i++)
+			{
+				i = ByteCodeAsString.find("register(t", i);
+				if (i == std::string::npos)
+					break;
+				NumShaderResources++;
+			}
+			OutNumShaderResourceViews = NumShaderResources;
+		}
+		{
+			uint8 NumUnorderedAccessViews = 0;
+			for (size_t i = 0; i < ByteCodeAsString.length(); i++)
+			{
+				i = ByteCodeAsString.find("register(u", i);
+				if (i == std::string::npos)
+					break;
+				NumUnorderedAccessViews++;
+			}
+			OutNumUnorderedAccessViews = NumUnorderedAccessViews;
+		}
+	}
 	// Find Resources
 	{
 		ResourcesStartLoc = File.find("Resources", 0);
@@ -1726,6 +1773,59 @@ COMPUTE_PIPELINE_DESC ParseComputeShader(const std::string& InFile, const std::s
 {
 	COMPUTE_PIPELINE_DESC Result = {};
 
+	{
+		uint8& OutNumConstantBuffers = Result.Counts.NumConstantBuffers;
+		uint8& OutNumSamplers = Result.Counts.NumSamplers;
+		uint8& OutNumShaderResourceViews = Result.Counts.NumShaderResourceViews;
+		uint8& OutNumUnorderedAccessViews = Result.Counts.NumUnorderedAccessViews;
+		std::string ByteCodeAsString = InFile;
+		{
+			uint8 NumConstBuffers = 0;
+
+			for (size_t i = 0; i < ByteCodeAsString.length(); i++)
+			{
+				i = ByteCodeAsString.find("register(b", i);
+				if (i == std::string::npos)
+					break;
+				NumConstBuffers++;
+			}
+			OutNumConstantBuffers = NumConstBuffers;
+		}
+		{
+			uint8 NumSamplers = 0;
+			for (size_t i = 0; i < ByteCodeAsString.length(); i++)
+			{
+				i = ByteCodeAsString.find("register(s", i);
+				if (i == std::string::npos)
+					break;
+				NumSamplers++;
+			}
+			OutNumSamplers = NumSamplers;
+		}
+		{
+			uint8 NumShaderResources = 0;
+			for (size_t i = 0; i < ByteCodeAsString.length(); i++)
+			{
+				i = ByteCodeAsString.find("register(t", i);
+				if (i == std::string::npos)
+					break;
+				NumShaderResources++;
+			}
+			OutNumShaderResourceViews = NumShaderResources;
+		}
+		{
+			uint8 NumUnorderedAccessViews = 0;
+			for (size_t i = 0; i < ByteCodeAsString.length(); i++)
+			{
+				i = ByteCodeAsString.find("register(u", i);
+				if (i == std::string::npos)
+					break;
+				NumUnorderedAccessViews++;
+			}
+			OutNumUnorderedAccessViews = NumUnorderedAccessViews;
+		}
+	}
+
 	Result.CS = CompileComputeShader(InFile);
 
 	if (Result.CS.ByteCode.size() == 0)
@@ -1766,17 +1866,24 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 		uint8* Buff;
 		uint8* P;
 		size_t BuffSize;
+		size_t DeclSizes[9];
+
+		struct ShaderHeader
 		{
-			size_t DeclSizes[8];
-			DeclSizes[0] = strlen("$~$ VertexShader $~$\n");
-			DeclSizes[1] = strlen("$~$ EndVertexShader $~$\n");
-			DeclSizes[2] = strlen("$~$ PixelShader $~$\n");
-			DeclSizes[3] = strlen("$~$ EndPixelShader $~$\n");
-			DeclSizes[4] = strlen("$~$ HullShader $~$\n");
-			DeclSizes[5] = strlen("$~$ EndHullShader $~$\n");
-			DeclSizes[6] = strlen("$~$ GeometryShader $~$\n");
-			DeclSizes[7] = strlen("$~$ EndGeometryShader $~$\n");
-			BuffSize = DeclSizes[0] + DeclSizes[1] + DeclSizes[2] + DeclSizes[3];
+			uint PSStart, HSStart, GSStart;
+		} Header = { };
+
+		{
+			DeclSizes[0] = sizeof(ShaderHeader);
+			DeclSizes[1] = strlen("$~$ VertexShader $~$\n");
+			DeclSizes[2] = strlen("$~$ EndVertexShader $~$\n");
+			DeclSizes[3] = strlen("$~$ PixelShader $~$\n");
+			DeclSizes[4] = strlen("$~$ EndPixelShader $~$\n");
+			DeclSizes[5] = strlen("$~$ HullShader $~$\n");
+			DeclSizes[6] = strlen("$~$ EndHullShader $~$\n");
+			DeclSizes[7] = strlen("$~$ GeometryShader $~$\n");
+			DeclSizes[8] = strlen("$~$ EndGeometryShader $~$\n");
+			BuffSize = DeclSizes[0] + DeclSizes[1] + DeclSizes[2] + DeclSizes[3] + DeclSizes[4];
 			BuffSize += FullDesc.VS.ByteCode.size() + 2;
 			BuffSize += FullDesc.PS.ByteCode.size() + 2;
 			if (HasHullShader(FullDesc))
@@ -1793,13 +1900,14 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 			P = Buff;
 		}
 		{
+			P += sizeof(ShaderHeader);
 			memcpy(P, "$~$ VertexShader $~$\n", strlen("$~$ VertexShader $~$\n"));
 			P += strlen("$~$ VertexShader $~$\n");
 			memcpy(P, FullDesc.VS.ByteCode.data(), FullDesc.VS.ByteCode.size());
 			P += FullDesc.VS.ByteCode.size();
-			*P++ = '\n';
 			memcpy(P, "\n$~$ EndVertexShader $~$\n$~$ PixelShader $~$\n", strlen("\n$~$ EndVertexShader $~$\n$~$ PixelShader $~$\n"));
 			P += strlen("\n$~$ EndVertexShader $~$\n$~$ PixelShader $~$\n");
+			Header.PSStart = static_cast<uint>(P - Buff);
 			memcpy(P, FullDesc.PS.ByteCode.data(), FullDesc.PS.ByteCode.size());
 			P += FullDesc.PS.ByteCode.size();
 			memcpy(P, "\n$~$ EndPixelShader $~$\n", strlen("\n$~$ EndPixelShader $~$\n"));
@@ -1808,6 +1916,7 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 			{
 				memcpy(P, "$~$ HullShader $~$\n", strlen("$~$ HullShader $~$\n"));
 				P += strlen("$~$ HullShader $~$\n");
+				Header.HSStart = static_cast<uint>(P - Buff);
 				memcpy(P, FullDesc.HS.ByteCode.data(), FullDesc.HS.ByteCode.size());
 				P += FullDesc.HS.ByteCode.size();
 				memcpy(P, "\n$~$ EndHullShader $~$\n", strlen("\n$~$ EndHullShader $~$\n"));
@@ -1817,11 +1926,13 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 			{
 				memcpy(P, "$~$ GeometryShader $~$\n", strlen("$~$ GeometryShader $~$\n"));
 				P += strlen("$~$ GeometryShader $~$\n");
+				Header.GSStart = static_cast<uint>(P - Buff);
 				memcpy(P, FullDesc.GS.ByteCode.data(), FullDesc.GS.ByteCode.size());
 				P += FullDesc.GS.ByteCode.size();
 				memcpy(P, "\n$~$ EndGeometryShader $~$\n", strlen("\n$~$ EndGeometryShader $~$\n"));
 				P += strlen("\n$~$ EndGeometryShader $~$\n");
 			}
+			memcpy(Buff, &Header, sizeof(Header));
 		}
 		WriteBufferToFile(DstCompiledFile, Buff, static_cast<uint>(BuffSize));
 	}
@@ -1835,9 +1946,9 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 		json RasterDesc;
 		RasterDesc["bFillSolid"]				= (FullDesc.RasterDesc.bFillSolid);
 		RasterDesc["bCull"]						= (FullDesc.RasterDesc.bCull);
-		RasterDesc["bIsCounterClockwiseFoward"] = (FullDesc.RasterDesc.bIsCounterClockwiseForward);
+		RasterDesc["bIsCounterClockwiseForward"] = (FullDesc.RasterDesc.bIsCounterClockwiseForward);
 		RasterDesc["bDepthClipEnable"]			= (FullDesc.RasterDesc.bDepthClipEnable);
-		RasterDesc["bAntialiasedLineEnabled"]	= (FullDesc.RasterDesc.bAntiAliasedLineEnabled);
+		RasterDesc["bAntialiasedLineEnabled"]	= (FullDesc.RasterDesc.bAntialiasedLineEnabled);
 		RasterDesc["bMultisampleEnable"]		= (FullDesc.RasterDesc.bMultisampleEnable);
 		RasterDesc["DepthBiasClamp"]			= (FullDesc.RasterDesc.DepthBiasClamp);
 		RasterDesc["SlopedScaledDepthBias"]		= (FullDesc.RasterDesc.SlopeScaledDepthBias);
@@ -1883,12 +1994,17 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 		DepthStencilDesc["BackFace"]		= (DepthBackFace);
 		
 		json PipelineDescriptor;
+		PipelineDescriptor["NumConstantBuffers"]		= FullDesc.Counts.NumConstantBuffers;
+		PipelineDescriptor["NumSamplers"]				= FullDesc.Counts.NumSamplers;
+		PipelineDescriptor["NumShaderResourceViews"]	= FullDesc.Counts.NumShaderResourceViews;
+		PipelineDescriptor["NumUnorderedAccessViews"]	= FullDesc.Counts.NumUnorderedAccessViews;
+		PipelineDescriptor["IsGraphics"]				= true;
 		PipelineDescriptor["ShaderReference"]			= DstCompiledFile;
 		PipelineDescriptor["InputLayout"]				= (InputLayout);
 		PipelineDescriptor["PolygonType"]				= (PolygonModeToString(FullDesc.PolygonType));
 		PipelineDescriptor["RasterDesc"]				= (RasterDesc);
 		PipelineDescriptor["bEnableAlphaToCoverage"]	= (FullDesc.bEnableAlphaToCoverage);
-		PipelineDescriptor["bIndepenedentBlendEnable"]	= (FullDesc.bIndependentBlendEnable);
+		PipelineDescriptor["bIndependentBlendEnable"]	= (FullDesc.bIndependentBlendEnable);
 		PipelineDescriptor["RtvDescs"]					= (RtvDescs);
 		PipelineDescriptor["DepthStencilState"]			= (DepthStencilDesc);
 		PipelineDescriptor["NumRenderTargets"]			= (FullDesc.NumRenderTargets);
@@ -1901,7 +2017,12 @@ static int DoCompileCompute(const std::string& SourceFile, const std::string& Se
 {
 	COMPUTE_PIPELINE_DESC Pipeline = LoadComputePipeline(SearchedFolder + '/' + SourceFile);
 	json PipelineDescriptor;
-	PipelineDescriptor["ShaderReference"] = DstCompiledFile;
+	PipelineDescriptor["NumConstantBuffers"] = Pipeline.Counts.NumConstantBuffers;
+	PipelineDescriptor["NumSamplers"] = Pipeline.Counts.NumSamplers;
+	PipelineDescriptor["NumShaderResourceViews"] = Pipeline.Counts.NumShaderResourceViews;
+	PipelineDescriptor["NumUnorderedAccessViews"] = Pipeline.Counts.NumUnorderedAccessViews;
+	PipelineDescriptor["IsGraphics"]		= false;
+	PipelineDescriptor["ShaderReference"]	= DstCompiledFile;
 	RootObject[SourceFile] = PipelineDescriptor;
 	WriteBufferToFile(DstCompiledFile, Pipeline.CS.ByteCode.data(), static_cast<uint>(Pipeline.CS.ByteCode.size()));
 	return 0;
@@ -1915,7 +2036,6 @@ std::string GetFileExtension(const std::string& FileName)
 	return Result;
 }
 
-// format "Bane-Shader-Compiler.exe" "api_type" "graphics_or_compute" "ShaderName" "SourceFile.hlsl" "DstFile.compiledshader" "DstFile.shadermetafile.json"
 // format "Bane-Shader-Compiler.exe" "api_type" "Folder" "DstFolder"
 
 

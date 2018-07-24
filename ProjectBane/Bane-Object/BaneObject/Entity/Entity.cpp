@@ -1,6 +1,6 @@
 #include "Entity.h"
 //#include "Engine/Application/Application.h"
-#include "../Scene/Scene.h"
+#include "../Scene/SceneManager.h"
 
 
 
@@ -75,5 +75,5 @@ Entity* Entity::GetParent() const
 
 Entity* GetEntityById(const EntityIdentifier& Id)
 {
-	return GetCurrentScene()->FindEntity(Id.HashedName);
+	return GetSceneManager()->CurrentScene->FindEntity(Id.HashedName);
 }

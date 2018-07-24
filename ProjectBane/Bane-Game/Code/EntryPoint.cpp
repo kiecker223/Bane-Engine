@@ -1,13 +1,14 @@
 #include "BaneObject/Scene/SceneManager.h"
 #include <iostream>
 
-Scene* CurrentScene;
-
-extern "C" void InitApplication()
+extern "C" void __declspec(dllexport) InitApplication()
 {
-	CurrentScene = GetSceneManager()->CreateNewScene("NewScene");
-	std::cout << "Application Initialized" << std::endl;
+///	GetSceneManager()->CreateNewScene("NewScene");
+///	Scene* Test = GetSceneManager()->CurrentScene;
+///	UNUSED(Test);
+///	std::cout << "Application Initialized" << std::endl;
 }
+
 
 void UpdateApplication()
 {
@@ -15,7 +16,7 @@ void UpdateApplication()
 
 void CleanupApplication()
 {
-	SetCurrentScene(nullptr);
+//	SetCurrentScene(nullptr);
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,
@@ -29,7 +30,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
-        MessageBox(0,"Test", "From unmanaged dll",0);
+//        MessageBox(0,"Test", "From unmanaged dll",0);
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
     case DLL_PROCESS_DETACH:

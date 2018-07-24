@@ -5,6 +5,7 @@
 #include "Graphics/IO/TextureCache.h"
 #include "Graphics/IO/ShaderCache.h"
 #include <Platform/System/Logging/Logger.h>
+#include <Platform/System/Process.h>
 #include <sstream>
 
 
@@ -74,7 +75,11 @@ void Application::InitSystems()
 	ApiRuntime::CreateRuntime();
 	GetApiRuntime()->Initialize(m_Window);
 
-	InitShaderCache();
+// 	IProcessHandle* Handle = StartProcess("BaneShaderCompiler.exe", { "Dx12", "SrcShaders/", "DstShaders/" });
+// 	Handle->WaitForFinish();
+// 	delete Handle;
+
+	InitShaderCache("DstShaders/ShaderPipelines.json");
 	InitializeTextureCache();
 
 	InitSceneManager();
@@ -90,11 +95,6 @@ void Application::InitSystems()
 	m_StartCallback = (PFNApplicationStartCallback)m_GameAssembly->LoadProc("InitApplication");
 
 	m_StartCallback();
-	Scene* pScene = GetCurrentScene();
-	if (pScene)
-	{
-		pScene->InitScene();
-	}
 }
 
 void Application::Run()
@@ -102,7 +102,7 @@ void Application::Run()
 	while (!m_Window->QuitRequested())
 	{
 		//m_UpdateCallback();
-		GetCurrentScene()->Tick(0.f);
+		GetSceneManager()->CurrentScene->Tick(0.f);
 		m_SceneRenderer->Render();
 		m_SceneRenderer->Present();
 	}

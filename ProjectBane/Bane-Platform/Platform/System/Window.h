@@ -6,14 +6,14 @@
 class Window
 {
 public:
-	class WindowsHandle {
+	class WindowHandle {
 	public:
 		template <typename CAST> CAST GetNativeHandle() {
 			return reinterpret_cast<CAST>(
 				reinterpret_cast<intptr_t>(GetHandle()));
 		}
 		virtual void Destroy() { };
-		virtual ~WindowsHandle() { }
+		virtual ~WindowHandle() { }
 
 	protected:
 		virtual void* GetHandle() { return nullptr; }
@@ -23,7 +23,7 @@ public:
 	Window(const char* windowName, uint width, uint height, bool isFullscreen = false);
 	~Window();
 
-	WindowsHandle* GetHandle() const { return m_windowHandle; }
+	WindowHandle* GetHandle() const { return m_windowHandle; }
 	inline uint GetWidth() const { return m_width; }
 	inline uint GetHeight() const { return m_height; }
 	inline float AspectXY() const { return (float)m_width / (float)m_height; }
@@ -47,6 +47,6 @@ private:
 
 	static Window* GMainWindow;
 	uint m_width, m_height;
-	WindowsHandle* m_windowHandle;
+	WindowHandle* m_windowHandle;
 };
 

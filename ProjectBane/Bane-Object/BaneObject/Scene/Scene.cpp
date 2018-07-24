@@ -2,8 +2,6 @@
 #include <algorithm>
 
 
-Scene* Scene::GCurrentScene = nullptr;
-
 static std::string GenerateNewName(std::string OriginalName, uint Count)
 {
 	return std::string(OriginalName + " (" + std::to_string(Count) + ")");
@@ -123,4 +121,5 @@ void Scene::InitScene()
 		e.pEntity->SubmitRenderingComponents();
 	}
 }
+
 

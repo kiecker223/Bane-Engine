@@ -16,7 +16,8 @@ Assembly::~Assembly()
 void* Assembly::LoadProc(const char* ProcName)
 {
 	void* Proc = GetProcAddress((HMODULE)NativeHandle, ProcName);
-	BANE_CHECK(GetLastError() == 0);
+	DWORD Error = GetLastError();
+	BANE_CHECK(Error == 0);
 	return Proc;
 }
 

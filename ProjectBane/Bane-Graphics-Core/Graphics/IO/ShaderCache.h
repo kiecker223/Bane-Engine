@@ -16,23 +16,15 @@ public:
 	static ShaderCache* GInstance;
 
 	IGraphicsPipelineState* LoadGraphicsPipeline(const std::string& ShaderFile);
-	void ReloadGraphicsShader(const std::string& ShaderFile);
-
 	IComputePipelineState* LoadComputePipeline(const std::string& ShaderFile);
-	void ReloadComputeShader(const std::string& ShaderFile);
 
-	void TransitionToReloadState();
+	void ReloadAllShaders();
 	
-	void InitCache();
+	void InitCache(const std::string& JsonLocation);
 	void DestroyCache();
 
 private:
 
-	GFX_PIPELINE_STATE_DESC InternalParseGraphicsShader(const std::string& InFile, const std::string& FileName);
-	COMPUTE_PIPELINE_STATE_DESC InternalParseComputeShader(const std::string& InFile, const std::string& FileName);
-
-	IDepthStencilState* m_DisabledDepthStencil;
-	IDepthStencilState* m_EnabledDepthStencil;
 	std::map<std::string, IGraphicsPipelineState*> m_GraphicsPipelines;
 	std::map<std::string, IComputePipelineState*> m_ComputePipelines;
 	
@@ -43,10 +35,10 @@ inline ShaderCache* GetShaderCache()
 	return ShaderCache::GInstance;
 }
 
-inline void InitShaderCache()
+inline void InitShaderCache(const std::string& JsonLocation)
 {
 	ShaderCache::GInstance = new ShaderCache();
-	ShaderCache::GInstance->InitCache();
+	ShaderCache::GInstance->InitCache(JsonLocation);
 }
 
 inline void DestroyShaderCache()
