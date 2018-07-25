@@ -1,7 +1,7 @@
 #include "SceneManager.h"
 
-SceneManager* SceneManager::GInstance = nullptr;
 
+SceneManager* SceneManager::GSceneManagerInstance = nullptr;
 
 Scene* SceneManager::LoadScene(const std::string& SceneName)
 {

@@ -7,7 +7,6 @@
 class Entity;
 class Transform;
 
-// GO FUCK YOURSELF MICROSOFT
 class Component
 {
 	friend class Entity;

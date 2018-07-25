@@ -60,7 +60,7 @@ workspace "ProjectBane"
     flags {
       "MultiProcessorCompile",
       "StaticRuntime",
-      "FatalWarnings",
+--      "FatalWarnings",
     }
 
     exceptionhandling "Off"

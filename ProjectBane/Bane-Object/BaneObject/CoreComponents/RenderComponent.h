@@ -15,9 +15,9 @@ public:
 
 	virtual bool IsRenderComponent() const override { return true; }
 
-	virtual void GraphicsInit() { };
+	virtual void GraphicsInit() { }
 	virtual void GraphicsUpdate(RenderLoop& InLoop) = 0;
-
+	virtual void GraphicsShutdown() { }
 };
 
 

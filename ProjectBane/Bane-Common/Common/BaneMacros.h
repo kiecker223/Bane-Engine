@@ -15,7 +15,11 @@
 #define MAKE_ALIGN(x) __declspec(align(x))
 #define SHADER_ALIGNMENT MAKE_ALIGN(sizeof(float4))
 
-
+#if defined(BANE_BUILD_EXPORT) && 1
+#define BANE_ENGINE_API __declspec(dllimport)
+#else
+#define BANE_ENGINE_API __declspec(dllexport)
+#endif
 
 #define NO_VTABLE __declspec(novtable)
 

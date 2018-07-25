@@ -3,7 +3,6 @@
 #include "Common.h"
 #include "Scene.h"
 
-#pragma warning(disable:4273)
 
 class SceneManager
 {
@@ -19,21 +18,21 @@ public:
 	Scene* CurrentScene;
 
 private:
+	static SceneManager* GSceneManagerInstance;
 
-	static SceneManager* GInstance;
 };
 
 inline void InitSceneManager()
 {
-	SceneManager::GInstance = new SceneManager();
+	SceneManager::GSceneManagerInstance = new SceneManager();
 }
 
 inline void ShutdownSceneManager()
 {
-	delete SceneManager::GInstance;
+	delete SceneManager::GSceneManagerInstance;
 }
 
 inline SceneManager* GetSceneManager()
 {
-	return SceneManager::GInstance;
+	return SceneManager::GSceneManagerInstance;
 }

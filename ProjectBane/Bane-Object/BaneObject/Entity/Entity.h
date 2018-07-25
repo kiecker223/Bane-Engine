@@ -5,6 +5,7 @@
 #include "Common/Hash.h"
 #include <array>
 
+#pragma warning(disable:4049)
 
 #define ENTITY_MAX_CHILDREN 20
 

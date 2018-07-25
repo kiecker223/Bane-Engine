@@ -128,6 +128,21 @@ void DefferedRenderer::Present()
 
 void DefferedRenderer::Shutdown()
 {
+	delete m_OnScreenQuad.VB;
+	delete m_OnScreenQuad.IB;
+	delete m_OnScreenQuad.Pipeline;
+	delete m_OnScreenQuad.Table;
+	delete m_OnScreenQuad.PointSampler;
+	delete m_OnScreenQuad.SkySampler;
+	delete m_MaterialBuffer;
+	delete m_CameraBuffer;
+	delete m_LightBuffer;
+	delete m_DefferedPass;
+	delete m_CameraConstants;
+	delete m_AlbedoBuffer;
+	delete m_NormalBuffer;
+	delete m_PositionBuffer;
+	delete m_ParameterBuffer;
 	ApiRuntime::Shutdown();
 }
 

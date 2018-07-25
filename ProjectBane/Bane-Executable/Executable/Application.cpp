@@ -6,11 +6,12 @@
 #include "Graphics/IO/ShaderCache.h"
 #include <Platform/System/Logging/Logger.h>
 #include <Platform/System/Process.h>
+#include <Code/EntryPoint.h>
 #include <sstream>
 
+#pragma warning(disable:4049)
 
 Application* Application::GApplication = nullptr;
-
 
 Application::Application() :
 	m_SceneRenderer(nullptr)
@@ -83,17 +84,14 @@ void Application::InitSystems()
 	InitializeTextureCache();
 
 	InitSceneManager();
-
+	
 	if (m_SceneRenderer == nullptr)
 	{
 		m_SceneRenderer = new DefferedRenderer();
 	}
 	m_SceneRenderer->Initialize(m_Window);
 	
-	AssemblyLoader Loader;
-	m_GameAssembly = Loader.LoadAssembly("BaneGame.dll");
-	m_StartCallback = (PFNApplicationStartCallback)m_GameAssembly->LoadProc("InitApplication");
-
+	m_StartCallback = &InitApplication;
 	m_StartCallback();
 }
 
