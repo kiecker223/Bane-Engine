@@ -2093,6 +2093,7 @@ int main(int argc, char** argv)
 			// For now we just skip the file 
 			continue;
 		}
+
 		if (bIsGraphics)
 		{
 			int Succeeded = DoCompileGraphics(File, SrcFolder, CompiledDest);

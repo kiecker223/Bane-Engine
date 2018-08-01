@@ -11,6 +11,7 @@
 #include <JSON/JsonCPP.h>
 
 
+
 ShaderCache* ShaderCache::GInstance = nullptr;
 
 IGraphicsPipelineState* ShaderCache::LoadGraphicsPipeline(const std::string& ShaderFile)
@@ -429,7 +430,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 				uint PSStart, HSStart, GSStart;
 			};
 			ShaderHeader* pHeader;
-			uint BufferSize;
+			size_t BufferSize = GetFileSize(PipelineJson["ShaderReference"].get<std::string>());
 			uint8* FileBinary = ReadFileBinary(PipelineJson["ShaderReference"].get<std::string>(), BufferSize);
 			pHeader = reinterpret_cast<ShaderHeader*>(FileBinary);
 			std::vector<uint8> VSByteCode;
@@ -437,8 +438,8 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 			memcpy(VSByteCode.data(), FileBinary + 33, VSByteCode.size());
 			Desc.VS = Device->CreateVertexShaderFromBytecode(VSByteCode);
 			// If we don't have a HullShader start location then we just assume that the shader ends at the end of the buffer
-			uint PSStart = pHeader->PSStart;
-			uint PSEnd = 0;
+			size_t PSStart = pHeader->PSStart;
+			size_t PSEnd = 0;
 			if (pHeader->HSStart == 0)
 			{
 				PSEnd = BufferSize - 26;
@@ -455,7 +456,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 			if (pHeader->HSStart != 0)
 			{
 				std::vector<uint8> HSByteCode;
-				uint HSEnd = 0;
+				size_t HSEnd = 0;
 				if (pHeader->GSStart == 0)
 				{
 					HSEnd = BufferSize - 24;
@@ -464,7 +465,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 				{
 					HSEnd = pHeader->GSStart - 48;
 				}
-				uint HSSize = HSEnd - pHeader->HSStart;
+				size_t HSSize = HSEnd - pHeader->HSStart;
 				HSByteCode.resize(HSSize);
 				memcpy(HSByteCode.data(), FileBinary + static_cast<size_t>(pHeader->HSStart), HSByteCode.size());
 				Desc.HS = Device->CreateHullShaderFromBytecode(HSByteCode);
@@ -472,7 +473,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 			if (pHeader->GSStart != 0)
 			{
 				std::vector<uint8> GSByteCode;
-				uint GSEnd = BufferSize - 28;
+				size_t GSEnd = BufferSize - 28;
 				GSByteCode.resize(GSEnd - pHeader->GSStart);
 				memcpy(GSByteCode.data(), FileBinary + static_cast<size_t>(pHeader->GSStart), GSEnd - pHeader->GSStart);
 				Desc.GS = Device->CreateGeometryShaderFromBytecode(GSByteCode);

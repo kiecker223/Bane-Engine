@@ -10,4 +10,6 @@ void EnsureFileDirectoryExists(const std::string& FileName);
 
 std::vector<std::string> GetAllFilesInFolder(const std::string& FolderName);
 
-uint8* ReadFileBinary(const std::string& FileName, uint& NumBytes);
+uint8* ReadFileBinary(const std::string& FileName, size_t fileSize);
+
+uintmax_t GetFileSize(const std::string& FileName);

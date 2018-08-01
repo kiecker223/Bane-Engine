@@ -22,5 +22,9 @@ project "BaneExecutable"
         includedirs {"../Bane-Systems/Platform-Windows/"}
     files {"**.h", "**.cpp"}
 
+	 postbuildcommands {
+        "{COPY} ../External/dlls/*.dll %{cfg.targetdir}"
+    } 
+
 
 
