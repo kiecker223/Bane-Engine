@@ -1,1 +1,1 @@
-Tools\premake5.exe vs2017
+Tools\premake5.exe vs2017 %*
