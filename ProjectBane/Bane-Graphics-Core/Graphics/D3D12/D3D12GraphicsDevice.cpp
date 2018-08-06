@@ -9,7 +9,7 @@
 #include <d3dcompiler.h>
 
 
-uint D3D12GraphicsDevice::GCurrentFrameIndex = 0;
+uint32 D3D12GraphicsDevice::GCurrentFrameIndex = 0;
 
 
 static D3D12_COMMAND_LIST_TYPE FromContextType(ECOMMAND_CONTEXT_TYPE ContextType)
@@ -42,7 +42,7 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 	m_CommandQueues[2].SetParentDevice(this);
 	
 	m_SwapChain->Device = this;
-	uint AvailableThreadCount = std::thread::hardware_concurrency();
+	uint32 AvailableThreadCount = std::thread::hardware_concurrency();
 	BANE_CHECK(AvailableThreadCount != 0);
 	m_AvailableContexts.reserve(AvailableThreadCount);
 	m_AvailableContexts.resize(AvailableThreadCount);
@@ -70,14 +70,14 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 
 	{
 		ID3D12Resource* BackBuffers[3] = { };
-		for (uint i = 0; i < 3; i++)
+		for (uint32 i = 0; i < 3; i++)
 		{
 			m_SwapChain->SwapChain->GetBuffer(i, IID_PPV_ARGS(&BackBuffers[i]));
 		}
 
 		D3D12TextureBase* Bases = new D3D12TextureBase[3];
 
-		for (uint i = 0; i < 3; i++)
+		for (uint32 i = 0; i < 3; i++)
 		{
 			Bases[i].Resource.SetParentDevice(this);
 			Bases[i].Resource.SetResource(BackBuffers[i]);
@@ -98,9 +98,9 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 		m_BasicRenderPass = (D3D12RenderPassInfo*)IRuntimeGraphicsDevice::CreateRenderPass(m_BackBuffer, DepthStencil, float4(0.3f, 0.3f, 0.3f, 0.0f));
 	}
 	
-	for (uint i = 0; i < COMMAND_CONTEXT_TYPE_NUM_TYPES; i++)
+	for (uint32 i = 0; i < COMMAND_CONTEXT_TYPE_NUM_TYPES; i++)
 	{	
-		for (uint b = 0; b < 4; b++)
+		for (uint32 b = 0; b < 4; b++)
 		{
 			ID3D12CommandAllocator* CommandAllocator;
 			ID3D12GraphicsCommandList* CommandList;
@@ -118,7 +118,7 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 		}
 	}
 
-	for (uint i = 0; i < AvailableThreadCount; i++)
+	for (uint32 i = 0; i < AvailableThreadCount; i++)
 	{
 		m_AvailableContexts[i] = new D3D12GraphicsCommandContext(this, COMMAND_CONTEXT_TYPE_GRAPHICS, m_Rect, m_ViewPort);
 	}
@@ -153,7 +153,7 @@ IComputeCommandContext* D3D12GraphicsDevice::GetComputeContext()
 	return m_ComputeContext;
 }
 
-static std::vector<uint8> CompileFromByteCode(const std::string& InByteCode, ESHADER_STAGE ShaderStage, uint& OutNumConstantBuffers, uint& OutNumSamplers, uint& OutNumShaderResourceViews, uint& OutNumUnorderedAccessViews)
+static std::vector<uint8> CompileFromByteCode(const std::string& InByteCode, ESHADER_STAGE ShaderStage, uint32& OutNumConstantBuffers, uint32& OutNumSamplers, uint32& OutNumShaderResourceViews, uint32& OutNumUnorderedAccessViews)
 {
 	std::string EntryPoint = "";
 	std::string Target = "";
@@ -181,7 +181,7 @@ static std::vector<uint8> CompileFromByteCode(const std::string& InByteCode, ESH
 		break;
 	}
 
-	uint CompileFlags = 0;
+	uint32 CompileFlags = 0;
 #ifdef _DEBUG
 	CompileFlags |= D3DCOMPILE_OPTIMIZATION_LEVEL0 | D3DCOMPILE_DEBUG;
 #endif 
@@ -213,7 +213,7 @@ static std::vector<uint8> CompileFromByteCode(const std::string& InByteCode, ESH
 	{
 		std::string ByteCodeAsString = InByteCode;
 		{
-			uint NumConstBuffers = 0;
+			uint32 NumConstBuffers = 0;
 
 			for (size_t i = 0; i < ByteCodeAsString.length(); i++)
 			{
@@ -225,7 +225,7 @@ static std::vector<uint8> CompileFromByteCode(const std::string& InByteCode, ESH
 			OutNumConstantBuffers = NumConstBuffers;
 		}
 		{
-			uint NumSamplers = 0;
+			uint32 NumSamplers = 0;
 			for (size_t i = 0; i < ByteCodeAsString.length(); i++)
 			{
 				i = ByteCodeAsString.find("register(s", i);
@@ -236,7 +236,7 @@ static std::vector<uint8> CompileFromByteCode(const std::string& InByteCode, ESH
 			OutNumSamplers = NumSamplers;
 		}
 		{
-			uint NumShaderResources = 0;
+			uint32 NumShaderResources = 0;
 			for (size_t i = 0; i < ByteCodeAsString.length(); i++)
 			{
 				i = ByteCodeAsString.find("register(t", i);
@@ -247,7 +247,7 @@ static std::vector<uint8> CompileFromByteCode(const std::string& InByteCode, ESH
 			OutNumShaderResourceViews = NumShaderResources;
 		}
 		{
-			uint NumUnorderedAccessViews = 0;
+			uint32 NumUnorderedAccessViews = 0;
 			for (size_t i = 0; i < ByteCodeAsString.length(); i++)
 			{
 				i = ByteCodeAsString.find("register(u", i);
@@ -274,10 +274,10 @@ static std::vector<uint8> CompileFromByteCode(const std::string& InByteCode, ESH
 
 IVertexShader* D3D12GraphicsDevice::CreateVertexShader(const std::string& ByteCode)
 {
-	uint NumConstantBuffers;
-	uint NumSamplers;
-	uint NumShaderResources;
-	uint NumUnorderedAccessViews;
+	uint32 NumConstantBuffers;
+	uint32 NumSamplers;
+	uint32 NumShaderResources;
+	uint32 NumUnorderedAccessViews;
 	std::vector<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_VERTEX, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 #ifdef _DEBUG
 	if (CompiledCode.size() == 0)
@@ -290,10 +290,10 @@ IVertexShader* D3D12GraphicsDevice::CreateVertexShader(const std::string& ByteCo
 
 IPixelShader* D3D12GraphicsDevice::CreatePixelShader(const std::string& ByteCode)
 {
-	uint NumConstantBuffers;
-	uint NumSamplers;
-	uint NumShaderResources;
-	uint NumUnorderedAccessViews;
+	uint32 NumConstantBuffers;
+	uint32 NumSamplers;
+	uint32 NumShaderResources;
+	uint32 NumUnorderedAccessViews;
 	std::vector<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_PIXEL, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 
 #ifdef _DEBUG
@@ -308,10 +308,10 @@ IPixelShader* D3D12GraphicsDevice::CreatePixelShader(const std::string& ByteCode
 
 IGeometryShader* D3D12GraphicsDevice::CreateGeometryShader(const std::string& ByteCode)
 {
-	uint NumConstantBuffers;
-	uint NumSamplers;
-	uint NumShaderResources;
-	uint NumUnorderedAccessViews;
+	uint32 NumConstantBuffers;
+	uint32 NumSamplers;
+	uint32 NumShaderResources;
+	uint32 NumUnorderedAccessViews;
 	std::vector<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_GEOMETRY, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 #ifdef _DEBUG
 	if (CompiledCode.size() == 0)
@@ -324,10 +324,10 @@ IGeometryShader* D3D12GraphicsDevice::CreateGeometryShader(const std::string& By
 
 IHullShader* D3D12GraphicsDevice::CreateHullShader(const std::string& ByteCode)
 {
-	uint NumConstantBuffers;
-	uint NumSamplers;
-	uint NumShaderResources;
-	uint NumUnorderedAccessViews;
+	uint32 NumConstantBuffers;
+	uint32 NumSamplers;
+	uint32 NumShaderResources;
+	uint32 NumUnorderedAccessViews;
 	std::vector<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_HULL, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 #ifdef _DEBUG
 	if (CompiledCode.size() == 0)
@@ -340,10 +340,10 @@ IHullShader* D3D12GraphicsDevice::CreateHullShader(const std::string& ByteCode)
 
 IComputeShader* D3D12GraphicsDevice::CreateComputeShader(const std::string& ByteCode)
 {
-	uint NumConstantBuffers;
-	uint NumSamplers;
-	uint NumShaderResources;
-	uint NumUnorderedAccessViews;
+	uint32 NumConstantBuffers;
+	uint32 NumSamplers;
+	uint32 NumShaderResources;
+	uint32 NumUnorderedAccessViews;
 	std::vector<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_COMPUTE, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 #ifdef _DEBUG
 	if (CompiledCode.size() == 0)
@@ -417,7 +417,7 @@ void D3D12GraphicsDevice::RecompilePipelineState(IComputePipelineState* pState, 
 	PipelineState->Reset(m_Device, CreationDesc, *NewDesc, UsedSignature);
 }
 
-IVertexBuffer* D3D12GraphicsDevice::CreateVertexBuffer(uint ByteCount, uint8* Buffer)
+IVertexBuffer* D3D12GraphicsDevice::CreateVertexBuffer(uint32 ByteCount, uint8* Buffer)
 {
 	if (!m_UploadList->HasBegun())
 	{
@@ -429,7 +429,7 @@ IVertexBuffer* D3D12GraphicsDevice::CreateVertexBuffer(uint ByteCount, uint8* Bu
 	return Result;
 }
 
-IIndexBuffer* D3D12GraphicsDevice::CreateIndexBuffer(uint ByteCount, uint8* Buffer)
+IIndexBuffer* D3D12GraphicsDevice::CreateIndexBuffer(uint32 ByteCount, uint8* Buffer)
 {
 	if (!m_UploadList->HasBegun())
 	{
@@ -441,17 +441,17 @@ IIndexBuffer* D3D12GraphicsDevice::CreateIndexBuffer(uint ByteCount, uint8* Buff
 	return Result;
 }
 
-IConstantBuffer* D3D12GraphicsDevice::CreateConstantBuffer(uint ByteCount)
+IConstantBuffer* D3D12GraphicsDevice::CreateConstantBuffer(uint32 ByteCount)
 {
 	return new D3D12Buffer(this, ByteCount, BUFFER_USAGE_CPU);
 }
 
-IBuffer* D3D12GraphicsDevice::CreateStagingBuffer(uint ByteCount)
+IBuffer* D3D12GraphicsDevice::CreateStagingBuffer(uint32 ByteCount)
 {
 	return new D3D12Buffer(this, ByteCount, BUFFER_USAGE_UPLOAD);
 }
 
-ITexture2D* D3D12GraphicsDevice::CreateTexture2D(uint Width, uint Height, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
+ITexture2D* D3D12GraphicsDevice::CreateTexture2D(uint32 Width, uint32 Height, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
 {
 	D3D12TextureBase* Result; 
 	bool bDoNoUpload = false; // Never start off with initial contents, only allow texture to texture copies or writes
@@ -463,7 +463,7 @@ ITexture2D* D3D12GraphicsDevice::CreateTexture2D(uint Width, uint Height, EFORMA
 			D3D12TextureBase(this, Width, Height, 1U, 1U, Format, Usage)
 		};
 
-		for (uint i = 0; i < 3; i++)
+		for (uint32 i = 0; i < 3; i++)
 		{
 			Result[i].Resource.SRVDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 			Result[i].Resource.UAVDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
@@ -479,7 +479,7 @@ ITexture2D* D3D12GraphicsDevice::CreateTexture2D(uint Width, uint Height, EFORMA
 			D3D12TextureBase(this, Width, Height, 1U, 1U, FORMAT_D24_UNORM_S8_UINT, Usage),
 		};
 
-		for (uint i = 0; i < 3; i++)
+		for (uint32 i = 0; i < 3; i++)
 		{
 			Result[i].Resource.SRVDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 			Result[i].Resource.UAVDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
@@ -505,7 +505,7 @@ ITexture2D* D3D12GraphicsDevice::CreateTexture2D(uint Width, uint Height, EFORMA
 	return Result;
 }
 
-ITexture2DArray* D3D12GraphicsDevice::CreateTexture2DArray(uint Width, uint Height, uint Count, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
+ITexture2DArray* D3D12GraphicsDevice::CreateTexture2DArray(uint32 Width, uint32 Height, uint32 Count, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
 {
 	D3D12TextureBase* Result = new D3D12TextureBase(this, Width, Height, 1, Count, Format, Usage);
 
@@ -520,7 +520,7 @@ ITexture2DArray* D3D12GraphicsDevice::CreateTexture2DArray(uint Width, uint Heig
 	return Result;
 }
 
-ITexture3D* D3D12GraphicsDevice::CreateTexture3D(uint Width, uint Height, uint Depth, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
+ITexture3D* D3D12GraphicsDevice::CreateTexture3D(uint32 Width, uint32 Height, uint32 Depth, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
 {
 	D3D12TextureBase* Result = nullptr;
 
@@ -536,7 +536,7 @@ ITexture3D* D3D12GraphicsDevice::CreateTexture3D(uint Width, uint Height, uint D
 	return Result;
 }
 
-ITextureCube* D3D12GraphicsDevice::CreateTextureCube(uint CubeSize, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
+ITextureCube* D3D12GraphicsDevice::CreateTextureCube(uint32 CubeSize, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
 {
 	D3D12TextureBase* TextureArray = (D3D12TextureBase*)CreateTexture2DArray(CubeSize, CubeSize, 6, Format, Usage, Data);
 	TextureArray->Resource.SRVDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
@@ -610,14 +610,14 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 		DirectContext->Flush();
 		DirectContext->Begin();
 		D3D12Buffer* ConstBuff = (D3D12Buffer*)CreateConstBuffer<float4>();
-		for (uint b = 0; b < Texture->ArrayCount; b++)
+		for (uint32 b = 0; b < Texture->ArrayCount; b++)
 		{
-			for (uint i = 0; i < Texture->MipCount - 1; i++)
+			for (uint32 i = 0; i < Texture->MipCount - 1; i++)
 			{
 				ID3D12DescriptorHeap* ppHeaps[2] = { m_SrvAllocator.GetDescriptorHeap(), m_SmpAllocator.GetDescriptorHeap() };
 				DirectCL->SetDescriptorHeaps(2, ppHeaps);
-				uint DstWidth = max(Texture->Width >> (i + 1), 1);
-				uint DstHeight = max(Texture->Height >> (i + 1), 1);
+				uint32 DstWidth = max(Texture->Width >> (i + 1), 1);
+				uint32 DstHeight = max(Texture->Height >> (i + 1), 1);
 
 				D3D12DescriptorAllocation UavAllocation = m_GenerateMipsTable2D->BaseUAVAllocation;
 				D3D12DescriptorAllocation SrvAllocation = m_GenerateMipsTable2D->BaseSRVAllocation;
@@ -769,7 +769,7 @@ IInputLayout* D3D12GraphicsDevice::CreateInputLayout(const GFX_INPUT_LAYOUT_DESC
 	return new D3D12InputLayout(Desc, CreationDesc);
 }
 
-IRenderPassInfo* D3D12GraphicsDevice::CreateRenderPass(const IRenderTargetView** RenderTargets, uint NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor)
+IRenderPassInfo* D3D12GraphicsDevice::CreateRenderPass(const IRenderTargetView** RenderTargets, uint32 NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor)
 {
 	// Consider making this store the command list too? That would make alot of the task submission easier, but potentially less performant
 	D3D12RenderPassInfo* RenderPassInfo = new D3D12RenderPassInfo(RenderTargets, NumRenderTargets, DepthStencil, ClearColor);
@@ -786,14 +786,14 @@ IRenderTargetView* D3D12GraphicsDevice::GetBackBuffer()
 	return m_BackBuffer;
 }
 
-void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint InSlot, uint64 InOffset)
+void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint32 InSlot, uint64 InOffset)
 {
 	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
 	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
 	DestTable->ConstantBuffers[InSlot] = { Buffer, InOffset };
 }
 
-void D3D12GraphicsDevice::CreateUnorderedAccessView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint InSlot, uint InSubresource)
+void D3D12GraphicsDevice::CreateUnorderedAccessView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint32 InSlot, uint32 InSubresource)
 {
 	UNUSED(InDestTable);
 	UNUSED(InBuffer);
@@ -812,7 +812,7 @@ void D3D12GraphicsDevice::CreateUnorderedAccessView(IShaderResourceTable* InDest
 //	DestTable->ConstantBuffers[InSlot] = Buffer;
 }
 
-void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestTable, ITextureBase* InTexture, uint Slot, uint InSubresource)
+void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestTable, ITextureBase* InTexture, uint32 Slot, uint32 InSubresource)
 {
 	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
 	D3D12TextureBase* Texture = (D3D12TextureBase*)InTexture;
@@ -855,7 +855,7 @@ void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestT
 	m_Device->CreateShaderResourceView(Texture->Resource.D3DResource, &SrvDesc, SlotAlloc.CpuHandle);
 }
 
-void D3D12GraphicsDevice::CreateUnorderedAccessView(IShaderResourceTable* InDestTable, ITextureBase* InTexture, uint Slot, uint InSubresource)
+void D3D12GraphicsDevice::CreateUnorderedAccessView(IShaderResourceTable* InDestTable, ITextureBase* InTexture, uint32 Slot, uint32 InSubresource)
 {
 	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
 	D3D12TextureBase* Texture = (D3D12TextureBase*)InTexture;
@@ -886,7 +886,7 @@ void D3D12GraphicsDevice::CreateUnorderedAccessView(IShaderResourceTable* InDest
 	m_Device->CreateUnorderedAccessView(Texture->Resource.D3DResource, nullptr, &UavDesc, SlotAlloc.CpuHandle);
 }
 
-void D3D12GraphicsDevice::CreateSamplerView(IShaderResourceTable* InDestTable, ISamplerState* InSamplerState, uint Slot)
+void D3D12GraphicsDevice::CreateSamplerView(IShaderResourceTable* InDestTable, ISamplerState* InSamplerState, uint32 Slot)
 {
 	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
 	D3D12SamplerState* SamplerState = (D3D12SamplerState*)InSamplerState;
@@ -906,10 +906,10 @@ D3D12ShaderItemData GetShaderRequirements(IGraphicsPipelineState* pState)
 	}
 	auto& Counts = PipelineDesc.Counts;
 	D3D12ShaderItemData ParameterList(
-		static_cast<uint>(Counts.NumConstantBuffers), 
-		static_cast<uint>(Counts.NumShaderResourceViews), 
-		static_cast<uint>(Counts.NumUnorderedAccessViews), 
-		static_cast<uint>(Counts.NumSamplers)
+		static_cast<uint32>(Counts.NumConstantBuffers), 
+		static_cast<uint32>(Counts.NumShaderResourceViews), 
+		static_cast<uint32>(Counts.NumUnorderedAccessViews), 
+		static_cast<uint32>(Counts.NumSamplers)
 	);
 	return ParameterList;
 }
@@ -965,7 +965,7 @@ IRenderTargetView* D3D12GraphicsDevice::CreateRenderTargetView(ITexture2D* InTex
 	}
 	D3D12TextureBase* Textures = (D3D12TextureBase*)InTexture;
 	D3D12DescriptorAllocation Allocations[3] = { };
-	for (uint i = 0; i < 3; i++)
+	for (uint32 i = 0; i < 3; i++)
 	{
 		Allocations[i] = m_RtvAllocator.AllocateDescriptor();
 		m_Device->CreateRenderTargetView(Textures[i].Resource.D3DResource, nullptr, Allocations[i].CpuHandle);
@@ -984,7 +984,7 @@ IDepthStencilView* D3D12GraphicsDevice::CreateDepthStencilView(ITexture2D* InTex
 	}
 	D3D12TextureBase* Textures = (D3D12TextureBase*)InTexture;
 	D3D12DescriptorAllocation Allocations[3] = { };
-	for (uint i = 0; i < 3; i++)
+	for (uint32 i = 0; i < 3; i++)
 	{
 		Allocations[i] = m_DsvAllocator.AllocateDescriptor();
 		m_Device->CreateDepthStencilView(Textures[i].Resource.D3DResource, nullptr, Allocations[i].CpuHandle);

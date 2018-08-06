@@ -32,7 +32,7 @@ Mesh::Mesh(const Mesh& InMesh) :
 {
 }
 
-Mesh::Mesh(const std::vector<FloatInt>& InVertices, const std::vector<uint>& InIndices) :
+Mesh::Mesh(const std::vector<FloatInt>& InVertices, const std::vector<uint32>& InIndices) :
 	m_VertexBuffer(nullptr),
 	m_IndexBuffer(nullptr),
 	m_Name("No Named Mesh"),
@@ -41,9 +41,9 @@ Mesh::Mesh(const std::vector<FloatInt>& InVertices, const std::vector<uint>& InI
 {
 }
 
-void ProcessMesh(aiMesh* pMesh, std::vector<uint>& OutIndices, std::vector<FloatInt>& OutVertices)
+void ProcessMesh(aiMesh* pMesh, std::vector<uint32>& OutIndices, std::vector<FloatInt>& OutVertices)
 {
-	for (uint i = 0; i < pMesh->mNumVertices; i++)
+	for (uint32 i = 0; i < pMesh->mNumVertices; i++)
 	{
 		aiVector3D Pos = pMesh->mVertices[i];
 		aiVector3D Norm = pMesh->mNormals[i];
@@ -60,29 +60,29 @@ void ProcessMesh(aiMesh* pMesh, std::vector<uint>& OutIndices, std::vector<Float
 		};
 
 		float* pFloats = reinterpret_cast<float*>(&Vtx);
-		uint FloatsSize = sizeof(Mesh::Vertex) / sizeof(float);
-		for (uint z = 0; z < FloatsSize; z++)
+		uint32 FloatsSize = sizeof(Mesh::Vertex) / sizeof(float);
+		for (uint32 z = 0; z < FloatsSize; z++)
 		{
 			OutVertices.push_back(pFloats[z]);
 		}
 	}
-	for (uint i = 0; i < pMesh->mNumFaces; i++)
+	for (uint32 i = 0; i < pMesh->mNumFaces; i++)
 	{
 		aiFace Face = pMesh->mFaces[i];
-		for (uint j = 0; j < Face.mNumIndices; j++)
+		for (uint32 j = 0; j < Face.mNumIndices; j++)
 		{
 			OutIndices.push_back(Face.mIndices[j]);
 		}
 	}
 }
 
-void ProcessScene(const aiScene* pScene, aiNode* pRootNode, std::vector<uint>& OutIndices, std::vector<FloatInt>& OutVertices)
+void ProcessScene(const aiScene* pScene, aiNode* pRootNode, std::vector<uint32>& OutIndices, std::vector<FloatInt>& OutVertices)
 {
-	for (uint i = 0; i < pRootNode->mNumMeshes; i++)
+	for (uint32 i = 0; i < pRootNode->mNumMeshes; i++)
 	{
 		ProcessMesh(pScene->mMeshes[pRootNode->mMeshes[i]], OutIndices, OutVertices);
 	}
-	for (uint i = 0; i < pRootNode->mNumChildren; i++)
+	for (uint32 i = 0; i < pRootNode->mNumChildren; i++)
 	{
 		ProcessScene(pScene, pRootNode->mChildren[i], OutIndices, OutVertices);
 	}
@@ -117,7 +117,7 @@ void Mesh::SetVertices(const std::vector<FloatInt>& InVertices)
 	m_Vertices = InVertices;
 }
 
-void Mesh::SetIndices(const std::vector<uint>& InIndices)
+void Mesh::SetIndices(const std::vector<uint32>& InIndices)
 {
 	m_Indices = InIndices;
 }
@@ -129,22 +129,22 @@ void Mesh::Upload()
 	{
 		delete m_VertexBuffer;
 	}
-	m_VertexBuffer = Device->CreateVertexBuffer(static_cast<uint>(m_Vertices.size()) * sizeof(FloatInt), (uint8*)m_Vertices.data());
+	m_VertexBuffer = Device->CreateVertexBuffer(static_cast<uint32>(m_Vertices.size()) * sizeof(FloatInt), (uint8*)m_Vertices.data());
 	if (m_IndexBuffer)
 	{
 		delete m_IndexBuffer;
 	}
-	m_IndexBuffer = Device->CreateIndexBuffer(static_cast<uint>(m_Indices.size() * 4), (uint8*)m_Indices.data());
+	m_IndexBuffer = Device->CreateIndexBuffer(static_cast<uint32>(m_Indices.size() * 4), (uint8*)m_Indices.data());
 }
 
-Mesh Mesh::CreateSphere(uint NumPoints)
+Mesh Mesh::CreateSphere(uint32 NumPoints)
 {
 	UNUSED(NumPoints);
 	Mesh Result;
-/*	uint NumSphereVertices = 0;
-	uint NumSphereFaces = 0;
-	uint LatLines = NumPoints;
-	uint LongLines = NumPoints;
+/*	uint32 NumSphereVertices = 0;
+	uint32 NumSphereFaces = 0;
+	uint32 LatLines = NumPoints;
+	uint32 LongLines = NumPoints;
 	NumSphereVertices = ((LatLines - 2) * LongLines) + 2;
 	NumSphereFaces = ((LatLines - 3)*(LongLines) * 2) + (LongLines * 2);
 
@@ -163,11 +163,11 @@ Mesh Mesh::CreateSphere(uint NumPoints)
 	vertices[0].y = 0.0f;
 	vertices[0].z = 1.0f;
 
-	for (uint i = 0; i < LatLines - 2; ++i)
+	for (uint32 i = 0; i < LatLines - 2; ++i)
 	{
 		spherePitch = (i + 1) * (3.14 / (LatLines - 1));
 		Rotationx = XMMatrixRotationX(spherePitch);
-		for (uint j = 0; j < LongLines; ++j)
+		for (uint32 j = 0; j < LongLines; ++j)
 		{
 			sphereYaw = j * (6.28 / (LongLines));
 			Rotationy = XMMatrixRotationZ(sphereYaw);
@@ -184,10 +184,10 @@ Mesh Mesh::CreateSphere(uint NumPoints)
 	vertices[NumSphereVertices - 1].z = -1.0f;
 	Result.SetVertexData<float3>(vertices);
 
-	std::vector<uint> indices(NumSphereFaces * 3);
+	std::vector<uint32> indices(NumSphereFaces * 3);
 
 	int k = 0;
-	for (uint l = 0; l < LongLines - 1; ++l)
+	for (uint32 l = 0; l < LongLines - 1; ++l)
 	{
 		indices[k] = 0;
 		indices[k + 1] = l + 1;
@@ -200,9 +200,9 @@ Mesh Mesh::CreateSphere(uint NumPoints)
 	indices[k + 2] = 1;
 	k += 3;
 
-	for (uint i = 0; i < LatLines - 3; ++i)
+	for (uint32 i = 0; i < LatLines - 3; ++i)
 	{
-		for (uint j = 0; j < LongLines - 1; ++j)
+		for (uint32 j = 0; j < LongLines - 1; ++j)
 		{
 			indices[k] = i * LongLines + j + 1;
 			indices[k + 1] = i * LongLines + j + 2;
@@ -226,7 +226,7 @@ Mesh Mesh::CreateSphere(uint NumPoints)
 		k += 6;
 	}
 
-	for (uint l = 0; l < LongLines - 1; ++l)
+	for (uint32 l = 0; l < LongLines - 1; ++l)
 	{
 		indices[k] = NumSphereVertices - 1;
 		indices[k + 1] = (NumSphereVertices - 1) - (l + 1);
@@ -242,17 +242,17 @@ Mesh Mesh::CreateSphere(uint NumPoints)
 	return Result;
 }
 
-void Mesh::AddData(float* pDatas, uint Size)
+void Mesh::AddData(float* pDatas, uint32 Size)
 {
-	for (uint i = 0; i < Size; i++)
+	for (uint32 i = 0; i < Size; i++)
 	{
 		m_Vertices.push_back(pDatas[i]);
 	}
 }
 
-void Mesh::AddData(int* pDatas, uint Size)
+void Mesh::AddData(int* pDatas, uint32 Size)
 {
-	for (uint i = 0; i < Size; i++)
+	for (uint32 i = 0; i < Size; i++)
 	{
 		m_Vertices.push_back(pDatas[i]);
 	}

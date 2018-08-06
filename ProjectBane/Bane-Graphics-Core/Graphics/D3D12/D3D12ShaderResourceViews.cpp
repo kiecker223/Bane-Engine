@@ -25,10 +25,10 @@ D3D12_CPU_DESCRIPTOR_HANDLE* D3D12RenderPassInfo::GetDSV()
 }
 
 D3D12ShaderResourceTable::D3D12ShaderResourceTable(
-	uint InNumCBVs, 
-	uint InNumSRVs, 
-	uint InNumSMPs, 
-	uint InNumUAVs, 
+	uint32 InNumCBVs, 
+	uint32 InNumSRVs, 
+	uint32 InNumSMPs, 
+	uint32 InNumUAVs, 
 	D3D12DescriptorAllocation InSRVAllocation, 
 	D3D12DescriptorAllocation InSMPAllocation, 
 	D3D12DescriptorAllocation InUAVAllocation) :

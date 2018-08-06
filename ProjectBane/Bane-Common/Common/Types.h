@@ -1,19 +1,29 @@
 #pragma once
 
+#include <cstddef>
 
-typedef unsigned char		uchar;
-typedef unsigned short		ushort;
-typedef unsigned int		uint;
-typedef unsigned long		ulong;
+#ifdef __GNUC__
+#include <stdint.h>
+#endif
 
-typedef char		int8;
-typedef short		int16;
-typedef int			int32;
-typedef __int64		int64;
+typedef unsigned char		uint8;
+typedef signed char			int8;
 
-typedef uchar			uint8;
-typedef ushort			uint16;
-typedef uint			uint32;
-typedef unsigned __int64 uint64;
+typedef unsigned short		uint16;
+typedef signed short		int16;
 
-typedef unsigned char byte;
+typedef float				float32;
+typedef double				float64;
+
+#if !defined(_WIN32) && defined(__GNUC__) && (defined(__x86_64__))
+typedef unsigned int uint32;
+typedef signed int int32;
+typedef unsigned long uint64;
+typedef signed long int64;
+#else
+typedef unsigned long uint32;
+typedef signed long int32;
+typedef unsigned long long uint64;
+typedef signed long long int64;
+#endif
+

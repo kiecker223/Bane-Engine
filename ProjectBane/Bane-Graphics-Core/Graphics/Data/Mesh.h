@@ -54,7 +54,7 @@ public:
 		return *this;
 	}
 
-	uint Stride;
+	uint32 Stride;
 	std::vector<std::string> Inputs;
 };
 
@@ -77,16 +77,16 @@ public:
 	// Calls Upload()
 	Mesh(const Mesh& Rhs);
 	// Does not call Upload()
-	Mesh(const std::vector<FloatInt>& InVertices, const std::vector<uint>& InIndices);
+	Mesh(const std::vector<FloatInt>& InVertices, const std::vector<uint32>& InIndices);
 
 	inline const std::vector<FloatInt>& GetVertices() const { return m_Vertices; }
-	inline const std::vector<uint>& GetIndices() const { return m_Indices; }
+	inline const std::vector<uint32>& GetIndices() const { return m_Indices; }
 	inline MeshLayout& GetLayout() { return m_Layout; }
 
 	inline IVertexBuffer* GetVertexBuffer() const { return m_VertexBuffer; }
 	inline IIndexBuffer* GetIndexBuffer() const { return m_IndexBuffer; }
-//	ForceInline const uint GetVertexCount() const { return m_Vertices.size(); }
-	inline const uint GetIndexCount() const { return static_cast<uint>(m_Indices.size()); }
+//	ForceInline const uint32 GetVertexCount() const { return m_Vertices.size(); }
+	inline const uint32 GetIndexCount() const { return static_cast<uint32>(m_Indices.size()); }
 
 	inline void SetName(const std::string& Name) { m_Name = Name; }
 	inline std::string GetName() const { return m_Name; }
@@ -102,7 +102,7 @@ public:
 		SetVertices(Res);
 	}
 	void SetVertices(const std::vector<FloatInt>& InVertices);
-	void SetIndices(const std::vector<uint>& InIndices);
+	void SetIndices(const std::vector<uint32>& InIndices);
 
 	void Upload(); // Call an explicit upload to gpu
 	
@@ -129,12 +129,12 @@ public:
 		m_Indices.clear();
 	}
 
-	static Mesh CreateSphere(uint NumPoints);
+	static Mesh CreateSphere(uint32 NumPoints);
 
 private:
 
-	void AddData(float* pDatas, uint Size);
-	void AddData(int* pDatas, uint Size);
+	void AddData(float* pDatas, uint32 Size);
+	void AddData(int* pDatas, uint32 Size);
 	
 	template<typename T>
 	inline void AddVertex(T* InData)
@@ -143,9 +143,9 @@ private:
 	}
 
 	template<typename T>
-	inline T& GetVerticesAtIndex(uint Index)
+	inline T& GetVerticesAtIndex(uint32 Index)
 	{
-		return (T&)*(((uint8*)m_Vertices.data()) + (Index * sizeof(T)));
+		return (T&)*(((uint328*)m_Vertices.data()) + (Index * sizeof(T)));
 	}
 
 	static IInputLayout* GBaseLayout;
@@ -155,6 +155,6 @@ private:
 	std::string m_Name; // Filename, or asset name
 	MeshLayout m_Layout;
 	std::vector<FloatInt> m_Vertices;
-	std::vector<uint> m_Indices;
+	std::vector<uint32> m_Indices;
 };
 

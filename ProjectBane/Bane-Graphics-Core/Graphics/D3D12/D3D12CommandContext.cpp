@@ -100,7 +100,7 @@ void D3D12GraphicsCommandContext::SetGraphicsResourceTable(const IShaderResource
 		D3DCL->SetGraphicsRootSignature(Table->AssociatedSignature.RootSignature);
 	}
 
-	for (uint i = 0; i < Table->ConstantBuffers.size(); i++)
+	for (uint32 i = 0; i < Table->ConstantBuffers.size(); i++)
 	{
 		if (Table->ConstantBuffers[i].ConstantBuffer != nullptr)
 		{
@@ -121,7 +121,7 @@ void D3D12GraphicsCommandContext::SetGraphicsResourceTable(const IShaderResource
 }
 
 
-void* D3D12GraphicsCommandContext::Map(IGPUResource* InResource, uint Subresource)
+void* D3D12GraphicsCommandContext::Map(IGPUResource* InResource, uint32 Subresource)
 {
 	D3D12GPUResource* Resource = dynamic_cast<D3D12GPUResource*>(InResource);
 	void* MappedPointer = nullptr;
@@ -136,7 +136,7 @@ void* D3D12GraphicsCommandContext::Map(IGPUResource* InResource, uint Subresourc
 	return MappedPointer;
 }
 
-void D3D12GraphicsCommandContext::Unmap(IGPUResource* InResource, uint Subresource)
+void D3D12GraphicsCommandContext::Unmap(IGPUResource* InResource, uint32 Subresource)
 {
 	D3D12GPUResource* Resource = dynamic_cast<D3D12GPUResource*>(InResource);
 	if (Resource->MappedPointer == nullptr)
@@ -149,28 +149,28 @@ void D3D12GraphicsCommandContext::Unmap(IGPUResource* InResource, uint Subresour
 	}
 }
 
-void D3D12GraphicsCommandContext::Draw(uint VertexCount, uint StartVertexLocation)
+void D3D12GraphicsCommandContext::Draw(uint32 VertexCount, uint32 StartVertexLocation)
 {
 	FlushResourceTransitions();
 	CommitResources();
 	D3DCL->DrawInstanced(VertexCount, 1, StartVertexLocation, 0);
 }
 
-void D3D12GraphicsCommandContext::DrawIndexed(uint IndexCount, uint StartIndexLocation, int BaseVertexLocation)
+void D3D12GraphicsCommandContext::DrawIndexed(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation)
 {
 	FlushResourceTransitions();
 	CommitResources();
 	D3DCL->DrawIndexedInstanced(IndexCount, 1, StartIndexLocation, BaseVertexLocation, 0);
 }
 
-void D3D12GraphicsCommandContext::DrawInstanced(uint VertexCount, uint InstanceCount, uint StartVertexLocation)
+void D3D12GraphicsCommandContext::DrawInstanced(uint32 VertexCount, uint32 InstanceCount, uint32 StartVertexLocation)
 {
 	FlushResourceTransitions();
 	CommitResources();
 	D3DCL->DrawInstanced(VertexCount, InstanceCount, StartVertexLocation, 0);
 }
 
-void D3D12GraphicsCommandContext::DrawIndexedInstanced(uint IndexCount, uint StartIndexLocation, int BaseVertexLocation, uint InstanceCount)
+void D3D12GraphicsCommandContext::DrawIndexedInstanced(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation, uint32 InstanceCount)
 {
 	FlushResourceTransitions();
 	CommitResources();
@@ -200,7 +200,7 @@ void D3D12GraphicsCommandContext::CopyBufferToTexture(IBuffer* Src, ITextureBase
 	D3DCL->CopyTextureRegion(&TexCopyLocation, D3DTex->Width, D3DTex->Height, D3DTex->Depth, &BufferSrcLocation, nullptr);
 }
 
-void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* InSrc, uint SrcSubresource, ITexture2D* InDst, uint DstSubresource)
+void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* InSrc, uint32 SrcSubresource, ITexture2D* InDst, uint32 DstSubresource)
 {
 	D3D12TextureBase* Src = (D3D12TextureBase*)InSrc;
 	D3D12TextureBase* Dst = (D3D12TextureBase*)InDst;
@@ -272,7 +272,7 @@ void D3D12GraphicsCommandContext::CommitResources()
 	bHasCheckedCurrentTable = true;
 	if (CurrentRenderPass != nullptr && CurrentRenderPass->NumRenderTargets > 0)
 	{
-		for (uint i = 0; i < CurrentRenderPass->NumRenderTargets; i++)
+		for (uint32 i = 0; i < CurrentRenderPass->NumRenderTargets; i++)
 		{
 			D3D12TextureBase* Texture = CurrentRenderPass->RenderTargets[i]->GetCurrentFrame().Texture;
 			if (Texture->RegisterDependency(COMMAND_CONTEXT_TYPE_GRAPHICS))
@@ -283,7 +283,7 @@ void D3D12GraphicsCommandContext::CommitResources()
 	}
 	if (!CurrentTable->ShaderResources.empty())
 	{
-		for (uint i = 0; i < CurrentTable->ShaderResources.size(); i++)
+		for (uint32 i = 0; i < CurrentTable->ShaderResources.size(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->ShaderResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_GRAPHICS))
@@ -294,7 +294,7 @@ void D3D12GraphicsCommandContext::CommitResources()
 	}
 	if (!CurrentTable->UnorderedAccessResources.empty())
 	{
-		for (uint i = 0; i < CurrentTable->UnorderedAccessResources.size(); i++)
+		for (uint32 i = 0; i < CurrentTable->UnorderedAccessResources.size(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->UnorderedAccessResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_GRAPHICS))
@@ -327,7 +327,7 @@ void D3D12ComputeCommandContext::StallToEnd()
 	ParentDevice->GetCommandQueue(COMMAND_CONTEXT_TYPE_COMPUTE).StallForFinish();
 }
 
-void* D3D12ComputeCommandContext::Map(IGPUResource* InResource, uint Subresource)
+void* D3D12ComputeCommandContext::Map(IGPUResource* InResource, uint32 Subresource)
 {
 	D3D12GPUResource* Resource = dynamic_cast<D3D12GPUResource*>(InResource);
 	void* MappedPointer = nullptr;
@@ -342,7 +342,7 @@ void* D3D12ComputeCommandContext::Map(IGPUResource* InResource, uint Subresource
 	return MappedPointer;
 }
 
-void D3D12ComputeCommandContext::Unmap(IGPUResource* InResource, uint Subresource)
+void D3D12ComputeCommandContext::Unmap(IGPUResource* InResource, uint32 Subresource)
 {
 	D3D12GPUResource* Resource = dynamic_cast<D3D12GPUResource*>(InResource);
 	if (Resource->MappedPointer == nullptr)
@@ -376,7 +376,7 @@ void D3D12ComputeCommandContext::SetComputeResourceTable(const IShaderResourceTa
 		D3DCL->SetComputeRootSignature(Table->AssociatedSignature.RootSignature);
 	}
 
-	for (uint i = 0; i < Table->ConstantBuffers.size(); i++)
+	for (uint32 i = 0; i < Table->ConstantBuffers.size(); i++)
 	{
 		if (Table->ConstantBuffers[i].ConstantBuffer != nullptr)
 		{
@@ -396,7 +396,7 @@ void D3D12ComputeCommandContext::SetComputeResourceTable(const IShaderResourceTa
 	}
 }
 
-void D3D12ComputeCommandContext::Dispatch(uint ThreadX, uint ThreadY, uint ThreadZ)
+void D3D12ComputeCommandContext::Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ)
 {
 	FlushResourceTransitions();
 	CommitResources();
@@ -410,7 +410,7 @@ void D3D12ComputeCommandContext::FlushResourceTransitions()
 	{
 		D3DCL->ResourceBarrier(PendingTransitions.GetNumElements(), PendingTransitions.Data.data());
 	}
-	for (uint i = 0; i < TransitionedResources.GetNumElements(); i++)
+	for (uint32 i = 0; i < TransitionedResources.GetNumElements(); i++)
 	{
 		D3D12GPUResource* Res = TransitionedResources.Pop();
 		Res->CurrentState = Res->PendingState;
@@ -428,7 +428,7 @@ void D3D12ComputeCommandContext::CommitResources()
 	// Leave out constant buffers because they are constant read?
 	if (!CurrentTable->ShaderResources.empty())
 	{
-		for (uint i = 0; i < CurrentTable->ShaderResources.size(); i++)
+		for (uint32 i = 0; i < CurrentTable->ShaderResources.size(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->ShaderResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_COMPUTE))
@@ -439,7 +439,7 @@ void D3D12ComputeCommandContext::CommitResources()
 	}
 	if (!CurrentTable->UnorderedAccessResources.empty())
 	{
-		for (uint i = 0; i < CurrentTable->UnorderedAccessResources.size(); i++)
+		for (uint32 i = 0; i < CurrentTable->UnorderedAccessResources.size(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->UnorderedAccessResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_COMPUTE))

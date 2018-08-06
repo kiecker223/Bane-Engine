@@ -83,7 +83,7 @@ public:
 	inline void ExecuteCommandLists(bool bWaitForFinish = false)
 	{
 		ID3D12CommandList* CommandLists[16];
-		for (uint i = 0; i < m_WaitQueue.GetNumElements(); i++)
+		for (uint32 i = 0; i < m_WaitQueue.GetNumElements(); i++)
 		{
 			CommandLists[i] = (ID3D12CommandList*)m_WaitQueue[i]->CommandList;
 		}
@@ -182,7 +182,7 @@ private:
 		InternalExecuteCommandLists(&CommandList, 1);
 	}
 
-	inline void InternalExecuteCommandLists(ID3D12CommandList** CommandLists, uint NumCommandLists)
+	inline void InternalExecuteCommandLists(ID3D12CommandList** CommandLists, uint32 NumCommandLists)
 	{
 		m_CommandQueue->ExecuteCommandLists(NumCommandLists, CommandLists);
 		m_FenceValue++;

@@ -3,12 +3,12 @@
 #include "Common.h"
 #include <array>
 
-template<typename TType, uint TMAX_SIZE>
+template<typename TType, uint32 TMAX_SIZE>
 class StackQueue
 {
 public:
 
-	static const uint MAX_SIZE = TMAX_SIZE;
+	static const uint32 MAX_SIZE = TMAX_SIZE;
 	typedef StackQueue<TType, MAX_SIZE> ThisType;
 
 	StackQueue() : 
@@ -21,7 +21,7 @@ public:
 		CopyFrom(Rhs);
 	}
 
-	inline uint MaxSize() const
+	inline uint32 MaxSize() const
 	{
 		return MAX_SIZE;
 	}
@@ -56,19 +56,19 @@ public:
 		Src.CopyTo(*this);
 	}
 
-	inline TType& operator [] (uint Position)
+	inline TType& operator [] (uint32 Position)
 	{
 		BANE_CHECK(Position < NumUsed);
 		return Data[Position];
 	}
 
-	inline const TType& operator [] (uint Position) const
+	inline const TType& operator [] (uint32 Position) const
 	{
 		assert(Position < NumUsed);
 		return Data[Position];
 	}
 
-	inline uint GetNumElements() const
+	inline uint32 GetNumElements() const
 	{
 		return NumUsed;
 	}
@@ -77,7 +77,7 @@ public:
 	template<class TOther>
 	inline ThisType AppendOther(const TOther& Other)
 	{
-		for (uint i = 0; i < Other.GetNumElements(); i++)
+		for (uint32 i = 0; i < Other.GetNumElements(); i++)
 		{
 			Push(Other[i]);
 		}
@@ -87,13 +87,13 @@ public:
 	template<class TOther>
 	inline ThisType AppendToOther(TOther& Other)
 	{
-		for (uint i = 0; i < GetNumElements(); i++)
+		for (uint32 i = 0; i < GetNumElements(); i++)
 		{
 			Other.Push(Data[i]);
 		}
 		return *this;
 	}
 
-	mutable uint NumUsed; // Gotta keep the const correctness
+	mutable uint32 NumUsed; // Gotta keep the const correctness
 	std::array<TType, MAX_SIZE> Data;
 };

@@ -78,7 +78,7 @@ public:
 		{
 			return;
 		}
-		for (uint i = 0; i < CommitedResources.size(); i++)
+		for (uint32 i = 0; i < CommitedResources.size(); i++)
 		{
 			CommitedResources[i].Uncommit();
 		}
@@ -130,17 +130,17 @@ public:
 
 	virtual void SetGraphicsResourceTable(const IShaderResourceTable* InTable) final override;
 
-	virtual void* Map(IGPUResource* InResource, uint Subresource = 0) final override;
-	virtual void Unmap(IGPUResource* InResource, uint Subresource = 0) final override;
+	virtual void* Map(IGPUResource* InResource, uint32 Subresource = 0) final override;
+	virtual void Unmap(IGPUResource* InResource, uint32 Subresource = 0) final override;
 	
-	virtual void Draw(uint VertexCount, uint StartVertexLocation) final override;
-	virtual void DrawIndexed(uint IndexCount, uint StartIndexLocation, int BaseVertexLocation) final override;
-	virtual void DrawInstanced(uint VertexCount, uint InstanceCount, uint StartVertexLocation) final override;
-	virtual void DrawIndexedInstanced(uint IndexCount, uint StartIndexLocation, int BaseVertexLocation, uint InstanceCount) final override;
+	virtual void Draw(uint32 VertexCount, uint32 StartVertexLocation) final override;
+	virtual void DrawIndexed(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation) final override;
+	virtual void DrawInstanced(uint32 VertexCount, uint32 InstanceCount, uint32 StartVertexLocation) final override;
+	virtual void DrawIndexedInstanced(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation, uint32 InstanceCount) final override;
 
 	virtual void CopyBuffers(IBuffer* Src, IBuffer* Dst) final override;
 	virtual void CopyBufferToTexture(IBuffer* Src, ITextureBase* Dst) final override;
-	virtual void CopyTextures(ITextureBase* InSrc, uint SrcSubresource, ITexture2D* InDst, uint DstSubresource) final override;
+	virtual void CopyTextures(ITextureBase* InSrc, uint32 SrcSubresource, ITexture2D* InDst, uint32 DstSubresource) final override;
 	virtual void CopyTextures(ITextureBase* Src, int3 SrcLocation, ITextureBase* Dst, int3 DstLocation, int3 DstSize) final override;
 
 	void FlushResourceTransitions();
@@ -180,13 +180,13 @@ public:
 	virtual void StallToEnd() final override;
 	virtual void Flush() final override { StallToEnd(); }
 
-	virtual void* Map(IGPUResource* ResourceToMap, uint Subresource = 0) final override;
-	virtual void Unmap(IGPUResource* ResourceToUnmap, uint Subresource = 0) final override;
+	virtual void* Map(IGPUResource* ResourceToMap, uint32 Subresource = 0) final override;
+	virtual void Unmap(IGPUResource* ResourceToUnmap, uint32 Subresource = 0) final override;
 
 	virtual void SetComputePipelineState(const IComputePipelineState* InState) final override;
 	virtual void SetComputeResourceTable(const IShaderResourceTable* InTable) final override;
 
-	virtual void Dispatch(uint ThreadX, uint ThreadY, uint ThreadZ) final override;
+	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) final override;
 
 	void CommitResources();
 

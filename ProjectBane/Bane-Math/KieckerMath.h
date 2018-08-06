@@ -10,7 +10,7 @@
 // Disable anonymous structures warnings
 #pragma warning(disable:4201)
 
-inline uint NextPowerOfTwo(uint Value)
+inline uint32 NextPowerOfTwo(uint32 Value)
 {
 	Value--;
 	Value |= Value >> 1;

@@ -5,7 +5,7 @@
 #include <map>
 
 typedef struct SHADER_PARAMETERS {
-	using Register = uint;
+	using Register = uint32;
 	std::map<std::string, Register> CBVS;
 } SHADER_PARAMETERS;
 

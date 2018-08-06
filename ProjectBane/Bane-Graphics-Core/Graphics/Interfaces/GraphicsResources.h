@@ -18,7 +18,7 @@ public:
 class IBuffer : public IGPUResource
 {
 public:
-	virtual uint GetSizeInBytes() const = 0;
+	virtual uint32 GetSizeInBytes() const = 0;
 	virtual EBUFFER_USAGE GetUsage() const = 0;
 };
 
@@ -29,13 +29,13 @@ typedef IBuffer IConstantBuffer;
 class ITextureBase : public IGPUResource
 {
 public:
-	virtual uint GetWidth() const = 0;
-	virtual uint GetHeight() const = 0;
-	virtual uint GetDepth() const = 0;
-	virtual uint GetArraySize() const = 0;
+	virtual uint32 GetWidth() const = 0;
+	virtual uint32 GetHeight() const = 0;
+	virtual uint32 GetDepth() const = 0;
+	virtual uint32 GetArraySize() const = 0;
 	virtual ETEXTURE_USAGE GetUsage() const = 0;
 	virtual EFORMAT GetFormat() const = 0;
-	virtual uint GetMipCount() const = 0;
+	virtual uint32 GetMipCount() const = 0;
 	inline bool IsShaderResource() const { return GetUsage() & TEXTURE_USAGE_SHADER_RESOURCE; }
 	inline bool IsUnorderedAccess() const { return GetUsage() & TEXTURE_USAGE_UNORDERED_ACCESS; }
 	inline bool IsRenderTarget() const { return ((GetUsage() & TEXTURE_USAGE_RENDER_TARGET) == TEXTURE_USAGE_RENDER_TARGET); }

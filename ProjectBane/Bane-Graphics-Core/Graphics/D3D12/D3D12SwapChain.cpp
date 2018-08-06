@@ -5,8 +5,8 @@
 bool D3D12SwapChain::Initialize(IDXGIFactory2* Factory, IDXGIAdapter* InAdapter, ID3D12CommandQueue* MainQueue, const Window* RenderingWindow)
 {
 	Adapter = InAdapter;
-	const uint Width = RenderingWindow->GetWidth();
-	const uint Height = RenderingWindow->GetHeight();
+	const uint32 Width = RenderingWindow->GetWidth();
+	const uint32 Height = RenderingWindow->GetHeight();
 	HWND WindowHandle = RenderingWindow->GetHandle()->GetNativeHandle<HWND>();
 	DXGI_SWAP_CHAIN_DESC1 Desc = { };
 	Desc.Width = Width;
@@ -29,7 +29,7 @@ bool D3D12SwapChain::Initialize(IDXGIFactory2* Factory, IDXGIAdapter* InAdapter,
 	return SUCCEEDED(HRes);
 }
 
-void D3D12SwapChain::SetSwapInterval(uint SyncInterval)
+void D3D12SwapChain::SetSwapInterval(uint32 SyncInterval)
 {
 	SyncRate = SyncInterval;
 }

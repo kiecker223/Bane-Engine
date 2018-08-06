@@ -13,17 +13,17 @@ class VirtualBlockLinearAllocator
 public:
 
 	VirtualBlockLinearAllocator() { }
-	VirtualBlockLinearAllocator(uint Size, ELINEAR_ALLOCATOR_FLAGS InFlags) { Initialize(Size, Flags); }
+	VirtualBlockLinearAllocator(uint32 Size, ELINEAR_ALLOCATOR_FLAGS InFlags) { Initialize(Size, Flags); }
 
 	~VirtualBlockLinearAllocator() { FreeBlock(); }
 
-	inline void Initialize(uint Size, ELINEAR_ALLOCATOR_FLAGS Flags);
+	inline void Initialize(uint32 Size, ELINEAR_ALLOCATOR_FLAGS Flags);
 	inline void FreeBlock();
 
-	inline void* Allocate(uint Size);
+	inline void* Allocate(uint32 Size);
 
-	inline uint GetSize() const;
-	inline uint GetAmountAllocated() const;
+	inline uint32 GetSize() const;
+	inline uint32 GetAmountAllocated() const;
 
 	template<typename T>
 	inline T* Alloc()
@@ -32,7 +32,7 @@ public:
 	}
 
 	template<typename T>
-	inline T* Alloc(uint Num)
+	inline T* Alloc(uint32 Num)
 	{
 		return (T*)Allocate(sizeof(T) * Num);
 	}
@@ -46,11 +46,11 @@ public:
 	}
 
 	template<typename T, class... TConstructorArgs>
-	inline T* AllocInitialized(uint Count, TConstructorArgs&&... Args)
+	inline T* AllocInitialized(uint32 Count, TConstructorArgs&&... Args)
 	{
 		T* RetPtr = Alloc(Count);
 		T* Ptr = RetPtr;
-		for (uint i = 0; i < Count; i++)
+		for (uint32 i = 0; i < Count; i++)
 		{
 			new (Ptr++) T(Args);
 		}
@@ -65,7 +65,7 @@ private:
 
 };
 
-void VirtualBlockLinearAllocator::Initialize(uint Size, ELINEAR_ALLOCATOR_FLAGS InFlags)
+void VirtualBlockLinearAllocator::Initialize(uint32 Size, ELINEAR_ALLOCATOR_FLAGS InFlags)
 {
 	DWORD Flags = 0;
 	Flags |= MEM_COMMIT;
@@ -88,17 +88,17 @@ void VirtualBlockLinearAllocator::FreeBlock()
 	m_EndPointer = nullptr;
 }
 
-uint VirtualBlockLinearAllocator::GetSize() const
+uint32 VirtualBlockLinearAllocator::GetSize() const
 {
-	return static_cast<uint>(m_EndPointer - m_BasePointer);
+	return static_cast<uint32>(m_EndPointer - m_BasePointer);
 }
 
-uint VirtualBlockLinearAllocator::GetAmountAllocated() const
+uint32 VirtualBlockLinearAllocator::GetAmountAllocated() const
 {
-	return static_cast<uint>(m_EndPointer - m_CurrentPointer);
+	return static_cast<uint32>(m_EndPointer - m_CurrentPointer);
 }
 
-void* VirtualBlockLinearAllocator::Allocate(uint Size)
+void* VirtualBlockLinearAllocator::Allocate(uint32 Size)
 {
 	byte* RetPointer = m_CurrentPointer;
 	m_CurrentPointer += Size;

@@ -92,7 +92,7 @@ public:
 		return Desc;
 	}
 
-	inline uint GetStride() const
+	inline uint32 GetStride() const
 	{
 		return GetLayoutDescSize(Desc);
 	}
@@ -127,7 +127,7 @@ public:
 	~D3D12GraphicsPipelineState();
 
 	virtual void GetDesc(GFX_PIPELINE_STATE_DESC* OutDesc) const final override;
-	virtual uint8* GetSerialized(uint& OutBytes) const final override;
+	virtual uint8* GetSerialized(uint32& OutBytes) const final override;
 
 	void Reset(ID3D12Device1* Device, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& InCreationDesc, const GFX_PIPELINE_STATE_DESC& InDesc, D3D12ShaderSignature InShaderSignature);
 
@@ -146,7 +146,7 @@ public:
 	~D3D12ComputePipelineState();
 
 	virtual void GetDesc(COMPUTE_PIPELINE_STATE_DESC* OutDesc) const final override;
-	virtual uint8* GetSerialized(uint& OutBytes) const final override;
+	virtual uint8* GetSerialized(uint32& OutBytes) const final override;
 
 	void Reset(ID3D12Device1* Device, const D3D12_COMPUTE_PIPELINE_STATE_DESC& InCreationDesc, const COMPUTE_PIPELINE_STATE_DESC& InDesc, D3D12ShaderSignature InShaderSignature);
 

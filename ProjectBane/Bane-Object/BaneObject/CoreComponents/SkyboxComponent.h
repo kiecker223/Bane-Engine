@@ -30,7 +30,7 @@ private:
 	ITexture3D* m_Skybox;
 	IVertexBuffer* m_VertexBuffer;
 	IIndexBuffer* m_IndexBuffer;
-	uint m_IndexCount;
+	uint32 m_IndexCount;
 	IShaderResourceTable* m_Table;
 	ISamplerState* m_Sampler;
 	IGraphicsPipelineState* m_Pipeline;

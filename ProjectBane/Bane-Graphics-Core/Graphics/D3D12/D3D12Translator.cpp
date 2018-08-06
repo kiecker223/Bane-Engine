@@ -179,22 +179,22 @@ void InitializeD3D12Translator()
 
 D3D12_BLEND D3D12_TranslateBlendType(EBLEND_STYLE Style)
 {
-	return D3D12BlendTypes[(uint)Style];
+	return D3D12BlendTypes[(uint32)Style];
 }
 
 D3D12_BLEND_OP D3D12_TranslateBlendOp(EBLEND_OP BlendOp)
 {
-	return D3D12BlendOperations[(uint)BlendOp];
+	return D3D12BlendOperations[(uint32)BlendOp];
 }
 
 D3D12_LOGIC_OP D3D12_TranslateLogicOp(ELOGIC_OP InLogicOp)
 {
-	return D3D12LogicOperations[(uint)InLogicOp];
+	return D3D12LogicOperations[(uint32)InLogicOp];
 }
 
 D3D12_PRIMITIVE_TOPOLOGY_TYPE D3D12_TranslatePolygonType(EPOLYGON_TYPE PolygonType)
 {
-	return D3D12PrimitiveTopologyTypes[(uint)PolygonType];
+	return D3D12PrimitiveTopologyTypes[(uint32)PolygonType];
 }
 
 D3D12_PRIMITIVE_TOPOLOGY D3D12_TranslatePrimitiveTopology(EPRIMITIVE_TOPOLOGY Topology)
@@ -213,12 +213,12 @@ D3D12_PRIMITIVE_TOPOLOGY D3D12_TranslatePrimitiveTopology(EPRIMITIVE_TOPOLOGY To
 
 D3D12_COMPARISON_FUNC D3D12_TranslateComparisonFunc(ECOMPARISON_FUNCTION InFunc)
 {
-	return D3D12ComparisonFunctions[(uint)InFunc];
+	return D3D12ComparisonFunctions[(uint32)InFunc];
 }
 
 D3D12_STENCIL_OP D3D12_TranslateStencilOp(ESTENCIL_OP InOp)
 {
-	return D3D12StencilOperations[(uint)InOp];
+	return D3D12StencilOperations[(uint32)InOp];
 }
 
 DXGI_FORMAT D3D12_TranslateDataFormat(EINPUT_ITEM_FORMAT Format)
@@ -243,7 +243,7 @@ D3D12_INPUT_LAYOUT_DESC D3D12_TranslateInputLayout(const GFX_INPUT_LAYOUT_DESC& 
 	
 	D3D12_INPUT_ELEMENT_DESC* ResultItems = new D3D12_INPUT_ELEMENT_DESC[InDesc.InputItems.size()]{ };
 
-	for (uint i = 0; i < InDesc.InputItems.size(); i++)
+	for (uint32 i = 0; i < InDesc.InputItems.size(); i++)
 	{
 		const GFX_INPUT_ITEM_DESC& Item = InDesc.InputItems[i];
 		ResultItems[i].SemanticName = new char[Item.Name.size()];
@@ -256,7 +256,7 @@ D3D12_INPUT_LAYOUT_DESC D3D12_TranslateInputLayout(const GFX_INPUT_LAYOUT_DESC& 
 	}
 
 	Result.pInputElementDescs = ResultItems;
-	Result.NumElements = static_cast<uint>(InDesc.InputItems.size());
+	Result.NumElements = static_cast<uint32>(InDesc.InputItems.size());
 	return Result;
 }
 
@@ -306,7 +306,7 @@ D3D12_GRAPHICS_PIPELINE_STATE_DESC D3D12_TranslateGraphicsPipelineStateDesc(cons
 		OutDesc.pRootSignature = ShaderSignature.RootSignature;
 	}
 
-	for (uint i = 0; i < InDesc->NumRenderTargets; i++)
+	for (uint32 i = 0; i < InDesc->NumRenderTargets; i++)
 	{
 		OutDesc.BlendState.RenderTarget[i].BlendEnable	=			InDesc->RtvDescs[i].bBlendEnable;
 		OutDesc.BlendState.RenderTarget[i].LogicOpEnable =			InDesc->RtvDescs[i].bLogicOpEnable;

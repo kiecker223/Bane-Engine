@@ -18,12 +18,12 @@ D3D12_ROOT_SIGNATURE_INFO CreateRootSignatureDesc(const D3D12ShaderItemData& InD
 	D3D12_ROOT_SIGNATURE_DESC& ResultDesc = Result.Desc;
 	Result.Data = InData;
 
-	uint NumParameters = InData.NumCBVs + (InData.NumSRVs >= 1 ? 1 : 0) + (InData.NumUAVs >= 1 ? 1 : 0) + (InData.NumSMPs >= 1 ? 1 : 0); // Only two because we can throw them into descriptor tables
+	uint32 NumParameters = InData.NumCBVs + (InData.NumSRVs >= 1 ? 1 : 0) + (InData.NumUAVs >= 1 ? 1 : 0) + (InData.NumSMPs >= 1 ? 1 : 0); // Only two because we can throw them into descriptor tables
 	D3D12_ROOT_PARAMETER* pRootParams = new D3D12_ROOT_PARAMETER[NumParameters];
 	ZeroMemory(pRootParams, sizeof(D3D12_ROOT_PARAMETER) * NumParameters);
 
-	uint i = 0;
-	uint NumProcessed;
+	uint32 i = 0;
+	uint32 NumProcessed;
 	for (; i < InData.NumCBVs; i++)
 	{
 		CD3DX12_ROOT_PARAMETER::InitAsConstantBufferView(pRootParams[i], i);
@@ -67,7 +67,7 @@ D3D12_ROOT_SIGNATURE_INFO CreateRootSignatureDesc(const D3D12ShaderItemData& InD
 
 void DisposeOfRootSignatureDescriptor(D3D12_ROOT_SIGNATURE_DESC& Desc)
 {
-	for (uint i = 0; i < Desc.NumParameters; i++)
+	for (uint32 i = 0; i < Desc.NumParameters; i++)
 	{
 		if (Desc.pParameters[i].ParameterType == D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE)
 		{
@@ -100,20 +100,20 @@ D3D12ShaderSignature CreateRootSignature(ID3D12Device1* Device, D3D12_ROOT_SIGNA
 
 void D3D12ShaderSignatureLibrary::Initialize(ID3D12Device1* Device)
 {
-	m_TieredSignatures[(uint)D3D12_SHADER_SIGNATURE_TIER_1CBV_1SRV_1SAMPLER]			= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 1, 1, 0, 1 )));
-	m_TieredSignatures[(uint)D3D12_SHADER_SIGNATURE_TIER_2CBV_2SRV_2SAMPLER]			= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 2, 2, 0, 2 )));
-	m_TieredSignatures[(uint)D3D12_SHADER_SIGNATURE_TIER_4CBV_4SRV_4SAMPLER]			= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 4, 4, 0, 4 )));
-	m_TieredSignatures[(uint)D3D12_SHADER_SIGNATURE_TIER_8CBV_8SRV_8SAMPLER]			= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 8, 8, 0, 8 )));
-	m_TieredSignatures[(uint)D3D12_SHADER_SIGNATURE_TIER_16CBV_16SRV_16SAMPLER]			= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 16, 16, 0, 16 )));
-// 	m_TieredSignatures[(uint)D3D12_SHADER_SIGNATURE_TIER_2UAV]							= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 0, 0, 2, 0 )));
-// 	m_TieredSignatures[(uint)D3D12_SHADER_SIGNATURE_TIER_4UAV]							= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 0, 0, 4, 0 )));
-//	m_TieredSignatures[(uint)D3D12_SHADER_SIGNATURE_TIER_2CBV_2UAV]						= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 2, 0, 2, 0 )));
-//	m_TieredSignatures[(uint)D3D12_SHADER_SIGNATURE_TIER_4CBV_4UAV]						= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 4, 0, 4, 0 )));
-	m_TieredSignatures[(uint)D3D12_SHADER_SIGNATURE_TIER_1CBV_1SRV_1UAV_1SAMPLER]		= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 1, 1, 1, 1 )));
-	m_TieredSignatures[(uint)D3D12_SHADER_SIGNATURE_TIER_2CBV_2SRV_2UAV_2SAMPLER]		= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 2, 2, 2, 2 )));
-	m_TieredSignatures[(uint)D3D12_SHADER_SIGNATURE_TIER_4CBV_4SRV_4UAV_4SAMPLER]		= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 4, 4, 4, 4 )));
-	m_TieredSignatures[(uint)D3D12_SHADER_SIGNATURE_TIER_8CBV_8SRV_8UAV_8SAMPLER]		= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 8, 8, 8, 8 )));
-	m_TieredSignatures[(uint)D3D12_SHADER_SIGNATURE_TIER_16CBV_16SRV_16UAV_16SAMPLER]	= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 16, 16, 16, 16 )));
+	m_TieredSignatures[(uint32)D3D12_SHADER_SIGNATURE_TIER_1CBV_1SRV_1SAMPLER]			= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 1, 1, 0, 1 )));
+	m_TieredSignatures[(uint32)D3D12_SHADER_SIGNATURE_TIER_2CBV_2SRV_2SAMPLER]			= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 2, 2, 0, 2 )));
+	m_TieredSignatures[(uint32)D3D12_SHADER_SIGNATURE_TIER_4CBV_4SRV_4SAMPLER]			= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 4, 4, 0, 4 )));
+	m_TieredSignatures[(uint32)D3D12_SHADER_SIGNATURE_TIER_8CBV_8SRV_8SAMPLER]			= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 8, 8, 0, 8 )));
+	m_TieredSignatures[(uint32)D3D12_SHADER_SIGNATURE_TIER_16CBV_16SRV_16SAMPLER]			= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 16, 16, 0, 16 )));
+// 	m_TieredSignatures[(uint32)D3D12_SHADER_SIGNATURE_TIER_2UAV]							= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 0, 0, 2, 0 )));
+// 	m_TieredSignatures[(uint32)D3D12_SHADER_SIGNATURE_TIER_4UAV]							= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 0, 0, 4, 0 )));
+//	m_TieredSignatures[(uint32)D3D12_SHADER_SIGNATURE_TIER_2CBV_2UAV]						= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 2, 0, 2, 0 )));
+//	m_TieredSignatures[(uint32)D3D12_SHADER_SIGNATURE_TIER_4CBV_4UAV]						= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 4, 0, 4, 0 )));
+	m_TieredSignatures[(uint32)D3D12_SHADER_SIGNATURE_TIER_1CBV_1SRV_1UAV_1SAMPLER]		= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 1, 1, 1, 1 )));
+	m_TieredSignatures[(uint32)D3D12_SHADER_SIGNATURE_TIER_2CBV_2SRV_2UAV_2SAMPLER]		= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 2, 2, 2, 2 )));
+	m_TieredSignatures[(uint32)D3D12_SHADER_SIGNATURE_TIER_4CBV_4SRV_4UAV_4SAMPLER]		= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 4, 4, 4, 4 )));
+	m_TieredSignatures[(uint32)D3D12_SHADER_SIGNATURE_TIER_8CBV_8SRV_8UAV_8SAMPLER]		= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 8, 8, 8, 8 )));
+	m_TieredSignatures[(uint32)D3D12_SHADER_SIGNATURE_TIER_16CBV_16SRV_16UAV_16SAMPLER]	= CreateRootSignature(Device, CreateRootSignatureDesc(D3D12ShaderItemData( 16, 16, 16, 16 )));
 }
 
 void D3D12ShaderItemData::Quantize()
@@ -143,7 +143,7 @@ void D3D12ShaderItemData::Quantize()
 		NumUAVs = NextPowerOfTwo(NumUAVs);
 	}
 
-	uint LargestParameter = GetLargestParameterSize();
+	uint32 LargestParameter = GetLargestParameterSize();
 	NumCBVs = LargestParameter;
 	NumSRVs = LargestParameter;
 
@@ -164,14 +164,14 @@ void D3D12ShaderSignatureLibrary::Shutdown()
 D3D12ShaderSignature D3D12ShaderSignatureLibrary::GetSignature(const PIPELINE_STATE_RESOURCE_COUNTS& ParameterList)
 {
 	ED3D12_SHADER_SIGNATURE_TIER Tier = GetTier(ParameterList);
-	return m_TieredSignatures[(uint)Tier];
+	return m_TieredSignatures[(uint32)Tier];
 }
 
 D3D12ShaderSignature D3D12ShaderSignatureLibrary::DetermineBestRootSignature(const PIPELINE_STATE_RESOURCE_COUNTS& Counts)
 {
 	D3D12ShaderItemData ParameterList(Counts);
 	ED3D12_SHADER_SIGNATURE_TIER Tier = GetTier(ParameterList);
-	return m_TieredSignatures[(uint)Tier];
+	return m_TieredSignatures[(uint32)Tier];
 }
 
 ED3D12_SHADER_SIGNATURE_TIER D3D12ShaderSignatureLibrary::GetTier(const D3D12ShaderItemData& InData)
@@ -193,7 +193,7 @@ ED3D12_SHADER_SIGNATURE_TIER D3D12ShaderSignatureLibrary::GetTier(const D3D12Sha
 	Data.NumSRVs = NextPowerOfTwo(Data.NumSRVs);
 	Data.NumUAVs = NextPowerOfTwo(Data.NumUAVs);
 
-	uint NumOfLargestParam = Data.GetLargestParameterSize();
+	uint32 NumOfLargestParam = Data.GetLargestParameterSize();
 
 	Tier = D3D12_SHADER_SIGNATURE_TIER_1CBV_1SRV_1SAMPLER;
 	switch (NumOfLargestParam)

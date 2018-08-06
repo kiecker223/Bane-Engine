@@ -154,7 +154,7 @@ public:
 	}
 
 	void AddChild(EntityIdentifier Child);
-	void RemoveChild(uint ChildIndex);
+	void RemoveChild(uint32 ChildIndex);
 	matrix GetMatrixAffectedByParents() const;
 
 	IdentifierList& GetChildren()
@@ -169,13 +169,13 @@ public:
 
 	inline void Start()
 	{
-		for (uint i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
+		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
 			m_Allocator.GetAllocatedObjects()[i]->Start();
 	}
 
 	inline void Tick(float DT)
 	{
-		for (uint i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
+		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
 			m_Allocator.GetAllocatedObjects()[i]->Tick(DT);
 	}
 

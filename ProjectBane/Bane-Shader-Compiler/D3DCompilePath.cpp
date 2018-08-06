@@ -5,7 +5,7 @@
 
 #define failed(x) ((x) < 0)
 
-uint ToD3DCompileFlags(CompilerFlags Flags)
+uint32 ToD3DCompileFlags(CompilerFlags Flags)
 {
 	if (Flags == WithDebugInfo_NoOptimization)
 	{

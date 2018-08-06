@@ -30,7 +30,7 @@ typedef struct RENDERING_SETTINGS {
 	bool				bEnableShadows;
 	ETEXTURE_QUALITY	TextureQuality;
 	EMESH_QUALITY		MeshQuality;
-	uint				MaxLights;
+	uint32				MaxLights;
 } RENDERING_SETTINGS;
 
 
@@ -79,7 +79,7 @@ public:
 		m_CleanupCallback = CleanupCallback;
 	}
 
-	void OpenApplicationWindow(const std::string& Name, uint Width, uint Height);
+	void OpenApplicationWindow(const std::string& Name, uint32 Width, uint32 Height);
 
 	void InitSystems();
 

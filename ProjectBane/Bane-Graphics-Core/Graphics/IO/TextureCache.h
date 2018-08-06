@@ -62,7 +62,7 @@ private:
 	typedef struct LOADED_IMAGE
 	{
 		uint8* Buff;
-		int Width, Height, Step;
+		int32 Width, Height, Step;
 	} LOADED_IMAGE;
 
 	void InternalLoadCubemap(
@@ -75,9 +75,9 @@ private:
 		const std::string& PZ
 	);
 
-	SUBRESOURCE_DATA CreateTexData(LOADED_IMAGE* InImages, uint& OutWidth, uint& OutHeight, uint& OutDepth);
+	SUBRESOURCE_DATA CreateTexData(LOADED_IMAGE* InImages, uint32& OutWidth, uint32& OutHeight, uint32& OutDepth);
 
-	byte* InternalLoadImage(const char* FileName, int& OutWidth, int& OutHeight, int& OutStep, bool bFlip = false);
+	uint8* InternalLoadImage(const char* FileName, int32& OutWidth, int32& OutHeight, int32& OutStep, bool bFlip = false);
 
 	std::map<std::string, ITextureBase*> m_Textures;
 

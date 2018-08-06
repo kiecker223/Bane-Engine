@@ -116,7 +116,7 @@ public:
 
 	D3D12ResourceLocation() : D3DResource(nullptr) { }
 
-	D3D12ResourceLocation(uint InSizeInBytes, ID3D12Resource* InResource, D3D12GraphicsDevice* InDevice) :
+	D3D12ResourceLocation(uint32 InSizeInBytes, ID3D12Resource* InResource, D3D12GraphicsDevice* InDevice) :
 		SizeInBytes(InSizeInBytes),
 		D3DResource(InResource),
 		D3D12DeviceChild(InDevice)
@@ -154,7 +154,7 @@ public:
 	D3D12_SRV_DIMENSION SRVDimension;
 	D3D12_UAV_DIMENSION UAVDimension;
 	ID3D12Resource* D3DResource;
-	uint SizeInBytes;
+	uint32 SizeInBytes;
 
 	std::string DebugName;
 };
@@ -246,7 +246,7 @@ public:
 	void UploadDataToGPU(D3D12GraphicsCommandContext* Ctx, uint8* Buffer);
 
 	virtual EBUFFER_USAGE GetUsage() const final override { return Usage; }
-	virtual uint GetSizeInBytes() const final override { return static_cast<uint>(SizeInBytes); }
+	virtual uint32 GetSizeInBytes() const final override { return static_cast<uint32>(SizeInBytes); }
 
 	void SetDebugName(const std::string& DebugName) override
 	{
@@ -295,17 +295,17 @@ class D3D12TextureBase : public ITextureBase, public D3D12GPUResource
 
 public:
 	
-	D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint InWidth, uint InHeight, uint InDepth, uint InCount, EFORMAT InFormat, ETEXTURE_USAGE InUsage);
+	D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth, uint32 InHeight, uint32 InDepth, uint32 InCount, EFORMAT InFormat, ETEXTURE_USAGE InUsage);
 
-	void UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void* Pointer, const uint Width, const uint Height, const uint Depth, const uint StepSize);
+	void UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void* Pointer, const uint32 Width, const uint32 Height, const uint32 Depth, const uint32 StepSize);
 
-	virtual uint GetWidth() const final override { return Width; }
-	virtual uint GetHeight() const final override { return Height; }
-	virtual uint GetDepth() const final override { return Depth; }
-	virtual uint GetArraySize() const final override { return ArrayCount; }
+	virtual uint32 GetWidth() const final override { return Width; }
+	virtual uint32 GetHeight() const final override { return Height; }
+	virtual uint32 GetDepth() const final override { return Depth; }
+	virtual uint32 GetArraySize() const final override { return ArrayCount; }
 	virtual ETEXTURE_USAGE GetUsage() const final override { return Usage; }
 	virtual EFORMAT GetFormat() const final override { return Format; }
-	virtual uint GetMipCount() const final override { return MipCount; }
+	virtual uint32 GetMipCount() const final override { return MipCount; }
 
 	void SetDebugName(const std::string& DebugName) override
 	{
@@ -322,11 +322,11 @@ public:
 		return Resource.Location;
 	}
 	
-	uint Width;
-	uint Height;
-	uint Depth;
-	uint ArrayCount;
-	uint MipCount;
+	uint32 Width;
+	uint32 Height;
+	uint32 Depth;
+	uint32 ArrayCount;
+	uint32 MipCount;
 	EFORMAT Format;
 	ETEXTURE_USAGE Usage;
 };

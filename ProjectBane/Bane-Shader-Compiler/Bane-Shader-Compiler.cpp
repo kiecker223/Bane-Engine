@@ -11,6 +11,7 @@
 #include "ShaderDeclarations.h"
 #include <Windows.h>
 #include <JSON/JsonCPP.h>
+#include "PE/PEImage.h"
 
 
 enum ShaderCompilationType
@@ -26,7 +27,7 @@ static std::string ShaderName;
 // Note: there is a HIGH HIGH probability I will be putting this in Platform/Systems/File as it would be a extremely useful function on all platforms and asset packages,
 // for now my laziness is profound and I will just keep it here
 
-void WriteBufferToFile(const std::string& FileName, const byte* Data, uint DataLen)
+void WriteBufferToFile(const std::string& FileName, const byte* Data, uint32 DataLen)
 {
 	EnsureFileDirectoryExists(FileName);
 	HANDLE File = CreateFile(FileName.c_str(), FILE_WRITE_ACCESS, FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS, 0, nullptr);
@@ -98,7 +99,7 @@ typedef struct FULL_PIPELINE_DESCRIPTOR {
 	bool bIndependentBlendEnable;
 	GFX_RENDER_TARGET_DESC RtvDescs[8];
 	GFX_DEPTH_STENCIL_DESC DepthStencilState;
-	uint NumRenderTargets;
+	uint32 NumRenderTargets;
 } FULL_PIPELINE_DESCRIPTOR;
 
 static bool HasGeometryShader(const FULL_PIPELINE_DESCRIPTOR& Desc)
@@ -120,7 +121,7 @@ static FULL_PIPELINE_DESCRIPTOR CreateDefaultDescriptor()
 	Result.bEnableAlphaToCoverage = false;
 	Result.bIndependentBlendEnable = false;
 	Result.NumRenderTargets = 1;
-	for (uint i = 0; i < 8; i++)
+	for (uint32 i = 0; i < 8; i++)
 	{
 		Result.RtvDescs[i] = CreateDefaultGFXRenderTargetDesc();
 	}
@@ -272,7 +273,7 @@ static STRUCT_INFO GetStructInfo(std::string StructDeclaration)
 		}
 
 		VARIABLE_INFO VarInfo;
-		uint i = 0;
+		uint32 i = 0;
 		for (i = 0; Member[i] == ' ' || Member[i] == '\n'; i++) {}
 		for (; Member[i] != ' ' && Member[i] != '\n'; i++)
 		{
@@ -878,7 +879,7 @@ static std::string ParseToEndOfScope(const std::string& InStr, size_t StartParse
 {
 	std::string Result;
 	size_t ScopeEndLoc = 0;
-	uint Depth = 1;
+	uint32 Depth = 1;
 	size_t BeginScopeLoc = InStr.find('{', StartParse);
 	size_t CurrentLoc = BeginScopeLoc;
 	for (int i = 0; i < 10000; i++) // Protect from infinite loop condition
@@ -1185,7 +1186,7 @@ OutDesc.ComparisonFunction = ParseComparisonFunction(ComparisonFuncStr);
 
 static void FillDescriptor(const std::string& InDescStr, FULL_PIPELINE_DESCRIPTOR& OutDesc, bool& bUsesCustomDepthStencilState)
 {
-	uint NumRenderTargets = 0;
+	uint32 NumRenderTargets = 0;
 
 	std::string DescStr = InDescStr;
 	RemoveTabs(DescStr);
@@ -1406,7 +1407,7 @@ static bool IsSystemType(const VARIABLE_INFO& InVar)
 {
 	if (InVar.Type == "float" || InVar.Type == "float2" || InVar.Type == "float3" || InVar.Type == "float4" ||
 		InVar.Type == "int" || InVar.Type == "int2" || InVar.Type == "int3" || InVar.Type == "int4" ||
-		InVar.Type == "uint" || InVar.Type == "uint2" || InVar.Type == "uint3" || InVar.Type == "uint4" ||
+		InVar.Type == "uint32" || InVar.Type == "uint322" || InVar.Type == "uint323" || InVar.Type == "uint324" ||
 		InVar.Type == "float2x2" || InVar.Type == "float2x3" || InVar.Type == "float2x4" ||
 		InVar.Type == "float3x2" || InVar.Type == "float3x3" || InVar.Type == "float3x4" ||
 		InVar.Type == "float4x2" || InVar.Type == "float4x3" || InVar.Type == "float4x4" ||
@@ -1764,7 +1765,7 @@ FULL_PIPELINE_DESCRIPTOR ParseGraphicsShader(const std::string& InFile, const st
 		}
 	}
 
-	PipelineDesc.NumRenderTargets = static_cast<uint>(NumRenderTargets);
+	PipelineDesc.NumRenderTargets = static_cast<uint32>(NumRenderTargets);
 
 	return PipelineDesc;
 }
@@ -1870,7 +1871,7 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 
 		struct ShaderHeader
 		{
-			uint PSStart, HSStart, GSStart;
+			uint32 PSStart, HSStart, GSStart;
 		} Header = { };
 
 		{
@@ -1907,7 +1908,7 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 			P += FullDesc.VS.ByteCode.size();
 			memcpy(P, "\n$~$ EndVertexShader $~$\n$~$ PixelShader $~$\n", strlen("\n$~$ EndVertexShader $~$\n$~$ PixelShader $~$\n"));
 			P += strlen("\n$~$ EndVertexShader $~$\n$~$ PixelShader $~$\n");
-			Header.PSStart = static_cast<uint>(P - Buff);
+			Header.PSStart = static_cast<uint32>(P - Buff);
 			memcpy(P, FullDesc.PS.ByteCode.data(), FullDesc.PS.ByteCode.size());
 			P += FullDesc.PS.ByteCode.size();
 			memcpy(P, "\n$~$ EndPixelShader $~$\n", strlen("\n$~$ EndPixelShader $~$\n"));
@@ -1916,7 +1917,7 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 			{
 				memcpy(P, "$~$ HullShader $~$\n", strlen("$~$ HullShader $~$\n"));
 				P += strlen("$~$ HullShader $~$\n");
-				Header.HSStart = static_cast<uint>(P - Buff);
+				Header.HSStart = static_cast<uint32>(P - Buff);
 				memcpy(P, FullDesc.HS.ByteCode.data(), FullDesc.HS.ByteCode.size());
 				P += FullDesc.HS.ByteCode.size();
 				memcpy(P, "\n$~$ EndHullShader $~$\n", strlen("\n$~$ EndHullShader $~$\n"));
@@ -1926,7 +1927,7 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 			{
 				memcpy(P, "$~$ GeometryShader $~$\n", strlen("$~$ GeometryShader $~$\n"));
 				P += strlen("$~$ GeometryShader $~$\n");
-				Header.GSStart = static_cast<uint>(P - Buff);
+				Header.GSStart = static_cast<uint32>(P - Buff);
 				memcpy(P, FullDesc.GS.ByteCode.data(), FullDesc.GS.ByteCode.size());
 				P += FullDesc.GS.ByteCode.size();
 				memcpy(P, "\n$~$ EndGeometryShader $~$\n", strlen("\n$~$ EndGeometryShader $~$\n"));
@@ -1934,7 +1935,7 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 			}
 			memcpy(Buff, &Header, sizeof(Header));
 		}
-		WriteBufferToFile(DstCompiledFile, Buff, static_cast<uint>(BuffSize));
+		WriteBufferToFile(DstCompiledFile, Buff, static_cast<uint32>(BuffSize));
 	}
 	{
 		json InputLayout = json::object();
@@ -1955,7 +1956,7 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 		RasterDesc["MultisampleLevel"]			= (MultiSamplingLevelToString(FullDesc.RasterDesc.MultisampleLevel));
 
 		json RtvDescs = json::array();
-		for (uint i = 0; i < FullDesc.NumRenderTargets; i++)
+		for (uint32 i = 0; i < FullDesc.NumRenderTargets; i++)
 		{
 			GFX_RENDER_TARGET_DESC Input = FullDesc.RtvDescs[i];
 			json Obj;
@@ -2024,7 +2025,7 @@ static int DoCompileCompute(const std::string& SourceFile, const std::string& Se
 	PipelineDescriptor["IsGraphics"]		= false;
 	PipelineDescriptor["ShaderReference"]	= DstCompiledFile;
 	RootObject[SourceFile] = PipelineDescriptor;
-	WriteBufferToFile(DstCompiledFile, Pipeline.CS.ByteCode.data(), static_cast<uint>(Pipeline.CS.ByteCode.size()));
+	WriteBufferToFile(DstCompiledFile, Pipeline.CS.ByteCode.data(), static_cast<uint32>(Pipeline.CS.ByteCode.size()));
 	return 0;
 }
 
@@ -2041,6 +2042,11 @@ std::string GetFileExtension(const std::string& FileName)
 
 int main(int argc, char** argv)
 {
+
+
+	//std::shared_ptr<PEImage> image = PEImage::create("F:\\Bane-Engine\\ProjectBane\\External\\dlls\\DevIL.dll");
+
+
 	//UNUSED(argc);
 	BANE_CHECK(argc == 4);
 	Init();

@@ -188,7 +188,7 @@ typedef struct GFX_DEPTH_STENCIL_OP_DESC {
 typedef struct GFX_DEPTH_STENCIL_DESC {
 	EFORMAT Format;
 	bool bDepthEnable;
-	uint DepthWriteMask;
+	uint32 DepthWriteMask;
 	ECOMPARISON_FUNCTION DepthFunction;
 	bool bStencilEnable;
 	GFX_DEPTH_STENCIL_OP_DESC FrontFace;
@@ -249,7 +249,7 @@ typedef enum EINPUT_ITEM_FORMAT {
 	INPUT_ITEM_FORMAT_INT4
 } EINPUT_ITEM_FORMAT;
 
-inline uint TranslateItemFormatSize(EINPUT_ITEM_FORMAT Format)
+inline uint32 TranslateItemFormatSize(EINPUT_ITEM_FORMAT Format)
 {
 	switch (Format)
 	{
@@ -278,9 +278,9 @@ typedef struct GFX_INPUT_LAYOUT_DESC {
 	std::vector<GFX_INPUT_ITEM_DESC> InputItems;
 } GFX_INPUT_LAYOUT_DESC;
 
-inline uint GetLayoutDescSize(const GFX_INPUT_LAYOUT_DESC& InDesc)
+inline uint32 GetLayoutDescSize(const GFX_INPUT_LAYOUT_DESC& InDesc)
 {
-	uint Result = 0;
+	uint32 Result = 0;
 	for (auto Iter : InDesc.InputItems)
 	{
 		Result += TranslateItemFormatSize(Iter.ItemFormat);
@@ -297,7 +297,7 @@ public:
 
 };
 
-inline uint GetLayoutStride(IInputLayout* Layout)
+inline uint32 GetLayoutStride(IInputLayout* Layout)
 {
 	return GetLayoutDescSize(Layout->GetDesc());
 }
@@ -327,7 +327,7 @@ typedef struct GFX_PIPELINE_STATE_DESC {
 	bool bIndependentBlendEnable;
 	GFX_RENDER_TARGET_DESC RtvDescs[8];
 	IDepthStencilState* DepthStencilState;
-	uint NumRenderTargets;
+	uint32 NumRenderTargets;
 
 
 	GFX_PIPELINE_STATE_DESC()
@@ -348,7 +348,7 @@ typedef struct GFX_PIPELINE_STATE_DESC {
 		bEnableAlphaToCoverage = false;
 		bIndependentBlendEnable = false;
 		NumRenderTargets = 1;
-		for (uint i = 0; i < 8; i++)
+		for (uint32 i = 0; i < 8; i++)
 		{
 			RtvDescs[i] = CreateDefaultGFXRenderTargetDesc();
 		}
@@ -374,7 +374,7 @@ public:
 
 	virtual ~IPipelineState() { }
 
-	virtual uint8* GetSerialized(uint& OutNumBytes) const = 0;
+	virtual uint8* GetSerialized(uint32& OutNumBytes) const = 0;
 };
 
 class IGraphicsPipelineState : public IPipelineState

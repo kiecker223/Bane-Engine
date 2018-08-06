@@ -9,7 +9,7 @@
 
 typedef struct D3D12_DESCRIPTOR_PARAMETER {
 	D3D12_DESCRIPTOR_RANGE_TYPE Type;
-	uint						Slot;
+	uint32						Slot;
 } D3D12_DESCRIPTOR_PARAMETER;
 
 typedef enum ED3D12_SHADER_PARAMETER_TYPE {
@@ -25,7 +25,7 @@ typedef struct D3D12_SHADER_PARAMETER {
 	~D3D12_SHADER_PARAMETER() { }
 
 	ED3D12_SHADER_PARAMETER_TYPE Type;
-	uint ShaderRegister;
+	uint32 ShaderRegister;
 
 } D3D12_SHADER_PARAMETER;
 
@@ -46,7 +46,7 @@ public:
 	inline void AddParameter(const D3D12_SHADER_PARAMETER& Parameter)
 	{
 		ShaderParams.push_back(Parameter);
-		RootParamIndexes[(uint)Parameter.Type].push_back(NumParameters);
+		RootParamIndexes[(uint32)Parameter.Type].push_back(NumParameters);
 		NumParameters++;
 		switch (Parameter.Type)
 		{
@@ -67,12 +67,12 @@ public:
 		StaticSamplers.push_back(SamplerDesc);
 	}
 	
-	uint NumConstantBuffers;
-	uint NumShaderResourceViews;
-	uint NumUnorderedAccessViews;
+	uint32 NumConstantBuffers;
+	uint32 NumShaderResourceViews;
+	uint32 NumUnorderedAccessViews;
 	std::vector<D3D12_SHADER_PARAMETER> ShaderParams;
-	std::vector<uint> RootParamIndexes[D3D12_SHADER_PARAMETER_NUM_TYPES];
-	uint NumParameters;
+	std::vector<uint32> RootParamIndexes[D3D12_SHADER_PARAMETER_NUM_TYPES];
+	uint32 NumParameters;
 	std::vector<D3D12_STATIC_SAMPLER_DESC> StaticSamplers;
 };
 
@@ -92,7 +92,7 @@ inline bool operator == (const D3D12ShaderSignatureParameterList& Left, const D3
 	}
 	if (Left.ShaderParams.size() == Right.ShaderParams.size())
 	{
-		for (uint i = 0; i < Left.ShaderParams.size(); i++)
+		for (uint32 i = 0; i < Left.ShaderParams.size(); i++)
 		{
 			if (Left.ShaderParams[i] != Right.ShaderParams[i])
 			{
@@ -106,7 +106,7 @@ inline bool operator == (const D3D12ShaderSignatureParameterList& Left, const D3
 	}
 	if (Left.StaticSamplers.size() == Right.StaticSamplers.size())
 	{
-		for (uint i = 0; i < Left.StaticSamplers.size(); i++)
+		for (uint32 i = 0; i < Left.StaticSamplers.size(); i++)
 		{
 			if (Left.StaticSamplers[i] != Right.StaticSamplers[i])
 			{
@@ -129,12 +129,12 @@ public:
 
 	D3D12ShaderItemData() : NumCBVs(0), NumSRVs(0), NumUAVs(0), NumSMPs(0) { }
 	D3D12ShaderItemData(const PIPELINE_STATE_RESOURCE_COUNTS& Counts) :
-		NumCBVs(static_cast<uint>(Counts.NumConstantBuffers)),
-		NumSRVs(static_cast<uint>(Counts.NumShaderResourceViews)),
-		NumUAVs(static_cast<uint>(Counts.NumUnorderedAccessViews)),
-		NumSMPs(static_cast<uint>(Counts.NumSamplers))
+		NumCBVs(static_cast<uint32>(Counts.NumConstantBuffers)),
+		NumSRVs(static_cast<uint32>(Counts.NumShaderResourceViews)),
+		NumUAVs(static_cast<uint32>(Counts.NumUnorderedAccessViews)),
+		NumSMPs(static_cast<uint32>(Counts.NumSamplers))
 	{ }
-	D3D12ShaderItemData(uint InNumCBVs, uint InNumSRVs, uint InNumUAVs, uint InNumSMPs) : NumCBVs(InNumCBVs), NumSRVs(InNumSRVs), NumUAVs(InNumUAVs), NumSMPs(InNumSMPs) { }
+	D3D12ShaderItemData(uint32 InNumCBVs, uint32 InNumSRVs, uint32 InNumUAVs, uint32 InNumSMPs) : NumCBVs(InNumCBVs), NumSRVs(InNumSRVs), NumUAVs(InNumUAVs), NumSMPs(InNumSMPs) { }
 
 	inline ESHADER_PARAMETER_TYPE GetLargestParameterType() const
 	{
@@ -153,7 +153,7 @@ public:
 		return SHADER_PARAMETER_TYPE_CBV; // Here its safe to assume that they are all equal
 	}
 
-	inline uint GetLargestParameterSize() const
+	inline uint32 GetLargestParameterSize() const
 	{
 		ESHADER_PARAMETER_TYPE LargestParameterType = GetLargestParameterType();
 		switch (LargestParameterType)
@@ -178,9 +178,9 @@ public:
 		return ToResourceCounts();
 	}
 
-	inline uint TotalParameterCount() const
+	inline uint32 TotalParameterCount() const
 	{
-		uint Result = 0;
+		uint32 Result = 0;
 		Result += NumCBVs;
 		Result += NumSRVs;
 		Result += NumUAVs;
@@ -195,10 +195,10 @@ public:
 		return Result;
 	}
 
-	uint NumCBVs;
-	uint NumSRVs;
-	uint NumUAVs;
-	uint NumSMPs;
+	uint32 NumCBVs;
+	uint32 NumSRVs;
+	uint32 NumUAVs;
+	uint32 NumSMPs;
 };
 
 
@@ -216,22 +216,22 @@ public:
 		}
 	}
 
-	inline uint GetCBVIndex(uint Register) const
+	inline uint32 GetCBVIndex(uint32 Register) const
 	{
 		return Register;
 	}
 
-	inline uint GetSRVTableIndex() const
+	inline uint32 GetSRVTableIndex() const
 	{
 		return ShaderData.NumCBVs;
 	}
 
-	inline uint GetSamplerTableIndex() const
+	inline uint32 GetSamplerTableIndex() const
 	{
 		return GetSRVTableIndex() + 1;
 	}
 
-	inline uint GetUAVTableIndex() const
+	inline uint32 GetUAVTableIndex() const
 	{
 		BANE_CHECK(HasUAVs());
 		return GetSamplerTableIndex() + 1;

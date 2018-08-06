@@ -29,7 +29,7 @@ void Material::SetSpecularTexture(const std::string& FileName)
 	SetTexture(GetTextureCache()->LoadTexture(FileName), nullptr, 2, 0);
 }
 
-void Material::SetTexture(ITextureBase* Texture, ISamplerState* Sampler, uint TextureRegister, uint SamplerRegister)
+void Material::SetTexture(ITextureBase* Texture, ISamplerState* Sampler, uint32 TextureRegister, uint32 SamplerRegister)
 {
 	IRuntimeGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
 	if (Sampler == nullptr)
@@ -41,17 +41,17 @@ void Material::SetTexture(ITextureBase* Texture, ISamplerState* Sampler, uint Te
 	Device->CreateSamplerView(m_Table, Sampler, SamplerRegister);
 }
 
-void Material::SetTexture(ITextureBase* Texture, uint TextureRegister)
+void Material::SetTexture(ITextureBase* Texture, uint32 TextureRegister)
 {
 	SetTexture(Texture, nullptr, TextureRegister, 0);
 }
 
-void Material::SetTexture(const std::string& Texture, uint Register)
+void Material::SetTexture(const std::string& Texture, uint32 Register)
 {
 	SetTexture(GetTextureCache()->LoadTexture(Texture), Register);
 }
 
-void Material::SetConstantBuffer(IConstantBuffer* ConstantBuffer, uint Register)
+void Material::SetConstantBuffer(IConstantBuffer* ConstantBuffer, uint32 Register)
 {
 	GetApiRuntime()->GetGraphicsDevice()->CreateShaderResourceView(m_Table, ConstantBuffer, Register);
 }

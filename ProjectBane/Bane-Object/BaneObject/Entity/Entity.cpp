@@ -8,7 +8,7 @@
 Component* Entity::GetComponentByHash(uint64 Hash)
 {
 	int IndexToUse = -1;
-	for (uint i = 0; i < m_Components.size(); i++)
+	for (uint32 i = 0; i < m_Components.size(); i++)
 	{
 		if (m_Components[i] == Hash)
 		{
@@ -46,7 +46,7 @@ void Entity::AddChild(EntityIdentifier Child)
 	m_Children.push_back(Child);
 }
 
-void Entity::RemoveChild(uint ChildIndex)
+void Entity::RemoveChild(uint32 ChildIndex)
 {
 	m_Children.erase(m_Children.begin() + ChildIndex);
 }

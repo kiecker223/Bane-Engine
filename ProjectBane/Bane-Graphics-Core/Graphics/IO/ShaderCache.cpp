@@ -344,10 +344,10 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 		
 		bool bIsGraphics = PipelineJson["IsGraphics"].get<bool>();
 
-		Counts.NumConstantBuffers = static_cast<uint8>(PipelineJson["NumConstantBuffers"].get<uint>());
-		Counts.NumSamplers = static_cast<uint8>(PipelineJson["NumSamplers"].get<uint>());
-		Counts.NumShaderResourceViews = static_cast<uint8>(PipelineJson["NumShaderResourceViews"].get<uint>());
-		Counts.NumUnorderedAccessViews = static_cast<uint8>(PipelineJson["NumUnorderedAccessViews"].get<uint>());
+		Counts.NumConstantBuffers = static_cast<uint8>(PipelineJson["NumConstantBuffers"].get<uint32>());
+		Counts.NumSamplers = static_cast<uint8>(PipelineJson["NumSamplers"].get<uint32>());
+		Counts.NumShaderResourceViews = static_cast<uint8>(PipelineJson["NumShaderResourceViews"].get<uint32>());
+		Counts.NumUnorderedAccessViews = static_cast<uint8>(PipelineJson["NumUnorderedAccessViews"].get<uint32>());
 
 		if (bIsGraphics)
 		{
@@ -379,9 +379,9 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 				CreatedDesc.MultisampleLevel			= ParseMultisampleLevel(JsonRasterDesc["MultisampleLevel"].get<std::string>());
 				Desc.RasterDesc = CreatedDesc;
 			}
-			Desc.NumRenderTargets = PipelineJson["NumRenderTargets"].get<uint>();
+			Desc.NumRenderTargets = PipelineJson["NumRenderTargets"].get<uint32>();
 			json RtvDescs = PipelineJson["RtvDescs"];
-			for (uint i = 0; i < Desc.NumRenderTargets; i++)
+			for (uint32 i = 0; i < Desc.NumRenderTargets; i++)
 			{
 				json RtvDesc = RtvDescs[i];
 				GFX_RENDER_TARGET_DESC Rtv = { };
@@ -403,7 +403,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 				json JsonDepthStencilState			= PipelineJson["DepthStencilState"];
 				DepthStencilState.Format			= ParseFormat(JsonDepthStencilState["Format"].get<std::string>());
 				DepthStencilState.bDepthEnable		= JsonDepthStencilState["bDepthEnable"].get<bool>();
-				DepthStencilState.DepthWriteMask	= JsonDepthStencilState["DepthWriteMask"].get<uint>();
+				DepthStencilState.DepthWriteMask	= JsonDepthStencilState["DepthWriteMask"].get<uint32>();
 				DepthStencilState.DepthFunction		= ParseComparisonFunction(JsonDepthStencilState["DepthFunction"].get<std::string>());
 				DepthStencilState.bStencilEnable	= JsonDepthStencilState["bStencilEnable"].get<bool>();
 				
@@ -427,7 +427,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 
 			struct ShaderHeader
 			{
-				uint PSStart, HSStart, GSStart;
+				uint32 PSStart, HSStart, GSStart;
 			};
 			ShaderHeader* pHeader;
 			size_t BufferSize = GetFileSize(PipelineJson["ShaderReference"].get<std::string>());
@@ -487,7 +487,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 		{
 			COMPUTE_PIPELINE_STATE_DESC Desc;
 			Desc.Counts = Counts;
-			uint NumBytes = 0;
+			uint32 NumBytes = 0;
 			uint8* FileBinary = ReadFileBinary(PipelineJson["ShaderReference"].get<std::string>(), NumBytes);
 			std::vector<uint8> ByteCode(NumBytes);
 			memcpy(ByteCode.data(), FileBinary, NumBytes);

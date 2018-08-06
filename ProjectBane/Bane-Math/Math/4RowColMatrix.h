@@ -10,8 +10,8 @@ struct int4x4
 	using TT3 = int3x3;
 	using TT2 = int2x2;
 	using RowType = int4;
-	static const uint NumRows = 4;
-	static const uint NumCols = 4;
+	static const uint32 NumRows = 4;
+	static const uint32 NumCols = 4;
 
 	union
 	{
@@ -65,12 +65,12 @@ struct int4x4
 		v[3] = r4;
 	}
 
-	inline constexpr RowType& operator[](uint Index)
+	inline constexpr RowType& operator[](uint32 Index)
 	{
 		return v[Index];
 	}
 
-	inline RowType operator[](uint Index) const
+	inline RowType operator[](uint32 Index) const
 	{
 		return v[Index];
 	}
@@ -144,7 +144,7 @@ struct int4x4
 
 	inline TT& operator *= (T Rhs)
 	{
-		for (uint i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			v[i] *= Rhs;
 		}
@@ -154,7 +154,7 @@ struct int4x4
 	inline TT operator * (T Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			Result[i] = v[i] * Rhs;
 		}
@@ -181,15 +181,15 @@ struct int4x4
 #pragma endregion
 };
 
-struct uint4x4
+struct uint324x4
 {
-	using T = uint;
-	using TT = uint4x4;
-	using TT3 = uint3x3;
-	using TT2 = uint2x2;
-	using RowType = uint4;
-	static const uint NumRows = 4;
-	static const uint NumCols = 4;
+	using T = uint32;
+	using TT = uint324x4;
+	using TT3 = uint323x3;
+	using TT2 = uint322x2;
+	using RowType = uint324;
+	static const uint32 NumRows = 4;
+	static const uint32 NumCols = 4;
 
 	union
 	{
@@ -197,7 +197,7 @@ struct uint4x4
 		RowType v[4];
 	};
 
-	uint4x4()
+	uint324x4()
 	{
 		v[0] = RowType();
 		v[1] = RowType();
@@ -205,7 +205,7 @@ struct uint4x4
 		v[3] = RowType();
 	}
 
-	uint4x4(T IdentityVal)
+	uint324x4(T IdentityVal)
 	{
 		for (int i = 0; i < NumRows; i++)
 		{
@@ -217,17 +217,17 @@ struct uint4x4
 		p[3][3] = IdentityVal;
 	}
 
-	uint4x4(const uint4x4& Rhs)
+	uint324x4(const uint324x4& Rhs)
 	{
 		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
 	}
 
-	uint4x4(const T* Values)
+	uint324x4(const T* Values)
 	{
 		memcpy(p, Values, sizeof(p));
 	}
 
-	uint4x4(T p00, T p01, T p02, T p03, T p10, T p11, T p12, T p13, T p20, T p21, T p22, T p23, T p30, T p31, T p32, T p33)
+	uint324x4(T p00, T p01, T p02, T p03, T p10, T p11, T p12, T p13, T p20, T p21, T p22, T p23, T p30, T p31, T p32, T p33)
 	{
 		v[0] = RowType(p00, p01, p02, p03);
 		v[1] = RowType(p10, p11, p12, p13);
@@ -235,7 +235,7 @@ struct uint4x4
 		v[3] = RowType(p30, p31, p32, p33);
 	}
 
-	uint4x4(RowType r1, RowType r2, RowType r3, RowType r4)
+	uint324x4(RowType r1, RowType r2, RowType r3, RowType r4)
 	{
 		v[0] = r1;
 		v[1] = r2;
@@ -243,12 +243,12 @@ struct uint4x4
 		v[3] = r4;
 	}
 
-	inline constexpr RowType& operator[](uint Index)
+	inline constexpr RowType& operator[](uint32 Index)
 	{
 		return v[Index];
 	}
 
-	inline RowType operator[](uint Index) const
+	inline RowType operator[](uint32 Index) const
 	{
 		return v[Index];
 	}
@@ -322,7 +322,7 @@ struct uint4x4
 
 	inline TT& operator *= (T Rhs)
 	{
-		for (uint i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			v[i] *= Rhs;
 		}
@@ -332,7 +332,7 @@ struct uint4x4
 	inline TT operator * (T Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			Result[i] = v[i] * Rhs;
 		}
@@ -366,8 +366,8 @@ struct float4x4
 	using TT3 = float3x3;
 	using TT2 = float2x2;
 	using RowType = float4;
-	static const uint NumRows = 4;
-	static const uint NumCols = 4;
+	static const uint32 NumRows = 4;
+	static const uint32 NumCols = 4;
 
 	union
 	{
@@ -421,12 +421,12 @@ struct float4x4
 		v[3] = r4;
 	}
 
-	inline constexpr RowType& operator[](uint Index)
+	inline constexpr RowType& operator[](uint32 Index)
 	{
 		return v[Index];
 	}
 
-	inline RowType operator[](uint Index) const
+	inline RowType operator[](uint32 Index) const
 	{
 		return v[Index];
 	}
@@ -500,7 +500,7 @@ struct float4x4
 
 	inline TT& operator *= (float Rhs)
 	{
-		for (uint i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			v[i] *= Rhs;
 		}
@@ -510,7 +510,7 @@ struct float4x4
 	inline TT operator * (float Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			Result[i] = v[i] * Rhs;
 		}

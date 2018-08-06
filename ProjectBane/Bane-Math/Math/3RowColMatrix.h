@@ -9,8 +9,8 @@ struct int3x3
 	using TT2 = int2x2;
 	using T = int;
 	using RowType = int3;
-	static const uint NumRows = 3;
-	static const uint NumCols = 3;
+	static const uint32 NumRows = 3;
+	static const uint32 NumCols = 3;
 
 	union
 	{
@@ -60,12 +60,12 @@ struct int3x3
 		v[2] = r3;
 	}
 
-	inline constexpr RowType& operator[](const uint Index)
+	inline constexpr RowType& operator[](const uint32 Index)
 	{
 		return v[Index];
 	}
 
-	inline const RowType operator[](const uint Index) const
+	inline const RowType operator[](const uint32 Index) const
 	{
 		return v[Index];
 	}
@@ -125,7 +125,7 @@ struct int3x3
 
 	inline TT& operator *= (T Rhs)
 	{
-		for (uint i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			v[i] *= Rhs;
 		}
@@ -135,7 +135,7 @@ struct int3x3
 	inline TT operator * (T Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			Result[i] = v[i] * Rhs;
 		}
@@ -153,14 +153,14 @@ struct int3x3
 #pragma endregion
 };
 
-struct uint3x3
+struct uint323x3
 {
-	using TT = uint3x3;
-	using TT2 = uint2x2;
-	using T = uint;
-	using RowType = uint3;
-	static const uint NumRows = 3;
-	static const uint NumCols = 3;
+	using TT = uint323x3;
+	using TT2 = uint322x2;
+	using T = uint32;
+	using RowType = uint323;
+	static const uint32 NumRows = 3;
+	static const uint32 NumCols = 3;
 
 	union
 	{
@@ -168,14 +168,14 @@ struct uint3x3
 		RowType v[3];
 	};
 
-	uint3x3()
+	uint323x3()
 	{
 		v[0] = RowType();
 		v[1] = RowType();
 		v[2] = RowType();
 	}
 
-	uint3x3(T IdentityVal)
+	uint323x3(T IdentityVal)
 	{
 		for (int i = 0; i < NumRows; i++)
 		{
@@ -186,36 +186,36 @@ struct uint3x3
 		p[2][2] = IdentityVal;
 	}
 
-	uint3x3(const uint3x3& Rhs)
+	uint323x3(const uint323x3& Rhs)
 	{
 		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
 	}
 
-	uint3x3(const T* Values)
+	uint323x3(const T* Values)
 	{
 		memcpy(p, Values, sizeof(p));
 	}
 
-	uint3x3(T p00, T p01, T p02, T p10, T p11, T p12, T p20, T p21, T p22)
+	uint323x3(T p00, T p01, T p02, T p10, T p11, T p12, T p20, T p21, T p22)
 	{
 		v[0] = RowType(p00, p01, p02);
 		v[1] = RowType(p10, p11, p12);
 		v[2] = RowType(p20, p21, p22);
 	}
 
-	uint3x3(RowType r1, RowType r2, RowType r3)
+	uint323x3(RowType r1, RowType r2, RowType r3)
 	{
 		v[0] = r1;
 		v[1] = r2;
 		v[2] = r3;
 	}
 
-	inline constexpr RowType& operator[](const uint Index)
+	inline constexpr RowType& operator[](const uint32 Index)
 	{
 		return v[Index];
 	}
 
-	inline const RowType operator[](const uint Index) const
+	inline const RowType operator[](const uint32 Index) const
 	{
 		return v[Index];
 	}
@@ -276,7 +276,7 @@ struct uint3x3
 
 	inline TT& operator *= (T Rhs)
 	{
-		for (uint i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			v[i] *= Rhs;
 		}
@@ -286,7 +286,7 @@ struct uint3x3
 	inline TT operator * (T Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			Result[i] = v[i] * Rhs;
 		}
@@ -310,8 +310,8 @@ struct float3x3
 	using TT2 = float2x2;
 	using T = float;
 	using RowType = float3;
-	static const uint NumRows = 3;
-	static const uint NumCols = 3;
+	static const uint32 NumRows = 3;
+	static const uint32 NumCols = 3;
 
 	union
 	{
@@ -361,12 +361,12 @@ struct float3x3
 		v[2] = r3;
 	}
 
-	inline constexpr RowType& operator[](const uint Index)
+	inline constexpr RowType& operator[](const uint32 Index)
 	{
 		return v[Index];
 	}
 
-	inline const RowType operator[](const uint Index) const
+	inline const RowType operator[](const uint32 Index) const
 	{
 		return v[Index];
 	}
@@ -426,7 +426,7 @@ struct float3x3
 
 	inline TT& operator *= (float Rhs)
 	{
-		for (uint i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			v[i] *= Rhs;
 		}
@@ -436,7 +436,7 @@ struct float3x3
 	inline TT operator * (float Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			Result[i] = v[i] * Rhs;
 		}

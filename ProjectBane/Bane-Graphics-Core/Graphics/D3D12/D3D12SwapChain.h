@@ -21,7 +21,7 @@ public:
 
 	bool Initialize(IDXGIFactory2* Factory, IDXGIAdapter* Adapter, ID3D12CommandQueue* MainQueue, const Window* RenderingWindow);
 
-	virtual void SetSwapInterval(uint SyncInterval) override final;
+	virtual void SetSwapInterval(uint32 SyncInterval) override final;
 
 	virtual void Present() override final;
 
@@ -32,7 +32,7 @@ public:
 	IDXGISwapChain4* SwapChain;
 	IDXGIAdapter* Adapter;
 
-	uint SyncRate;
+	uint32 SyncRate;
 
 };
 

@@ -18,8 +18,8 @@ void DefferedRenderer::Initialize(const Window* pWindow)
 	m_DrawCommits.reserve(100);
 	
 	m_Device = GetApiRuntime()->GetGraphicsDevice();
-	uint Height = pWindow->GetHeight();
-	uint Width =  pWindow->GetWidth();
+	uint32 Height = pWindow->GetHeight();
+	uint32 Width =  pWindow->GetWidth();
 
 	m_AlbedoBuffer		= m_Device->CreateTexture2D(Width, Height, FORMAT_R8G8B8A8_UNORM, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
 	m_NormalBuffer		= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
@@ -54,7 +54,7 @@ void DefferedRenderer::Initialize(const Window* pWindow)
 			{ { -1.0f,  1.0f,  0.1f },{ 0.0f, 0.0f } }
 		};
 
-		uint indices[6] = {
+		uint32 indices[6] = {
 			0, 3, 2,
 			2, 1, 0
 		};
@@ -84,7 +84,7 @@ void DefferedRenderer::Render()
 	GatherSceneData(ctx);
 	ctx->BeginPass(m_DefferedPass);
 
-	for (uint i = 0; i < m_DrawCommits.size(); i++)
+	for (uint32 i = 0; i < m_DrawCommits.size(); i++)
 	{
 		auto& Commit = m_DrawCommits[i];
 		for (auto& DrawMesh : Commit.Meshes)

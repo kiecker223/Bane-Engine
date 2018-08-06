@@ -4,7 +4,7 @@
 #include <dxgiformat.h>
 
 
-inline uint GetDXGIFormatSize(DXGI_FORMAT Format)
+inline uint32 GetDXGIFormatSize(DXGI_FORMAT Format)
 {
 	switch (Format)
 	{

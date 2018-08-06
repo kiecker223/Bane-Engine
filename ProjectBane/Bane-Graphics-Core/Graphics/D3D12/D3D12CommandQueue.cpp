@@ -5,7 +5,7 @@ void D3D12CommandQueue::CompleteExecution()
 {
 	BANE_CHECK(IsFinished());
 
-	for (uint i = 0; i < m_ExecutionQueue.GetNumElements(); i++)
+	for (uint32 i = 0; i < m_ExecutionQueue.GetNumElements(); i++)
 	{
 		if (!m_ExecutionQueue[i]->UploadResourcesToDestroy.empty())
 		{

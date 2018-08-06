@@ -47,10 +47,10 @@ public:
 	virtual void RecompilePipelineState(IGraphicsPipelineState* pState, const GFX_PIPELINE_STATE_DESC* NewDesc) = 0;
 	virtual void RecompilePipelineState(IComputePipelineState* pState, const COMPUTE_PIPELINE_STATE_DESC* NewDesc) = 0;
 
-	virtual IVertexBuffer* CreateVertexBuffer(uint ByteCount, uint8* Buffer) = 0;
-	virtual IIndexBuffer* CreateIndexBuffer(uint ByteCount, uint8* Buffer) = 0;
-	virtual IConstantBuffer* CreateConstantBuffer(uint ByteCount) = 0;
-	virtual IBuffer* CreateStagingBuffer(uint ByteCount) = 0;
+	virtual IVertexBuffer* CreateVertexBuffer(uint32 ByteCount, uint8* Buffer) = 0;
+	virtual IIndexBuffer* CreateIndexBuffer(uint32 ByteCount, uint8* Buffer) = 0;
+	virtual IConstantBuffer* CreateConstantBuffer(uint32 ByteCount) = 0;
+	virtual IBuffer* CreateStagingBuffer(uint32 ByteCount) = 0;
 	
 	template<typename T>
 	inline IConstantBuffer* CreateConstBuffer()
@@ -63,10 +63,10 @@ public:
 		return GetBackBufferTargetPass()->GetDepthStencil();
 	}
 	
-	virtual ITexture2D* CreateTexture2D(uint Width, uint Height, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
-	virtual ITexture2DArray* CreateTexture2DArray(uint Width, uint Height, uint Count, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
-	virtual ITexture3D* CreateTexture3D(uint Width, uint Height, uint Depth, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
-	virtual ITextureCube* CreateTextureCube(uint CubeSize, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
+	virtual ITexture2D* CreateTexture2D(uint32 Width, uint32 Height, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
+	virtual ITexture2DArray* CreateTexture2DArray(uint32 Width, uint32 Height, uint32 Count, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
+	virtual ITexture3D* CreateTexture3D(uint32 Width, uint32 Height, uint32 Depth, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
+	virtual ITextureCube* CreateTextureCube(uint32 CubeSize, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
 
 	// @Warn! This is an extremely slow function in directx 12!!
 	virtual ISamplerState* CreateSamplerState(const SAMPLER_DESC& Desc) = 0;
@@ -74,7 +74,7 @@ public:
 	
 	virtual IInputLayout* CreateInputLayout(const GFX_INPUT_LAYOUT_DESC& Desc) = 0;
 
-	virtual IRenderPassInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor) = 0;
+	virtual IRenderPassInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint32 NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor) = 0;
 	
 	inline IRenderPassInfo* CreateRenderPass(const IRenderTargetView* RenderTarget, const IDepthStencilView* DepthStencil, const float4& ClearColor)
 	{
@@ -87,11 +87,11 @@ public:
 	virtual IRenderPassInfo* GetBackBufferTargetPass() = 0; // This just returns the screen target
 	virtual IRenderTargetView* GetBackBuffer() = 0;
 
-	virtual void CreateShaderResourceView(IShaderResourceTable* DestTable, IBuffer* Buffer, uint Slot, uint64 Offset = 0) = 0;
-	virtual void CreateUnorderedAccessView(IShaderResourceTable* DestTable, IBuffer* Buffer, uint Slot, uint Subresource = 0) = 0;
-	virtual void CreateShaderResourceView(IShaderResourceTable* DestTable, ITextureBase* Texture, uint Slot, uint Subresource = 0) = 0;
-	virtual void CreateUnorderedAccessView(IShaderResourceTable* DestTable, ITextureBase* Texture, uint Slot, uint Subresource = 0) = 0;
-	virtual void CreateSamplerView(IShaderResourceTable* DestTable, ISamplerState* SamplerState, uint Slot) = 0;
+	virtual void CreateShaderResourceView(IShaderResourceTable* DestTable, IBuffer* Buffer, uint32 Slot, uint64 Offset = 0) = 0;
+	virtual void CreateUnorderedAccessView(IShaderResourceTable* DestTable, IBuffer* Buffer, uint32 Slot, uint32 Subresource = 0) = 0;
+	virtual void CreateShaderResourceView(IShaderResourceTable* DestTable, ITextureBase* Texture, uint32 Slot, uint32 Subresource = 0) = 0;
+	virtual void CreateUnorderedAccessView(IShaderResourceTable* DestTable, ITextureBase* Texture, uint32 Slot, uint32 Subresource = 0) = 0;
+	virtual void CreateSamplerView(IShaderResourceTable* DestTable, ISamplerState* SamplerState, uint32 Slot) = 0;
 	
 	virtual IShaderResourceTable* CreateShaderTable(IGraphicsPipelineState* Pipeline) = 0;
 	virtual IShaderResourceTable* CreateShaderTable(IComputePipelineState* Pipeline) = 0;

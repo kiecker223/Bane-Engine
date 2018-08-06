@@ -9,10 +9,10 @@ class IShaderResourceTable
 public:
 	virtual ~IShaderResourceTable() { }
 	
-	virtual uint GetNumConstantBuffers() const = 0;
-	virtual uint GetNumTextures() const = 0;
-	virtual uint GetNumSamplers() const = 0;
-	virtual uint GetNumUnorderedAccessViews() const = 0;
+	virtual uint32 GetNumConstantBuffers() const = 0;
+	virtual uint32 GetNumTextures() const = 0;
+	virtual uint32 GetNumSamplers() const = 0;
+	virtual uint32 GetNumUnorderedAccessViews() const = 0;
 
 };
 
@@ -34,8 +34,8 @@ public:
 	virtual ~IRenderPassInfo() { }
 
 	virtual IRenderTargetView** GetRenderTargets() const = 0;
-	virtual uint GetNumRenderTargets() const = 0;
-	virtual IRenderTargetView* GetRenderTarget(uint Index) const = 0;
+	virtual uint32 GetNumRenderTargets() const = 0;
+	virtual IRenderTargetView* GetRenderTarget(uint32 Index) const = 0;
 	virtual IDepthStencilView* GetDepthStencil() const = 0;
 	virtual float4 GetClearColor() const = 0;
 };

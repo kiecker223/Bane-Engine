@@ -1,6 +1,6 @@
 #include "D3D12DescriptorAllocator.h"
 
-void D3D12DescriptorAllocator::Initialize(ID3D12Device1* Device, D3D12_DESCRIPTOR_HEAP_TYPE HeapType, uint Size, bool bShaderVisible)
+void D3D12DescriptorAllocator::Initialize(ID3D12Device1* Device, D3D12_DESCRIPTOR_HEAP_TYPE HeapType, uint32 Size, bool bShaderVisible)
 {
 	D3D12_DESCRIPTOR_HEAP_DESC HeapDesc = { };
 	HeapDesc.Type = HeapType;
@@ -32,7 +32,7 @@ D3D12DescriptorAllocation D3D12DescriptorAllocator::AllocateDescriptor()
 	return Current;
 }
 
-D3D12DescriptorAllocation D3D12DescriptorAllocator::AllocateMultiple(uint Count)
+D3D12DescriptorAllocation D3D12DescriptorAllocator::AllocateMultiple(uint32 Count)
 {
 	D3D12DescriptorAllocation Current = m_Current;
 	m_Current.Increment(Count);

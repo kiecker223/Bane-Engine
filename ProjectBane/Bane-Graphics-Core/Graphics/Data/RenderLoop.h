@@ -34,7 +34,7 @@ typedef struct DRAWABLE_MESH {
 	IIndexBuffer* IndexBuffer;
 	IGraphicsPipelineState* Pipeline;
 	IShaderResourceTable* Table;
-	uint IndexCount;
+	uint32 IndexCount;
 } DRAWABLE_MESH;
 
 typedef struct RENDER_LOOP_DRAW_COMMIT {
@@ -65,9 +65,9 @@ class RenderLoop
 			DIRECTIONAL_LIGHT_DATA	DirectionalLights[MAX_LIGHTS];
 			POINT_LIGHT_DATA		PointLights[MAX_LIGHTS];
 			SPOTLIGHT_DATA			SpotLights[MAX_LIGHTS];
-			uint					NumDirectionalLights;
-			uint					NumPointLights;
-			uint					NumSpotLights;
+			uint32					NumDirectionalLights;
+			uint32					NumPointLights;
+			uint32					NumSpotLights;
 		} LightData;
 		struct
 		{

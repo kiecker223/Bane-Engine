@@ -43,15 +43,15 @@ public:
 	virtual void RecompilePipelineState(IGraphicsPipelineState* pState, const GFX_PIPELINE_STATE_DESC* NewDesc) final override;
 	virtual void RecompilePipelineState(IComputePipelineState* pState, const COMPUTE_PIPELINE_STATE_DESC* NewDesc) final override;
 
-	virtual IVertexBuffer* CreateVertexBuffer(uint ByteCount, uint8* Buffer) final override;
-	virtual IIndexBuffer* CreateIndexBuffer(uint ByteCount, uint8* Buffer) final override;
-	virtual IConstantBuffer* CreateConstantBuffer(uint ByteCount) final override;
-	virtual IBuffer* CreateStagingBuffer(uint ByteCount) final override;
+	virtual IVertexBuffer* CreateVertexBuffer(uint32 ByteCount, uint8* Buffer) final override;
+	virtual IIndexBuffer* CreateIndexBuffer(uint32 ByteCount, uint8* Buffer) final override;
+	virtual IConstantBuffer* CreateConstantBuffer(uint32 ByteCount) final override;
+	virtual IBuffer* CreateStagingBuffer(uint32 ByteCount) final override;
 
-	virtual ITexture2D* CreateTexture2D(uint Width, uint Height, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
-	virtual ITexture2DArray* CreateTexture2DArray(uint Width, uint Height, uint Count, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
-	virtual ITexture3D* CreateTexture3D(uint Width, uint Height, uint Depth, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
-	virtual ITextureCube* CreateTextureCube(uint CubeSize, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
+	virtual ITexture2D* CreateTexture2D(uint32 Width, uint32 Height, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
+	virtual ITexture2DArray* CreateTexture2DArray(uint32 Width, uint32 Height, uint32 Count, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
+	virtual ITexture3D* CreateTexture3D(uint32 Width, uint32 Height, uint32 Depth, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
+	virtual ITextureCube* CreateTextureCube(uint32 CubeSize, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
 
 	virtual void GenerateMips(ITextureBase* InTexture) final override;
 
@@ -59,15 +59,15 @@ public:
 	virtual ISamplerState* GetDefaultSamplerState() final override;
 	virtual IInputLayout* CreateInputLayout(const GFX_INPUT_LAYOUT_DESC& Desc) final override;
 
-	virtual IRenderPassInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor) final override;
+	virtual IRenderPassInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint32 NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor) final override;
 	virtual IRenderPassInfo* GetBackBufferTargetPass() final override;
 	virtual IRenderTargetView* GetBackBuffer() final override;
 
-	virtual void CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* Buffer, uint Slot, uint64 Offset = 0) final override;
-	virtual void CreateUnorderedAccessView(IShaderResourceTable* InDestTable, IBuffer* Buffer, uint Slot, uint Subresource = 0) final override;
-	virtual void CreateShaderResourceView(IShaderResourceTable* InDestTable, ITextureBase* Texture, uint Slot, uint Subresource = 0) final override;
-	virtual void CreateUnorderedAccessView(IShaderResourceTable* InDestTable, ITextureBase* Texture, uint Slot, uint Subresource = 0) final override;
-	virtual void CreateSamplerView(IShaderResourceTable* DestTable, ISamplerState* SamplerState, uint Slot) final override;
+	virtual void CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* Buffer, uint32 Slot, uint64 Offset = 0) final override;
+	virtual void CreateUnorderedAccessView(IShaderResourceTable* InDestTable, IBuffer* Buffer, uint32 Slot, uint32 Subresource = 0) final override;
+	virtual void CreateShaderResourceView(IShaderResourceTable* InDestTable, ITextureBase* Texture, uint32 Slot, uint32 Subresource = 0) final override;
+	virtual void CreateUnorderedAccessView(IShaderResourceTable* InDestTable, ITextureBase* Texture, uint32 Slot, uint32 Subresource = 0) final override;
+	virtual void CreateSamplerView(IShaderResourceTable* DestTable, ISamplerState* SamplerState, uint32 Slot) final override;
 	virtual IShaderResourceTable* CreateShaderTable(IGraphicsPipelineState* pState) final override;
 	virtual IShaderResourceTable* CreateShaderTable(IComputePipelineState* pState) final override;
 
@@ -99,7 +99,7 @@ public:
 
 	void EnsureAllUploadsOccured();
 
-	static uint GetCurrentFrameIndex()
+	static uint32 GetCurrentFrameIndex()
 	{
 		return GCurrentFrameIndex;
 	}
@@ -111,7 +111,7 @@ public:
 
 private:
 
-	static uint GCurrentFrameIndex;
+	static uint32 GCurrentFrameIndex;
 
 	StackQueue<D3D12CommandList*, 16> m_AvailableCLs[COMMAND_CONTEXT_TYPE_NUM_TYPES];
 	std::vector<D3D12GraphicsCommandContext*> m_AvailableContexts;

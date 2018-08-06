@@ -44,16 +44,16 @@ public:
 
 	virtual void CopyBuffers(IBuffer* Src, IBuffer* Dst) = 0;
 	virtual void CopyBufferToTexture(IBuffer* Src, ITextureBase* Dst) = 0;
-	virtual void CopyTextures(ITextureBase* Src, uint SrcSubresource, ITextureBase* Dst, uint DstSubresource) = 0;
+	virtual void CopyTextures(ITextureBase* Src, uint32 SrcSubresource, ITextureBase* Dst, uint32 DstSubresource) = 0;
 	virtual void CopyTextures(ITextureBase* Src, int3 SrcLocation, ITextureBase* Dst, int3 DstLocation, int3 DstSize) = 0;
 
-	virtual void* Map(IGPUResource* ResourceToMap, uint Subresource = 0) = 0;
-	virtual void Unmap(IGPUResource* ResourceToMap, uint Subresource = 0) = 0;
+	virtual void* Map(IGPUResource* ResourceToMap, uint32 Subresource = 0) = 0;
+	virtual void Unmap(IGPUResource* ResourceToMap, uint32 Subresource = 0) = 0;
 
-	virtual void Draw(uint VertexCount, uint StartVertexLocation) = 0;
-	virtual void DrawIndexed(uint IndexCount, uint StartIndexLocation, int BaseVertexLocation) = 0;
-	virtual void DrawInstanced(uint VertexCount, uint InstanceCount, uint StartVertexLocation) = 0;
-	virtual void DrawIndexedInstanced(uint IndexCount, uint StartIndexLocation, int BaseVertexLocation, uint InstanceCount) = 0;
+	virtual void Draw(uint32 VertexCount, uint32 StartVertexLocation) = 0;
+	virtual void DrawIndexed(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation) = 0;
+	virtual void DrawInstanced(uint32 VertexCount, uint32 InstanceCount, uint32 StartVertexLocation) = 0;
+	virtual void DrawIndexedInstanced(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation, uint32 InstanceCount) = 0;
 };
 
 class IComputeCommandContext
@@ -66,11 +66,11 @@ public:
 
 	virtual void StallToEnd() = 0;
 	virtual void Flush() = 0;
-	virtual void* Map(IGPUResource* ResourceToMap, uint Subresource = 0) = 0;
-	virtual void Unmap(IGPUResource* ResourceToUnmap, uint Subresource = 0) = 0;
+	virtual void* Map(IGPUResource* ResourceToMap, uint32 Subresource = 0) = 0;
+	virtual void Unmap(IGPUResource* ResourceToUnmap, uint32 Subresource = 0) = 0;
 
 	virtual void SetComputePipelineState(const IComputePipelineState* PipelineState) = 0;
 	virtual void SetComputeResourceTable(const IShaderResourceTable* InTable) = 0;
 
-	virtual void Dispatch(uint ThreadX, uint ThreadY, uint ThreadZ) = 0;
+	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) = 0;
 };

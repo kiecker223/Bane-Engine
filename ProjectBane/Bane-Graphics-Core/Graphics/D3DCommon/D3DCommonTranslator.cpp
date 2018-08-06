@@ -20,7 +20,7 @@ void InitializeD3DCommonTranslator()
 
 D3D_PRIMITIVE_TOPOLOGY D3D_TranslatePrimitiveTopology(EPOLYGON_TYPE InType)
 {
-	return D3DPrimitiveTopologies[(uint)InType];
+	return D3DPrimitiveTopologies[(uint32)InType];
 }
 
 DXGI_FORMAT D3D_TranslateFormat(EFORMAT Format)

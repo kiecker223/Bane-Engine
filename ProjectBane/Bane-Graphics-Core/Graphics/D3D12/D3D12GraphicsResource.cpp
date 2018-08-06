@@ -121,7 +121,7 @@ void D3D12Buffer::UploadDataToGPU(D3D12GraphicsCommandContext* Ctx, uint8* Buffe
 }
 
 
-D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint InWidth, uint InHeight, uint InDepth, uint InCount, EFORMAT InFormat, ETEXTURE_USAGE InUsage) :
+D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth, uint32 InHeight, uint32 InDepth, uint32 InCount, EFORMAT InFormat, ETEXTURE_USAGE InUsage) :
 	Width(InWidth),
 	Height(InHeight),
 	Depth(InDepth),
@@ -139,7 +139,7 @@ D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint InWidth, 
 
 	if (IsShaderResource())
 	{
-		MipCount = static_cast<uint>(std::floor(std::log2(max(InWidth, InHeight))) + 1);
+		MipCount = static_cast<uint32>(std::floor(std::log2(max(InWidth, InHeight))) + 1);
 	}
 	if (IsUnorderedAccess())
 	{
@@ -163,7 +163,7 @@ D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint InWidth, 
 
 	if (InDepth == 1)
 	{
-		uint DepthOrArraySize;
+		uint32 DepthOrArraySize;
 		if (InCount > 1)
 		{
 			DepthOrArraySize = InCount;
@@ -201,18 +201,18 @@ D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint InWidth, 
 }
 
 
-void D3D12TextureBase::UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void* Pointer, const uint InWidth, const uint InHeight, const uint InDepth, const uint StepSize)
+void D3D12TextureBase::UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void* Pointer, const uint32 InWidth, const uint32 InHeight, const uint32 InDepth, const uint32 StepSize)
 {
 	// Special treatment of arrays
 	if (ArrayCount > 1)
 	{
 		const uint8* Ptr = (const uint8*)Pointer;
 		auto Desc = Resource.D3DResource->GetDesc();
-		const uint Size = (InWidth * InHeight * InDepth) * StepSize;
-		const uint ImgSize = (InWidth * InHeight * StepSize);
+		const uint32 Size = (InWidth * InHeight * InDepth) * StepSize;
+		const uint32 ImgSize = (InWidth * InHeight * StepSize);
 		D3D12Buffer* UploadBuffer = new D3D12Buffer(Resource.GetParentDevice(), Size, BUFFER_USAGE_UPLOAD);
 		memcpy(UploadBuffer->MappedPointer, Pointer, Size);
-		for (uint i = 0; i < ArrayCount; i++)
+		for (uint32 i = 0; i < ArrayCount; i++)
 		{
 			
 			D3D12_SUBRESOURCE_DATA ResourceData = { };

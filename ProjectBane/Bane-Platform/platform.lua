@@ -9,6 +9,7 @@ project "BanePlatform"
         }
     
 	files {
+		"Platform/System/File/**.cpp",
 		"**.h"
 	}
  

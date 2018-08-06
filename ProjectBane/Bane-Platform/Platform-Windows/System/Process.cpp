@@ -35,7 +35,7 @@ IProcessHandle* StartProcess(const std::string& ProcessName, const std::vector<s
 	GetCurrentDirectoryA(256, CWD);
 	std::string ArgumentsStr = CWD;
 	ArgumentsStr += ProcessName + ' ';
-	for (uint i = 0; i < ProcessArguments.size(); i++)
+	for (uint32 i = 0; i < ProcessArguments.size(); i++)
 	{
 		ArgumentsStr += ProcessArguments[i] + ' ';
 	}

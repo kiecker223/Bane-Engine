@@ -40,18 +40,18 @@ class D3D12RenderPassInfo : public IRenderPassInfo
 {
 public:
 
-	D3D12RenderPassInfo(const IRenderTargetView** Rtvs, uint InNumRenderTargets, const IDepthStencilView* Dsv, const float4& InClearColor) :
+	D3D12RenderPassInfo(const IRenderTargetView** Rtvs, uint32 InNumRenderTargets, const IDepthStencilView* Dsv, const float4& InClearColor) :
 		NumRenderTargets(InNumRenderTargets),
 		DepthStencil((D3D12DepthStencilView*)Dsv),
 		ClearColor(InClearColor)
 	{
-		for (uint i = 0; i < NumRenderTargets; i++)
+		for (uint32 i = 0; i < NumRenderTargets; i++)
 		{
 			RenderTargets[i] = (D3D12RenderTargetView*)Rtvs[i];
 		}
 	}
 
-	IRenderTargetView* GetRenderTarget(uint Index) const final override
+	IRenderTargetView* GetRenderTarget(uint32 Index) const final override
 	{
 		return RenderTargets[Index];
 	}
@@ -61,7 +61,7 @@ public:
 		return (IRenderTargetView**)&RenderTargets[0];
 	}
 
-	uint GetNumRenderTargets() const final override
+	uint32 GetNumRenderTargets() const final override
 	{
 		return NumRenderTargets;
 	}
@@ -86,7 +86,7 @@ public:
 		{
 			D3D12_CPU_DESCRIPTOR_HANDLE Rtvs[16] = { { } };
 			D3D12_CPU_DESCRIPTOR_HANDLE* Dsv = nullptr;
-			for (uint i = 0; i < NumRenderTargets; i++)
+			for (uint32 i = 0; i < NumRenderTargets; i++)
 			{
 				Rtvs[i] = RenderTargets[i]->GetCurrentFrame().CpuHandle;
 			}
@@ -101,7 +101,7 @@ public:
 
 	inline void Clear(ID3D12GraphicsCommandList* CommandList)
 	{
-		for (uint i = 0; i < NumRenderTargets; i++)
+		for (uint32 i = 0; i < NumRenderTargets; i++)
 		{
 			D3D12_CPU_DESCRIPTOR_HANDLE Rtv = RenderTargets[i]->GetCurrentFrame().CpuHandle;
 			CommandList->ClearRenderTargetView(Rtv, &ClearColor.x, 0, nullptr);
@@ -114,7 +114,7 @@ public:
 
 	inline void TransitionResourcesToWrite(D3D12GraphicsCommandContext* Context)
 	{
-		for (uint i = 0; i < NumRenderTargets; i++)
+		for (uint32 i = 0; i < NumRenderTargets; i++)
 		{
 			RenderTargets[i]->GetCurrentFrame().Texture->TransitionResource(Context, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		}
@@ -126,7 +126,7 @@ public:
 
 	inline void TransitionResourcesToRead(D3D12GraphicsCommandContext* Context)
 	{
-		for (uint i = 0; i < NumRenderTargets; i++)
+		for (uint32 i = 0; i < NumRenderTargets; i++)
 		{
 			RenderTargets[i]->GetCurrentFrame().Texture->TransitionResource(Context, D3D12_RESOURCE_STATE_PRESENT);
 		}
@@ -139,7 +139,7 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE* GetDSV();
 
 	D3D12RenderTargetView* RenderTargets[16];
-	uint NumRenderTargets;
+	uint32 NumRenderTargets;
 	D3D12DepthStencilView* DepthStencil;
 	const float4 ClearColor;
 };
@@ -153,25 +153,25 @@ class D3D12ShaderResourceTable : public IShaderResourceTable
 {
 public:
 
-	D3D12ShaderResourceTable(uint InNumCBVs, uint InNumSRVs, uint InNumSMPs, uint InNumUAVs, D3D12DescriptorAllocation InSRVAllocation, D3D12DescriptorAllocation InSMPAllocation, D3D12DescriptorAllocation InUAVAllocation);
+	D3D12ShaderResourceTable(uint32 InNumCBVs, uint32 InNumSRVs, uint32 InNumSMPs, uint32 InNumUAVs, D3D12DescriptorAllocation InSRVAllocation, D3D12DescriptorAllocation InSMPAllocation, D3D12DescriptorAllocation InUAVAllocation);
 
-	virtual uint GetNumConstantBuffers() const final override { return NumCBVs; }
-	virtual uint GetNumTextures() const final override { return NumSRVs; }
-	virtual uint GetNumSamplers() const final override { return NumSMPs; }
-	virtual uint GetNumUnorderedAccessViews() const final override { return NumUAVs; }
+	virtual uint32 GetNumConstantBuffers() const final override { return NumCBVs; }
+	virtual uint32 GetNumTextures() const final override { return NumSRVs; }
+	virtual uint32 GetNumSamplers() const final override { return NumSMPs; }
+	virtual uint32 GetNumUnorderedAccessViews() const final override { return NumUAVs; }
 
-	inline uint GetSRVDescriptorTableIndex() const
+	inline uint32 GetSRVDescriptorTableIndex() const
 	{
 		return AssociatedSignature.GetSRVTableIndex();
 	}
 
-	inline uint GetUAVDescriptorTableIndex() const
+	inline uint32 GetUAVDescriptorTableIndex() const
 	{
 		BANE_CHECK(HasUAVs());
 		return AssociatedSignature.GetUAVTableIndex();
 	}
 
-	inline uint GetSamplerTableIndex() const
+	inline uint32 GetSamplerTableIndex() const
 	{
 		return AssociatedSignature.GetSamplerTableIndex();
 	}
@@ -200,5 +200,5 @@ public:
 	D3D12DescriptorAllocation BaseUAVAllocation;
 
 	D3D12ShaderSignature AssociatedSignature; // The actual d3d12 shader signature handle.
-	uint NumCBVs, NumSMPs, NumSRVs, NumUAVs;
+	uint32 NumCBVs, NumSMPs, NumSRVs, NumUAVs;
 };

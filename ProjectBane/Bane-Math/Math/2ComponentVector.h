@@ -6,7 +6,7 @@ struct int2
 {
 	using T = int;
 	using TT = int2;
-	static const uint ColCount = 2;
+	static const uint32 ColCount = 2;
 	
 	union
 	{
@@ -18,7 +18,7 @@ struct int2
 	
 	int2()
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = T(0);
 		}
@@ -32,25 +32,25 @@ struct int2
 
 	int2(const int2& SelfType)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = SelfType[i];
 		}
 	}
 	inline TT& operator = (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = Rhs.p[i];
 		}
 		return *this;
 	}
-	inline T& operator[] (const uint Index)
+	inline T& operator[] (const uint32 Index)
 	{
 		return p[Index];
 	}
 
-	inline const T operator[] (const uint Index) const
+	inline const T operator[] (const uint32 Index) const
 	{
 		return p[Index];
 	}
@@ -61,7 +61,7 @@ struct int2
 
 	inline TT& operator *= (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] *= Rhs.p[i];
 		}
@@ -70,7 +70,7 @@ struct int2
 
 	inline TT& operator /= (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] /= Rhs.p[i];
 		}
@@ -79,7 +79,7 @@ struct int2
 
 	inline TT& operator += (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] += Rhs.p[i];
 		}
@@ -88,7 +88,7 @@ struct int2
 
 	inline TT& operator -= (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] -= Rhs.p[i];
 		}
@@ -97,7 +97,7 @@ struct int2
 
 	inline TT& operator *= (const T& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] *= Rhs;
 		}
@@ -106,7 +106,7 @@ struct int2
 
 	inline TT& operator /= (const T& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] /= Rhs;
 		}
@@ -115,7 +115,7 @@ struct int2
 
 	inline TT& operator += (const T& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] += Rhs;
 		}
@@ -124,7 +124,7 @@ struct int2
 
 	inline TT& operator -= (const T& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] -= Rhs;
 		}
@@ -143,7 +143,7 @@ struct int2
 	inline TT operator * (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] * Rhs.p[i];
 		}
@@ -153,7 +153,7 @@ struct int2
 	inline TT operator / (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] / Rhs.p[i];
 		}
@@ -163,7 +163,7 @@ struct int2
 	inline TT operator + (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] + Rhs.p[i];
 		}
@@ -173,7 +173,7 @@ struct int2
 	inline TT operator - (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] - Rhs.p[i];
 		}
@@ -183,7 +183,7 @@ struct int2
 	inline TT operator * (const T& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] * Rhs;
 		}
@@ -193,7 +193,7 @@ struct int2
 	inline TT operator / (const T& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] / Rhs;
 		}
@@ -203,7 +203,7 @@ struct int2
 	inline TT operator + (const T& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] + Rhs;
 		}
@@ -213,7 +213,7 @@ struct int2
 	inline TT operator - (const T& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] - Rhs;
 		}
@@ -225,11 +225,11 @@ struct int2
 #pragma endregion
 };
 
-struct uint2
+struct uint322
 {
-	using T = uint;
-	using TT = uint2;
-	static const uint ColCount = 2;
+	using T = uint32;
+	using TT = uint322;
+	static const uint32 ColCount = 2;
 	union
 	{
 		struct { T x, y; };
@@ -238,23 +238,23 @@ struct uint2
 		T p[ColCount];
 	};
 
-	uint2()
+	uint322()
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = T(0);
 		}
 	}
 	
-	uint2(T X, T Y) :
+	uint322(T X, T Y) :
 		x(X),
 		y(Y)
 	{
 	}
 
-	uint2(const TT& SelfType)
+	uint322(const TT& SelfType)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = SelfType[i];
 		}
@@ -262,18 +262,18 @@ struct uint2
 
 	inline TT& operator = (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = Rhs.p[i];
 		}
 		return *this;
 	}
-	inline T& operator[] (const uint Index)
+	inline T& operator[] (const uint32 Index)
 	{
 		return p[Index];
 	}
 
-	inline const T operator[] (const uint Index) const
+	inline const T operator[] (const uint32 Index) const
 	{
 		return p[Index];
 	}
@@ -284,7 +284,7 @@ struct uint2
 
 	inline TT& operator *= (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] *= Rhs.p[i];
 		}
@@ -293,7 +293,7 @@ struct uint2
 
 	inline TT& operator /= (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] /= Rhs.p[i];
 		}
@@ -302,7 +302,7 @@ struct uint2
 
 	inline TT& operator += (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] += Rhs.p[i];
 		}
@@ -311,7 +311,7 @@ struct uint2
 
 	inline TT& operator -= (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] -= Rhs.p[i];
 		}
@@ -320,7 +320,7 @@ struct uint2
 
 	inline TT& operator *= (const T& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] *= Rhs;
 		}
@@ -329,7 +329,7 @@ struct uint2
 
 	inline TT& operator /= (const T& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] /= Rhs;
 		}
@@ -338,7 +338,7 @@ struct uint2
 
 	inline TT& operator += (const T& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] += Rhs;
 		}
@@ -347,7 +347,7 @@ struct uint2
 
 	inline TT& operator -= (const T& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] -= Rhs;
 		}
@@ -363,7 +363,7 @@ struct uint2
 	inline TT operator * (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] * Rhs.p[i];
 		}
@@ -373,7 +373,7 @@ struct uint2
 	inline TT operator / (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] / Rhs.p[i];
 		}
@@ -383,7 +383,7 @@ struct uint2
 	inline TT operator + (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] + Rhs.p[i];
 		}
@@ -393,7 +393,7 @@ struct uint2
 	inline TT operator - (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] - Rhs.p[i];
 		}
@@ -403,7 +403,7 @@ struct uint2
 	inline TT operator * (const T& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] * Rhs;
 		}
@@ -413,7 +413,7 @@ struct uint2
 	inline TT operator / (const T& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] / Rhs;
 		}
@@ -423,7 +423,7 @@ struct uint2
 	inline TT operator + (const T& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] + Rhs;
 		}
@@ -433,7 +433,7 @@ struct uint2
 	inline TT operator - (const T& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] - Rhs;
 		}
@@ -449,7 +449,7 @@ struct float2
 {
 	using T = float;
 	using TT = float2;
-	static const uint ColCount = 2;
+	static const uint32 ColCount = 2;
 	
 	union
 	{
@@ -461,7 +461,7 @@ struct float2
 
 	float2()
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = T(0);
 		}
@@ -475,25 +475,25 @@ struct float2
 
 	float2(const TT& SelfType)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = SelfType[i];
 		}
 	}
 	inline TT& operator = (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = Rhs.p[i];
 		}
 		return *this;
 	}
-	inline T& operator[] (const uint Index)
+	inline T& operator[] (const uint32 Index)
 	{
 		return p[Index];
 	}
 
-	inline const T operator[] (const uint Index) const
+	inline const T operator[] (const uint32 Index) const
 	{
 		return p[Index];
 	}
@@ -504,7 +504,7 @@ struct float2
 
 	inline TT& operator *= (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] *= Rhs.p[i];
 		}
@@ -513,7 +513,7 @@ struct float2
 
 	inline TT& operator /= (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] /= Rhs.p[i];
 		}
@@ -522,7 +522,7 @@ struct float2
 
 	inline TT& operator += (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] += Rhs.p[i];
 		}
@@ -531,7 +531,7 @@ struct float2
 
 	inline TT& operator -= (const TT& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] -= Rhs.p[i];
 		}
@@ -540,7 +540,7 @@ struct float2
 
 	inline TT& operator *= (const T& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] *= Rhs;
 		}
@@ -549,7 +549,7 @@ struct float2
 
 	inline TT& operator /= (const T& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] /= Rhs;
 		}
@@ -558,7 +558,7 @@ struct float2
 
 	inline TT& operator += (const T& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] += Rhs;
 		}
@@ -567,7 +567,7 @@ struct float2
 
 	inline TT& operator -= (const T& Rhs)
 	{
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] -= Rhs;
 		}
@@ -586,7 +586,7 @@ struct float2
 	inline TT operator * (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] * Rhs.p[i];
 		}
@@ -596,7 +596,7 @@ struct float2
 	inline TT operator / (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] / Rhs.p[i];
 		}
@@ -606,7 +606,7 @@ struct float2
 	inline TT operator + (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] + Rhs.p[i];
 		}
@@ -616,7 +616,7 @@ struct float2
 	inline TT operator - (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] - Rhs.p[i];
 		}
@@ -626,7 +626,7 @@ struct float2
 	inline TT operator * (const T& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] * Rhs;
 		}
@@ -636,7 +636,7 @@ struct float2
 	inline TT operator / (const T& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] / Rhs;
 		}
@@ -646,7 +646,7 @@ struct float2
 	inline TT operator + (const T& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] + Rhs;
 		}
@@ -656,7 +656,7 @@ struct float2
 	inline TT operator - (const T& Rhs) const
 	{
 		TT Result;
-		for (uint i = 0; i < ColCount; i++)
+		for (uint32 i = 0; i < ColCount; i++)
 		{
 			Result[i] = p[i] - Rhs;
 		}

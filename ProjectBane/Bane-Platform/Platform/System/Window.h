@@ -20,16 +20,16 @@ public:
 	};
 
 	Window();
-	Window(const char* windowName, uint width, uint height, bool isFullscreen = false);
+	Window(const char* windowName, uint32 width, uint32 height, bool isFullscreen = false);
 	~Window();
 
 	WindowHandle* GetHandle() const { return m_windowHandle; }
-	inline uint GetWidth() const { return m_width; }
-	inline uint GetHeight() const { return m_height; }
+	inline uint32 GetWidth() const { return m_width; }
+	inline uint32 GetHeight() const { return m_height; }
 	inline float AspectXY() const { return (float)m_width / (float)m_height; }
 	inline float AspectYX() const { return (float)m_height / (float)m_width; }
 
-	void Open(const char* windowName, uint width, uint height, bool isFullscreen = false);
+	void Open(const char* windowName, uint32 width, uint32 height, bool isFullscreen = false);
 
 	bool QuitRequested();
 
@@ -46,7 +46,7 @@ public:
 private:
 
 	static Window* GMainWindow;
-	uint m_width, m_height;
+	uint32 m_width, m_height;
 	WindowHandle* m_windowHandle;
 };
 

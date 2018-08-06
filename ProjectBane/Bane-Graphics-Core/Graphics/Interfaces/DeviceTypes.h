@@ -16,32 +16,32 @@ typedef enum ETEXTURE_USAGE {
 };
 
 typedef struct CONSTANT_BUFFER_DESC {
-	uint						ByteSize;
+	uint32						ByteSize;
 	ECONSTANT_BUFFER_BIND_FLAG	BindFlag;
 } CONSTANT_BUFFER_DESC;
 
 typedef struct TEXTURE_DESC {
-	uint			Width;
-	uint			Height;
-	uint			Depth;
-	uint			ArraySize;
-	uint			MipCount;
+	uint32			Width;
+	uint32			Height;
+	uint32			Depth;
+	uint32			ArraySize;
+	uint32			MipCount;
 	DXGI_FORMAT		Format;
 	ETEXTURE_USAGE	Usage;
 } TEXTURE_DESC;
 
 
 typedef struct DEPTH_STENCIL_DESC {
-	uint		Width;
-	uint		Height;
+	uint32		Width;
+	uint32		Height;
 	DXGI_FORMAT Format;
 } DEPTH_STENCIL_DESC;
 
 typedef struct SUBRESOURCE_DATA {
 	void* Pointer;
-	uint Depth;
-	uint Width;
-	uint Subresource;
+	uint32 Depth;
+	uint32 Width;
+	uint32 Subresource;
 } SUBRESOURCE_DATA;
 
 
@@ -102,7 +102,7 @@ inline D3D12_RESOURCE_DESC TranslateConstantBufferDesc(const CONSTANT_BUFFER_DES
 inline D3D12_RESOURCE_DESC TranslateTextureDesc(const TEXTURE_DESC& Desc)
 {
 	D3D12_RESOURCE_DIMENSION ResourceDimension = (D3D12_RESOURCE_DIMENSION)0;
-	uint DepthAndArraySize = 1;
+	uint32 DepthAndArraySize = 1;
 
 	if (Desc.ArraySize > 0 && Desc.Depth > 0)
 	{
@@ -149,7 +149,7 @@ inline D3D12_RESOURCE_DESC TranslateTextureDesc(const TEXTURE_DESC& Desc)
 }
 
 
-inline D3D12_RESOURCE_DESC D3D12CreateVertexBufferDesc(uint ByteWidth)
+inline D3D12_RESOURCE_DESC D3D12CreateVertexBufferDesc(uint32 ByteWidth)
 {
 	return {
 		D3D12_RESOURCE_DIMENSION_BUFFER,
@@ -165,7 +165,7 @@ inline D3D12_RESOURCE_DESC D3D12CreateVertexBufferDesc(uint ByteWidth)
 	};
 }
 
-inline D3D12_RESOURCE_DESC D3D12CreateIndexBufferDesc(uint ByteWidth)
+inline D3D12_RESOURCE_DESC D3D12CreateIndexBufferDesc(uint32 ByteWidth)
 {
 	return {
 		D3D12_RESOURCE_DIMENSION_BUFFER,
@@ -174,7 +174,7 @@ inline D3D12_RESOURCE_DESC D3D12CreateIndexBufferDesc(uint ByteWidth)
 		1,
 		1,
 		1,
-		DXGI_FORMAT_R32_UINT,
+		DXGI_FORMAT_R32_uint32,
 		{ 1, 1 },
 		D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
 		D3D12_RESOURCE_FLAG_NONE

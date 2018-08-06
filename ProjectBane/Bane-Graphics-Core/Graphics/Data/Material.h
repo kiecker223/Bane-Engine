@@ -30,10 +30,10 @@ public:
 	void SetNormalTexture(const std::string& FileName);
 	void SetSpecularTexture(const std::string& FileName);
 
-	void SetTexture(ITextureBase* Texture, ISamplerState* Sampler, uint TextureRegister, uint SamplerRegister);
-	void SetTexture(ITextureBase* Texture, uint TextureRegister);
-	void SetTexture(const std::string& Texture, uint Register);
-	void SetConstantBuffer(IConstantBuffer* ConstantBuffer, uint Register);
+	void SetTexture(ITextureBase* Texture, ISamplerState* Sampler, uint32 TextureRegister, uint32 SamplerRegister);
+	void SetTexture(ITextureBase* Texture, uint32 TextureRegister);
+	void SetTexture(const std::string& Texture, uint32 Register);
+	void SetConstantBuffer(IConstantBuffer* ConstantBuffer, uint32 Register);
 
 	void SetMaterialParameters(const MATERIAL_PARAMETERS& Params);
 

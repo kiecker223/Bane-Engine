@@ -30,18 +30,18 @@ void TextureCache::InitCache()
 	Data.Pointer = &ImgData[0];
 	m_DefaultBlack = Device->CreateTexture2D(64, 64, FORMAT_R8G8B8A8_UNORM, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
 
-	for (uint y = 0; y < 64; y++)
+	for (uint32 y = 0; y < 64; y++)
 	{
-		for (uint x = 0; x < 64; x++)
+		for (uint32 x = 0; x < 64; x++)
 		{
 			ImgData[x + (y * 64)] = { 0, 0, 255, 0 };
 		}
 	}
 	m_DefaultBlue = Device->CreateTexture2D(64, 64, FORMAT_R8G8B8A8_UNORM, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
 
-	for (uint y = 0; y < 64; y++)
+	for (uint32 y = 0; y < 64; y++)
 	{
-		for (uint x = 0; x < 64; x++)
+		for (uint32 x = 0; x < 64; x++)
 		{
 			ImgData[x + (y * 64)] = { 128, 128, 255, 0 };
 		}
@@ -68,7 +68,7 @@ ITexture2D* TextureCache::LoadTexture(const std::string& TextureName)
 
 	if (FoundIter == m_Textures.end())
 	{
-		int Width, Height, Step;
+		int32 Width, Height, Step;
 		void* Buffer = InternalLoadImage(TextureName.c_str(), Width, Height, Step);
 		SUBRESOURCE_DATA Data = { };
 		Data.Depth = 1;
@@ -137,7 +137,7 @@ ITextureCube* TextureCache::LoadCubemap(
 		LOADED_IMAGE Images[6];
 		InternalLoadCubemap(&Images[0], NX, NY, NZ, PX, PY, PZ);
 
-		uint Width, Height, Depth;
+		uint32 Width, Height, Depth;
 		SUBRESOURCE_DATA Data = CreateTexData(&Images[0], Width, Height, Depth);
 		Result = GetApiRuntime()->GetGraphicsDevice()->CreateTextureCube(Width, FORMAT_R8G8B8A8_UNORM, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
 		GetApiRuntime()->GetGraphicsDevice()->GenerateMips(Result);
@@ -177,9 +177,9 @@ void TextureCache::InternalLoadCubemap(
 	OutImages[5].Buff = InternalLoadImage(PZ.c_str(), OutImages[5].Width, OutImages[5].Height, OutImages[5].Step, true);
 
 	bool bEqual = true;
-	for (uint i = 0; i < 6; i++)
+	for (uint32 i = 0; i < 6; i++)
 	{
-		for (uint x = 0; x < 6; x++)
+		for (uint32 x = 0; x < 6; x++)
 		{
 			bEqual = (OutImages[i].Width == OutImages[x].Width && OutImages[i].Height == OutImages[x].Height && OutImages[i].Step == OutImages[x].Step);
 		}
@@ -187,17 +187,17 @@ void TextureCache::InternalLoadCubemap(
 	//assert(bEqual);
 }
 
-// static uint GetLocation(uint X, uint Y, uint Z, uint Width, uint Depth)
+// static uint32 GetLocation(uint32 X, uint32 Y, uint32 Z, uint32 Width, uint32 Depth)
 // {
 // 	return (X + ((Y * Width) + (Z * Width * Depth)));
 // }
 
-SUBRESOURCE_DATA TextureCache::CreateTexData(LOADED_IMAGE* InImages, uint& OutWidth, uint& OutHeight, uint& OutDepth)
+SUBRESOURCE_DATA TextureCache::CreateTexData(LOADED_IMAGE* InImages, uint32& OutWidth, uint32& OutHeight, uint32& OutDepth)
 {
 	SUBRESOURCE_DATA Result;
-	uint Width = InImages[0].Width;
-	uint Height = InImages[0].Height;
-	uint Step = InImages[0].Step;
+	uint32 Width = InImages[0].Width;
+	uint32 Height = InImages[0].Height;
+	uint32 Step = InImages[0].Step;
 	OutWidth = Width;
 	OutHeight = Height;
 	OutDepth = 6;
@@ -208,7 +208,7 @@ SUBRESOURCE_DATA TextureCache::CreateTexData(LOADED_IMAGE* InImages, uint& OutWi
 	Result.Step = Step;
 	uint8* Buff = new uint8[(Width * Height * 6) * Step];
 
-	for (uint i = 0; i < 6; i++)
+	for (uint32 i = 0; i < 6; i++)
 	{
 		uint8* Dst = &Buff[(Width * Height * Step) * i];
 		memcpy(Dst, InImages[i].Buff, (Width * Height * Step));
@@ -218,7 +218,7 @@ SUBRESOURCE_DATA TextureCache::CreateTexData(LOADED_IMAGE* InImages, uint& OutWi
 }
 
 
-byte* TextureCache::InternalLoadImage(const char* FileName, int& OutWidth, int& OutHeight, int& OutStep, bool bFlip)
+byte* TextureCache::InternalLoadImage(const char* FileName, int32& OutWidth, int32& OutHeight, int32& OutStep, bool bFlip)
 {
 	uint8* Buffer;
 	ilImage Img;

@@ -62,7 +62,7 @@ inline bool IsWhiteSpace(const std::string& TestStr)
 {
 	bool bWhiteSpace = false;
 	char C;
-	for (uint i = 0; i < TestStr.length(); i++)
+	for (uint32 i = 0; i < TestStr.length(); i++)
 	{
 		C = TestStr[i];
 		if (C == ' ' || C == '\n' || C == '\t')

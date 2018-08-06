@@ -26,7 +26,7 @@ LRESULT CALLBACK WndProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam
 
 class OsWindowsHandle : public Window::WindowHandle {
 public:
-	static Window::WindowHandle* Create(LPCSTR className, const char* name, uint width, uint height, HINSTANCE instance);
+	static Window::WindowHandle* Create(LPCSTR className, const char* name, uint32 width, uint32 height, HINSTANCE instance);
 
 	OsWindowsHandle(HWND);
 	virtual ~OsWindowsHandle();
@@ -57,7 +57,7 @@ void* OsWindowsHandle::GetHandle() {
 	return osHandle;
 }
 
-Window::WindowHandle* OsWindowsHandle::Create(LPCSTR className, const char* name, uint width, uint height, HINSTANCE instance) {
+Window::WindowHandle* OsWindowsHandle::Create(LPCSTR className, const char* name, uint32 width, uint32 height, HINSTANCE instance) {
 
 	auto windows = CreateWindowA(
 		className, name, WS_OVERLAPPEDWINDOW | WS_VISIBLE,
@@ -72,7 +72,7 @@ Window::Window()
 
 }
 
-Window::Window(const char *windowName, uint width, uint height, bool isFullscreen)
+Window::Window(const char *windowName, uint32 width, uint32 height, bool isFullscreen)
 {
 	Open(windowName, width, height, isFullscreen);
 }
@@ -83,7 +83,7 @@ Window::~Window()
 	UnregisterClassA("GAME-WINDOW-CLASS-NAME", GetModuleHandle(nullptr));
 }
 
-void Window::Open(const char* windowName, uint width, uint height, bool isFullscreen)
+void Window::Open(const char* windowName, uint32 width, uint32 height, bool isFullscreen)
 {
 	HINSTANCE instance = GetModuleHandle(nullptr);
 

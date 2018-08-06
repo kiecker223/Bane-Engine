@@ -11,7 +11,7 @@ class ComponentAllocator
 public:
 
 	ComponentAllocator() : PtrBegin(nullptr), PtrCurrent(nullptr), PtrEnd(nullptr) { }
-	ComponentAllocator(uint NumBytes);
+	ComponentAllocator(uint32 NumBytes);
 	~ComponentAllocator();
 
 	inline size_t GetNumBytesAllocated() const
@@ -27,7 +27,7 @@ public:
 
 
 	// Clears and dumps the current memory
-	void Reserve(uint NumBytes);
+	void Reserve(uint32 NumBytes);
 
 	// Dumps the current memory, copys it over
 	void ReserveAndCopy(size_t NumBytes);
@@ -100,7 +100,7 @@ public:
 
 		PtrCurrent = PtrBegin + NumBytesUsed;
 		PtrEnd = PtrBegin + ByteSize;
-		for (uint i = 0; i < AllocatedObjects.size(); i++)
+		for (uint32 i = 0; i < AllocatedObjects.size(); i++)
 		{
 			int64 Diff = ((uint8*)AllocatedObjects[i]) - PrevBegin;
 			AllocatedObjects[i] = (Component*)(PtrBegin + Diff);

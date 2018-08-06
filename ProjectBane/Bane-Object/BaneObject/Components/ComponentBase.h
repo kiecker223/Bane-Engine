@@ -41,7 +41,7 @@ public:
 	virtual void FixedTick() { } // Maybe not do this
 	virtual bool IsRenderComponent() const { return false; }
 
-	virtual uint GetTypeSize() const = 0; // Overridden by IMPLEMENT_COMPONENT(type)
+	virtual uint32 GetTypeSize() const = 0; // Overridden by IMPLEMENT_COMPONENT(type)
 
 private:
 
@@ -68,8 +68,8 @@ constexpr const uint64 BuildClassHash()
 public: \
 static constexpr const char* ClassName = #x; \
 static constexpr const uint64 ClassHash = BuildClassHash<x>(); \
-uint GetTypeSize() const override { return sizeof(x); } \
-static uint StaticTypeSize() { return sizeof(x); } \
+uint32 GetTypeSize() const override { return sizeof(x); } \
+static uint32 StaticTypeSize() { return sizeof(x); } \
 private:
 
 #define IMPLEMENT_BASE_CLASS(x) \

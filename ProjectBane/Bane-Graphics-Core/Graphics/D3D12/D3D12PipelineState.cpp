@@ -33,7 +33,7 @@ void D3D12GraphicsPipelineState::GetDesc(GFX_PIPELINE_STATE_DESC* OutDesc) const
 	*OutDesc = Desc;
 }
 
-uint8* D3D12GraphicsPipelineState::GetSerialized(uint& OutBytes) const 
+uint8* D3D12GraphicsPipelineState::GetSerialized(uint32& OutBytes) const
 {
 	ID3DBlob* WrittenBlob;
 	PipelineState->GetCachedBlob(&WrittenBlob);
@@ -43,7 +43,7 @@ uint8* D3D12GraphicsPipelineState::GetSerialized(uint& OutBytes) const
 	BytesToWrite[WrittenBlob->GetBufferSize()] = '\n';
 	memcpy(&BytesToWrite[1], WrittenBlob->GetBufferPointer(), WrittenBlob->GetBufferSize());
 
-	OutBytes = static_cast<uint>(WrittenBlob->GetBufferSize());
+	OutBytes = static_cast<uint32>(WrittenBlob->GetBufferSize());
 	return BytesToWrite;
 }
 
@@ -97,7 +97,7 @@ void D3D12ComputePipelineState::GetDesc(COMPUTE_PIPELINE_STATE_DESC* OutDesc) co
 	*OutDesc = Desc;
 }
 
-uint8* D3D12ComputePipelineState::GetSerialized(uint& OutBytes) const
+uint8* D3D12ComputePipelineState::GetSerialized(uint32& OutBytes) const
 {
 	UNUSED(OutBytes);
 	return nullptr;

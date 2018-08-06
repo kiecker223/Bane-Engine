@@ -2,7 +2,7 @@
 #include <algorithm>
 
 
-static std::string GenerateNewName(std::string OriginalName, uint Count)
+static std::string GenerateNewName(std::string OriginalName, uint32 Count)
 {
 	return std::string(OriginalName + " (" + std::to_string(Count) + ")");
 }
@@ -25,7 +25,7 @@ Entity* Scene::CreateEntity(const std::string& EntityName)
 	std::string SearchName = EntityName;
 	Entity* pEntity = FindEntity(SearchName);
 	// Slow
-	uint Index = 1;
+	uint32 Index = 1;
 	while (pEntity)
 	{
 		SearchName = GenerateNewName(SearchName, Index);

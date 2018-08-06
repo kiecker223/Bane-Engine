@@ -45,7 +45,7 @@ bool Application::RegisterApplication(Application* App)
 	return true;
 }
 
-void Application::OpenApplicationWindow(const std::string& Name, uint Width, uint Height)
+void Application::OpenApplicationWindow(const std::string& Name, uint32 Width, uint32 Height)
 {
 	if (m_Window)
 	{
@@ -66,10 +66,10 @@ void Application::InitSystems()
 
 	if (!m_Window)
 	{
-		uint ScreenWidth  = GetSystemMetrics(SM_CXSCREEN);
-		uint ScreenHeight = GetSystemMetrics(SM_CYSCREEN);
-		ScreenWidth = uint(ScreenWidth *  (float)0.9);
-		ScreenHeight = uint(ScreenHeight * (float)0.9);
+		uint32 ScreenWidth  = GetSystemMetrics(SM_CXSCREEN);
+		uint32 ScreenHeight = GetSystemMetrics(SM_CYSCREEN);
+		ScreenWidth = uint32(ScreenWidth *  (float)0.9);
+		ScreenHeight = uint32(ScreenHeight * (float)0.9);
 		OpenApplicationWindow("Unnamed window", ScreenWidth, ScreenHeight);
 	}
 

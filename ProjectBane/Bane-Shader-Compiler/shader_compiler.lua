@@ -7,6 +7,7 @@ project "BaneShaderCompiler"
 		"../Bane-Math",
 		"../Bane-Core",
 		"../Bane-Platform",
+		"../Bane-PE-Loader",
 		"../External/include"
 	}
 
@@ -14,6 +15,7 @@ project "BaneShaderCompiler"
 		"BaneCore",
 		"BaneGraphicsCore",
 		"BanePlatform",
+		"BanePELoader",
 		"d3dcompiler"
 	}
 

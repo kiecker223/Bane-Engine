@@ -10,7 +10,7 @@
 inline float length(const float4& InType)
 {
 	float Result = 0.f;
-	for (uint i = 0; i < 4; i++)
+	for (uint32 i = 0; i < 4; i++)
 	{
 		Result += (InType.p[i] * InType.p[i]);
 	}
@@ -21,7 +21,7 @@ inline float length(const float4& InType)
 inline float length(const float3& InType)
 {
 	float Result = 0.f;
-	for (uint i = 0; i < 3; i++)
+	for (uint32 i = 0; i < 3; i++)
 	{
 		Result += (InType.p[i] * InType.p[i]);
 	}
@@ -32,7 +32,7 @@ inline float length(const float3& InType)
 inline float length(const float2& InType)
 {
 	float Result = 0.f;
-	for (uint i = 0; i < 2; i++)
+	for (uint32 i = 0; i < 2; i++)
 	{
 		Result += (InType.p[i] * InType.p[i]);
 	}
@@ -73,7 +73,7 @@ inline float2& normalize(float2& InType)
 inline float dot(const float4& Lhs, const float4& Rhs)
 {
 	float Result = 0;
-	for (uint i = 0; i < 4; i++)
+	for (uint32 i = 0; i < 4; i++)
 	{
 		Result += (Lhs.p[i] * Rhs.p[i]);
 	}
@@ -83,7 +83,7 @@ inline float dot(const float4& Lhs, const float4& Rhs)
 inline float dot(const float3& Lhs, const float3& Rhs)
 {
 	float Result = 0;
-	for (uint i = 0; i < 3; i++)
+	for (uint32 i = 0; i < 3; i++)
 	{
 		Result += (Lhs.p[i] * Rhs.p[i]);
 	}
@@ -93,7 +93,7 @@ inline float dot(const float3& Lhs, const float3& Rhs)
 inline float dot(const float2& Lhs, const float2& Rhs)
 {
 	float Result = 0;
-	for (uint i = 0; i < 2; i++)
+	for (uint32 i = 0; i < 2; i++)
 	{
 		Result += (Lhs.p[i] * Rhs.p[i]);
 	}
@@ -181,9 +181,9 @@ inline matrix matProjection(float Aspect, float FovY, float Near, float Far)
 // T transpose(const T& InMatrix)
 // {
 // 	T Result;
-// 	for (uint y = 0; y < T::NumRows; y++)
+// 	for (uint32 y = 0; y < T::NumRows; y++)
 // 	{
-// 		for (uint x = 0; x < T::NumCols; x++)
+// 		for (uint32 x = 0; x < T::NumCols; x++)
 // 		{
 // 			Result[y][x] = InMatrix[x][y];
 // 		}

@@ -10,7 +10,7 @@ public:
 
 	virtual ~IDeviceSwapChain() { }
 
-	virtual void SetSwapInterval(uint SyncInterval) = 0;
+	virtual void SetSwapInterval(uint32 SyncInterval) = 0;
 
 	virtual void Present() = 0;
 

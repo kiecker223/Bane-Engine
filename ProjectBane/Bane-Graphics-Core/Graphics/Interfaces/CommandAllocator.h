@@ -5,12 +5,12 @@ class CommandAllocator
 {
 public:
 // 
-// 	void* AllocateCommand(uint Size);
+// 	void* AllocateCommand(uint32 Size);
 // 
 // 	template<typename TCmd>
 // 	TCmd* AllocCommand();
 // 
-// 	void Reset(uint NumBytes = 1024);
+// 	void Reset(uint32 NumBytes = 1024);
 
 private:
 
