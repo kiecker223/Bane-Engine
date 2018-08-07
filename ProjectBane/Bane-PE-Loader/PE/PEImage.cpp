@@ -1,5 +1,6 @@
 #include "PEImage.h"
 #include "Win32Helpers.h"
+#include <cstring>
 
 PEImage::PEImage(const std::string& inPath)
 	: path(inPath)
