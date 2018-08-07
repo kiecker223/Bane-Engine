@@ -1,8 +1,9 @@
 #pragma once
 
 // Disable warnings related to padding structures
+#if _MSC_VER
 #pragma warning(disable:4324)
-
+#endif
 #ifdef _DEBUG
 #define BANE_CHECK(x) if (!(x)) {  __debugbreak(); abort(); }
 #else
