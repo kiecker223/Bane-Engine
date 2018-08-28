@@ -8,7 +8,7 @@ class IProcessHandle
 {
 public:
 
-	virtual ~IProcessHandle() { };
+	~IProcessHandle() { };
 
 	template<class T>
 	T* ToNativeHandle() const 

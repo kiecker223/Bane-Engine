@@ -26,6 +26,7 @@ void DefferedRenderer::Initialize(const Window* pWindow)
 	m_PositionBuffer	= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
 	m_ParameterBuffer	= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
 
+	m_MeshDataBuffer = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
 	m_MaterialBuffer = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
 	m_CameraBuffer	 = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
 	m_LightBuffer	 = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
@@ -61,7 +62,7 @@ void DefferedRenderer::Initialize(const Window* pWindow)
 
 		m_OnScreenQuad.VB = m_Device->CreateVertexBuffer(sizeof(vertices), (uint8*)vertices);
 		m_OnScreenQuad.IB = m_Device->CreateIndexBuffer(sizeof(indices), (uint8*)indices);
-		m_OnScreenQuad.Pipeline = GetShaderCache()->LoadGraphicsPipeline("DeferredLighting.gfx");
+		m_OnScreenQuad.Pipeline = GetShaderCache()->LoadGraphicsPipeline("DefferredLighting.gfx");
 		m_OnScreenQuad.Table = m_Device->CreateShaderTable(m_OnScreenQuad.Pipeline);
 		m_OnScreenQuad.PointSampler = m_Device->GetDefaultSamplerState();
 		SAMPLER_DESC SamplerDesc = CreateDefaultSamplerDesc();
@@ -138,7 +139,7 @@ void DefferedRenderer::Shutdown()
 	delete m_CameraBuffer;
 	delete m_LightBuffer;
 	delete m_DefferedPass;
-	delete m_CameraConstants;
+//	delete m_CameraConstants;
 	delete m_AlbedoBuffer;
 	delete m_NormalBuffer;
 	delete m_PositionBuffer;
@@ -183,7 +184,7 @@ void DefferedRenderer::GatherSceneData(IGraphicsCommandContext* ctx)
 		ctx->Unmap(m_CameraBuffer);
 	}
 	{
-		byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_CameraBuffer));
+		byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_MeshDataBuffer));
 		memcpy(Buff,
 			reinterpret_cast<void*>(RenderLoop::GRenderGlobals.MeshData.Buffer),
 			RenderLoop::GRenderGlobals.MeshData.Size * sizeof(MESH_RENDER_DATA)

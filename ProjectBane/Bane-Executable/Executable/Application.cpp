@@ -76,11 +76,14 @@ void Application::InitSystems()
 	ApiRuntime::CreateRuntime();
 	GetApiRuntime()->Initialize(m_Window);
 
-// 	IProcessHandle* Handle = StartProcess("BaneShaderCompiler.exe", { "Dx12", "SrcShaders/", "DstShaders/" });
-// 	Handle->WaitForFinish();
-// 	delete Handle;
+	char str[256];
+	GetCurrentDirectoryA(256, str);
+	UNUSED(str);
 
-	InitShaderCache("DstShaders/ShaderPipelines.json");
+ 	IProcessHandle* Handle = StartProcess("BaneShaderCompiler.exe", { "Dx12", "Shaders/", "CompiledShaders/" });
+ 	Handle->WaitForFinish();
+ 	
+	InitShaderCache("CompiledShaders/ShaderPipelines.json");
 	InitializeTextureCache();
 
 	InitSceneManager();

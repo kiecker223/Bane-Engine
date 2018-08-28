@@ -1,4 +1,5 @@
 #include "BaneObject/Scene/SceneManager.h"
+#include "BaneObject/CoreComponents/MeshRenderingComponent.h"
 #include <iostream>
 
 
@@ -8,6 +9,12 @@ void InitApplication()
 {
 	GetSceneManager()->CreateNewScene("NewScene");
 	Scene* Test = GetSceneManager()->CurrentScene;
+
+	Entity* EntityTest = Test->CreateEntity("Test Entity");
+	auto* TestMesh = EntityTest->AddComponent<MeshRenderingComponent>();
+	//TestMesh->RenderedMesh.LoadFromFile("")
+	UNUSED(TestMesh);
+
 	UNUSED(Test);
 	std::cout << "Application Initialized" << std::endl;
 }

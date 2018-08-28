@@ -16,7 +16,10 @@ std::vector<std::string> GetAllFilesInFolder(const std::string& FolderName) {
 
 void EnsureFileDirectoryExists(const std::string& FileName)
 {
-	std::filesystem::create_directories(FileName);
+	auto EndOfDirectory = FileName.find_last_of("/");
+	std::string Directory = FileName.substr(0, EndOfDirectory);
+	std::cout << Directory << std::endl;
+	std::filesystem::create_directories(Directory);
 }
 
 std::string ReadEntireFile(const std::string& FileName)
@@ -41,8 +44,8 @@ uint8* ReadFileBinary(const std::string& FileName, size_t fileSize)
 }
 
 uintmax_t GetFileSize(const std::string& FileName) {
-	std::filesystem::path pathForSize(FileName);
-	auto filesize = std::filesystem::file_size(pathForSize);
+	std::filesystem::path PathForSize(FileName);
+	auto filesize = std::filesystem::file_size(PathForSize);
 
 	return filesize;
 }

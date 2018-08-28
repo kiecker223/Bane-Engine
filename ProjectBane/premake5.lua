@@ -24,6 +24,7 @@ workspace "ProjectBane"
     platforms { "x64" }
     warnings "Extra"
 
+
     if _OPTIONS["ANDREW"] then
       location "Generated/"
     end

@@ -7,7 +7,7 @@ project "BaneGame"
         "../Bane-Math",
         "../Bane-Object",
         "../Bane-Core",
-        "../Bane-Graphics",
+		"../Bane-Graphics-Core",
         "../External/include"}
 
 --  libdirs {"../External/libs/" }

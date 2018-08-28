@@ -1563,6 +1563,14 @@ FULL_PIPELINE_DESCRIPTOR ParseGraphicsShader(const std::string& InFile, const st
 
 	FULL_PIPELINE_DESCRIPTOR PipelineDesc = CreateDefaultDescriptor();
 
+	auto Find = File.find("CAMERA_CONSTANTS");
+	if (Find != std::string::npos)
+	{
+		File.replace(Find, 16, 1, ' ');
+		std::string CameraConstantsStr = "cbuffer CameraConstants : register(b0)\n{\n\tmatrix Model;\n\tmatrix View;\n\tmatrix Projection;\n\tfloat4 Position;\n}";
+		File.insert(Find, CameraConstantsStr.c_str(), 109);
+	}
+
 	std::string Resources;
 	std::string PipelineDescStr;
 	size_t ResourcesStartLoc;
@@ -2042,10 +2050,7 @@ std::string GetFileExtension(const std::string& FileName)
 
 int main(int argc, char** argv)
 {
-
-
 	//std::shared_ptr<PEImage> image = PEImage::create("F:\\Bane-Engine\\ProjectBane\\External\\dlls\\DevIL.dll");
-
 
 	//UNUSED(argc);
 	BANE_CHECK(argc == 4);

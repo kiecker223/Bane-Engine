@@ -487,7 +487,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 		{
 			COMPUTE_PIPELINE_STATE_DESC Desc;
 			Desc.Counts = Counts;
-			uint32 NumBytes = 0;
+			auto NumBytes = GetFileSize(PipelineJson["ShaderReference"].get<std::string>());
 			uint8* FileBinary = ReadFileBinary(PipelineJson["ShaderReference"].get<std::string>(), NumBytes);
 			std::vector<uint8> ByteCode(NumBytes);
 			memcpy(ByteCode.data(), FileBinary, NumBytes);

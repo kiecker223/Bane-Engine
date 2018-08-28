@@ -12,7 +12,6 @@ public:
 	DefferedRenderer();
 	~DefferedRenderer();
 
-	
 	virtual void Initialize(const Window* pWindow) override final;
 
 	virtual void Render() override final;
@@ -49,6 +48,7 @@ private:
 	
 	IConstantBuffer* m_MaterialBuffer;
 	IConstantBuffer* m_CameraBuffer;
+	IConstantBuffer* m_MeshDataBuffer;
 	IConstantBuffer* m_LightBuffer;
 	IRuntimeGraphicsDevice* m_Device;
 	IRenderPassInfo* m_DefferedPass;
