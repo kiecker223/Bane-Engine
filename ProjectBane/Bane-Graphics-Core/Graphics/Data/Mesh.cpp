@@ -96,18 +96,18 @@ bool Mesh::LoadFromFile(const std::string& FileName)
 	m_Layout.AddItem("TANGENT", INPUT_ITEM_FORMAT_FLOAT3);
 	m_Layout.AddItem("TEXCOORD", INPUT_ITEM_FORMAT_FLOAT2);
 
- 	Assimp::Importer Importer;
- 
- 	const aiScene* pScene = Importer.ReadFile(FileName, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices);
- 
- 	if (!pScene || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !pScene->mRootNode)
- 	{
- 		__debugbreak();
- 		return false;
- 	}
- 
- 	ProcessScene(pScene, pScene->mRootNode, m_Indices, m_Vertices);
- 	Upload();
+	Assimp::Importer Importer;
+
+	const aiScene* pScene = Importer.ReadFile(FileName, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices);
+
+	if (!pScene || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !pScene->mRootNode)
+	{
+		__debugbreak();
+		return false;
+	}
+
+	ProcessScene(pScene, pScene->mRootNode, m_Indices, m_Vertices);
+	Upload();
 
 	return true;
 }
@@ -136,12 +136,12 @@ void Mesh::Upload()
 	}
 	m_IndexBuffer = Device->CreateIndexBuffer(static_cast<uint32>(m_Indices.size() * 4), (uint8*)m_Indices.data());
 }
-
+/*
 Mesh Mesh::CreateSphere(uint32 NumPoints)
 {
 	UNUSED(NumPoints);
 	Mesh Result;
-/*	uint32 NumSphereVertices = 0;
+	uint32 NumSphereVertices = 0;
 	uint32 NumSphereFaces = 0;
 	uint32 LatLines = NumPoints;
 	uint32 LongLines = NumPoints;
@@ -238,9 +238,10 @@ Mesh Mesh::CreateSphere(uint32 NumPoints)
 	indices[k + 1] = (NumSphereVertices - 1) - LongLines;
 	indices[k + 2] = NumSphereVertices - 2;
 	Result.SetIndices(indices);
-	*/
+
 	return Result;
 }
+*/
 
 void Mesh::AddData(float* pDatas, uint32 Size)
 {

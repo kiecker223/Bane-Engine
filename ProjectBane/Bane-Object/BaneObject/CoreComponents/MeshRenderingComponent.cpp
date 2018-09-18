@@ -1,26 +1,24 @@
 #include "MeshRenderingComponent.h"
+#include "../Entity/Transform.h"
 #include <Graphics/Interfaces/ApiRuntime.h>
 
 
-MeshRenderingComponent::MeshRenderingComponent()
+MeshRenderingComponent::MeshRenderingComponent() :
+	bStaticMesh(false),
+	RenderedMesh(nullptr)
 {
-
 }
 
 void MeshRenderingComponent::Start()
 {
+	if (bStaticMesh)
+	{
+	}
 }
 
 void MeshRenderingComponent::GraphicsUpdate(RenderLoop& Loop)
 {
-	UNUSED(Loop);
-// 	m_Constants = GetApiRuntime()->GetGraphicsDevice()->CreateConstantBuffer(204);
-// 	Renderer->AddBasicMesh(RenderedMesh, RenderedMaterial, GetOwner(), m_Constants);
-// 
-// 	if ((RenderedMaterial.RenderFlags & RENDER_FLAG_NO_SHADOWS) != RENDER_FLAG_NO_SHADOWS)
-// 	{
-// 
-// 	}
+	Loop.AddDrawable(RenderedMesh, RenderedMaterial, GetTransform()->GetMatrix());
 }
 
 

@@ -1946,10 +1946,16 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 		WriteBufferToFile(DstCompiledFile, Buff, static_cast<uint32>(BuffSize));
 	}
 	{
-		json InputLayout = json::object();
-		for (auto& Input : FullDesc.InputLayout.InputItems)
+		json InputLayout = json::array();
+		
+		for (uint32 i = 0; i < FullDesc.InputLayout.InputItems.size(); i++)
 		{
-			InputLayout.push_back({ Input.Name, ItemFormatToString(Input.ItemFormat) });
+			auto& Input = FullDesc.InputLayout.InputItems[i];
+			json SavedInput;
+			SavedInput["Idx"]		= i;
+			SavedInput["Name"]		= Input.Name;
+			SavedInput["Format"]	= ItemFormatToString(Input.ItemFormat);
+			InputLayout.push_back(SavedInput);
 		}
 
 		json RasterDesc;

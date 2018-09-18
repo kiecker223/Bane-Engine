@@ -35,6 +35,7 @@ public:
 		return m_Transform;
 	}
 	
+	virtual void Awake() { }
 	virtual void Start() { }
 	virtual void Tick(float DT) { UNUSED(DT); }
 	virtual void Dispose() { }

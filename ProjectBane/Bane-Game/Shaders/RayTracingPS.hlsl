@@ -183,7 +183,7 @@ float HitBox(BOX Box, RAY Ray)
 	// float FarT = min(min(Max.x, Max.y), Max.z); // ??
 	if (NearT < 0)
 	{
-		return 0.0f;
+		return -1.0f;
 	}
 	return NearT;
 }

@@ -25,6 +25,7 @@ class Material
 public:
 
 	Material();
+	~Material();
 
 	void SetDiffuseTexture(const std::string& FileName);
 	void SetNormalTexture(const std::string& FileName);
@@ -40,7 +41,7 @@ public:
 	inline IShaderResourceTable* GetTable() const { return m_Table; }
 	inline IGraphicsPipelineState* GetShaderConfiguration() const { return m_Pipeline; }
 
-	void LoadFromFile(const std::string& ShaderName);
+	void InitializeMaterial(const std::string& ShaderName);
 	inline std::string GetMaterialName() const { return m_MaterialName; }
 
 	inline MATERIAL_PARAMETERS GetMaterialParameters() const

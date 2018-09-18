@@ -1,7 +1,9 @@
 #pragma once
 #include "Transform.h"
+#include "Common.h"
 #include "../Components/ComponentBase.h"
 #include "../Components/ComponentAllocator.h"
+#include "Graphics/Data/RenderLoop.h"
 #include "Common/Hash.h"
 #include <array>
 
@@ -129,11 +131,12 @@ public:
 		m_Components.push_back(T::ClassHash);
 		RetPointer->m_Owner = this;
 		RetPointer->m_Transform = &m_Transform;
-		RetPointer->Start();
+		RetPointer->Awake();
 		return RetPointer;
 	}
 
 	void SubmitRenderingComponents();
+	void UpdateRenderObjects(RenderLoop& RL);
 
 	template<class T, class... U>
 	inline T* AddAndConstructComponent(U&&... Params)
@@ -142,6 +145,7 @@ public:
 		m_Components.push_back(T::ClassHash);
 		RetPointer->m_Owner = this;
 		RetPointer->m_Transform = &m_Transform;
+		RetPointer->Awake();
 		return RetPointer;
 	}
 
@@ -187,6 +191,13 @@ public:
 	inline void SetParent(EntityIdentifier Parent)
 	{
 		m_Parent = Parent;
+	}
+
+	Entity* GetChild(uint32 Idx);
+
+	inline uint32 GetChildCount()
+	{
+		return static_cast<uint32>(m_Children.size());
 	}
 
 private:

@@ -358,9 +358,15 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 			{
 				GFX_INPUT_LAYOUT_DESC CreatedDesc;
 				json JsonInputLayoutDesc = PipelineJson["InputLayout"];
-				for (auto I = JsonInputLayoutDesc.begin(); I != JsonInputLayoutDesc.end(); I++)
+				CreatedDesc.InputItems.resize(JsonInputLayoutDesc.size());
+				for (int i = 0; i < JsonInputLayoutDesc.size(); i++)
 				{
-					CreatedDesc.InputItems.push_back({ I.key(), ParseItemFormat(I.value().get<std::string>()) });
+					json Element = JsonInputLayoutDesc[i];
+					std::string ItemName = Element["Name"].get<std::string>();
+					auto ItemFormat = ParseItemFormat(Element["Format"].get<std::string>());
+					int Idx = Element["Idx"].get<int>();
+					CreatedDesc.InputItems[Idx].Name = ItemName;
+					CreatedDesc.InputItems[Idx].ItemFormat = ItemFormat;
 				}
 				Desc.InputLayout = Device->CreateInputLayout(CreatedDesc);
 			}

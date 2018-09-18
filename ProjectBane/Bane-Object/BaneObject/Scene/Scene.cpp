@@ -1,4 +1,5 @@
 #include "Scene.h"
+#include "Graphics/Data/RenderLoop.h"
 #include <algorithm>
 
 
@@ -35,7 +36,7 @@ Entity* Scene::CreateEntity(const std::string& EntityName)
 	pEntity = new Entity(EntityIdentifier(SearchName));
 	pEntity->SetParent(m_Root->GetId());
 	EntityHashEntry Entry = { pEntity->GetId().HashedName, pEntity };
-	m_Entities.push_back(Entry);
+	m_EntityAddList.push_back(Entry);
 	return pEntity;
 }
 
@@ -89,7 +90,7 @@ bool Scene::EntityExists(uint64 Id)
 			}
 			return false;
 		}
-	) == m_Entities.end();
+	) != m_Entities.end();
 }
 
 void Scene::Tick(float DT)
@@ -97,6 +98,23 @@ void Scene::Tick(float DT)
 	for (auto& e : m_Entities)
 	{
 		e.pEntity->Tick(DT);
+	}
+	if (m_EntityAddList.size() > 0)
+	{
+		for (auto& e : m_EntityAddList)
+		{
+			m_Entities.push_back(e);
+			e.pEntity->Start();
+		}
+		m_EntityAddList.clear();
+	}
+}
+
+void Scene::Render(RenderLoop& RL)
+{
+	for (auto& e : m_Entities)
+	{
+		e.pEntity->UpdateRenderObjects(RL);
 	}
 }
 
@@ -107,6 +125,7 @@ void Scene::DumpScene()
 		delete e.pEntity;
 	}
 	m_Entities.clear();
+	m_MeshCache.Destroy();
 }
 
 void Scene::LoadFromMetaData(const SCENE_DATA* Data)
@@ -116,6 +135,7 @@ void Scene::LoadFromMetaData(const SCENE_DATA* Data)
 
 void Scene::InitScene()
 {
+	m_MeshCache.Initialize();
 	for (auto& e : m_Entities)
 	{
 		e.pEntity->SubmitRenderingComponents();

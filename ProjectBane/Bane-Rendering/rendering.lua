@@ -3,7 +3,7 @@ group "Graphics"
         kind "StaticLib"
         links {"BaneCore", "BaneGraphicsCore", "BanePlatform" }
         includedirs { 
-            "../Bane-Common",  
+            "../Bane-Common",
             "../Bane-Core",
             "../Bane-Math",
             "../Bane-Graphics-Core",

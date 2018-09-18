@@ -25,7 +25,7 @@ typedef struct MESH_ITEM {
 } MESH_ITEM;
 
 typedef struct SKYBOX_DATA {
-	ITextureCube* TexCube;
+	const ITextureCube* TexCube;
 	float3 AmbientLight; // Possibly remove when making GI?
 } SKYBOX_DATA;
 
@@ -34,6 +34,7 @@ typedef struct DRAWABLE_MESH {
 	IIndexBuffer* IndexBuffer;
 	IGraphicsPipelineState* Pipeline;
 	IShaderResourceTable* Table;
+	uint64 MeshDataOffset;
 	uint32 IndexCount;
 } DRAWABLE_MESH;
 
@@ -71,7 +72,7 @@ class RenderLoop
 		} LightData;
 		struct
 		{
-			ITextureCube* Cubemap;
+			const ITextureCube* Cubemap;
 			float3 AmbientLight;
 		} SkyboxData;
 	} RENDER_LOOP_GLOBALS;
@@ -85,7 +86,7 @@ public:
 	~RenderLoop();
 
 	void SetCamera(const CAMERA_DATA& CamData);
-	void AddDrawable(const Mesh* pMesh, const Material* pMat, matrix ModelMat);
+	void AddDrawable(const Mesh* pMesh, const Material& Mat, matrix ModelMat);
 	void AddLight(const DIRECTIONAL_LIGHT_DATA& DirLight);
 	void AddLight(const POINT_LIGHT_DATA& PointLight);
 	void AddLight(const SPOTLIGHT_DATA& SpotLight);

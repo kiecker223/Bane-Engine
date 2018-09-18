@@ -26,11 +26,11 @@ void RenderLoop::SetCamera(const CAMERA_DATA& CamData)
 	Size++;
 }
 
-void RenderLoop::AddDrawable(const Mesh* pMesh, const Material* pMat, matrix ModelMat)
-{
-	GRenderGlobals.MeshData.Buffer[GRenderGlobals.MeshData.Offset] = { ModelMat, pMat->GetMaterialParameters() };
+void RenderLoop::AddDrawable(const Mesh* pMesh, const Material& Mat, matrix ModelMat)
+{	
+	GRenderGlobals.MeshData.Buffer[GRenderGlobals.MeshData.Offset] = { ModelMat, Mat.GetMaterialParameters() };
 	GRenderGlobals.MeshData.Offset++;
-	m_Current.Meshes.push_back({ pMesh->GetVertexBuffer(), pMesh->GetIndexBuffer(), pMat->GetShaderConfiguration() });
+	m_Current.Meshes.push_back({ pMesh->GetVertexBuffer(), pMesh->GetIndexBuffer(), Mat.GetShaderConfiguration(), Mat.GetTable(), 0, pMesh->GetIndexCount() });
 	m_Current.MeshData_NumUsed++;
 }
 

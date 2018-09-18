@@ -13,6 +13,11 @@ Material::Material() :
 	m_Parameters.Roughness = 0.5f;
 }
 
+Material::~Material()
+{
+	if (m_Table)
+		delete m_Table;
+}
 
 void Material::SetDiffuseTexture(const std::string& FileName)
 {
@@ -61,7 +66,7 @@ void Material::SetMaterialParameters(const MATERIAL_PARAMETERS& Params)
 	m_Parameters = Params;
 }
 
-void Material::LoadFromFile(const std::string& ShaderName)
+void Material::InitializeMaterial(const std::string& ShaderName)
 {
 	IRuntimeGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
 	m_MaterialName = ShaderName;

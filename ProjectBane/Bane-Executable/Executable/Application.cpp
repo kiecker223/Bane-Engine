@@ -102,9 +102,14 @@ void Application::Run()
 {
 	while (!m_Window->QuitRequested())
 	{
-		//m_UpdateCallback();
-		GetSceneManager()->CurrentScene->Tick(0.f);
+		Scene* pCurrentScene = GetSceneManager()->CurrentScene;
+		RenderLoop RL;
+		RL.SetSkybox({ pCurrentScene->GetSkybox(), float3(0.f, 0.f, 0.f) });
+		pCurrentScene->Render(RL);
+		RL.Draw(); // <- 
+		m_SceneRenderer->Submit(RL);
 		m_SceneRenderer->Render();
+		pCurrentScene->Tick(1.0f);
 		m_SceneRenderer->Present();
 	}
 }

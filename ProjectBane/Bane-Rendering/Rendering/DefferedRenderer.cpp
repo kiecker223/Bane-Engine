@@ -88,12 +88,13 @@ void DefferedRenderer::Render()
 	for (uint32 i = 0; i < m_DrawCommits.size(); i++)
 	{
 		auto& Commit = m_DrawCommits[i];
-		for (auto& DrawMesh : Commit.Meshes)
+		for (uint32 b = 0; b < static_cast<uint32>(Commit.Meshes.size()); b++)
 		{
+			auto& DrawMesh = Commit.Meshes[b];
 			ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);
 			ctx->SetGraphicsResourceTable(DrawMesh.Table);
 			m_Device->CreateShaderResourceView(DrawMesh.Table, m_CameraBuffer, 0, Commit.CameraIdxOffset * sizeof(CAMERA_CONSTANT_BUFFER_DATA));
-			m_Device->CreateShaderResourceView(DrawMesh.Table, m_MaterialBuffer, 1, Commit.MeshData_Offset * sizeof(MESH_RENDER_DATA));
+			m_Device->CreateShaderResourceView(DrawMesh.Table, m_MaterialBuffer, 1, b * sizeof(MESH_RENDER_DATA));
 			ctx->SetVertexBuffer(DrawMesh.VertexBuffer);
 			ctx->SetIndexBuffer(DrawMesh.IndexBuffer);
 			ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -120,6 +121,8 @@ void DefferedRenderer::Render()
 	ctx->DrawIndexed(6, 0, 0);
 
 	ctx->EndPass();
+	RenderLoop::ResetForNextFrame();
+	m_DrawCommits.clear();
 }
 
 void DefferedRenderer::Present()
@@ -176,19 +179,25 @@ void DefferedRenderer::RenderShadows(matrix LightMatrix, IRenderPassInfo* DestRe
 void DefferedRenderer::GatherSceneData(IGraphicsCommandContext* ctx)
 {
 	{
-		byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_CameraBuffer));
-		memcpy(Buff, 
-			reinterpret_cast<void*>(RenderLoop::GRenderGlobals.CameraData.Buffer), 
-			RenderLoop::GRenderGlobals.CameraData.Size * sizeof(CAMERA_CONSTANT_BUFFER_DATA)
-		);
-		ctx->Unmap(m_CameraBuffer);
+		if (RenderLoop::GRenderGlobals.CameraData.Size > 0) 
+		{
+			byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_CameraBuffer));
+			memcpy(Buff,
+				reinterpret_cast<void*>(RenderLoop::GRenderGlobals.CameraData.Buffer),
+				RenderLoop::GRenderGlobals.CameraData.Size * sizeof(CAMERA_CONSTANT_BUFFER_DATA)
+			);
+			ctx->Unmap(m_CameraBuffer);
+		}
 	}
 	{
-		byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_MeshDataBuffer));
-		memcpy(Buff,
-			reinterpret_cast<void*>(RenderLoop::GRenderGlobals.MeshData.Buffer),
-			RenderLoop::GRenderGlobals.MeshData.Size * sizeof(MESH_RENDER_DATA)
-		);
+		if (RenderLoop::GRenderGlobals.MeshData.Size > 0)
+		{
+			byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_MeshDataBuffer));
+			memcpy(Buff,
+				reinterpret_cast<void*>(RenderLoop::GRenderGlobals.MeshData.Buffer),
+				RenderLoop::GRenderGlobals.MeshData.Size * sizeof(MESH_RENDER_DATA)
+			);
+		}
 	}
 	{
 		byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_LightBuffer));

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include "Graphics/IO/MeshCache.h"
 #include "Common/Types.h"
 #include "Common/Hash.h"
 #include "../Entity/Entity.h"
@@ -10,7 +11,6 @@
 typedef struct SCENE_DATA {
 	void* unused;
 } SCENE_DATA;
-
 
 class Scene
 {
@@ -34,9 +34,25 @@ public:
 	bool EntityExists(uint64 Id);
 
 	void Tick(float DT);
+	void Render(RenderLoop& RL);
 	void DumpScene();
 	void LoadFromMetaData(const SCENE_DATA* Data);
 	void InitScene();
+
+	inline void SetSkybox(ITextureCube* InSkybox)
+	{
+		m_Skybox = InSkybox;
+	}
+
+	inline const ITextureCube* GetSkybox() const
+	{
+		return m_Skybox;
+	}
+
+	inline MeshCache& GetMeshCache()
+	{
+		return m_MeshCache;
+	}
 	
 	inline Entity* GetSceneRoot()
 	{
@@ -45,6 +61,9 @@ public:
 
 private:
 
+	MeshCache m_MeshCache;
+	
+	ITextureCube* m_Skybox;
 	std::string m_Name;
 	Entity* m_Root;
 	struct EntityHashEntry
@@ -53,7 +72,7 @@ private:
 		Entity* pEntity;
 	};
 	std::vector<EntityHashEntry> m_Entities;
-	std::vector<Entity*> m_EntityAddList;
+	std::vector<EntityHashEntry> m_EntityAddList;
 };
 
 // Scene* GetCurrentScene();

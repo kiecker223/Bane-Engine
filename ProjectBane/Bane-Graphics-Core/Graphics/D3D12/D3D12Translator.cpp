@@ -387,11 +387,10 @@ D3D12_GRAPHICS_PIPELINE_STATE_DESC D3D12_TranslateGraphicsPipelineStateDesc(cons
 			OutDesc.DepthStencilState.DepthEnable = DepthStencilDesc.bDepthEnable;
 			OutDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 			OutDesc.DepthStencilState.DepthFunc = D3D12_TranslateComparisonFunc(DepthStencilDesc.DepthFunction);
-			OutDesc.DepthStencilState.StencilEnable = DepthStencilDesc.bStencilEnable;
 		}
-
 		if (DepthStencilDesc.bStencilEnable)
 		{
+			OutDesc.DepthStencilState.StencilEnable = DepthStencilDesc.bStencilEnable;
 			OutDesc.DepthStencilState.StencilReadMask = 0xff;
 			OutDesc.DepthStencilState.StencilWriteMask = 0xff;
 			D3D12_DEPTH_STENCILOP_DESC FrontFace;

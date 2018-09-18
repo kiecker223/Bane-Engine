@@ -1,5 +1,6 @@
 #include "Entity.h"
-//#include "Engine/Application/Application.h"
+#include "Graphics/Data/RenderLoop.h"
+#include "../CoreComponents/RenderComponent.h"
 #include "../Scene/SceneManager.h"
 
 
@@ -30,15 +31,18 @@ void Entity::RemoveComponent(uint64 ComponentHash)
 
 void Entity::SubmitRenderingComponents()
 {
-	//SceneRenderer* Renderer = GetApplicationInstance()->GetSceneRenderer();
-	//for (auto Comp : m_Allocator.GetAllocatedObjects())
-	//{
-	//	if (Comp->IsRenderComponent())
-	//	{
-	//		RenderComponent* rc = (RenderComponent*)Comp;
-	//		rc->SubmitFeature(Renderer);
-	//	}
-	//}
+}
+
+void Entity::UpdateRenderObjects(RenderLoop& RL)
+{
+	for (auto& Comp : m_Allocator.GetAllocatedObjects())
+	{
+		if (Comp->IsRenderComponent())
+		{
+			RenderComponent* RC = static_cast<RenderComponent*>(Comp);
+			RC->GraphicsUpdate(RL);
+		}
+	}
 }
 
 void Entity::AddChild(EntityIdentifier Child)
@@ -71,6 +75,15 @@ Entity* Entity::GetParent() const
 		return GetEntityById(m_Parent);
 	}
 	return nullptr;
+}
+
+Entity* Entity::GetChild(uint32 Idx)
+{
+	if (Idx > GetChildCount())
+	{
+		return nullptr;
+	}
+	return GetEntityById(m_Children[Idx]);
 }
 
 Entity* GetEntityById(const EntityIdentifier& Id)

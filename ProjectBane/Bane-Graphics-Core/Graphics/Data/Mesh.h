@@ -85,7 +85,6 @@ public:
 
 	inline IVertexBuffer* GetVertexBuffer() const { return m_VertexBuffer; }
 	inline IIndexBuffer* GetIndexBuffer() const { return m_IndexBuffer; }
-//	ForceInline const uint32 GetVertexCount() const { return m_Vertices.size(); }
 	inline const uint32 GetIndexCount() const { return static_cast<uint32>(m_Indices.size()); }
 
 	inline void SetName(const std::string& Name) { m_Name = Name; }
@@ -128,8 +127,6 @@ public:
 		m_Vertices.clear();
 		m_Indices.clear();
 	}
-
-	static Mesh CreateSphere(uint32 NumPoints);
 
 private:
 

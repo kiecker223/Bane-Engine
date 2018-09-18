@@ -18,14 +18,15 @@ public:
 
 	inline MATERIAL_PARAMETERS GetMaterialParameters()
 	{
-		return RenderedMaterial.GetMaterialParameters();
+		if (RenderedMaterial.GetShaderConfiguration() != nullptr)
+			return RenderedMaterial.GetMaterialParameters();
+		return MATERIAL_PARAMETERS();
 	}
 
-	Mesh		RenderedMesh;
+	bool		bStaticMesh;
+	Mesh*		RenderedMesh;
 	Material	RenderedMaterial;
 
 private:
-
-	IConstantBuffer* m_Constants;
 
 };
