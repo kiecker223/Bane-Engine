@@ -44,6 +44,9 @@ void CameraComponent::Tick(float DT)
 
 void CameraComponent::GraphicsUpdate(RenderLoop& Loop)
 {
-	UNUSED(Loop);
-//	Renderer->AddCamera(this);
+	CAMERA_DATA CamData;
+	CamData.Position = GetTransform()->GetPosition();
+	CamData.Projection = GetProjection();
+	CamData.View = GetLookAt();
+	Loop.SetCamera(CamData);
 }

@@ -94,7 +94,7 @@ void DefferedRenderer::Render()
 			ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);
 			ctx->SetGraphicsResourceTable(DrawMesh.Table);
 			m_Device->CreateShaderResourceView(DrawMesh.Table, m_CameraBuffer, 0, Commit.CameraIdxOffset * sizeof(CAMERA_CONSTANT_BUFFER_DATA));
-			m_Device->CreateShaderResourceView(DrawMesh.Table, m_MaterialBuffer, 1, b * sizeof(MESH_RENDER_DATA));
+			m_Device->CreateShaderResourceView(DrawMesh.Table, m_MeshDataBuffer, 1, b * sizeof(MESH_RENDER_DATA));
 			ctx->SetVertexBuffer(DrawMesh.VertexBuffer);
 			ctx->SetIndexBuffer(DrawMesh.IndexBuffer);
 			ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -141,12 +141,12 @@ void DefferedRenderer::Shutdown()
 	delete m_MaterialBuffer;
 	delete m_CameraBuffer;
 	delete m_LightBuffer;
-	delete m_DefferedPass;
+//	delete m_AlbedoBuffer;
+//	delete m_NormalBuffer;
+//	delete m_PositionBuffer;
+//	delete m_ParameterBuffer;
+//	delete m_DefferedPass;
 //	delete m_CameraConstants;
-	delete m_AlbedoBuffer;
-	delete m_NormalBuffer;
-	delete m_PositionBuffer;
-	delete m_ParameterBuffer;
 	ApiRuntime::Shutdown();
 }
 
@@ -181,7 +181,7 @@ void DefferedRenderer::GatherSceneData(IGraphicsCommandContext* ctx)
 	{
 		if (RenderLoop::GRenderGlobals.CameraData.Size > 0) 
 		{
-			byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_CameraBuffer));
+ 			byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_CameraBuffer));
 			memcpy(Buff,
 				reinterpret_cast<void*>(RenderLoop::GRenderGlobals.CameraData.Buffer),
 				RenderLoop::GRenderGlobals.CameraData.Size * sizeof(CAMERA_CONSTANT_BUFFER_DATA)
@@ -197,6 +197,7 @@ void DefferedRenderer::GatherSceneData(IGraphicsCommandContext* ctx)
 				reinterpret_cast<void*>(RenderLoop::GRenderGlobals.MeshData.Buffer),
 				RenderLoop::GRenderGlobals.MeshData.Size * sizeof(MESH_RENDER_DATA)
 			);
+			ctx->Unmap(m_MeshDataBuffer);
 		}
 	}
 	{

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BaneObject/Components/ComponentBase.h"
+#include <iostream>
 #include <windows.h>
 #include <WinUser.h>
 #include "KieckerMath.h"
@@ -67,7 +68,7 @@ public:
 		{
 			ST->Rotate(5.f, 0.0f, 0.0f);
 		}
-
+		std::cout << Forward.x << "\n" << Forward.y << "\n" << Forward.z << "\n--------\n" << std::endl;
 	}
 };
 

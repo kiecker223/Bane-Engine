@@ -10,6 +10,7 @@ RenderLoop::RenderLoop()
 	{
 		GRenderGlobals.MeshData.Buffer = reinterpret_cast<MESH_RENDER_DATA*>(new byte[GPU_BUFFER_MIN_SIZE]);
 	}
+	m_Current.CameraIdxOffset = 0;
 }
 
 RenderLoop::~RenderLoop()
@@ -32,6 +33,7 @@ void RenderLoop::AddDrawable(const Mesh* pMesh, const Material& Mat, matrix Mode
 	GRenderGlobals.MeshData.Offset++;
 	m_Current.Meshes.push_back({ pMesh->GetVertexBuffer(), pMesh->GetIndexBuffer(), Mat.GetShaderConfiguration(), Mat.GetTable(), 0, pMesh->GetIndexCount() });
 	m_Current.MeshData_NumUsed++;
+	GRenderGlobals.MeshData.Size++;
 }
 
 void RenderLoop::AddLight(const DIRECTIONAL_LIGHT_DATA& DirLight)
@@ -70,8 +72,10 @@ void RenderLoop::Draw()
 
 void RenderLoop::ResetForNextFrame()
 {
+	GRenderGlobals.CameraData.Size = 0;
 	GRenderGlobals.CameraData.Offset = 0;
 	GRenderGlobals.MeshData.Offset = 0;
+	GRenderGlobals.MeshData.Size = 0;
 	GRenderGlobals.LightData.NumDirectionalLights = 0;
 	GRenderGlobals.LightData.NumPointLights = 0;
 	GRenderGlobals.LightData.NumSpotLights = 0;

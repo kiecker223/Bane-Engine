@@ -45,7 +45,7 @@ uint8* ReadFileBinary(const std::string& FileName, size_t fileSize)
 
 uintmax_t GetFileSize(const std::string& FileName) {
 	std::filesystem::path PathForSize(FileName);
-	auto filesize = std::filesystem::file_size(PathForSize);
+	auto Filesize = std::filesystem::file_size(PathForSize);
 
-	return filesize;
+	return Filesize;
 }
