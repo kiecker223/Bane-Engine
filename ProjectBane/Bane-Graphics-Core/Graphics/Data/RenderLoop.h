@@ -7,12 +7,12 @@
 #include "CameraData.h"
 
 
-typedef struct SHADER_ALIGNMENT MESH_RENDER_DATA {
+typedef struct ALIGN_FOR_GPU_BUFFER MESH_RENDER_DATA {
 	matrix Model;
 	MATERIAL_PARAMETERS Parameters;
 } MESH_RENDER_DATA;
 
-typedef struct SHADER_ALIGNMENT CAMERA_CONSTANT_BUFFER_DATA {
+typedef struct ALIGN_FOR_GPU_BUFFER CAMERA_CONSTANT_BUFFER_DATA {
 	matrix View;
 	matrix Projection;
 	float4 Position;

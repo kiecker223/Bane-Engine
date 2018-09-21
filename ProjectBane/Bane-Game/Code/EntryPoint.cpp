@@ -40,6 +40,11 @@ void InitApplication()
 	TestMesh->RenderedMaterial.SetTexture(Normal, 1);
 	//EntityTest->AddComponent<TestComponent1>();
 
+	MeshRenderingComponent* OtherMesh = Test->CreateEntity("Other test entity")->AddComponent<MeshRenderingComponent>();
+	OtherMesh->RenderedMesh = Test->GetMeshCache().LoadMesh("Meshes/PlaneyThing.fbx");
+	OtherMesh->RenderedMaterial.InitializeMaterial("TestRenderingShader.gfx");
+	OtherMesh->GetTransform()->SetPosition(float3(1.f, 2.f, 3.f));
+
 	Entity* MainCamera = Test->CreateEntity("TestCamera");
 	MainCamera->GetTransform()->SetPosition(float3(0.f, 0.f, -2.f));
 	MainCamera->AddComponent<CameraComponent>();

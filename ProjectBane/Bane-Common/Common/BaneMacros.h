@@ -15,6 +15,7 @@
 
 #define MAKE_ALIGN(x) __declspec(align(x))
 #define SHADER_ALIGNMENT MAKE_ALIGN(sizeof(float4))
+#define ALIGN_FOR_GPU_BUFFER MAKE_ALIGN(256)
 
 #if defined(BANE_BUILD_EXPORT) && 1
 #define BANE_ENGINE_API __declspec(dllimport)
