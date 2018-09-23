@@ -7,6 +7,7 @@
 #include "Common/Types.h"
 #include "Common/Hash.h"
 #include "../Entity/Entity.h"
+#include "Physics/PhysicsWorld.h"
 
 typedef struct SCENE_DATA {
 	void* unused;
@@ -34,6 +35,7 @@ public:
 	bool EntityExists(uint64 Id);
 
 	void Tick(float DT);
+	void PhysicsUpdate(const PhysicsUpdateBuffer UpdateBuffer); // Poor name!
 	void Render(RenderLoop& RL);
 	void DumpScene();
 	void LoadFromMetaData(const SCENE_DATA* Data);
@@ -62,7 +64,8 @@ public:
 private:
 
 	MeshCache m_MeshCache;
-	
+	PhysicsWorld m_World;
+
 	ITextureCube* m_Skybox;
 	std::string m_Name;
 	Entity* m_Root;

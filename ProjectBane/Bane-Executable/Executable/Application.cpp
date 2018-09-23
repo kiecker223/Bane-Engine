@@ -1,12 +1,16 @@
 #include "Application.h"
 #include "Rendering/RendererInterface.h"
 #include "Rendering/DefferedRenderer.h"
+#include "Rendering/BasicForwardRenderer.h"
 #include <BaneObject/Scene/SceneManager.h>
 #include "Graphics/IO/TextureCache.h"
 #include "Graphics/IO/ShaderCache.h"
 #include <Platform/System/Logging/Logger.h>
 #include <Platform/System/Process.h>
 #include <Code/EntryPoint.h>
+#include <iostream>
+#include <sys/timeb.h>
+#include <sys/utime.h>
 #include <sstream>
 
 #pragma warning(disable:4049)
@@ -90,7 +94,7 @@ void Application::InitSystems()
 	
 	if (m_SceneRenderer == nullptr)
 	{
-		m_SceneRenderer = new DefferedRenderer();
+		m_SceneRenderer = new BasicForwardRenderer();
 	}
 	m_SceneRenderer->Initialize(m_Window);
 	
@@ -99,28 +103,38 @@ void Application::InitSystems()
 }
 
 void Application::Run()
-{
+{	
+	using Clock = std::chrono::high_resolution_clock;
+	auto TimeStart = Clock::now();
+
 	while (!m_Window->QuitRequested())
 	{
 		Scene* pCurrentScene = GetSceneManager()->CurrentScene;
+		
 		RenderLoop RL;
 		RL.SetSkybox({ pCurrentScene->GetSkybox(), float3(0.f, 0.f, 0.f) });
 		pCurrentScene->Render(RL);
-		RL.Draw(); // <- 
+		RL.Draw(); 
 		m_SceneRenderer->Submit(RL);
 		m_SceneRenderer->Render();
-		pCurrentScene->Tick(1.0f);
+
+		auto Now = Clock::now();
+		auto DeltaTime = Now - TimeStart;
+		TimeStart = Now;
+		float Dt = static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(DeltaTime).count()) / 1E+9f;
+		pCurrentScene->Tick(Dt);
 		m_SceneRenderer->Present();
+		std::cout << "Delta Time: " << Dt << std::endl;
 	}
 }
 
 void Application::Shutdown()
 {
-	m_SceneRenderer->Shutdown();
-	delete m_SceneRenderer;
 	ShutdownSceneManager();
 	DestroyShaderCache();
 	DestroyTextureCache();
+	m_SceneRenderer->Shutdown();
+	delete m_SceneRenderer;
 	GlobalLog::Cleanup();
 }
 

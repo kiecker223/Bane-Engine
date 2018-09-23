@@ -1,59 +1,92 @@
 #include "BasicForwardRenderer.h"
-//#include <BaneObject/CoreComponents/CameraComponent.h>
 
-/*
-struct FORWARD_CAMERA_CONSTANTS
+void BasicForwardRenderer::Initialize(const Window* pWindow)
 {
-	matrix Model;
-	matrix View;
-	matrix Projection;
-} CameraConstants;
+	UNUSED(pWindow);
+	m_Commits.reserve(100);
+	m_Device = GetApiRuntime()->GetGraphicsDevice();
 
-void BasicForwardRenderer::Initialize()
-{
-	ApiRuntime::CreateRuntime();
-	GetApiRuntime()->Initialize();
-	m_CameraConstants = GetApiRuntime()->GetGraphicsDevice()->CreateConstBuffer<FORWARD_CAMERA_CONSTANTS>();
+	m_LightBuffer = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
+	m_CameraConstants = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
+	m_MeshDataBuffer = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
+	m_LightBuffer = m_Device->CreateConstantBuffer(sizeof(RenderLoop::GRenderGlobals.LightData));
 }
 
 void BasicForwardRenderer::Render()
 {
-	IRuntimeGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
-	IGraphicsCommandContext* Context = Device->GetGraphicsContext();
+	IGraphicsCommandContext* ctx = m_Device->GetGraphicsContext();
 
-	Context->BeginPass(Device->GetBackBufferTargetPass());
-
-	void* Buff = Context->Map(m_CameraConstants);
-	
-	for (uint i = 0; i < m_DrawList.size(); i++)
+	ctx->BeginPass(m_Device->GetBackBufferTargetPass());
+	GatherSceneData(ctx);
+	for (uint32 i = 0; i < m_Commits.size(); i++)
 	{
-		MeshDrawArgs& DrawItem = m_DrawList[i];
-
-		//CameraConstants.Model = DrawItem.OwningEntity->GetTransform()->GetMatrix();
-		CameraConstants.Projection = MainCamera->GetProjection();
-		CameraConstants.View = MainCamera->GetLookAt();
-		memcpy(Buff, &CameraConstants, sizeof(FORWARD_CAMERA_CONSTANTS));
-		
-		Device->CreateShaderResourceView(DrawItem.UsedMaterial.GetTable(), m_CameraConstants, 0);
-		DrawItem.UsedMaterial.Bind(Context);
-
-		Context->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		Context->SetVertexBuffer(DrawItem.DrawnMesh.GetVertexBuffer());
-		Context->SetIndexBuffer(DrawItem.DrawnMesh.GetIndexBuffer());
-		Context->DrawIndexed(DrawItem.DrawnMesh.GetIndexCount(), 0, 0);
+		auto& Commit = m_Commits[i];
+		for (uint32 y = 0; y < Commit.Meshes.size(); y++)
+		{
+			auto& DrawMesh = Commit.Meshes[y];
+			ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);			
+			m_Device->CreateShaderResourceView(DrawMesh.Table, m_CameraConstants, 0, Commit.CameraIdxOffset * sizeof(CAMERA_CONSTANT_BUFFER_DATA));
+			m_Device->CreateShaderResourceView(DrawMesh.Table, m_MeshDataBuffer, 1, y * sizeof(MESH_RENDER_DATA));
+			m_Device->CreateShaderResourceView(DrawMesh.Table, m_LightBuffer, 2);
+			ctx->SetGraphicsResourceTable(DrawMesh.Table);
+			ctx->SetVertexBuffer(DrawMesh.VertexBuffer);
+			ctx->SetIndexBuffer(DrawMesh.IndexBuffer);
+			ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			ctx->DrawIndexed(DrawMesh.IndexCount, 0, 0);
+		}
 	}
-	
-	Context->Unmap(m_CameraConstants);
-	Context->EndPass();
+
+	ctx->EndPass();
+	RenderLoop::ResetForNextFrame();
+	m_Commits.clear();
 }
 
 void BasicForwardRenderer::Present()
 {
-	GetApiRuntime()->GetGraphicsDevice()->GetSwapChain()->Present();
+	GetSwapChain()->Present();
 }
 
 void BasicForwardRenderer::Shutdown()
 {
 	ApiRuntime::Shutdown();
 }
-*/
+
+void BasicForwardRenderer::Submit(const RenderLoop& pRenderLoop)
+{
+	for (auto& Commit : pRenderLoop.GetCommitedData())
+		m_Commits.push_back(Commit);
+}
+
+void BasicForwardRenderer::GatherSceneData(IGraphicsCommandContext* ctx)
+{
+	{
+		if (RenderLoop::GRenderGlobals.CameraData.Size > 0)
+		{
+			byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_CameraConstants));
+			memcpy(Buff,
+				reinterpret_cast<void*>(RenderLoop::GRenderGlobals.CameraData.Buffer),
+				RenderLoop::GRenderGlobals.CameraData.Size * sizeof(CAMERA_CONSTANT_BUFFER_DATA)
+			);
+			ctx->Unmap(m_CameraConstants);
+		}
+	}
+	{
+		if (RenderLoop::GRenderGlobals.MeshData.Size > 0)
+		{
+			byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_MeshDataBuffer));
+			memcpy(Buff,
+				reinterpret_cast<void*>(RenderLoop::GRenderGlobals.MeshData.Buffer),
+				RenderLoop::GRenderGlobals.MeshData.Size * sizeof(MESH_RENDER_DATA)
+			);
+			ctx->Unmap(m_MeshDataBuffer);
+		}
+	}
+	{
+		byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_LightBuffer));
+		memcpy(Buff,
+			reinterpret_cast<void*>(&RenderLoop::GRenderGlobals.LightData),
+			sizeof(RenderLoop::GRenderGlobals.LightData)
+		);
+		ctx->Unmap(m_LightBuffer);
+	}
+}

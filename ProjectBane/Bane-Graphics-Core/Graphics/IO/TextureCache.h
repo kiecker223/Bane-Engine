@@ -17,12 +17,12 @@ public:
 	ITextureCube* LoadCubemap(const std::string& TextureName);
 	ITextureCube* LoadCubemap(
 		const std::string& Name, 
-		const std::string& NX, 
-		const std::string& NY, 
-		const std::string& NZ, 
-		const std::string& PX, 
-		const std::string& PY, 
-		const std::string& PZ
+		const std::string& NX,
+		const std::string& NY,
+		const std::string& NZ,
+		const std::string& PX,
+		const std::string& PY,
+		const std::string& PZ 
 	);
 
 	void AddTexture(const std::string& TextureName, ITextureBase* Texture);

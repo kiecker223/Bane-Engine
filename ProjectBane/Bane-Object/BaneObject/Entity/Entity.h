@@ -6,6 +6,7 @@
 #include "Graphics/Data/RenderLoop.h"
 #include "Common/Hash.h"
 #include <array>
+#include "PhysicsProperties.h"
 
 #pragma warning(disable:4049)
 
@@ -200,12 +201,18 @@ public:
 		return static_cast<uint32>(m_Children.size());
 	}
 
+	inline PhysicsProperties& GetPhysicsProperties()
+	{
+		return m_PhysicsProperties;
+	}
+
 private:
 
 	friend class Entity;
 
 	Entity* GetParent() const;
 	
+	PhysicsProperties m_PhysicsProperties;
 	Transform m_Transform;
 	EntityIdentifier m_Id;
 	EntityIdentifier m_Parent;

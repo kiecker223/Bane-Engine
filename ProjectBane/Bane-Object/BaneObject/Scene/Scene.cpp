@@ -11,6 +11,7 @@ static std::string GenerateNewName(std::string OriginalName, uint32 Count)
 Scene::Scene()
 {
 	m_Root = new Entity(EntityIdentifier("SceneRoot"));
+	m_Root->GetPhysicsProperties().bCanTick = false;
 	m_Entities.push_back({ m_Root->GetId().HashedName, m_Root });
 }
 
@@ -93,8 +94,11 @@ bool Scene::EntityExists(uint64 Id)
 	) != m_Entities.end();
 }
 
+float Timer;
+
 void Scene::Tick(float DT)
 {
+	Timer += DT;
 	for (auto& e : m_Entities)
 	{
 		e.pEntity->Tick(DT);
@@ -105,8 +109,36 @@ void Scene::Tick(float DT)
 		{
 			m_Entities.push_back(e);
 			e.pEntity->Start();
+			auto PhysicsProps = e.pEntity->GetPhysicsProperties();
+			if (PhysicsProps.bCanTick)
+			{
+				PhysicsBody Body;
+				Body.Mass = PhysicsProps.Mass;
+				Body.Position = e.pEntity->GetTransform()->GetPosition();
+				Body.Radius = 1.f;
+				Body.Velocity = PhysicsProps.Velocity;
+				e.pEntity->GetPhysicsProperties().PhysicsWorldHandle = m_World.AddBody(Body);
+			}
 		}
 		m_EntityAddList.clear();
+	}
+	if (Timer > 1.f / 60.f)
+	{
+		m_World.UpdateBodies();
+		PhysicsUpdate(m_World.UpdateBuffer);
+		Timer = 0.f;
+	}
+}
+
+void Scene::PhysicsUpdate(const PhysicsUpdateBuffer UpdateBuffer)
+{
+	for (auto& e : m_Entities)
+	{
+		if (e.pEntity->GetPhysicsProperties().bCanTick)
+		{
+			uint32 PhysicsHandle = e.pEntity->GetPhysicsProperties().PhysicsWorldHandle;
+			e.pEntity->GetTransform()->SetPosition(UpdateBuffer.Bodies[PhysicsHandle].Position);
+		}
 	}
 }
 

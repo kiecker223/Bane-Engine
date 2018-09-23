@@ -86,7 +86,7 @@ project("Regenerate premake")
     prebuildcommands("%{prj.location}../Tools/premake5.exe --file=%{prj.location}../premake5.lua vs2017")
 
 include "Bane-Shader-Compiler/shader_compiler.lua"
-include "Bane-Application/application.lua"
+include "Bane-Physics/physics.lua"
 include "Bane-Executable/executable.lua"
 include "Bane-Platform/platform.lua"
 include "Bane-Common/common.lua"
@@ -99,3 +99,4 @@ include "Bane-Irradiance-Generator/irradiance.lua"
 include "Bane-Core-Components/core_components.lua"
 include "Bane-Game/game.lua"
 include "Bane-PE-Loader/peloader.lua"
+include "Bane-Physics/physics.lua"

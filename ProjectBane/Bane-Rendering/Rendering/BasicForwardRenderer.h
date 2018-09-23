@@ -10,18 +10,29 @@ class BasicForwardRenderer : public ISceneRenderer
 {
 public:
 
+	virtual void Initialize(const Window* pWindow) override;
+
 	virtual void Render() override final;
 
 	virtual void Present() override final;
 
 	virtual void Shutdown() override final;
 
-	virtual IDeviceSwapChain* GetSwapChain() { return nullptr; };
+	virtual IDeviceSwapChain* GetSwapChain() { return m_Device->GetSwapChain(); };
 
 	virtual bool SupportsAsyncContexts() { return true; }
 
-	virtual void Submit(const RenderLoop& pRenderLoop) { UNUSED(pRenderLoop); }
+	virtual void Submit(const RenderLoop& pRenderLoop) override;
 
 private:
+
+	void GatherSceneData(IGraphicsCommandContext* ctx);
+
+	IRuntimeGraphicsDevice* m_Device;
+	IConstantBuffer* m_CameraConstants;
+	IConstantBuffer* m_MaterialConstants;
+	IConstantBuffer* m_MeshDataBuffer;
+	IConstantBuffer* m_LightBuffer;
+	std::vector<RENDER_LOOP_DRAW_COMMIT> m_Commits;
 
 };

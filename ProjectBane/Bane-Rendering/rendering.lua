@@ -15,5 +15,4 @@ group "Graphics"
         files { "**.h",
                 "**.cpp"}
 
-        excludes { "Rendering/BasicForwardRenderer.cpp" }
             

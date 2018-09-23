@@ -170,6 +170,11 @@ public:
 	void* MappedPointer;
 
 	D3D12GPUResource() : CurrentState(D3D12_RESOURCE_STATE_COMMON), PendingState(D3D12_RESOURCE_STATE_INVALID_STATE), ResourceOwnership(COMMAND_CONTEXT_TYPE_INVALID) { }
+	virtual ~D3D12GPUResource() 
+	{
+		Resource.D3DResource->Release();
+		Resource.D3DResource = nullptr;
+	}
 
 	inline bool CheckResourceTransitionValid(D3D12_RESOURCE_STATES NewState)
 	{

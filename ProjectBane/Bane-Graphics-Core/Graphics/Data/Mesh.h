@@ -100,6 +100,7 @@ public:
 		memcpy((void*)Res.data(), (void*)InVertices.data(), InVertices.size() * (sizeof(T)));
 		SetVertices(Res);
 	}
+
 	void SetVertices(const std::vector<FloatInt>& InVertices);
 	void SetIndices(const std::vector<uint32>& InIndices);
 

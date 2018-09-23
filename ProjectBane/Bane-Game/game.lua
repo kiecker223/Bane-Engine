@@ -1,13 +1,14 @@
 group "Game"
 project "BaneGame"
     kind "StaticLib"
-    links {"BaneObject", "BaneCore", "BaneGraphicsCore" }
+    links {"BaneObject", "BaneCore", "BaneGraphicsCore", "BanePhysics" }
     includedirs { 
         "../Bane-Common",
         "../Bane-Math",
         "../Bane-Object",
         "../Bane-Core",
 		"../Bane-Graphics-Core",
+		"../Bane-Physics",
         "../External/include"}
 
 --  libdirs {"../External/libs/" }

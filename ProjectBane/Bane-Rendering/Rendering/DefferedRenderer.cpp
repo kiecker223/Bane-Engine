@@ -134,7 +134,6 @@ void DefferedRenderer::Shutdown()
 {
 	delete m_OnScreenQuad.VB;
 	delete m_OnScreenQuad.IB;
-	delete m_OnScreenQuad.Pipeline;
 	delete m_OnScreenQuad.Table;
 	delete m_OnScreenQuad.PointSampler;
 	delete m_OnScreenQuad.SkySampler;

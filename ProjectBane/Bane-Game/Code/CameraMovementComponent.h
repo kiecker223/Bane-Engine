@@ -26,8 +26,7 @@ public:
 
 	void Tick(float Dt) override final
 	{
-		UNUSED(Dt);
-
+		float RotationSpeed = 30.f;
 		Transform* ST = GetTransform();
 		GetKeyboardState(InputState);
 		static const float3 Up(0.0f, 1.0f, 0.0f);
@@ -38,37 +37,36 @@ public:
 
 		if (InputState[0x57] & 0x80)
 		{
-			ST->Translate(ST->GetForward());
+			ST->Translate((ST->GetForward() * 4.f) * Dt);
 		}
 		if (InputState[0x53] & 0x80)
 		{
-			ST->Translate(-ST->GetForward());
+			ST->Translate((-ST->GetForward() * 4.f) * Dt);
 		}
 		if (InputState[0x41] & 0x80)
 		{
-			ST->Translate(-Right * 0.3f);
+			ST->Translate(-Right * Dt);
 		}
 		if (InputState[0x44] & 0x80)
 		{
-			ST->Translate(Right * 0.3f);
+			ST->Translate(Right * Dt);
 		}
 		if (InputState[0x51] & 0x80)
 		{
-			ST->Rotate(-5.f, 0.0f, 0.0f);
+			ST->Rotate(-RotationSpeed * Dt, 0.0f, 0.0f);
 		}
 		if (InputState[0x52] & 0x80)
 		{
-			ST->Rotate(0.0f, -5.f, 0.0f);
+			ST->Rotate(0.0f, -RotationSpeed * Dt, 0.0f);
 		}
 		if (InputState[0x46] & 0x80)
 		{
-			ST->Rotate(0.0f, 5.f, 0.0f);
+			ST->Rotate(0.0f, RotationSpeed * Dt, 0.0f);
 		}
 		if (InputState[0x45] & 0x80)
 		{
-			ST->Rotate(5.f, 0.0f, 0.0f);
+			ST->Rotate(RotationSpeed * Dt, 0.0f, 0.0f);
 		}
-		std::cout << Forward.x << "\n" << Forward.y << "\n" << Forward.z << "\n--------\n" << std::endl;
 	}
 };
 
