@@ -124,7 +124,6 @@ void Application::Run()
 		float Dt = static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(DeltaTime).count()) / 1E+9f;
 		pCurrentScene->Tick(Dt);
 		m_SceneRenderer->Present();
-		std::cout << "Delta Time: " << Dt << std::endl;
 	}
 }
 

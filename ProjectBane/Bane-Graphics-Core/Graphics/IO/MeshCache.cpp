@@ -61,11 +61,23 @@ void MeshCache::DeallocateMesh(Mesh* pMesh)
 
 Mesh* MeshCache::LoadMesh(const std::string& MeshName)
 {
-	Mesh* Result = AllocateMesh();
-	if (Result)
+	auto Val = m_Meshes.find(MeshName);
+	if (Val == m_Meshes.end())
 	{
-		if (Result->LoadFromFile(MeshName))
-			return Result;
+		Mesh* Result = AllocateMesh();
+		if (Result)
+		{
+			if (Result->LoadFromFile(MeshName))
+			{
+				m_Meshes.insert(std::pair<std::string, Mesh*>(MeshName, Result));
+				return Result;
+			}
+			return nullptr;
+		}
+	}
+	else
+	{
+		return Val->second;
 	}
 	return nullptr;
 }

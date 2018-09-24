@@ -26,3 +26,6 @@
 #define NO_VTABLE __declspec(novtable)
 
 #define UNUSED(expr) do { (void)(expr); } while (0)
+
+#define GRAV_CONST 6.6747E-11f
+

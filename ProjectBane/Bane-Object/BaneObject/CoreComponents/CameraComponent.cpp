@@ -14,27 +14,26 @@ CameraComponent::CameraComponent() :
 {
 }
 
-matrix CameraComponent::GetProjection() const
+float4x4 CameraComponent::GetProjection() const
 {
 	if (ProjectionType == CAMERA_TYPE_ORTHO)
 	{
-		return matrix();
+		return float4x4();
 		//return XMMatrixOrthographicLH(ViewWidth, ViewHeight, ZNear, ZFar);
 	}
 	else
 	{
 		float Aspect = Window::GetMainWindow()->AspectXY();
-		return matProjection(Aspect, Fov, 0.01f, 1000.0f);
+		return matProjection(Aspect, Fov, ZNear, ZFar);
 	}
 }
 
-matrix CameraComponent::GetLookAt() const
+float4x4 CameraComponent::GetLookAt() const
 {
 	static const float3 UpDirection = float3(0.0f, 1.0f, 0.0f);
-	float3 Forward = GetOwner()->GetTransform()->GetForward();
+	//float3 Forward = GetOwner()->GetTransform()->GetForward() * 200.f;
 	float3 Position = GetOwner()->GetTransform()->GetPosition();
-
-	return matView(Position, Position + Forward, UpDirection);
+	return matView(Position, Target, UpDirection);
 }
 
 void CameraComponent::Tick(float DT)
@@ -48,5 +47,7 @@ void CameraComponent::GraphicsUpdate(RenderLoop& Loop)
 	CamData.Position = GetTransform()->GetPosition();
 	CamData.Projection = GetProjection();
 	CamData.View = GetLookAt();
+	CamData.FarPlane = ZFar;
+	CamData.ZResolution = 0.0005f;
 	Loop.SetCamera(CamData);
 }

@@ -160,7 +160,7 @@ public:
 
 	void AddChild(EntityIdentifier Child);
 	void RemoveChild(uint32 ChildIndex);
-	matrix GetMatrixAffectedByParents() const;
+	float4x4 GetMatrixAffectedByParents() const;
 
 	IdentifierList& GetChildren()
 	{

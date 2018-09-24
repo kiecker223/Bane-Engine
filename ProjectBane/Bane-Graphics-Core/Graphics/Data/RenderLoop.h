@@ -8,14 +8,16 @@
 
 
 typedef struct ALIGN_FOR_GPU_BUFFER MESH_RENDER_DATA {
-	matrix Model;
+	float4x4 Model;
 	MATERIAL_PARAMETERS Parameters;
 } MESH_RENDER_DATA;
 
 typedef struct ALIGN_FOR_GPU_BUFFER CAMERA_CONSTANT_BUFFER_DATA {
-	matrix View;
-	matrix Projection;
-	float4 Position;
+	float4x4 View;
+	float4x4 Projection;
+	float3 Position;
+	float ZResolution;
+	float FarPlane;
 } CAMERA_CONSTANT_BUFFER_DATA;
 
 
@@ -86,7 +88,7 @@ public:
 	~RenderLoop();
 
 	void SetCamera(const CAMERA_DATA& CamData);
-	void AddDrawable(const Mesh* pMesh, const Material& Mat, matrix ModelMat);
+	void AddDrawable(const Mesh* pMesh, const Material& Mat, float4x4 ModelMat);
 	void AddLight(const DIRECTIONAL_LIGHT_DATA& DirLight);
 	void AddLight(const POINT_LIGHT_DATA& PointLight);
 	void AddLight(const SPOTLIGHT_DATA& SpotLight);

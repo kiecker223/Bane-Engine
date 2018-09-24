@@ -44,8 +44,8 @@ inline SPOTLIGHT_DATA LightComponent::GetSpotLight() const
 	//BANE_CHECK(m_Type == LIGHT_TYPE_SPOT);
 	SPOTLIGHT_DATA Result = {};
 	Result.Color = Color;
-	Result.Direction = GetOwner()->GetTransform()->GetForward();
-	Result.Position = GetOwner()->GetTransform()->GetPosition();
+	Result.Direction = (GetOwner()->GetTransform()->GetForward());
+	Result.Position = (GetOwner()->GetTransform()->GetPosition());
 	Result.Range = Range;
 	Result.SpotAngle = SpotAngle;
 	Result.Intensity = Intensity;

@@ -17,6 +17,7 @@ public:
 
 private:
 
+	std::map<std::string, Mesh*> m_Meshes;
 
 };
 

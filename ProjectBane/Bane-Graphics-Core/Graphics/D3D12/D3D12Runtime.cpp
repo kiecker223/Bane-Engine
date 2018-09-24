@@ -5,7 +5,7 @@
 #include "Platform/System/Logging/Logger.h"
 
 #define USE_WARP 0
-#define USE_DEBUG_INTERFACE 1
+#define USE_DEBUG_INTERFACE 0
 
 #define PLEASE_HELP_I_BROKE_THE_THING_AGAIN 0
 

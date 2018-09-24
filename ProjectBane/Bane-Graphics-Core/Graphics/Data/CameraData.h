@@ -5,7 +5,9 @@
 
 typedef struct CAMERA_DATA {
 	IRenderPassInfo* CurrentRenderPass;
-	matrix View;
-	matrix Projection;
+	float4x4 View;
+	float4x4 Projection;
 	float3 Position;
+	float ZResolution;
+	float FarPlane;
 } CAMERA_DATA;

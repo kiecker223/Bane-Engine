@@ -846,6 +846,7 @@ struct double4
 		{
 			p[i] = Rhs.p[i];
 		}
+		return *this;
 	}
 
 	inline constexpr T& operator[](const uint32 Index)

@@ -21,14 +21,14 @@ RenderLoop::~RenderLoop()
 void RenderLoop::SetCamera(const CAMERA_DATA& CamData)
 {
 	uint64& Size = GRenderGlobals.CameraData.Size;
-	GRenderGlobals.CameraData.Buffer[m_Current.CameraIdxOffset + Size] = { CamData.View, CamData.Projection, float4(CamData.Position, 1.f) };
+	GRenderGlobals.CameraData.Buffer[m_Current.CameraIdxOffset + Size] = { CamData.View, CamData.Projection, CamData.Position, CamData.ZResolution, CamData.FarPlane };
 	m_Current.CameraIdxOffset = GRenderGlobals.CameraData.Offset * sizeof(CAMERA_CONSTANT_BUFFER_DATA);
 	GRenderGlobals.CameraData.RenderPasses[Size] = CamData.CurrentRenderPass;
 	Size++;
 }
 
-void RenderLoop::AddDrawable(const Mesh* pMesh, const Material& Mat, matrix ModelMat)
-{	
+void RenderLoop::AddDrawable(const Mesh* pMesh, const Material& Mat, float4x4 ModelMat)
+{
 	GRenderGlobals.MeshData.Buffer[GRenderGlobals.MeshData.Offset] = { ModelMat, Mat.GetMaterialParameters() };
 	GRenderGlobals.MeshData.Offset++;
 	m_Current.Meshes.push_back({ pMesh->GetVertexBuffer(), pMesh->GetIndexBuffer(), Mat.GetShaderConfiguration(), Mat.GetTable(), 0, pMesh->GetIndexCount() });

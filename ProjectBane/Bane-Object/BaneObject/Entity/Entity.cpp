@@ -55,10 +55,10 @@ void Entity::RemoveChild(uint32 ChildIndex)
 	m_Children.erase(m_Children.begin() + ChildIndex);
 }
 
-matrix Entity::GetMatrixAffectedByParents() const
+float4x4 Entity::GetMatrixAffectedByParents() const
 {
 	const Entity* Parent = this;
-	matrix Result = GetTransform()->GetMatrix();
+	float4x4 Result = GetTransform()->GetMatrix();
 
 	while (Parent)
 	{

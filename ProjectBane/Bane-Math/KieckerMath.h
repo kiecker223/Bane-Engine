@@ -26,10 +26,17 @@ inline uint32 NextPowerOfTwo(uint32 Value)
 #include "Math/MathFunctions.h"
 
 template<>
-inline Quaternion lerp<Quaternion>(const Quaternion& V0, const Quaternion& V1, float Factor)
+inline Quaternion lerp<Quaternion, float>(const Quaternion& V0, const Quaternion& V1, float Factor)
 {
 	float f = 1 - Factor;
 	return Quaternion(V0.w * f + V1.w * Factor, V0.x * f + V1.x * Factor, V0.y * f + V1.y * Factor, V0.z * f + V1.z * Factor).Normalized();
+}
+
+template<>
+inline Quaternion64 lerp<Quaternion64, double>(const Quaternion64& V0, const Quaternion64& V1, double Factor)
+{
+	double f = 1 - Factor;
+	return Quaternion64(V0.w * f + V1.w * Factor, V0.x * f + V1.x * Factor, V0.y * f + V1.y * Factor, V0.z * f + V1.z * Factor).Normalized();
 }
 
 #endif //__BANE_MATH_H__

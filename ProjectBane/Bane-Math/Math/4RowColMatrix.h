@@ -539,7 +539,7 @@ struct float4x4
 
 typedef float4x4 matrix;
 
-/*
+
 struct double4x4
 {
 	using T = double;
@@ -566,7 +566,7 @@ struct double4x4
 
 	double4x4(T IdentityVal)
 	{
-		for (double i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			v[i] = RowType();
 		}
@@ -602,12 +602,12 @@ struct double4x4
 		v[3] = r4;
 	}
 
-	inline constexpr RowType& operator[](udouble32 Index)
+	inline constexpr RowType& operator[](uint32 Index)
 	{
 		return v[Index];
 	}
 
-	inline RowType operator[](udouble32 Index) const
+	inline RowType operator[](uint32 Index) const
 	{
 		return v[Index];
 	}
@@ -681,7 +681,7 @@ struct double4x4
 
 	inline TT& operator *= (T Rhs)
 	{
-		for (udouble32 i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			v[i] *= Rhs;
 		}
@@ -691,7 +691,7 @@ struct double4x4
 	inline TT operator * (T Rhs) const
 	{
 		TT Result;
-		for (udouble32 i = 0; i < NumRows; i++)
+		for (uint32 i = 0; i < NumRows; i++)
 		{
 			Result[i] = v[i] * Rhs;
 		}
@@ -717,4 +717,3 @@ struct double4x4
 
 #pragma endregion
 };
-*/

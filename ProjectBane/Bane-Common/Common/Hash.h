@@ -15,11 +15,6 @@ inline uint64 GetDJB264BitHash(const char* Ptr, size_t Length)
 	return Result;
 }
 
-//ForceInline uint3264 GetDJB264BitHash(const std::string& Str)
-//{
-//	return GetDJB264BitHash(Str.c_str(), Str.length());
-//}
-
 constexpr uint64 GetDJB264BitHash_ConstExpr_Impl(const char* String, uint64 InValue, uint32 Index)
 {
 	return String[Index] != 0 ? GetDJB264BitHash_ConstExpr_Impl(String, (((InValue << 5) + InValue) + String[Index]), Index + 1) : InValue;
