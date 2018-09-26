@@ -21,17 +21,34 @@ RenderLoop::~RenderLoop()
 void RenderLoop::SetCamera(const CAMERA_DATA& CamData)
 {
 	uint64& Size = GRenderGlobals.CameraData.Size;
-	GRenderGlobals.CameraData.Buffer[m_Current.CameraIdxOffset + Size] = { CamData.View, CamData.Projection, CamData.Position, CamData.ZResolution, CamData.FarPlane };
+	GRenderGlobals.CameraData.Buffer[m_Current.CameraIdxOffset + Size] = { CamData.View, CamData.Projection, fromDouble3(CamData.Position), CamData.ZResolution, CamData.FarPlane };
 	m_Current.CameraIdxOffset = GRenderGlobals.CameraData.Offset * sizeof(CAMERA_CONSTANT_BUFFER_DATA);
+	m_Current.CameraPosition = CamData.Position;
 	GRenderGlobals.CameraData.RenderPasses[Size] = CamData.CurrentRenderPass;
 	Size++;
 }
 
-void RenderLoop::AddDrawable(const Mesh* pMesh, const Material& Mat, float4x4 ModelMat)
+void RenderLoop::AddDrawable(const Mesh* pMesh, const Material& Mat, const double3& ModelPos, const double3& ModelScale, const Quaternion& ModelRot)
 {
-	GRenderGlobals.MeshData.Buffer[GRenderGlobals.MeshData.Offset] = { ModelMat, Mat.GetMaterialParameters() };
+	float4x4 ModelMat;
+	double3 DeprojectedPos = ModelPos - m_Current.CameraPosition;
+	// This code is horrible and should be ashamed of itself
+	
+	GRenderGlobals.MeshData.Buffer[GRenderGlobals.MeshData.Offset].Parameters = Mat.GetMaterialParameters();
+	auto* MatPtr = &GRenderGlobals.MeshData.Buffer[GRenderGlobals.MeshData.Offset].Model;
 	GRenderGlobals.MeshData.Offset++;
-	m_Current.Meshes.push_back({ pMesh->GetVertexBuffer(), pMesh->GetIndexBuffer(), Mat.GetShaderConfiguration(), Mat.GetTable(), 0, pMesh->GetIndexCount() });
+	m_Current.Meshes.push_back({ 
+		pMesh->GetVertexBuffer(),
+		pMesh->GetIndexBuffer(),
+		Mat.GetShaderConfiguration(),
+		Mat.GetTable(),
+		ModelPos, 
+		ModelScale, 
+		ModelRot, 
+		MatPtr, 
+		0, 
+		pMesh->GetIndexCount() 
+	});
 	m_Current.MeshData_NumUsed++;
 	GRenderGlobals.MeshData.Size++;
 }

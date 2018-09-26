@@ -117,7 +117,6 @@ public:
 		PtrEnd = PtrBegin + ByteSize;
 	}
 	
-
 	uint8* PtrBegin;
 	uint8* PtrEnd;
 	uint8* PtrCurrent;

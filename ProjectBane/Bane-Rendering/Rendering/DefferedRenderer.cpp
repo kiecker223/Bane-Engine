@@ -80,6 +80,7 @@ void DefferedRenderer::Initialize(const Window* pWindow)
 
 void DefferedRenderer::Render()
 {
+	__debugbreak();
 	Frame++;
 	IGraphicsCommandContext* ctx = m_Device->GetGraphicsContext();
 	GatherSceneData(ctx);

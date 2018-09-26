@@ -7,12 +7,12 @@ class PhysicsBody
 {
 public:
 
-	float Radius;
-	float3 Velocity;
-	float Mass;
+	double Radius;
+	double3 Velocity;
+	double Mass;
 
 	uint32 Handle;
-	float3 Position;
+	double3 Position;
 
 };
 

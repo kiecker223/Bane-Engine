@@ -36,6 +36,10 @@ typedef struct DRAWABLE_MESH {
 	IIndexBuffer* IndexBuffer;
 	IGraphicsPipelineState* Pipeline;
 	IShaderResourceTable* Table;
+	double3 Position;
+	double3 Scale;
+	Quaternion Rotation;
+	float4x4* MatrixPtr;
 	uint64 MeshDataOffset;
 	uint32 IndexCount;
 } DRAWABLE_MESH;
@@ -44,6 +48,7 @@ typedef struct RENDER_LOOP_DRAW_COMMIT {
 	uint64 CameraIdxOffset;
 	uint64 MeshData_Offset;
 	uint64 MeshData_NumUsed;
+	double3 CameraPosition;
 	std::vector<DRAWABLE_MESH> Meshes;
 } RENDER_LOOP_DRAW_COMMIT;
 
@@ -88,7 +93,7 @@ public:
 	~RenderLoop();
 
 	void SetCamera(const CAMERA_DATA& CamData);
-	void AddDrawable(const Mesh* pMesh, const Material& Mat, float4x4 ModelMat);
+	void AddDrawable(const Mesh* pMesh, const Material& Mat, const double3& ModelPos, const double3& ModelScale, const Quaternion& ModelRot);
 	void AddLight(const DIRECTIONAL_LIGHT_DATA& DirLight);
 	void AddLight(const POINT_LIGHT_DATA& PointLight);
 	void AddLight(const SPOTLIGHT_DATA& SpotLight);

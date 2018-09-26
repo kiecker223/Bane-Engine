@@ -138,6 +138,7 @@ void Scene::PhysicsUpdate(const PhysicsUpdateBuffer UpdateBuffer)
 		{
 			uint32 PhysicsHandle = e.pEntity->GetPhysicsProperties().PhysicsWorldHandle;
 			e.pEntity->GetTransform()->SetPosition(UpdateBuffer.Bodies[PhysicsHandle].Position);
+			e.pEntity->GetPhysicsProperties().Velocity = UpdateBuffer.Bodies[PhysicsHandle].Velocity;
 		}
 	}
 }

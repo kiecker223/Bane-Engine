@@ -12,7 +12,7 @@ public:
 
 	bool bCanTick;
 
-	float Mass;
-	float3 Velocity;
+	double Mass;
+	double3 Velocity;
 	uint32 PhysicsWorldHandle;
 };

@@ -16,14 +16,18 @@ void PhysicsWorld::UpdateBodies()
 			{
 				continue;
 			}
-			float3 AccelerationDir = OtherBody.Position - Body.Position;
-			float DistanceFromBody = length(AccelerationDir);
+			double3 AccelerationDir = OtherBody.Position - Body.Position;
+			double DistanceFromBody = length(AccelerationDir);
 			normalize(AccelerationDir);
 
-			float Force = GRAV_CONST * ((Body.Mass * OtherBody.Mass) / DistanceFromBody * DistanceFromBody);
+			double Force = M_GRAV_CONST * ((Body.Mass * OtherBody.Mass) / DistanceFromBody * DistanceFromBody);
 			AccelerationDir *= Force;
+			if (isnan(AccelerationDir.x))
+			{
+				__debugbreak();
+			}
 			Body.Velocity += AccelerationDir;
-			if (length(Body.Velocity) > 0.1f)
+			if (length(Body.Velocity) > 0.0001)
 				Body.Position += Body.Velocity;
 		}
 	}

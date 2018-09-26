@@ -18,24 +18,24 @@ public:
 	~CameraMovementComponent();
 
 	uint8* InputState = nullptr;
-	float Speed;
+	double Speed;
 
 	void Start() override final
 	{
 		InputState = new uint8[256];
 	}
 
-	void Tick(float Dt) override final
+	void Tick(float DT) override final
 	{
+		double Dt = static_cast<double>(DT);
 		float RotationSpeed = 30.;
 		Transform* ST = GetTransform();
 		GetKeyboardState(InputState);
-		static const float3 Up(0.0, 1.0, 0.0);
+		static const double3 Up(0.0, 1.0, 0.0);
 
-		float3 Right;
-		float3 Forward = ST->GetForward();
+		double3 Right;
+		double3 Forward = ST->GetForward();
 		Right = cross(Forward, Up);
-		std::cout << ST->GetPosition().x << " : " << ST->GetPosition().y << " : " << ST->GetPosition().z << std::endl;
 		if (InputState[0x57] & 0x80)
 		{
 			ST->Translate((ST->GetForward() * Speed) * Dt);
@@ -54,19 +54,19 @@ public:
 		}
 		if (InputState[0x51] & 0x80)
 		{
-			ST->Rotate(-RotationSpeed * Dt, 0.0f, 0.0f);
+			ST->Rotate(-RotationSpeed * DT, 0.0f, 0.0f);
 		}
 		if (InputState[0x52] & 0x80)
 		{
-			ST->Rotate(0.0f, -RotationSpeed * Dt, 0.0f);
+			ST->Rotate(0.0f, -RotationSpeed * DT, 0.0f);
 		}
 		if (InputState[0x46] & 0x80)
 		{
-			ST->Rotate(0.0f, RotationSpeed * Dt, 0.0f);
+			ST->Rotate(0.0f, RotationSpeed * DT, 0.0f);
 		}
 		if (InputState[0x45] & 0x80)
 		{
-			ST->Rotate(RotationSpeed * Dt, 0.0f, 0.0f);
+			ST->Rotate(RotationSpeed * DT, 0.0f, 0.0f);
  		}
 	}
 };

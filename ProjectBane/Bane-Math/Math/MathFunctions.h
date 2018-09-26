@@ -363,6 +363,21 @@ inline float2 fromDouble2(const double2& InVal)
 	return float2(static_cast<float>(InVal.x), static_cast<float>(InVal.y));
 }
 
+inline double4 fromFloat4(const float4& InVal)
+{
+	return double4(static_cast<double>(InVal.x), static_cast<double>(InVal.y), static_cast<double>(InVal.z), static_cast<double>(InVal.w));
+}
+
+inline double3 fromFloat3(const float3& InVal)
+{
+	return double3(static_cast<double>(InVal.x), static_cast<double>(InVal.y), static_cast<double>(InVal.z));
+}
+
+inline double2 fromFloat2(const float2& InVal)
+{
+	return double2(static_cast<double>(InVal.x), static_cast<double>(InVal.y));
+}
+
 // Forward is expected to be normalized already
 inline matrix matView(float3 Eye, float3 Forward, float3 Up)
 {

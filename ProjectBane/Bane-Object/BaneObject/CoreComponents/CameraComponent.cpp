@@ -32,8 +32,7 @@ float4x4 CameraComponent::GetLookAt() const
 {
 	static const float3 UpDirection = float3(0.0f, 1.0f, 0.0f);
 	//float3 Forward = GetOwner()->GetTransform()->GetForward() * 200.f;
-	float3 Position = GetOwner()->GetTransform()->GetPosition();
-	return matView(Position, Target, UpDirection);
+	return matView(float3(0.f, 0.f, 0.f), fromDouble3(fromFloat3(Target) - GetTransform()->GetPosition()), UpDirection);
 }
 
 void CameraComponent::Tick(float DT)

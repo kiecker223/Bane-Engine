@@ -18,7 +18,8 @@ void MeshRenderingComponent::Start()
 
 void MeshRenderingComponent::GraphicsUpdate(RenderLoop& Loop)
 {
-	Loop.AddDrawable(RenderedMesh, RenderedMaterial, GetTransform()->GetMatrix());
+	auto* XForm = GetTransform();
+	Loop.AddDrawable(RenderedMesh, RenderedMaterial, XForm->GetPosition(), XForm->GetScale(), XForm->GetRotation());
 }
 
 

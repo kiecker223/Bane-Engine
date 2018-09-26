@@ -24,7 +24,7 @@ void BasicForwardRenderer::Render()
 		for (uint32 y = 0; y < Commit.Meshes.size(); y++)
 		{
 			auto& DrawMesh = Commit.Meshes[y];
-			ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);			
+			ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);
 			m_Device->CreateShaderResourceView(DrawMesh.Table, m_CameraConstants, 0, Commit.CameraIdxOffset * sizeof(CAMERA_CONSTANT_BUFFER_DATA));
 			m_Device->CreateShaderResourceView(DrawMesh.Table, m_MeshDataBuffer, 1, y * sizeof(MESH_RENDER_DATA));
 			m_Device->CreateShaderResourceView(DrawMesh.Table, m_LightBuffer, 2);
@@ -71,6 +71,13 @@ void BasicForwardRenderer::GatherSceneData(IGraphicsCommandContext* ctx)
 		}
 	}
 	{
+		for (auto& Commit : m_Commits)
+		{
+			for (auto& DrawMesh : Commit.Meshes)
+			{
+				*DrawMesh.MatrixPtr = matTransformation(fromDouble3(DrawMesh.Position - Commit.CameraPosition), DrawMesh.Rotation, fromDouble3(DrawMesh.Scale));
+			}
+		}
 		if (RenderLoop::GRenderGlobals.MeshData.Size > 0)
 		{
 			byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_MeshDataBuffer));

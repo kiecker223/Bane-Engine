@@ -28,4 +28,7 @@
 #define UNUSED(expr) do { (void)(expr); } while (0)
 
 #define GRAV_CONST 6.6747E-11f
+#define M_GRAV_CONST 6.6747E-11
+#define AU(x) x * 149600000.f
+#define M_AU(x) x * 149600000.0
 
