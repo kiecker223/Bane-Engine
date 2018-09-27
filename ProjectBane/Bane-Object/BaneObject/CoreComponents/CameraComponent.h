@@ -31,8 +31,6 @@ public:
 	float ZNear;
 	float ZFar;
 	ECAMERA_TYPE ProjectionType;
-	// Probably going to remove, this is for testing
-	float3 Target;
 	
 	inline void SetPriority(uint32 Priority)
 	{

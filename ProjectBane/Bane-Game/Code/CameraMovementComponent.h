@@ -28,7 +28,7 @@ public:
 	void Tick(float DT) override final
 	{
 		double Dt = static_cast<double>(DT);
-		float RotationSpeed = 30.;
+		float RotationSpeed = 30.f;
 		Transform* ST = GetTransform();
 		GetKeyboardState(InputState);
 		static const double3 Up(0.0, 1.0, 0.0);

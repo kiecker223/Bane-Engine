@@ -706,7 +706,10 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 					};
 					DirectCL->ResourceBarrier(1, &Barrier);
 				}
-				DirectCL->Dispatch(max(DstWidth / 8, 1), max(DstHeight / 8, 1), 1);
+				DirectCL->Dispatch(
+					max(static_cast<uint32>(std::ceil(static_cast<float>(DstWidth) / 8.f)), 1),
+					max(static_cast<uint32>(std::ceil(static_cast<float>(DstHeight) / 8.f)), 1),
+					1);
 				{
 					D3D12_RESOURCE_BARRIER Barriers[2] =
 					{

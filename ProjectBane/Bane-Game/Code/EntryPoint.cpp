@@ -24,7 +24,6 @@ public:
 	{
 		UNUSED(Dt);
 		double3 PlanetPos = ParentPlanet->GetTransform()->GetPosition();
-		CamComp->Target = fromDouble3(PlanetPos);
 		if (length(PlanetPos - GetTransform()->GetPosition()) > 2e4)
 		{
 			GetTransform()->SetPosition(PlanetPos + double3(0., 0., -3000.0));
@@ -111,35 +110,37 @@ void InitApplication()
 		auto* SunMesh = Sun->AddComponent<MeshRenderingComponent>();
 		SunMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Meshes/sphere.FBX");
 		SunMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
-		Sun->GetTransform()->Scale(1391016.0);
+		Sun->GetTransform()->Scale(1391016000.0);
 	}
 	Entity* FollowedPlanet = nullptr;
 	{
+		double DFS = 57910000000.;
 		Entity* Mercury = SpaceLevel->CreateEntity("Mercury");
 		Mercury->GetPhysicsProperties().Mass = 3.285e23;
-		Mercury->GetPhysicsProperties().Velocity = double3((M_GRAV_CONST * 1.989e30) / 57910000., 0., 0.);
+		Mercury->GetPhysicsProperties().Velocity = double3((M_GRAV_CONST * 1.989e30) / DFS, 0., 0.);
 		Mercury->GetPhysicsProperties().bCanTick = false;
-		Mercury->GetTransform()->SetPosition(double3(0., 0., -57910000.));
+		Mercury->GetTransform()->SetPosition(double3(0., 0., -DFS));
 		auto* MercuryMesh = Mercury->AddComponent<MeshRenderingComponent>();
 		MercuryMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Meshes/sphere.FBX");
 		MercuryMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
-		Mercury->GetTransform()->Scale(4879.0);
+		Mercury->GetTransform()->Scale(4879000.0);
 	}
 	{
+		double DFS = 108200000.;
 		Entity* Venus = SpaceLevel->CreateEntity("Venus");
 		Venus->GetPhysicsProperties().Mass = 4.867e24f;
-		Venus->GetPhysicsProperties().Velocity = double3((M_GRAV_CONST * 1.989e30) / 108200000., 0., 0.);
+		Venus->GetPhysicsProperties().Velocity = double3(0., 0.0, 0.0);
 		Venus->GetPhysicsProperties().bCanTick = false;
-		Venus->GetTransform()->SetPosition(double3(0.f, 0.f, -108200000.f));
+		Venus->GetTransform()->SetPosition(double3(0.f, 0.f, -DFS));
 		auto* VenusMesh = Venus->AddComponent<MeshRenderingComponent>();
 		VenusMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Meshes/sphere.FBX");
 		VenusMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
-		Venus->GetTransform()->Scale(12104.);
+		Venus->GetTransform()->Scale(12104000.);
 	}
 	{
 		Entity* Earth = SpaceLevel->CreateEntity("Earth");
-		Earth->GetPhysicsProperties().Mass = 5.972e24;
-		//Earth->GetPhysicsProperties().Velocity = double3((M_GRAV_CONST * 1.989e30 / M_AU(1.)), 0., 0.);
+		Earth->GetPhysicsProperties().Mass = 5.97219e24;
+		Earth->GetPhysicsProperties().Velocity = double3(30000.0, 0., 0.);
 		//Earth->GetPhysicsProperties().bCanTick = false;
 		auto Test = Earth->GetPhysicsProperties().Velocity;
 		UNUSED(Test);
@@ -147,33 +148,29 @@ void InitApplication()
 		auto* EarthMesh = Earth->AddComponent<MeshRenderingComponent>();
 		EarthMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Meshes/sphere.FBX");
 		EarthMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
-		Earth->GetTransform()->Scale(12742.0);
+		EarthMesh->RenderedMaterial.SetTexture("Resources/EarthNoClouds.jpg", 0);
+		Earth->GetTransform()->Scale(12742000.0);
 		Earth->AddComponent<PrintVelocityFromPhysicsComponent>();
 
 		Entity* Luna = SpaceLevel->CreateEntity("Luna");
 		Luna->GetPhysicsProperties().Mass = 7.34767309e22;
-		//Luna->GetPhysicsProperties().Velocity = double3((M_GRAV_CONST * 1.989e30 / M_AU(1.) + 384400.), 0., 0.);
-		//Luna->GetPhysicsProperties().bCanTick = false;
-		Luna->GetTransform()->SetPosition(double3(0., 0., M_AU(1.) + 384400.));
+		Luna->GetPhysicsProperties().Velocity = double3((M_GRAV_CONST * 1.989e30 / M_AU(1.) + 384400000.), 0., 0.);
+		Luna->GetPhysicsProperties().bCanTick = false;
+		Luna->GetTransform()->SetPosition(double3(0., 0., M_AU(1.) + 384400000.));
 		auto* LunaMesh = Luna->AddComponent<MeshRenderingComponent>();
 		LunaMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Meshes/sphere.FBX");
 		LunaMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
-		Luna->GetTransform()->Scale(3474.0);
+		Luna->GetTransform()->Scale(3474000.0);
 		FollowedPlanet = Earth;
-	}
-	{
-// 		Entity* Mars = SpaceLevel->CreateEntity("Mars");
-// 		Mars->GetPhysicsProperties().Mass = 6.41693e23f;
-// 		Mars->GetPhysicsProperties().Velocity = float3();
 	}
 	Entity* CamEntity = SpaceLevel->CreateEntity("Camera");
 	CamEntity->GetTransform()->SetPosition(double3(0., 0., -M_AU(1.)));
 	CamEntity->GetPhysicsProperties().bCanTick = false;
 	auto* Cam = CamEntity->AddComponent<CameraComponent>();
 	Cam->ZNear = 1e-2f;
-	Cam->ZFar = 1e+18f;
-	CamEntity->AddComponent<CameraMovementComponent>()->Speed = 1e6;
-	CamEntity->AddComponent<CameraFollowPlanet>()->ParentPlanet = FollowedPlanet;
+	Cam->ZFar = 1e+21f;
+	CamEntity->AddComponent<CameraMovementComponent>()->Speed = 1e7;
+	//CamEntity->AddComponent<CameraFollowPlanet>()->ParentPlanet = FollowedPlanet;
 }
 
 
