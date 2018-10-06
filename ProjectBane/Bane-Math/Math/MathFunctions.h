@@ -321,13 +321,28 @@ inline matrix matProjection(float Aspect, float FovY, float Near, float Far)
 	FovY = radians(FovY);
 	float TanFovOverTwo = tanf(FovY / 2.f);
 	matrix Result(
-		1.f / (Aspect * TanFovOverTwo), 0.f, 0.f, 0.f,
+		-(1.f / (Aspect * TanFovOverTwo)), 0.f, 0.f, 0.f,
 		0.f, 1.f / TanFovOverTwo, 0.f, 0.f,
 		0.f, 0.f, -((Far + Near) / (Far - Near)), -((2 * Far * Near) / (Far - Near)),
 		0.f, 0.f, -1.f, 0.f
 	);
 	return Result;
 }
+
+// inline matrix xRotation(float Degrees)
+// {
+// 
+// }
+// 
+// inline matrix yRotation(float Degrees)
+// {
+// 
+// }
+// 
+// inline matrix zRotation(float Degrees)
+// {
+// 
+// }
 
 // TODO: implement all the variations of this function
 // T transpose(const T& InMatrix)
@@ -448,7 +463,7 @@ inline double4x4 matProjection(float InAspect, float InFovY, float InNear, float
 	FovY = radiansD(FovY);
 	double TanFovOverTwo = tan(FovY / 2.);
 	double4x4 Result(
-		1. / (Aspect * TanFovOverTwo), 0., 0., 0.,
+		-1. / (Aspect * TanFovOverTwo), 0., 0., 0.,
 		0., 1. / TanFovOverTwo, 0., 0.,
 		0., 0., -((Far + Near) / (Far - Near)), -((2 * Far * Near) / (Far - Near)),
 		0., 0., -1., 0.

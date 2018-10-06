@@ -35,6 +35,7 @@ Entity* Scene::CreateEntity(const std::string& EntityName)
 		Index++;
 	}
 	pEntity = new Entity(EntityIdentifier(SearchName));
+	pEntity->m_SceneOwner = this;
 	pEntity->SetParent(m_Root->GetId());
 	EntityHashEntry Entry = { pEntity->GetId().HashedName, pEntity };
 	m_EntityAddList.push_back(Entry);

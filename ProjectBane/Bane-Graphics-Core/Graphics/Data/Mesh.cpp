@@ -47,9 +47,21 @@ void ProcessMesh(aiMesh* pMesh, std::vector<uint32>& OutIndices, std::vector<Flo
 	{
 		aiVector3D Pos = pMesh->mVertices[i];
 		aiVector3D Norm = pMesh->mNormals[i];
-		aiVector3D Tangent = pMesh->mTangents[i];
-		aiVector3D Binormals = pMesh->mBitangents[i];
-		aiVector3D UV = pMesh->mTextureCoords[0][i];
+		aiVector3D Tangent;
+		aiVector3D Binormals;
+		aiVector3D UV;
+		if (pMesh->mTangents)
+		{
+			Tangent = pMesh->mTangents[i];
+		}
+		if (pMesh->mBitangents)
+		{
+			Binormals = pMesh->mBitangents[i];
+		}
+		if (pMesh->mTextureCoords && pMesh->mTextureCoords[0])
+		{
+			UV = pMesh->mTextureCoords[0][i];
+		}
 
 		Mesh::Vertex Vtx = { 
 			float3(Pos.x, Pos.y, Pos.z), 
@@ -120,6 +132,59 @@ void Mesh::SetVertices(const std::vector<FloatInt>& InVertices)
 void Mesh::SetIndices(const std::vector<uint32>& InIndices)
 {
 	m_Indices = InIndices;
+}
+
+void Mesh::GenerateSphere(uint32 NumIterations)
+{
+	UNUSED(NumIterations);
+	std::vector<Vertex> Vertices;
+	std::vector<uint32> Indices;
+	float3 TopPoint(0.f, 1.f, 0.f);
+
+	/*
+	struct Vertex
+	{
+	float3 Postition;
+	float3 Normal;
+	float3 Binormal;
+	float3 Tangent;
+	float2 UV;
+	};
+	*/
+
+	Quaternion XRotation = Quaternion::FromAxisAngle(float3(1.f, 0.f, 0.f), 0.0f);
+
+	for (uint32 y = 0; y < 10; y++)
+	{
+		if (y == 0)
+		{
+			Vertices.push_back({TopPoint, TopPoint, float3(), float3(), float2(0.5, 1)});
+			Indices.push_back(0);
+		}
+		else if (y == NumIterations - 1)
+		{
+			for (int i = 0; i < 10; i++)
+			{
+				const float PercentAroundCrown = (static_cast<float>(i) / 10.f);
+				Quaternion YRotation = Quaternion::FromAxisAngle(float3(0, 1, 0), radians(PercentAroundCrown * 360.f));
+				float3 Point = ((float3x3)XRotation.RotationMatrix() * (float3x3)YRotation.RotationMatrix()) * TopPoint;
+				Vertices.push_back({ Point, Point, float3(), float3(),  });
+
+			}
+		}
+		else if (y == 1)
+		{
+
+		}
+		else if (y == NumIterations - 2)
+		{
+
+		}
+		else
+		{
+
+		}
+	}
 }
 
 void Mesh::Upload()

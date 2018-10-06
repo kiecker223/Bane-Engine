@@ -103,6 +103,7 @@ public:
 
 	void SetVertices(const std::vector<FloatInt>& InVertices);
 	void SetIndices(const std::vector<uint32>& InIndices);
+	void GenerateSphere(uint32 NumIterations);
 
 	void Upload(); // Call an explicit upload to gpu
 	

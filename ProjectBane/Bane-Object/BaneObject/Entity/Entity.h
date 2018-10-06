@@ -187,6 +187,7 @@ private:
 class Entity
 {
 	typedef std::vector<EntityIdentifier> IdentifierList;
+	friend class Scene;
 	template<typename T>
 	friend class TComponentHandle;
 public:
@@ -218,6 +219,7 @@ public:
 		m_Components.push_back(T::ClassHash);
 		RetPointer->m_Owner = this;
 		RetPointer->m_Transform = &m_Transform;
+		RetPointer->m_Scene = m_SceneOwner;
 		RetPointer->Awake();
 		return Result;
 	}
@@ -233,6 +235,7 @@ public:
 		m_Components.push_back(T::ClassHash);
 		RetPointer->m_Owner = this;
 		RetPointer->m_Transform = &m_Transform;
+		RetPointer->m_Scene = m_SceneOwner;
 		RetPointer->Awake();
 		return Result;
 	}
@@ -304,7 +307,7 @@ private:
 	EntityIdentifier m_Id;
 	EntityIdentifier m_Parent;
 	IdentifierList m_Children;
-	
+	Scene* m_SceneOwner;
 	ComponentAllocator m_Allocator;
 	std::vector<uint64> m_Components;
 };

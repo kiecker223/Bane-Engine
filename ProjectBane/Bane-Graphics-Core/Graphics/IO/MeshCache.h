@@ -13,6 +13,7 @@ public:
 	Mesh* AllocateMesh();
 	void DeallocateMesh(Mesh* pMesh);
 
+	void SaveMesh(Mesh* pMesh, const std::string& MeshName);
 	Mesh* LoadMesh(const std::string& MeshName);
 
 private:

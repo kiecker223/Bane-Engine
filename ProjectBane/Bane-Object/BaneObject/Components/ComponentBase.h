@@ -6,6 +6,7 @@
 
 class Entity;
 class Transform;
+class Scene;
 
 class Component
 {
@@ -22,6 +23,11 @@ public:
 	inline Entity* GetOwner() const
 	{
 		return m_Owner;
+	}
+
+	inline Scene* GetScene()
+	{
+		return m_Scene;
 	}
 
 	inline Transform* GetTransform()
@@ -46,6 +52,7 @@ public:
 private:
 
 	Entity* m_Owner;
+	Scene* m_Scene;
 	Transform* m_Transform;
 
 };
