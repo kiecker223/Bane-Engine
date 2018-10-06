@@ -1,0 +1,89 @@
+
+Resources
+{
+	cbuffer PositionalData : register(b0)
+	{
+		matrix View;
+		matrix Projection;
+		float3 CameraPosition;
+		float ZResolution;
+		float FarPlane;
+	}
+
+	cbuffer MaterialParameters : register(b1)
+	{
+		matrix Model;
+		float3 MatColor;
+		float MatSpecularFactor;
+		float2 P0;
+		float MatRoughness;
+		float Metallic;
+	}
+
+	cbuffer LightData : register(b2)
+	{
+		float test;
+	}
+
+	Texture2D<float3> AlbedoTexture : register(t0);
+	Texture2D<float3> NormalTexture : register(t1);
+	Texture2D<float> SpecularMap : register(t2);
+	SamplerState DefaultSampler : register(s0);
+};
+
+Pipeline 
+{
+	// Color buffer
+	RenderTarget_0 =  
+	{
+		Format = FORMAT_R8G8B8A8_UNORM;
+	};
+
+	RasterState = 
+	{
+		Cull = false;
+		FillSolid = true;
+	};
+};
+
+struct VS_INPUT
+{
+	float3 Position : POSITION;
+	float3 Normal : NORMAL;
+	float3 Binormal : BINORMAL;
+	float3 Tangent : TANGENT;
+	float2 TexCoords : TEXCOORD;
+};
+
+struct PS_INPUT
+{
+	float4 Position : SV_POSITION;
+	float3 WorldPos : POSITION;
+	float3 Normal : NORMAL;
+	float3 Binormal : BINORMAL;
+	float3 Tangent : TANGENT;
+	float2 TexCoords : TEXCOORD;
+};
+
+PS_INPUT VSMain(VS_INPUT Input)
+{
+	PS_INPUT Output;
+	Output.TexCoords = Input.TexCoords;
+	float4 Pos = float4(Input.Position, 1.0);
+	Pos = mul(Pos, Model);
+	Pos = mul(Pos, View);
+	Pos = mul(Pos, Projection);
+	Pos.z = log((ZResolution*Pos.z) + 1.0) / log((ZResolution*FarPlane) + 1.0);
+	Pos.z *= Pos.w;
+	Output.Position = Pos;
+	Output.WorldPos = mul(float4(Input.Position, 1.0f), Model).xyz;
+	Output.Normal =   normalize(mul(Input.Normal,   (float3x3)Model));
+	Output.Binormal = normalize(mul(Input.Binormal, (float3x3)Model));
+	Output.Tangent =  normalize(mul(Input.Tangent,  (float3x3)Model));
+	return Output;
+}
+
+float4 PSMain(PS_INPUT Input) : SV_TARGET0
+{
+	return float4(AlbedoTexture.Sample(DefaultSampler, Input.TexCoords).rgb, 1.f);
+}
