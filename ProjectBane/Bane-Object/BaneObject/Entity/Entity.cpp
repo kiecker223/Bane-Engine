@@ -6,7 +6,7 @@
 
 
 
-Component* Entity::GetComponentByHash(uint64 Hash)
+TComponentHandle<Component> Entity::GetComponentByHash(uint64 Hash)
 {
 	int IndexToUse = -1;
 	for (uint32 i = 0; i < m_Components.size(); i++)
@@ -19,13 +19,13 @@ Component* Entity::GetComponentByHash(uint64 Hash)
 	}
 
 	if (IndexToUse >= 0)
-		return m_Allocator.GetAllocatedObjects()[IndexToUse];
+		return TComponentHandle<Component>(&m_Allocator.GetAllocatedObjects(), IndexToUse);
 	return nullptr;
 }
 
 void Entity::RemoveComponent(uint64 ComponentHash)
 {
-	Component* Position = GetComponentByHash(ComponentHash);
+	Component* Position = GetComponentByHash(ComponentHash).operator->();
 	m_Allocator.RemovePointer(Position);
 }
 

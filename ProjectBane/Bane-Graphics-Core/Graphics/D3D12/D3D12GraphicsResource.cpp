@@ -5,6 +5,7 @@
 #include "D3D12Helper.h"
 
 
+
 void D3D12GPUResource::TransitionResource(D3D12GraphicsCommandContext* Ctx, D3D12_RESOURCE_STATES NewState)
 {
 	if (CheckResourceTransitionValid(NewState))
@@ -120,6 +121,32 @@ void D3D12Buffer::UploadDataToGPU(D3D12GraphicsCommandContext* Ctx, uint8* Buffe
 	Ctx->CommandList->EnqueueUploadResourceToDestroy(dynamic_cast<D3D12GPUResource*>(UploadBuffer));
 }
 
+void* D3D12Buffer::Map()
+{
+	if (MappedPointer != nullptr)
+	{
+		return MappedPointer;
+	}
+	if (FAILED(Resource.D3DResource->Map(0, nullptr, &MappedPointer)))
+	{
+		__debugbreak();
+	}
+	return MappedPointer;
+}
+
+void D3D12Buffer::Unmap()
+{
+	if (MappedPointer == nullptr)
+	{
+		Resource.D3DResource->Unmap(0, nullptr);
+	}
+	else
+	{
+		return;
+	}
+}
+
+
 
 D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth, uint32 InHeight, uint32 InDepth, uint32 InCount, EFORMAT InFormat, ETEXTURE_USAGE InUsage) :
 	Width(InWidth),
@@ -233,6 +260,31 @@ void D3D12TextureBase::UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void*
 		ResourceData.SlicePitch = (Width * Height) * StepSize;
 		UpdateSubresources<1>(Ctx->CommandList->GetGraphicsCommandList(), Resource.D3DResource, UploadBuffer->Resource.D3DResource, 0, 0, 1, &ResourceData);
 		Ctx->CommandList->EnqueueUploadResourceToDestroy(dynamic_cast<D3D12GPUResource*>(UploadBuffer));
+	}
+}
+
+void* D3D12TextureBase::Map()
+{
+	if (MappedPointer != nullptr)
+	{
+		return MappedPointer;
+	}
+	if (FAILED(Resource.D3DResource->Map(0, nullptr, &MappedPointer)))
+	{
+		__debugbreak();
+	}
+	return MappedPointer;
+}
+
+void D3D12TextureBase::Unmap()
+{
+	if (MappedPointer == nullptr)
+	{
+		Resource.D3DResource->Unmap(0, nullptr);
+	}
+	else
+	{
+		return;
 	}
 }
 

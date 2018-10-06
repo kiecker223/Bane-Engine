@@ -10,7 +10,6 @@ class Transform;
 class Component
 {
 	friend class Entity;
-
 public:
 
 	virtual ~Component() { }
@@ -50,6 +49,7 @@ private:
 	Transform* m_Transform;
 
 };
+
 
 
 constexpr const uint64 Component_HashImpl(uint64 InResult, const char* Pointer)

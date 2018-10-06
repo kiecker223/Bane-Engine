@@ -204,6 +204,7 @@ public:
 		return ResourceOwnership == COMMAND_CONTEXT_TYPE_COMPUTE;
 	}
 
+
 	// Returns true if there was already a dependency
 	// Returns false otherwise
 	// Essentially:  if(RegisterDependency(...)) { IsADependencyAndNeedsWaitCommand = true; }
@@ -249,6 +250,9 @@ public:
 	D3D12Buffer(D3D12GraphicsDevice* InDevice, uint64 InSize, EBUFFER_USAGE InUsage);
 
 	void UploadDataToGPU(D3D12GraphicsCommandContext* Ctx, uint8* Buffer);
+
+	void* Map() final override;
+	void Unmap() final override;
 
 	virtual EBUFFER_USAGE GetUsage() const final override { return Usage; }
 	virtual uint32 GetSizeInBytes() const final override { return static_cast<uint32>(SizeInBytes); }
@@ -303,6 +307,9 @@ public:
 	D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth, uint32 InHeight, uint32 InDepth, uint32 InCount, EFORMAT InFormat, ETEXTURE_USAGE InUsage);
 
 	void UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void* Pointer, const uint32 Width, const uint32 Height, const uint32 Depth, const uint32 StepSize);
+
+	void* Map() final override;
+	void Unmap() final override;
 
 	virtual uint32 GetWidth() const final override { return Width; }
 	virtual uint32 GetHeight() const final override { return Height; }

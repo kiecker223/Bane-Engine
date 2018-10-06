@@ -83,7 +83,7 @@ void DefferedRenderer::Render()
 	__debugbreak();
 	Frame++;
 	IGraphicsCommandContext* ctx = m_Device->GetGraphicsContext();
-	GatherSceneData(ctx);
+	GatherSceneData();
 	ctx->BeginPass(m_DefferedPass);
 
 	for (uint32 i = 0; i < m_DrawCommits.size(); i++)
@@ -176,37 +176,37 @@ void DefferedRenderer::RenderShadows(matrix LightMatrix, IRenderPassInfo* DestRe
 	UNUSED(ctx);
 }
 
-void DefferedRenderer::GatherSceneData(IGraphicsCommandContext* ctx)
+void DefferedRenderer::GatherSceneData()
 {
 	{
 		if (RenderLoop::GRenderGlobals.CameraData.Size > 0) 
 		{
- 			byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_CameraBuffer));
+ 			byte* Buff = reinterpret_cast<byte*>(m_CameraBuffer->Map());
 			memcpy(Buff,
 				reinterpret_cast<void*>(RenderLoop::GRenderGlobals.CameraData.Buffer),
 				RenderLoop::GRenderGlobals.CameraData.Size * sizeof(CAMERA_CONSTANT_BUFFER_DATA)
 			);
-			ctx->Unmap(m_CameraBuffer);
+			m_CameraBuffer->Unmap();
 		}
 	}
 	{
 		if (RenderLoop::GRenderGlobals.MeshData.Size > 0)
 		{
-			byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_MeshDataBuffer));
+			byte* Buff = reinterpret_cast<byte*>(m_MeshDataBuffer->Map());
 			memcpy(Buff,
 				reinterpret_cast<void*>(RenderLoop::GRenderGlobals.MeshData.Buffer),
 				RenderLoop::GRenderGlobals.MeshData.Size * sizeof(MESH_RENDER_DATA)
 			);
-			ctx->Unmap(m_MeshDataBuffer);
+			m_MeshDataBuffer->Unmap();
 		}
 	}
 	{
-		byte* Buff = reinterpret_cast<byte*>(ctx->Map(m_LightBuffer));
+		byte* Buff = reinterpret_cast<byte*>(m_LightBuffer->Map());
 		memcpy(Buff,
 			reinterpret_cast<void*>(&RenderLoop::GRenderGlobals.LightData),
 			sizeof(RenderLoop::GRenderGlobals.LightData)
 		);
-		ctx->Unmap(m_LightBuffer);
+		m_LightBuffer->Unmap();
 	}
 }
 

@@ -12,8 +12,10 @@ class CameraFollowPlanet : public Component
 	IMPLEMENT_COMPONENT(CameraFollowPlanet)
 public:
 
+	CameraFollowPlanet() { }
+
 	Entity* ParentPlanet;
-	CameraComponent* CamComp;
+	TComponentHandle<CameraComponent> CamComp;
 
 	void Start()
 	{
@@ -26,8 +28,9 @@ public:
 		double3 PlanetPos = ParentPlanet->GetTransform()->GetPosition();
 		if (length(PlanetPos - GetTransform()->GetPosition()) > 2e4)
 		{
-			GetTransform()->SetPosition(PlanetPos + double3(0., 0., -3000.0));
+			GetTransform()->SetPosition(PlanetPos + double3(0., 0., -7000.0));
 		}
+		
 	}
 
 };
@@ -107,7 +110,7 @@ void InitApplication()
 	{
 		Entity* Sun = SpaceLevel->CreateEntity("Sun");
 		Sun->GetPhysicsProperties().Mass = 1.989e30;
-		auto* SunMesh = Sun->AddComponent<MeshRenderingComponent>();
+		auto SunMesh = Sun->AddComponent<MeshRenderingComponent>();
 		SunMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Meshes/sphere.FBX");
 		SunMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		Sun->GetTransform()->Scale(1391016000.0);
@@ -120,7 +123,7 @@ void InitApplication()
 		Mercury->GetPhysicsProperties().Velocity = double3((M_GRAV_CONST * 1.989e30) / DFS, 0., 0.);
 		Mercury->GetPhysicsProperties().bCanTick = false;
 		Mercury->GetTransform()->SetPosition(double3(0., 0., -DFS));
-		auto* MercuryMesh = Mercury->AddComponent<MeshRenderingComponent>();
+		auto MercuryMesh = Mercury->AddComponent<MeshRenderingComponent>();
 		MercuryMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Meshes/sphere.FBX");
 		MercuryMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		Mercury->GetTransform()->Scale(4879000.0);
@@ -132,7 +135,7 @@ void InitApplication()
 		Venus->GetPhysicsProperties().Velocity = double3(0., 0.0, 0.0);
 		Venus->GetPhysicsProperties().bCanTick = false;
 		Venus->GetTransform()->SetPosition(double3(0.f, 0.f, -DFS));
-		auto* VenusMesh = Venus->AddComponent<MeshRenderingComponent>();
+		auto VenusMesh = Venus->AddComponent<MeshRenderingComponent>();
 		VenusMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Meshes/sphere.FBX");
 		VenusMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		Venus->GetTransform()->Scale(12104000.);
@@ -140,12 +143,10 @@ void InitApplication()
 	{
 		Entity* Earth = SpaceLevel->CreateEntity("Earth");
 		Earth->GetPhysicsProperties().Mass = 5.97219e24;
-		Earth->GetPhysicsProperties().Velocity = double3(30000.0, 0., 0.);
+		Earth->GetPhysicsProperties().Velocity = double3(0., 0., -30000.);
 		//Earth->GetPhysicsProperties().bCanTick = false;
-		auto Test = Earth->GetPhysicsProperties().Velocity;
-		UNUSED(Test);
 		Earth->GetTransform()->SetPosition(double3(0., 0., -M_AU(1.)));
-		auto* EarthMesh = Earth->AddComponent<MeshRenderingComponent>();
+		auto EarthMesh = Earth->AddComponent<MeshRenderingComponent>();
 		EarthMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Meshes/sphere.FBX");
 		EarthMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		EarthMesh->RenderedMaterial.SetTexture("Resources/EarthNoClouds.jpg", 0);
@@ -157,7 +158,7 @@ void InitApplication()
 		Luna->GetPhysicsProperties().Velocity = double3((M_GRAV_CONST * 1.989e30 / M_AU(1.) + 384400000.), 0., 0.);
 		Luna->GetPhysicsProperties().bCanTick = false;
 		Luna->GetTransform()->SetPosition(double3(0., 0., M_AU(1.) + 384400000.));
-		auto* LunaMesh = Luna->AddComponent<MeshRenderingComponent>();
+		auto LunaMesh = Luna->AddComponent<MeshRenderingComponent>();
 		LunaMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Meshes/sphere.FBX");
 		LunaMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		Luna->GetTransform()->Scale(3474000.0);
@@ -166,11 +167,11 @@ void InitApplication()
 	Entity* CamEntity = SpaceLevel->CreateEntity("Camera");
 	CamEntity->GetTransform()->SetPosition(double3(0., 0., -M_AU(1.)));
 	CamEntity->GetPhysicsProperties().bCanTick = false;
-	auto* Cam = CamEntity->AddComponent<CameraComponent>();
+	auto Cam = CamEntity->AddComponent<CameraComponent>();
 	Cam->ZNear = 1e-2f;
 	Cam->ZFar = 1e+21f;
 	CamEntity->AddComponent<CameraMovementComponent>()->Speed = 1e7;
-	//CamEntity->AddComponent<CameraFollowPlanet>()->ParentPlanet = FollowedPlanet;
+	CamEntity->AddComponent<CameraFollowPlanet>()->ParentPlanet = FollowedPlanet;
 }
 
 

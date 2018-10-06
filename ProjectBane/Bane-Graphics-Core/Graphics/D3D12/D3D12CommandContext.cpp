@@ -120,35 +120,6 @@ void D3D12GraphicsCommandContext::SetGraphicsResourceTable(const IShaderResource
 	}
 }
 
-
-void* D3D12GraphicsCommandContext::Map(IGPUResource* InResource, uint32 Subresource)
-{
-	D3D12GPUResource* Resource = dynamic_cast<D3D12GPUResource*>(InResource);
-	void* MappedPointer = nullptr;
-	if (Resource->MappedPointer != nullptr)
-	{
-		return Resource->MappedPointer;
-	}
-	if (FAILED(Resource->Resource.D3DResource->Map(Subresource, nullptr, &MappedPointer)))
-	{
-		__debugbreak();
-	}
-	return MappedPointer;
-}
-
-void D3D12GraphicsCommandContext::Unmap(IGPUResource* InResource, uint32 Subresource)
-{
-	D3D12GPUResource* Resource = dynamic_cast<D3D12GPUResource*>(InResource);
-	if (Resource->MappedPointer == nullptr)
-	{
-		Resource->Resource.D3DResource->Unmap(Subresource, nullptr);
-	}
-	else
-	{
-		return;
-	}
-}
-
 void D3D12GraphicsCommandContext::Draw(uint32 VertexCount, uint32 StartVertexLocation)
 {
 	FlushResourceTransitions();
@@ -234,6 +205,55 @@ void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* InSrc, int3 SrcLoca
 	SrcBox.bottom = SrcLocation.y + DstSize.y;
 	SrcBox.back = SrcLocation.z + DstSize.z;
 	D3DCL->CopyTextureRegion(&DstCopyLocation, DstLocation.x, DstLocation.y, DstLocation.z, &SrcCopyLocation, &SrcBox);
+}
+
+void D3D12GraphicsCommandContext::SetComputePipelineState(const IComputePipelineState* InState)
+{
+	D3D12ComputePipelineState* Pipeline = (D3D12ComputePipelineState*)InState;
+	// Can't keep track of it here
+	//PipelineState = Pipeline;
+	D3DCL->SetPipelineState(PipelineState->PipelineState);
+	RootSignature = Pipeline->ShaderSignature.RootSignature;
+	D3DCL->SetComputeRootSignature(RootSignature);
+}
+
+void D3D12GraphicsCommandContext::SetComputeResourceTable(const IShaderResourceTable* InTable)
+{
+	D3D12ShaderResourceTable* Table = (D3D12ShaderResourceTable*)InTable;
+	CurrentTable = Table;
+
+	bHasCheckedCurrentTable = false;
+
+	if (Table->AssociatedSignature.RootSignature != RootSignature)
+	{
+		D3DCL->SetComputeRootSignature(Table->AssociatedSignature.RootSignature);
+	}
+
+	for (uint32 i = 0; i < Table->ConstantBuffers.size(); i++)
+	{
+		if (Table->ConstantBuffers[i].ConstantBuffer != nullptr)
+		{
+			const auto& ConstBuffOffsetPair = Table->ConstantBuffers[i];
+			D3DCL->SetComputeRootConstantBufferView(i, ConstBuffOffsetPair.ConstantBuffer->GetGPUVirtualAddress() + ConstBuffOffsetPair.Offset);
+		}
+	}
+
+	if (Table->HasTextures())
+	{
+		D3DCL->SetComputeRootDescriptorTable(Table->GetSRVDescriptorTableIndex(), Table->BaseSRVAllocation.GpuHandle);
+		D3DCL->SetComputeRootDescriptorTable(Table->GetSamplerTableIndex(), Table->BaseSMPAllocation.GpuHandle);
+	}
+	if (Table->HasUAVs())
+	{
+		D3DCL->SetComputeRootDescriptorTable(Table->GetUAVDescriptorTableIndex(), Table->BaseUAVAllocation.GpuHandle);
+	}
+}
+
+void D3D12GraphicsCommandContext::Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ)
+{
+	FlushResourceTransitions();
+	CommitResources();
+	D3DCL->Dispatch(ThreadX, ThreadY, ThreadZ);
 }
 
 D3D12_RESOURCE_BARRIER TranslateResourceTransition(const D3D12_RESOURCE_TRANSITION& ResourceTransition)
@@ -325,34 +345,6 @@ void D3D12ComputeCommandContext::End()
 void D3D12ComputeCommandContext::StallToEnd()
 {
 	ParentDevice->GetCommandQueue(COMMAND_CONTEXT_TYPE_COMPUTE).StallForFinish();
-}
-
-void* D3D12ComputeCommandContext::Map(IGPUResource* InResource, uint32 Subresource)
-{
-	D3D12GPUResource* Resource = dynamic_cast<D3D12GPUResource*>(InResource);
-	void* MappedPointer = nullptr;
-	if (Resource->MappedPointer != nullptr)
-	{
-		return Resource->MappedPointer;
-	}
-	if (FAILED(Resource->Resource.D3DResource->Map(Subresource, nullptr, &MappedPointer)))
-	{
-		__debugbreak();
-	}
-	return MappedPointer;
-}
-
-void D3D12ComputeCommandContext::Unmap(IGPUResource* InResource, uint32 Subresource)
-{
-	D3D12GPUResource* Resource = dynamic_cast<D3D12GPUResource*>(InResource);
-	if (Resource->MappedPointer == nullptr)
-	{
-		Resource->Resource.D3DResource->Unmap(Subresource, nullptr);
-	}
-	else
-	{
-		return;
-	}
 }
 
 void D3D12ComputeCommandContext::SetComputePipelineState(const IComputePipelineState* InState)

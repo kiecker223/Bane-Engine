@@ -99,11 +99,96 @@ inline bool operator <= (const EntityIdentifier& Left, const EntityIdentifier& R
 	return (Left.HashedName <= Right.HashedName);
 }
 
+template<typename T>
+class TComponentHandle
+{
+	template<typename T>
+	friend class TComponentHandle;
+public:
 
+	inline TComponentHandle() : m_AllocObjects(nullptr), m_Index(0) { }
+
+	template<typename TOther>
+	inline TComponentHandle(const TComponentHandle<TOther>& Other)
+	{
+		m_AllocObjects = Other.m_AllocObjects;
+		m_Index = Other.m_Index;
+	}
+
+	inline TComponentHandle(const TComponentHandle& Other)
+	{
+		m_AllocObjects = Other.m_AllocObjects;
+		m_Index = Other.m_Index;
+	}
+
+ 	inline TComponentHandle(TComponentHandle&& Other)
+ 	{
+ 		m_AllocObjects = Other.m_AllocObjects;
+ 		m_Index = Other.m_Index;
+ 	}
+
+	inline TComponentHandle(const nullptr_t Other) : m_AllocObjects(nullptr), m_Index(0)
+	{
+		UNUSED(Other);
+	}
+
+	inline TComponentHandle(std::vector<Component*>* AllocObjects, uint32 Index)
+	{
+		m_AllocObjects = AllocObjects;
+		m_Index = Index;
+	}
+
+	template<typename TOther>
+	inline TComponentHandle<T>& operator = (const TComponentHandle<TOther>& Other)
+	{
+		m_AllocObjects = Other.m_AllocObjects;
+		m_Index = Other.m_Index;
+		return *this;
+	}
+	
+	inline TComponentHandle& operator = (const TComponentHandle& Other)
+	{
+		m_AllocObjects = Other.m_AllocObjects;
+		m_Index = Other.m_Index;
+		return *this;
+	}
+
+	inline TComponentHandle<T>& operator = (const nullptr_t Other) 
+	{
+		UNUSED(Other);
+		m_AllocObjects = nullptr;
+		m_Index = 0;
+		return *this;
+	}
+
+	inline T* operator ->()
+	{
+#ifdef _DEBUG
+		BANE_CHECK(m_AllocObjects);
+#endif
+		return static_cast<T*>((*m_AllocObjects)[m_Index]);
+	}
+
+	inline T& operator ->() const
+	{
+#ifdef _DEBUG
+		BANE_CHECK(m_AllocObjects);
+#endif
+		return static_cast<T*>((*m_AllocObjects)[m_Index]);
+	}
+
+private:
+
+	uint32 m_Index;
+	std::vector<Component*>* m_AllocObjects;
+
+};
 
 class Entity
 {
 	typedef std::vector<EntityIdentifier> IdentifierList;
+	template<typename T>
+	friend class TComponentHandle;
 public:
 
 	Entity() :
@@ -118,36 +203,38 @@ public:
 	}
 
 	template<typename T>
-	inline T* GetComponent()
+	inline TComponentHandle<T> GetComponent()
 	{
-		return (T*)GetComponentByHash(T::ClassHash);
+		return GetComponentByHash(T::ClassHash);
 	}
 
-	Component* GetComponentByHash(uint64 Hash);
+	TComponentHandle<Component> GetComponentByHash(uint64 Hash);
 
 	template<typename T>
-	inline T* AddComponent()
+	inline TComponentHandle<T> AddComponent()
 	{
 		T* RetPointer = m_Allocator.AllocateObject<T>();
+		TComponentHandle<T> Result(&m_Allocator.GetAllocatedObjects(), static_cast<uint32>(m_Components.size()));
 		m_Components.push_back(T::ClassHash);
 		RetPointer->m_Owner = this;
 		RetPointer->m_Transform = &m_Transform;
 		RetPointer->Awake();
-		return RetPointer;
+		return Result;
 	}
 
 	void SubmitRenderingComponents();
 	void UpdateRenderObjects(RenderLoop& RL);
 
 	template<class T, class... U>
-	inline T* AddAndConstructComponent(U&&... Params)
+	inline TComponentHandle<T> AddAndConstructComponent(U&&... Params)
 	{
 		T* RetPointer = m_Allocator.AllocateObjectCtor<T>(Params...);
+		TComponentHandle<T> Result(&m_Allocator.GetAllocatedObjects(), m_Components.size());
 		m_Components.push_back(T::ClassHash);
 		RetPointer->m_Owner = this;
 		RetPointer->m_Transform = &m_Transform;
 		RetPointer->Awake();
-		return RetPointer;
+		return Result;
 	}
 
 	void RemoveComponent(uint64 ComponentHash);

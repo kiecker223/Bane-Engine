@@ -12,6 +12,8 @@ public:
 
 	virtual void SetDebugName(const std::string& DebugName) = 0;
 	virtual std::string GetDebugName() const = 0;
+	virtual void* Map() = 0;
+	virtual void Unmap() = 0;
 };
 
 

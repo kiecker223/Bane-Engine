@@ -30,7 +30,7 @@ private:
 
 	void RenderShadows(matrix LightMatrix, IRenderPassInfo* DestRenderPass, IGraphicsCommandContext* ctx);
 
-	void GatherSceneData(IGraphicsCommandContext* ctx);
+	void GatherSceneData();
 	
 	struct
 	{

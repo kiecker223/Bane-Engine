@@ -26,7 +26,7 @@ public:
 
 private:
 
-	void GatherSceneData(IGraphicsCommandContext* ctx);
+	void GatherSceneData();
 
 	IRuntimeGraphicsDevice* m_Device;
 	IConstantBuffer* m_CameraConstants;

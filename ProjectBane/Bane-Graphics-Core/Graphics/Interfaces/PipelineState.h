@@ -281,9 +281,9 @@ typedef struct GFX_INPUT_LAYOUT_DESC {
 inline uint32 GetLayoutDescSize(const GFX_INPUT_LAYOUT_DESC& InDesc)
 {
 	uint32 Result = 0;
-	for (auto Iter : InDesc.InputItems)
+	for (uint32 i = 0; i < InDesc.InputItems.size(); i++)
 	{
-		Result += TranslateItemFormatSize(Iter.ItemFormat);
+		Result += TranslateItemFormatSize(InDesc.InputItems[i].ItemFormat);
 	}
 	return Result;
 }
