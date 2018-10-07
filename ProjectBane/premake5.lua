@@ -26,12 +26,12 @@ workspace "ProjectBane"
 
     if _OPTIONS["ANDREW"] then
       location "Generated/"
-	  files {"../Tools/Formatting/.clang-format"}
-	  vpaths {
-		["Source"] = "**.cpp",
-		["Headers"] = "**.h",
-		["Formatting"] = "../Tools/Formatting/.clang-format",
-	  }
+--	  files {"../Tools/Formatting/.clang-format"}
+--	  vpaths {
+--		["Source"] = "**.cpp",
+--		["Headers"] = "**.h",
+--		["Formatting"] = "../Tools/Formatting/.clang-format",
+--	  }
     end
 
     filter "platforms:x64"
