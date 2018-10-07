@@ -46,11 +46,11 @@ public:
 		}
 		if (InputState[0x41] & 0x80)
 		{
-			ST->Translate((-Right * Speed) * Dt);
+			ST->Translate((Right * Speed) * Dt);
 		}
 		if (InputState[0x44] & 0x80)
 		{
-			ST->Translate((Right * Speed) * Dt);
+			ST->Translate((-Right * Speed) * Dt);
 		}
 		if (InputState[0x51] & 0x80)
 		{
