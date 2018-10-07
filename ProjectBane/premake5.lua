@@ -24,11 +24,15 @@ workspace "ProjectBane"
     platforms { "x64" }
     warnings "Extra"
 
-
     if _OPTIONS["ANDREW"] then
       location "Generated/"
+	  files {"../Tools/Formatting/.clang-format"}
+	  vpaths {
+		["Source"] = "**.cpp",
+		["Headers"] = "**.h",
+		["Formatting"] = "../Tools/Formatting/.clang-format",
+	  }
     end
- 
 
     filter "platforms:x64"
       architecture "x86_64"

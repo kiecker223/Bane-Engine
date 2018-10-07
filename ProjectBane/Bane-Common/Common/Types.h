@@ -16,13 +16,13 @@ typedef float				float32;
 typedef double				float64;
 
 #if !defined(_WIN32) && defined(__GNUC__) && (defined(__x86_64__))
-typedef unsigned int uint32;
-typedef signed int int32;
-typedef unsigned long uint64;
-typedef signed long int64;
+typedef unsigned int		uint32;
+typedef signed int			int32;
+typedef unsigned long		uint64;
+typedef signed long			int64;
 #else
-typedef unsigned long uint32;
-typedef signed long int32;
-typedef unsigned long long uint64;
-typedef signed long long int64;
+typedef unsigned long		uint32;
+typedef signed long			int32;
+typedef unsigned long long	uint64;
+typedef signed long long	int64;
 #endif
