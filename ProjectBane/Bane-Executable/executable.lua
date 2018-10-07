@@ -24,10 +24,14 @@ project "BaneExecutable"
     files {"**.h", "**.cpp"}
 	
 	debugdir "../Build/Debug/"
+
 	dependson { "BaneShaderCompiler"}
+
 	postbuildcommands {
-        "{COPY} ../External/dlls/*.dll %{cfg.targetdir}"
-    } 
+		"{COPY} ../External/dlls/*.dll %{cfg.targetdir}",
+		"{COPY} ../Assets ../Build/%{cfg.targetdir}"
+	}
+
 
 
 
