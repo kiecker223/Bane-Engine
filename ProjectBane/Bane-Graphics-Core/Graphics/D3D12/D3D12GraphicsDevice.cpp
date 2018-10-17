@@ -95,7 +95,7 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 		ITexture2D* DepthTexture = CreateTexture2D(RenderingWindow->GetWidth(), RenderingWindow->GetHeight(), FORMAT_UNKNOWN, TEXTURE_USAGE_DEPTH_STENCIL, nullptr);
 		IDepthStencilView* DepthStencil = CreateDepthStencilView(DepthTexture);
 
-		m_BasicRenderPass = (D3D12RenderPassInfo*)IRuntimeGraphicsDevice::CreateRenderPass(m_BackBuffer, DepthStencil, float4(0.f, 0.f, 0.f, 0.f));
+		m_BasicRenderPass = (D3D12RenderPassInfo*)IRuntimeGraphicsDevice::CreateRenderPass(m_BackBuffer, DepthStencil, float4(0.0f, 0.0f, 0.0f, 0.f));
 	}
 	
 	for (uint32 i = 0; i < COMMAND_CONTEXT_TYPE_NUM_TYPES; i++)

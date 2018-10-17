@@ -114,7 +114,7 @@ void Application::Run()
 		RenderLoop RL;
 		RL.SetSkybox({ pCurrentScene->GetSkybox(), float3(0.f, 0.f, 0.f) });
 		pCurrentScene->Render(RL);
-		RL.Draw(); 
+		RL.Draw();
 		m_SceneRenderer->Submit(RL);
 		m_SceneRenderer->Render();
 
@@ -125,6 +125,8 @@ void Application::Run()
 		pCurrentScene->Tick(Dt);
 		m_SceneRenderer->Present();
 	}
+
+	GetSceneManager()->CurrentScene->DumpScene();
 }
 
 void Application::Shutdown()

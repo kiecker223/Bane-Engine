@@ -7,6 +7,7 @@
 #include "CameraMovementComponent.h"
 
 
+
 class CameraFollowPlanet : public Component 
 {
 	IMPLEMENT_COMPONENT(CameraFollowPlanet)
@@ -26,11 +27,7 @@ public:
 	{
 		UNUSED(Dt);
 		double3 PlanetPos = ParentPlanet->GetTransform()->GetPosition();
-		if (length(PlanetPos - GetTransform()->GetPosition()) > 2e4)
-		{
-			GetTransform()->SetPosition(PlanetPos + double3(0., 0., -7000.0));
-		}
-		
+		GetTransform()->SetPosition(PlanetPos + double3(-30000000., 0., -70000000.0));
 	}
 
 };
@@ -45,6 +42,17 @@ public:
 		UNUSED(Dt);
 		auto Vel = GetOwner()->GetPhysicsProperties().Velocity;
 		std::cout << Vel.x << " : " << Vel.y << " : " << Vel.z << std::endl;
+	}
+};
+
+class RotateEarthComponent : public Component
+{
+	IMPLEMENT_COMPONENT(RotateEarthComponent)
+public:
+
+	void Tick(float Dt) override
+	{
+		GetTransform()->Rotate(float3(0.f, 1.f * Dt, 0.f));
 	}
 };
 
@@ -143,7 +151,7 @@ void InitApplication()
 	{
 		Entity* Earth = SpaceLevel->CreateEntity("Earth");
 		Earth->GetPhysicsProperties().Mass = 5.97219e24;
-		Earth->GetPhysicsProperties().Velocity = double3(30000.0, 0., 0.);
+		Earth->GetPhysicsProperties().Velocity = double3(30000.0 * (1. / 60.), 0., 0.);
 		//Earth->GetPhysicsProperties().bCanTick = false;
 		Earth->GetTransform()->SetPosition(double3(0., 0., -M_AU(1.)));
 		auto EarthMesh = Earth->AddComponent<MeshRenderingComponent>();
@@ -151,7 +159,8 @@ void InitApplication()
 		EarthMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		EarthMesh->RenderedMaterial.SetTexture("Resources/EarthNoClouds.jpg", 0);
 		Earth->GetTransform()->Scale(12742000.0);
-		Earth->AddComponent<PrintVelocityFromPhysicsComponent>();
+		//Earth->AddComponent<PrintVelocityFromPhysicsComponent>();
+		//Earth->AddComponent<RotateEarthComponent>();
 
 		Entity* Luna = SpaceLevel->CreateEntity("Luna");
 		Luna->GetPhysicsProperties().Mass = 7.34767309e22;
@@ -167,11 +176,12 @@ void InitApplication()
 	Entity* CamEntity = SpaceLevel->CreateEntity("Camera");
 	CamEntity->GetTransform()->SetPosition(double3(0., 0., -M_AU(1.)));
 	CamEntity->GetPhysicsProperties().bCanTick = false;
+	CamEntity->GetTransform()->SetRotation(float3(0.f, 0.f, 0.f));
 	auto Cam = CamEntity->AddComponent<CameraComponent>();
 	Cam->ZNear = 1e-2f;
 	Cam->ZFar = 1e+21f;
 	CamEntity->AddComponent<CameraMovementComponent>()->Speed = 1e7;
-//	CamEntity->AddComponent<CameraFollowPlanet>()->ParentPlanet = FollowedPlanet;
+	//CamEntity->AddComponent<CameraFollowPlanet>()->ParentPlanet = FollowedPlanet;
 }
 
 

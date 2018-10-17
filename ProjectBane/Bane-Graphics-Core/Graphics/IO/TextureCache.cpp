@@ -169,12 +169,12 @@ void TextureCache::InternalLoadCubemap(
 	const std::string& PY,
 	const std::string& PZ)
 {
-	OutImages[0].Buff = InternalLoadImage(NX.c_str(), OutImages[0].Width, OutImages[0].Height, OutImages[0].Step, true);
-	OutImages[1].Buff = InternalLoadImage(PX.c_str(), OutImages[1].Width, OutImages[1].Height, OutImages[1].Step, true);
+	OutImages[0].Buff = InternalLoadImage(NX.c_str(), OutImages[0].Width, OutImages[0].Height, OutImages[0].Step,  true);
+	OutImages[1].Buff = InternalLoadImage(PX.c_str(), OutImages[1].Width, OutImages[1].Height, OutImages[1].Step,  true);
 	OutImages[2].Buff = InternalLoadImage(PY.c_str(), OutImages[2].Width, OutImages[2].Height, OutImages[2].Step, false);
 	OutImages[3].Buff = InternalLoadImage(NY.c_str(), OutImages[3].Width, OutImages[3].Height, OutImages[3].Step, false);
-	OutImages[4].Buff = InternalLoadImage(NZ.c_str(), OutImages[4].Width, OutImages[4].Height, OutImages[4].Step, true);
-	OutImages[5].Buff = InternalLoadImage(PZ.c_str(), OutImages[5].Width, OutImages[5].Height, OutImages[5].Step, true);
+	OutImages[4].Buff = InternalLoadImage(NZ.c_str(), OutImages[4].Width, OutImages[4].Height, OutImages[4].Step,  true);
+	OutImages[5].Buff = InternalLoadImage(PZ.c_str(), OutImages[5].Width, OutImages[5].Height, OutImages[5].Step,  true);
 
 	bool bEqual = true;
 	for (uint32 i = 0; i < 6; i++)
@@ -182,6 +182,7 @@ void TextureCache::InternalLoadCubemap(
 		for (uint32 x = 0; x < 6; x++)
 		{
 			bEqual = (OutImages[i].Width == OutImages[x].Width && OutImages[i].Height == OutImages[x].Height && OutImages[i].Step == OutImages[x].Step);
+			BANE_CHECK(bEqual);
 		}
 	}
 	//assert(bEqual);

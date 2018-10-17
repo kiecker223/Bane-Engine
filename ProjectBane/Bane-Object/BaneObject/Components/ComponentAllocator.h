@@ -47,7 +47,7 @@ public:
 			return AllocateObject<C>();
 		}
 		C* Pointer = new ((void*)PtrCurrent) C();
-		AllocatedObjects.push_back(Pointer);
+		AllocatedObjects.push_back(reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(Pointer) - reinterpret_cast<ptrdiff_t>(PtrBegin)));
 		PtrCurrent += sizeof(C);
 		return (C*)Pointer;
 	}
@@ -61,7 +61,7 @@ public:
 			return AllocateObject<C>(Params...);
 		}
 		C* Pointer = new ((void*)PtrCurrent) C(std::forward<U>(Params)...);
-		AllocatedObjects.push_back(Pointer);
+		AllocatedObjects.push_back(reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(Pointer) - reinterpret_cast<ptrdiff_t>(PtrBegin)));
 		PtrCurrent += sizeof(C);
 		return Pointer;
 	}
@@ -74,8 +74,9 @@ public:
 
 	inline void InternalFree()
 	{
-		for (auto* c : AllocatedObjects)
+		for (auto* CompOffset : AllocatedObjects)
 		{
+			auto* c = reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(CompOffset) + reinterpret_cast<ptrdiff_t>(PtrBegin));
 			c->~Component();
 		}
 		HeapFree(GetProcessHeap(), HEAP_NO_SERIALIZE, (LPVOID)PtrBegin);
@@ -88,7 +89,6 @@ public:
 	{
 		bool Result = true;
 		size_t NumBytesUsed = GetNumBytesUsed();
-		uint8* PrevBegin = PtrBegin;
 
 		PtrBegin = (uint8*)HeapReAlloc(GetProcessHeap(), HEAP_NO_SERIALIZE, (LPVOID)PtrBegin, ByteSize);
 
@@ -100,11 +100,6 @@ public:
 
 		PtrCurrent = PtrBegin + NumBytesUsed;
 		PtrEnd = PtrBegin + ByteSize;
-		for (uint32 i = 0; i < AllocatedObjects.size(); i++)
-		{
-			int64 Diff = ((uint8*)AllocatedObjects[i]) - PrevBegin;
-			AllocatedObjects[i] = (Component*)(PtrBegin + Diff);
-		}
 
 		return Result;
 	}
@@ -124,6 +119,11 @@ public:
 	std::vector<Component*> AllocatedObjects;
 	std::mutex ThreadLock;
 	
+	inline Component* GetComponent(uint32 Index)
+	{
+		return reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(AllocatedObjects[Index]) + reinterpret_cast<ptrdiff_t>(PtrBegin));
+	}
+
 	inline std::vector<Component*>& GetAllocatedObjects()
 	{
 		// std::lock_guard<std::mutex> LockGuard(ThreadLock);

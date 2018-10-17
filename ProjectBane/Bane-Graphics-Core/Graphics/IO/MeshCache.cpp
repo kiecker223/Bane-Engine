@@ -17,7 +17,7 @@ public:
 	
 	void Destroy()
 	{
-		delete BasePointer;
+		delete[] BasePointer;
 	}
 
 	Mesh* AllocateMesh()

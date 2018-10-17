@@ -103,7 +103,7 @@ public:
 
 	void SetVertices(const std::vector<FloatInt>& InVertices);
 	void SetIndices(const std::vector<uint32>& InIndices);
-	void GenerateSphere(uint32 NumIterations);
+	void GenerateSphere(uint32 SegmentCount);
 
 	void Upload(); // Call an explicit upload to gpu
 	
@@ -144,7 +144,7 @@ private:
 	template<typename T>
 	inline T& GetVerticesAtIndex(uint32 Index)
 	{
-		return (T&)*(((uint328*)m_Vertices.data()) + (Index * sizeof(T)));
+		return (T&)*(((uint8*)m_Vertices.data()) + (Index * sizeof(T)));
 	}
 
 	static IInputLayout* GBaseLayout;

@@ -134,55 +134,75 @@ void Mesh::SetIndices(const std::vector<uint32>& InIndices)
 	m_Indices = InIndices;
 }
 
-void Mesh::GenerateSphere(uint32 NumIterations)
+void Mesh::GenerateSphere(uint32 SegmentCount)
 {
-	UNUSED(NumIterations);
 	std::vector<Vertex> Vertices;
 	std::vector<uint32> Indices;
-	float3 TopPoint(0.f, 1.f, 0.f);
+	float3 TopPoint(0.f, 0.5f, 0.f);
 
 	/*
 	struct Vertex
 	{
-	float3 Postition;
-	float3 Normal;
-	float3 Binormal;
-	float3 Tangent;
-	float2 UV;
+		float3 Postition;
+		float3 Normal;
+		float3 Binormal;
+		float3 Tangent;
+		float2 UV;
 	};
 	*/
-
+	
+	float SegmentCountF = static_cast<float>(SegmentCount);
 	Quaternion XRotation = Quaternion::FromAxisAngle(float3(1.f, 0.f, 0.f), 0.0f);
-
-	for (uint32 y = 0; y < 10; y++)
+	for (uint32 y = 0; y < SegmentCount; y++)
 	{
+		const float PercentDown = (static_cast<float>(y) / SegmentCountF);
+		XRotation = Quaternion::FromAxisAngle(float3(1.f, 0.f, 0.f), radians(PercentDown * 360.f));
 		if (y == 0)
 		{
-			Vertices.push_back({TopPoint, TopPoint, float3(), float3(), float2(0.5, 1)});
-			Indices.push_back(0);
+			Vertices.push_back({TopPoint, normalized(TopPoint), float3(), float3(), float2(0.5f, 1.f)});
 		}
-		else if (y == NumIterations - 1)
+		else if (y == SegmentCount - 1)
 		{
-			for (int i = 0; i < 10; i++)
-			{
-				const float PercentAroundCrown = (static_cast<float>(i) / 10.f);
-				Quaternion YRotation = Quaternion::FromAxisAngle(float3(0, 1, 0), radians(PercentAroundCrown * 360.f));
-				float3 Point = ((float3x3)XRotation.RotationMatrix() * (float3x3)YRotation.RotationMatrix()) * TopPoint;
-				Vertices.push_back({ Point, Point, float3(), float3(),  });
-
-			}
-		}
-		else if (y == 1)
-		{
-
-		}
-		else if (y == NumIterations - 2)
-		{
-
+			Vertices.push_back({ -TopPoint, normalized(-TopPoint), float3(), float3(), float2(0.5f, 0.f) });
 		}
 		else
 		{
+			for (uint32 i = 0; i < SegmentCount; i++)
+			{
+				const float PercentAroundCrown = (static_cast<float>(i) / SegmentCountF);
+				Quaternion YRotation = Quaternion::FromAxisAngle(float3(0.f, 1.f, 0.f), radians(PercentAroundCrown * 360.f));
+				float3 Point = ((float3x3)XRotation.RotationMatrix() * (float3x3)YRotation.RotationMatrix()) * TopPoint;
+				Vertices.push_back({ Point, normalized(Point), float3(), float3(), float2(1.f - PercentDown, PercentAroundCrown) });
+			}
+		}
+	}
 
+	for (uint32 y = 1; y < SegmentCount; y++)
+	{
+		if (y == 1)
+		{
+			for (uint32 i = 0; i < SegmentCount; i++)
+			{
+				Indices.push_back(0);
+				Indices.push_back(i);
+				Indices.push_back(i + 1);
+			}
+		}
+		if (y == SegmentCount - 1)
+		{
+			for (uint32 i = SegmentCount - 2; i > 0; i--)
+			{
+				Indices.push_back(static_cast<uint32>(Vertices.size() - 1));
+				Indices.push_back(static_cast<uint32>(Vertices.size() - i));
+				Indices.push_back(static_cast<uint32>(Vertices.size() - (i - 1)));
+			}
+		}
+		else
+		{
+			for (uint32 i = 0; i < SegmentCount; i++)
+			{
+
+			}
 		}
 	}
 }

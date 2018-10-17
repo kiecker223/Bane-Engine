@@ -19,7 +19,7 @@ TComponentHandle<Component> Entity::GetComponentByHash(uint64 Hash)
 	}
 
 	if (IndexToUse >= 0)
-		return TComponentHandle<Component>(&m_Allocator.GetAllocatedObjects(), IndexToUse);
+		return TComponentHandle<Component>(&m_Allocator.GetAllocatedObjects(), IndexToUse, &m_Allocator.PtrBegin);
 	return nullptr;
 }
 
@@ -35,8 +35,10 @@ void Entity::SubmitRenderingComponents()
 
 void Entity::UpdateRenderObjects(RenderLoop& RL)
 {
-	for (auto& Comp : m_Allocator.GetAllocatedObjects())
+	for (Component* pCompOffset : m_Allocator.GetAllocatedObjects())
 	{
+		const auto CompOffset = reinterpret_cast<ptrdiff_t>(pCompOffset);
+		Component* Comp = reinterpret_cast<Component*>(CompOffset + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin));
 		if (Comp->IsRenderComponent())
 		{
 			RenderComponent* RC = static_cast<RenderComponent*>(Comp);

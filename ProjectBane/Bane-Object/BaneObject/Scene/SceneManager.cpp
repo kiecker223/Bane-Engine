@@ -14,8 +14,7 @@ Scene* SceneManager::LoadScene(const std::string& SceneName)
 
 Scene* SceneManager::CreateNewScene(const std::string& SceneName)
 {
-	UNUSED(SceneName);
-	Scene* Result = new Scene();
+	Scene* Result = new Scene(SceneName);
 	if (CurrentScene)
 	{
 		CurrentScene->DumpScene();

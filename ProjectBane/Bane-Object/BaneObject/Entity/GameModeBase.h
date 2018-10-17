@@ -6,5 +6,4 @@ class GameModeBase
 {
 public:
 	
-	
 };

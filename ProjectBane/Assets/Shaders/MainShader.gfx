@@ -68,7 +68,7 @@ struct PS_INPUT
 PS_INPUT VSMain(VS_INPUT Input)
 {
 	PS_INPUT Output;
-	Output.TexCoords = Input.TexCoords;
+	Output.TexCoords = float2(Input.TexCoords.x, 1-Input.TexCoords.y);
 	float4 Pos = float4(Input.Position, 1.0);
 	Pos = mul(Pos, Model);
 	Pos = mul(Pos, View);
@@ -85,5 +85,5 @@ PS_INPUT VSMain(VS_INPUT Input)
 
 float4 PSMain(PS_INPUT Input) : SV_TARGET0
 {
-	return float4(AlbedoTexture.Sample(DefaultSampler, Input.TexCoords).rgb, 1.f);
+	return float4(Input.uv.x, Input.uv.y, 0.0f, 1.0f);
 }

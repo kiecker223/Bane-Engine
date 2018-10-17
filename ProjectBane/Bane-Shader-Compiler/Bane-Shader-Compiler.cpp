@@ -1944,6 +1944,7 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 			memcpy(Buff, &Header, sizeof(Header));
 		}
 		WriteBufferToFile(DstCompiledFile, Buff, static_cast<uint32>(BuffSize));
+		delete[] Buff;
 	}
 	{
 		json InputLayout = json::array();

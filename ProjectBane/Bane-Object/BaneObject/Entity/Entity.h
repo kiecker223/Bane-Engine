@@ -6,7 +6,8 @@
 #include "Graphics/Data/RenderLoop.h"
 #include "Common/Hash.h"
 #include <array>
-#include "PhysicsProperties.h"
+#include <string>
+#include <Physics/PhysicsProperties.h>
 
 #pragma warning(disable:4049)
 
@@ -106,36 +107,40 @@ class TComponentHandle
 	friend class TComponentHandle;
 public:
 
-	inline TComponentHandle() : m_AllocObjects(nullptr), m_Index(0) { }
+	inline TComponentHandle() : m_AllocObjects(nullptr), m_Index(0), m_AllocObjectsStart(nullptr) { }
 
 	template<typename TOther>
 	inline TComponentHandle(const TComponentHandle<TOther>& Other)
 	{
 		m_AllocObjects = Other.m_AllocObjects;
 		m_Index = Other.m_Index;
+		m_AllocObjectsStart = Other.m_AllocObjectsStart;
 	}
 
 	inline TComponentHandle(const TComponentHandle& Other)
 	{
 		m_AllocObjects = Other.m_AllocObjects;
 		m_Index = Other.m_Index;
+		m_AllocObjectsStart = Other.m_AllocObjectsStart;
 	}
 
  	inline TComponentHandle(TComponentHandle&& Other)
  	{
  		m_AllocObjects = Other.m_AllocObjects;
  		m_Index = Other.m_Index;
+		m_AllocObjectsStart = Other.m_AllocObjectsStart;
  	}
 
-	inline TComponentHandle(const nullptr_t Other) : m_AllocObjects(nullptr), m_Index(0)
+	inline TComponentHandle(const nullptr_t Other) : m_AllocObjects(nullptr), m_Index(0), m_AllocObjectsStart(nullptr)
 	{
 		UNUSED(Other);
 	}
 
-	inline TComponentHandle(std::vector<Component*>* AllocObjects, uint32 Index)
+	inline TComponentHandle(std::vector<Component*>* AllocObjects, uint32 Index, uint8** AllocObjectsStart)
 	{
 		m_AllocObjects = AllocObjects;
 		m_Index = Index;
+		m_AllocObjectsStart = AllocObjectsStart;
 	}
 
 	template<typename TOther>
@@ -143,6 +148,7 @@ public:
 	{
 		m_AllocObjects = Other.m_AllocObjects;
 		m_Index = Other.m_Index;
+		m_AllocObjectsStart = Other.m_AllocObjectsStart;
 		return *this;
 	}
 	
@@ -150,6 +156,7 @@ public:
 	{
 		m_AllocObjects = Other.m_AllocObjects;
 		m_Index = Other.m_Index;
+		m_AllocObjectsStart = Other.m_AllocObjectsStart;
 		return *this;
 	}
 
@@ -158,6 +165,7 @@ public:
 		UNUSED(Other);
 		m_AllocObjects = nullptr;
 		m_Index = 0;
+		m_AllocObjectsStart = nullptr;
 		return *this;
 	}
 
@@ -166,7 +174,7 @@ public:
 #ifdef _DEBUG
 		BANE_CHECK(m_AllocObjects);
 #endif
-		return static_cast<T*>((*m_AllocObjects)[m_Index]);
+		return reinterpret_cast<T*>(reinterpret_cast<ptrdiff_t>(*m_AllocObjectsStart) + reinterpret_cast<ptrdiff_t>((*m_AllocObjects)[m_Index]));
 	}
 
 	inline T& operator ->() const
@@ -174,14 +182,14 @@ public:
 #ifdef _DEBUG
 		BANE_CHECK(m_AllocObjects);
 #endif
-		return static_cast<T*>((*m_AllocObjects)[m_Index]);
+		return reinterpret_cast<T*>(reinterpret_cast<ptrdiff_t>(*m_AllocObjectsStart) + reinterpret_cast<ptrdiff_t>((*m_AllocObjects)[m_Index]));
 	}
 
 private:
 
 	uint32 m_Index;
 	std::vector<Component*>* m_AllocObjects;
-
+	uint8** m_AllocObjectsStart;
 };
 
 class Entity
@@ -215,7 +223,7 @@ public:
 	inline TComponentHandle<T> AddComponent()
 	{
 		T* RetPointer = m_Allocator.AllocateObject<T>();
-		TComponentHandle<T> Result(&m_Allocator.GetAllocatedObjects(), static_cast<uint32>(m_Components.size()));
+		TComponentHandle<T> Result(&m_Allocator.GetAllocatedObjects(), static_cast<uint32>(m_Components.size()), &m_Allocator.PtrBegin);
 		m_Components.push_back(T::ClassHash);
 		RetPointer->m_Owner = this;
 		RetPointer->m_Transform = &m_Transform;
@@ -231,7 +239,7 @@ public:
 	inline TComponentHandle<T> AddAndConstructComponent(U&&... Params)
 	{
 		T* RetPointer = m_Allocator.AllocateObjectCtor<T>(Params...);
-		TComponentHandle<T> Result(&m_Allocator.GetAllocatedObjects(), m_Components.size());
+		TComponentHandle<T> Result(&m_Allocator.GetAllocatedObjects(), static_cast<uint32>(m_Components.size()), &m_Allocator.PtrBegin);
 		m_Components.push_back(T::ClassHash);
 		RetPointer->m_Owner = this;
 		RetPointer->m_Transform = &m_Transform;
@@ -265,13 +273,13 @@ public:
 	inline void Start()
 	{
 		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
-			m_Allocator.GetAllocatedObjects()[i]->Start();
+			reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(m_Allocator.GetAllocatedObjects()[i]) + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin))->Start();
 	}
 
 	inline void Tick(float DT)
 	{
 		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
-			m_Allocator.GetAllocatedObjects()[i]->Tick(DT);
+			reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(m_Allocator.GetAllocatedObjects()[i]) + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin))->Tick(DT);
 	}
 
 	inline Transform* GetTransform() const
@@ -286,7 +294,7 @@ public:
 
 	Entity* GetChild(uint32 Idx);
 
-	inline uint32 GetChildCount()
+	inline uint32 GetChildCount() const
 	{
 		return static_cast<uint32>(m_Children.size());
 	}
