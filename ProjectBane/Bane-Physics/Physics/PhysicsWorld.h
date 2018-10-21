@@ -10,9 +10,22 @@
 class PhysicsMessage
 {
 public:
-	uint32 EntityIDSource;
 
+	PhysicsMessage(uint32 InEntityIDSource, bool bInQuit) : EntityIDSource(InEntityIDSource), bQuit(bInQuit) { }
+
+	uint32 EntityIDSource;
 	bool bQuit;
+
+	virtual void Execute(PhysicsBody& BodyToOperate)
+	{
+		UNUSED(BodyToOperate);
+	}
+};
+
+// Unused for the moment, fired to the entity system when, say a particular mesh was cut in half
+class PhysicsToApplicationMessage
+{
+public:
 };
 
 
@@ -31,6 +44,10 @@ public:
 	}
 
 	void SpawnThread();
+	inline void DestroyThread()
+	{
+		PhysicsThread.join();
+	}
 
 	inline bool IsReadyForRead() const
 	{
@@ -38,8 +55,7 @@ public:
 	}
 
 	void UpdatePhysics();
-	void WriteBodies();
-
+	
 	std::thread PhysicsThread;
 	PhysicsUpdateBuffer UpdateBuffer;
 	std::vector<PhysicsBody> Bodies;

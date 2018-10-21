@@ -85,11 +85,13 @@ public:
 		m_Scale = InScale;
 	}
 
-	// ????
-	// Not used in the end, so why keep it??? To enCOURAGE BAD HABITS???
-	inline float4x4 GetMatrix() const
+	inline float4x4 GetMatrix(const double3& CameraPos) const
 	{
-		__debugbreak(); // Not on my watch
+		return matTransformation(fromDouble3(m_Position - CameraPos), m_Rotation, fromDouble3(m_Scale));
+	}
+
+	inline float4x4 GetRawMatrix() const
+	{
 		return matTransformation(fromDouble3(m_Position), m_Rotation, fromDouble3(m_Scale));
 	}
 

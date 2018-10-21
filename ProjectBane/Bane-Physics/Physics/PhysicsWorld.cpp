@@ -65,9 +65,10 @@ void PhysicsWorld::UpdatePhysics()
 		UpdateBuffer.Bodies = Bodies;
 		m_bUnlockedForRead = true;
 		auto TimeTaken = Clock::now() - Start;
-		std::chrono::nanoseconds SleepTime = (std::chrono::nanoseconds(16667) - std::chrono::duration_cast<std::chrono::nanoseconds>(TimeTaken));
+		//std::cout << "Time taken: " << static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(TimeTaken).count() / 1E+9f) << std::endl;
+		std::chrono::nanoseconds SleepTime = (std::chrono::nanoseconds(16666667) - std::chrono::duration_cast<std::chrono::nanoseconds>(TimeTaken));
+		//BANE_CHECK(SleepTime > std::chrono::nanoseconds(0));
 		std::this_thread::sleep_for(SleepTime);
-		std::cout << "Physics thread time: " << (static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(TimeTaken).count()) / 1E+9f) << std::endl;
 	}
 	std::cout << "Quiting physics thread" << std::endl;
 }

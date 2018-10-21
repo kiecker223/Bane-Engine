@@ -28,24 +28,15 @@ void RenderLoop::SetCamera(const CAMERA_DATA& CamData)
 	Size++;
 }
 
-void RenderLoop::AddDrawable(const Mesh* pMesh, const Material& Mat, const double3& ModelPos, const double3& ModelScale, const Quaternion& ModelRot)
+void RenderLoop::AddDrawable(const Mesh* pMesh, const Material& Mat, const float4x4& Transformation)
 {
-	float4x4 ModelMat;
-	double3 DeprojectedPos = ModelPos - m_Current.CameraPosition;
-	// This code is horrible and should be ashamed of itself
-	
-	GRenderGlobals.MeshData.Buffer[GRenderGlobals.MeshData.Offset].Parameters = Mat.GetMaterialParameters();
-	auto* MatPtr = &GRenderGlobals.MeshData.Buffer[GRenderGlobals.MeshData.Offset].Model;
-	GRenderGlobals.MeshData.Offset++;
+	GRenderGlobals.MeshData.Buffer[GRenderGlobals.MeshData.Size].Parameters = Mat.GetMaterialParameters();
+	GRenderGlobals.MeshData.Buffer[GRenderGlobals.MeshData.Size].Model = Transformation;
 	m_Current.Meshes.push_back({ 
 		pMesh->GetVertexBuffer(),
 		pMesh->GetIndexBuffer(),
 		Mat.GetShaderConfiguration(),
 		Mat.GetTable(),
-		ModelPos, 
-		ModelScale, 
-		ModelRot, 
-		MatPtr, 
 		0, 
 		pMesh->GetIndexCount() 
 	});

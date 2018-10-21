@@ -20,11 +20,6 @@ public:
 
 	CameraComponent();
 
-	inline static CameraComponent* GetMainCamera()
-	{
-		return GMainCamera;
-	}
-
 	float Fov;
 	float ViewWidth;
 	float ViewHeight;
@@ -32,32 +27,17 @@ public:
 	float ZFar;
 	ECAMERA_TYPE ProjectionType;
 	
-	inline void SetPriority(uint32 Priority)
-	{
-		m_Priority = Priority;
-		if (m_Priority == 1)
-		{
-			GMainCamera = this;
-		}
-	}
-
-	inline uint32 GetPriority() const
-	{
-		return m_Priority;
-	}
 
 	float4x4 GetProjection() const;
 	float4x4 GetLookAt() const;
 
+	void Start() override final;
 	void Tick(float DT) override final;
 
 	void GraphicsUpdate(RenderLoop& Loop) final override;
 
 private:
 
-	static CameraComponent* GMainCamera;
-
-	uint32 m_Priority;
 
 };
 

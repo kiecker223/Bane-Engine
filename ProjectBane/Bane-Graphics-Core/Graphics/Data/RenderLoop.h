@@ -36,10 +36,6 @@ typedef struct DRAWABLE_MESH {
 	IIndexBuffer* IndexBuffer;
 	IGraphicsPipelineState* Pipeline;
 	IShaderResourceTable* Table;
-	double3 Position;
-	double3 Scale;
-	Quaternion Rotation;
-	float4x4* MatrixPtr;
 	uint64 MeshDataOffset;
 	uint32 IndexCount;
 } DRAWABLE_MESH;
@@ -93,7 +89,7 @@ public:
 	~RenderLoop();
 
 	void SetCamera(const CAMERA_DATA& CamData);
-	void AddDrawable(const Mesh* pMesh, const Material& Mat, const double3& ModelPos, const double3& ModelScale, const Quaternion& ModelRot);
+	void AddDrawable(const Mesh* pMesh, const Material& Mat, const float4x4& Transformation);
 	void AddLight(const DIRECTIONAL_LIGHT_DATA& DirLight);
 	void AddLight(const POINT_LIGHT_DATA& PointLight);
 	void AddLight(const SPOTLIGHT_DATA& SpotLight);

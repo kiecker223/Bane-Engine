@@ -4,7 +4,7 @@
 #include "../Interfaces/GraphicsResources.h"
 #include "../Interfaces/GraphicsCommandList.h"
 #include "D3D12PipelineState.h"
-
+#include <iostream>
 
 
 inline bool D3D12ResourceStateIsRead(D3D12_RESOURCE_STATES ResourceStates)
@@ -121,14 +121,20 @@ public:
 		D3DResource(InResource),
 		D3D12DeviceChild(InDevice)
 	{
-		// TODO: Debug me
-		D3DResource->AddRef();
 	}
 
 	~D3D12ResourceLocation()
 	{
 		if (D3DResource)
-			D3DResource->Release();
+		{
+			ULONG RefCount = D3DResource->Release();
+			while (RefCount) 
+			{
+				std::cout << "RefCount: " << RefCount << std::endl; 
+				RefCount = D3DResource->Release();
+			}
+			std::cout << "Destroying" << std::endl;
+		}
 	}
 
 	inline void SetResource(ID3D12Resource* InResource)
@@ -172,8 +178,6 @@ public:
 	D3D12GPUResource() : CurrentState(D3D12_RESOURCE_STATE_COMMON), PendingState(D3D12_RESOURCE_STATE_INVALID_STATE), ResourceOwnership(COMMAND_CONTEXT_TYPE_INVALID) { }
 	virtual ~D3D12GPUResource() 
 	{
-		Resource.D3DResource->Release();
-		Resource.D3DResource = nullptr;
 	}
 
 	inline bool CheckResourceTransitionValid(D3D12_RESOURCE_STATES NewState)

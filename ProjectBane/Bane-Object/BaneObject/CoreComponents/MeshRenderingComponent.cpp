@@ -1,6 +1,8 @@
 #include "MeshRenderingComponent.h"
 #include "../Entity/Transform.h"
 #include <Graphics/Interfaces/ApiRuntime.h>
+#include "../Scene/SceneManager.h"
+#include "../Entity/Entity.h"
 
 
 MeshRenderingComponent::MeshRenderingComponent() :
@@ -18,8 +20,9 @@ void MeshRenderingComponent::Start()
 
 void MeshRenderingComponent::GraphicsUpdate(RenderLoop& Loop)
 {
-	auto* XForm = GetTransform();
-	Loop.AddDrawable(RenderedMesh, RenderedMaterial, XForm->GetPosition(), XForm->GetScale(), XForm->GetRotation());
+	double3 CamPos = GetSceneManager()->CurrentScene->GetCameraEntity()->GetTransform()->GetPosition();
+	auto Mat = GetOwner()->GetMatrixAffectedByParents();
+	Loop.AddDrawable(RenderedMesh, RenderedMaterial, Mat);
 }
 
 

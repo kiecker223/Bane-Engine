@@ -41,6 +41,16 @@ public:
 	void LoadFromMetaData(const SCENE_DATA* Data);
 	void InitScene();
 
+	inline void SetCamera(Entity* EntityCamera)
+	{
+		m_CameraEntity = EntityCamera;
+	}
+
+	inline Entity* GetCameraEntity()
+	{
+		return m_CameraEntity;
+	}
+
 	inline void SetSkybox(ITextureCube* InSkybox)
 	{
 		m_Skybox = InSkybox;
@@ -69,6 +79,7 @@ private:
 	ITextureCube* m_Skybox;
 	std::string m_Name;
 	Entity* m_Root;
+	Entity* m_CameraEntity;
 	struct EntityHashEntry
 	{
 		uint64 Hash;

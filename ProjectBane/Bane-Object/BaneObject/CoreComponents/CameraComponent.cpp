@@ -1,8 +1,6 @@
 #include "CameraComponent.h"
 #include <Platform/System/Window.h>
-
-
-CameraComponent* CameraComponent::GMainCamera = nullptr;
+#include "../Scene/SceneManager.h"
 
 CameraComponent::CameraComponent() :
 	Fov(60.0f),
@@ -34,6 +32,11 @@ float4x4 CameraComponent::GetLookAt() const
 	double3 ForwardVec = GetTransform()->GetForward() * 200.;
 	double3 Forward = GetTransform()->GetPosition() + ForwardVec;
 	return matView(float3(0.f, 0.f, 0.f), fromDouble3(Forward - GetTransform()->GetPosition()), UpDirection);
+}
+
+void CameraComponent::Start()
+{
+	GetSceneManager()->CurrentScene->SetCamera(GetOwner());
 }
 
 void CameraComponent::Tick(float DT)

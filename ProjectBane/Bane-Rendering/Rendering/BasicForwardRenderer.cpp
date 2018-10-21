@@ -71,13 +71,6 @@ void BasicForwardRenderer::GatherSceneData()
 		}
 	}
 	{
-		for (auto& Commit : m_Commits)
-		{
-			for (auto& DrawMesh : Commit.Meshes)
-			{
-				*DrawMesh.MatrixPtr = matTransformation(fromDouble3(DrawMesh.Position - Commit.CameraPosition), DrawMesh.Rotation, fromDouble3(DrawMesh.Scale));
-			}
-		}
 		if (RenderLoop::GRenderGlobals.MeshData.Size > 0)
 		{
 			byte* Buff = reinterpret_cast<byte*>(m_MeshDataBuffer->Map());

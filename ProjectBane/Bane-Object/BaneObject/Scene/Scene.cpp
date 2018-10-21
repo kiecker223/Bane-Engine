@@ -154,7 +154,7 @@ void Scene::Render(RenderLoop& RL)
 
 void Scene::DumpScene()
 {
-	m_World.MessageList.push_back({ 0, true });
+	m_World.MessageList.push_back(PhysicsMessage(0, true));
 	m_MeshCache.Destroy();
 	for (auto& e : m_Entities)
 	{

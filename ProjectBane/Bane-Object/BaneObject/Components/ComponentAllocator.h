@@ -76,8 +76,7 @@ public:
 	{
 		for (auto* CompOffset : AllocatedObjects)
 		{
-			auto* c = reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(CompOffset) + reinterpret_cast<ptrdiff_t>(PtrBegin));
-			c->~Component();
+			reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(CompOffset) + reinterpret_cast<ptrdiff_t>(PtrBegin))->~Component();
 		}
 		HeapFree(GetProcessHeap(), HEAP_NO_SERIALIZE, (LPVOID)PtrBegin);
 		PtrBegin = nullptr;

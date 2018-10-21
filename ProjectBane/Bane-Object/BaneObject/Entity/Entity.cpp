@@ -60,12 +60,16 @@ void Entity::RemoveChild(uint32 ChildIndex)
 float4x4 Entity::GetMatrixAffectedByParents() const
 {
 	const Entity* Parent = this;
-	float4x4 Result = GetTransform()->GetMatrix();
-
-	while (Parent)
+	double3 CamPos = m_SceneOwner->GetCameraEntity()->GetTransform()->GetPosition();
+	float4x4 Result = GetTransform()->GetMatrix(CamPos);
+	while (true)
 	{
-		Result *= Parent->GetTransform()->GetMatrix();
 		Parent = Parent->GetParent();
+		if (!Parent)
+		{
+			break;
+		}
+		Result *= Parent->GetTransform()->GetRawMatrix();
 	}
 	return Result;
 }
