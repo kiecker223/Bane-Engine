@@ -10,6 +10,8 @@ public:
 	double  Radius;
 	double3 Velocity;
 	double  Mass;
+// 
+// 	void Accelerate(double3 Direction, double Magnitude) { }
 
 	uint32  Handle;
 	double3 Position;

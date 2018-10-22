@@ -53,6 +53,7 @@ struct VS_INPUT
 	float3 Binormal : BINORMAL;
 	float3 Tangent : TANGENT;
 	float2 TexCoords : TEXCOORD;
+	uint Id : SV_VERTEXID;
 };
 
 struct PS_INPUT
@@ -63,6 +64,7 @@ struct PS_INPUT
 	float3 Binormal : BINORMAL;
 	float3 Tangent : TANGENT;
 	float2 TexCoords : TEXCOORD;
+	uint Id : VERTEXID;
 };
 
 PS_INPUT VSMain(VS_INPUT Input)
@@ -75,6 +77,7 @@ PS_INPUT VSMain(VS_INPUT Input)
 	Pos = mul(Pos, Projection);
 	Pos.z = log((ZResolution*Pos.z) + 1.0) / log((ZResolution*FarPlane) + 1.0);
 	Pos.z *= Pos.w;
+	Output.Id = Input.Id;
 	Output.Position = Pos;
 	Output.WorldPos = mul(float4(Input.Position, 1.0f), Model).xyz;
 	Output.Normal =   normalize(mul(Input.Normal,   (float3x3)Model));
@@ -83,7 +86,19 @@ PS_INPUT VSMain(VS_INPUT Input)
 	return Output;
 }
 
+float rand(in float2 uv)
+{
+	return (frac(sin(dot(uv, float2(12.9898, 78.233)*2.0)) * 43758.5453));
+}
+
+float rand2(in uint Value, uint o)
+{
+	return rand(float2(Value + o, Value - o));
+}
+
 float4 PSMain(PS_INPUT Input) : SV_TARGET0
 {
-	return float4(Input.uv.x, Input.uv.y, 0.0f, 1.0f);
+	return float4(AlbedoTexture.Sample(DefaultSampler, Input.TexCoords).rgb, 1.0);
+	//return float4(rand2(Input.Id, 1), rand2(Input.Id, 2), rand2(Input.Id, 3), 1.0);
+	//return float4(Input.TexCoords, 0.0f, 1.0f);
 }

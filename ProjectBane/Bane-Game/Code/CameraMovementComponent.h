@@ -54,19 +54,19 @@ public:
 		}
 		if (InputState[0x51] & 0x80)
 		{
-			ST->Rotate(-RotationSpeed * DT, 0.0f, 0.0f);
+			ST->Rotate(fromDouble3(ST->GetRightVector()) * -RotationSpeed * DT);
 		}
 		if (InputState[0x52] & 0x80)
 		{
-			ST->Rotate(0.0f, -RotationSpeed * DT, 0.0f);
+			ST->Rotate(float3(0.0f, -RotationSpeed * DT, 0.0f) * fromDouble3(ST->GetUpVector()));
 		}
 		if (InputState[0x46] & 0x80)
 		{
-			ST->Rotate(0.0f, RotationSpeed * DT, 0.0f);
+			ST->Rotate(float3(0.0f, RotationSpeed * DT, 0.0f) * fromDouble3(ST->GetUpVector()));
 		}
 		if (InputState[0x45] & 0x80)
 		{
-			ST->Rotate(RotationSpeed * DT, 0.0f, 0.0f);
+			ST->Rotate(fromDouble3(ST->GetRightVector()) * RotationSpeed * DT);
  		}
 	}
 };

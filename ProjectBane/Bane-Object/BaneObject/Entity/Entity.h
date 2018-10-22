@@ -315,7 +315,7 @@ private:
 	EntityIdentifier m_Id;
 	EntityIdentifier m_Parent;
 	IdentifierList m_Children;
-	Scene* m_SceneOwner;
+	class Scene* m_SceneOwner;
 	ComponentAllocator m_Allocator;
 	std::vector<uint64> m_Components;
 };

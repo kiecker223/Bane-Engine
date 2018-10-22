@@ -316,6 +316,33 @@ inline double3 cross(const double3& Lhs, const double3& Rhs)
 	);
 }
 
+template<typename T>
+inline T saturate(const T& Value)
+{
+	for (uint32 i = 0; i < T::ColCount; i++)
+	{
+		if (Value[i] < 0.0f) Value[i] = 0.0f;
+		else if (Value[i] > 1.f) Value[i] = 1.0f;
+	}
+	return Value;
+}
+
+template<>
+inline float saturate(const float& Value)
+{
+	if (Value < 0.0f) return 0.0f;
+	else if (Value > 1.0f) return 1.0f;
+	return Value;
+}
+
+template<>
+inline double saturate(const double& Value)
+{
+	if (Value < 0.0) return 0.0;
+	else if (Value > 1.0) return 1.0;
+	return Value;
+}
+
 inline matrix matProjection(float Aspect, float FovY, float Near, float Far)
 {
 	FovY = radians(FovY);
@@ -446,6 +473,36 @@ inline matrix matTransformation(const float3& Position, const Quaternion& Rotati
 	Result = m1 * m2 * m3;
 
 	return Result;
+}
+
+inline matrix matRotX(float Radians)
+{
+	return matrix(
+		1.f, 0.f, 0.f, 0.f,
+		0.f, cosf(Radians), -sinf(Radians), 0,
+		0.f, sin(Radians), cos(Radians), 0,
+		0.f, 0.f, 0.f, 1.f
+	);
+}
+
+inline matrix matRotY(float Radians)
+{
+	return matrix(
+		cosf(Radians), 0.f, sinf(Radians), 0.f,
+		0.f, 1.f, 0.f, 0.f,
+		-sinf(Radians), 0.f, cosf(Radians), 0.f,
+		0.f, 0.f, 0.f, 1.f
+	);
+}
+
+inline matrix matRotZ(float Radians)
+{
+	return matrix(
+		cosf(Radians), -sinf(Radians), 0.f, 0.f,
+		sinf(Radians), cosf(Radians), 0.f, 0.f,
+		0.f, 0.f, 1.f, 0.f,
+		0.f, 0.f, 0.f, 1.f
+	);
 }
 
 enum NoName

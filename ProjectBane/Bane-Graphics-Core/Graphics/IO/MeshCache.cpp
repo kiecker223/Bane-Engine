@@ -62,9 +62,9 @@ void MeshCache::DeallocateMesh(Mesh* pMesh)
 void MeshCache::SaveMesh(Mesh* pMesh, const std::string& MeshName)
 {
 	auto Val = m_Meshes.find(MeshName);
-	if (Val == m_Meshes.end())
+	if (Val != m_Meshes.end())
 	{
-		// Already have it, Do I error?
+		__debugbreak();
 		return;
 	}
 	m_Meshes.insert(std::pair<std::string, Mesh*>(MeshName, pMesh));

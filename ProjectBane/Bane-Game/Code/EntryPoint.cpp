@@ -63,6 +63,11 @@ void InitApplication()
 	GetSceneManager()->CreateNewScene("Space Scene");
 	Scene* SpaceLevel = GetSceneManager()->CurrentScene;
 	{
+		Mesh* AllocMesh = SpaceLevel->GetMeshCache().AllocateMesh();
+		AllocMesh->GenerateUVSphere(32);
+		SpaceLevel->GetMeshCache().SaveMesh(AllocMesh, "Sphere");
+	}
+	{
 		Entity* Sun = SpaceLevel->CreateEntity("Sun");
 		Sun->GetPhysicsProperties().Mass = 1.989e30;
 		auto SunMesh = Sun->AddComponent<MeshRenderingComponent>();
@@ -80,7 +85,7 @@ void InitApplication()
 		Mercury->GetPhysicsProperties().bCanTick = false;
 		Mercury->GetTransform()->SetPosition(double3(0., 0., -DFS));
 		auto MercuryMesh = Mercury->AddComponent<MeshRenderingComponent>();
-		MercuryMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Meshes/Sphere.FBX");
+		MercuryMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		MercuryMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		MercuryMesh->RenderedMaterial.SetTexture("Resources/2k_mercury.jpg", 0);
 		Mercury->GetTransform()->Scale(4879000.0);
@@ -93,7 +98,7 @@ void InitApplication()
 		Venus->GetPhysicsProperties().bCanTick = false;
 		Venus->GetTransform()->SetPosition(double3(0.f, 0.f, -DFS));
 		auto VenusMesh = Venus->AddComponent<MeshRenderingComponent>();
-		VenusMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Meshes/Sphere.FBX");
+		VenusMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		VenusMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		VenusMesh->RenderedMaterial.SetTexture("Resources/8k_venus_atmosphere.jpg", 0);
 		Venus->GetTransform()->Scale(12104000.);
@@ -102,10 +107,10 @@ void InitApplication()
 		Entity* Earth = SpaceLevel->CreateEntity("Earth");
 		Earth->GetPhysicsProperties().Mass = 5.97219e24;
 		Earth->GetPhysicsProperties().Velocity = double3(30000.0 * (1. / 60.), 0., 0.);
-		//Earth->GetPhysicsProperties().bCanTick = false;
+		Earth->GetPhysicsProperties().bCanTick = false;
 		Earth->GetTransform()->SetPosition(double3(0., 0., -M_AU(1.)));
 		auto EarthMesh = Earth->AddComponent<MeshRenderingComponent>();
-		EarthMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Meshes/Sphere.FBX");
+		EarthMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		EarthMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		EarthMesh->RenderedMaterial.SetTexture("Resources/EarthNoClouds.jpg", 0);
 		Earth->GetTransform()->Scale(12742000.0);
@@ -116,13 +121,11 @@ void InitApplication()
 		//Luna->GetPhysicsProperties().bCanTick = false;
 		Luna->GetTransform()->SetPosition(double3(0., 0., M_AU(1.) + 384400000.));
 		auto LunaMesh = Luna->AddComponent<MeshRenderingComponent>();
-		LunaMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Meshes/Sphere.FBX");
+		LunaMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		LunaMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		Luna->GetTransform()->Scale(3474000.0);
 		FollowedPlanet = Earth;
 	}
-
-
 
 	Entity* CamEntity = SpaceLevel->CreateEntity("Camera");
 	CamEntity->GetTransform()->SetPosition(double3(0., 0., -M_AU(1.0)));
@@ -131,7 +134,7 @@ void InitApplication()
 	auto Cam = CamEntity->AddComponent<CameraComponent>();
 	Cam->ZNear = 1e-2f;
 	Cam->ZFar = 1e+21f;
-	CamEntity->AddComponent<CameraMovementComponent>()->Speed = 8e9;
+	CamEntity->AddComponent<CameraMovementComponent>()->Speed = 1e7;
 }
 
 

@@ -3,6 +3,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "../Interfaces/ApiRuntime.h"
+#include <iostream>
 
 
 MeshLayout::MeshLayout(IInputLayout* Layout)
@@ -134,77 +135,137 @@ void Mesh::SetIndices(const std::vector<uint32>& InIndices)
 	m_Indices = InIndices;
 }
 
-void Mesh::GenerateSphere(uint32 SegmentCount)
+void Mesh::GenerateUVSphere(uint32 SegmentCount)
 {
 	std::vector<Vertex> Vertices;
 	std::vector<uint32> Indices;
 	float3 TopPoint(0.f, 0.5f, 0.f);
+	const float LatitudeSpacing = 1.0f / (static_cast<float>(SegmentCount) + 1.0f);
+	const float LongitudeSpacing = 1.0f / (static_cast<float>(SegmentCount));
 
-	/*
-	struct Vertex
+	for (uint32 y = 0; y < SegmentCount / 2 + 1; y++)
 	{
-		float3 Postition;
-		float3 Normal;
-		float3 Binormal;
-		float3 Tangent;
-		float2 UV;
-	};
-	*/
-	
-	float SegmentCountF = static_cast<float>(SegmentCount);
-	Quaternion XRotation = Quaternion::FromAxisAngle(float3(1.f, 0.f, 0.f), 0.0f);
-	for (uint32 y = 0; y < SegmentCount; y++)
-	{
-		const float PercentDown = (static_cast<float>(y) / SegmentCountF);
-		XRotation = Quaternion::FromAxisAngle(float3(1.f, 0.f, 0.f), radians(PercentDown * 360.f));
+		const float PercentDown = static_cast<float>(y) / static_cast<float>(SegmentCount / 2);
 		if (y == 0)
 		{
-			Vertices.push_back({TopPoint, normalized(TopPoint), float3(), float3(), float2(0.5f, 1.f)});
+			Vertices.push_back({ TopPoint, normalized(TopPoint), float3(), float3(), float2(0.5f, 1.0f) });
 		}
-		else if (y == SegmentCount - 1)
+		else if (y == ((SegmentCount / 2)))
 		{
-			Vertices.push_back({ -TopPoint, normalized(-TopPoint), float3(), float3(), float2(0.5f, 0.f) });
+			Vertices.push_back({ -TopPoint, normalized(-TopPoint), float3(), float3(), float2(0.5f, 0.0f) });
 		}
 		else
 		{
 			for (uint32 i = 0; i < SegmentCount; i++)
 			{
-				const float PercentAroundCrown = (static_cast<float>(i) / SegmentCountF);
-				Quaternion YRotation = Quaternion::FromAxisAngle(float3(0.f, 1.f, 0.f), radians(PercentAroundCrown * 360.f));
-				float3 Point = ((float3x3)XRotation.RotationMatrix() * (float3x3)YRotation.RotationMatrix()) * TopPoint;
-				Vertices.push_back({ Point, normalized(Point), float3(), float3(), float2(1.f - PercentDown, PercentAroundCrown) });
+				const float PercentAroundCrown = (static_cast<float>(i) / static_cast<float>(SegmentCount));
+				float3 Point = (float3x3)(matRotY(radians(PercentAroundCrown * 360.f)) * matRotX(radians(PercentDown * 180.f))) * TopPoint;
+				Vertices.push_back({ Point, normalized(Point), float3(), float3(), float2(1.0f - PercentAroundCrown, 1.0f - PercentDown) });
+ 				if (i == SegmentCount - 1)
+ 				{
+ 					Point = (float3x3)(matRotY(radians(360.f)) * matRotX(radians(PercentDown * 180.f))) * TopPoint;
+ 					Vertices.push_back({ Point, normalized(Point), float3(), float3(), float2(0.0f, 1.0f - PercentDown) });
+ 				}
 			}
 		}
 	}
-
-	for (uint32 y = 1; y < SegmentCount; y++)
+	uint32 LatitudeCount = SegmentCount + 1;
+	for (uint32 y = 0; y < (SegmentCount / 2) - 1; y++)
 	{
-		if (y == 1)
+		if (y == 0) 
 		{
-			for (uint32 i = 0; i < SegmentCount; i++)
+			for (uint32 i = 0; i < LatitudeCount - 1; i++)
 			{
 				Indices.push_back(0);
-				Indices.push_back(i);
 				Indices.push_back(i + 1);
+				Indices.push_back(i + 2);
+				if (i == LatitudeCount - 2)
+				{
+					Indices.push_back(0);
+					Indices.push_back(LatitudeCount);
+					Indices.push_back(1);
+				}
 			}
-		}
-		if (y == SegmentCount - 1)
-		{
-			for (uint32 i = SegmentCount - 2; i > 0; i--)
+			for (uint32 i = 0; i < (LatitudeCount); i++)
 			{
-				Indices.push_back(static_cast<uint32>(Vertices.size() - 1));
-				Indices.push_back(static_cast<uint32>(Vertices.size() - i));
-				Indices.push_back(static_cast<uint32>(Vertices.size() - (i - 1)));
-			}
-		}
-		else
-		{
-			for (uint32 i = 0; i < SegmentCount; i++)
-			{
+				if (i == 0)
+				{
+					// Top triangle
+					Indices.push_back((y * LatitudeCount) + LatitudeCount + LatitudeCount);
+					Indices.push_back((y * LatitudeCount) + LatitudeCount);
+					Indices.push_back((y * LatitudeCount) + 1);
 
+					// Bottom triangle
+					Indices.push_back((y * LatitudeCount) + LatitudeCount + LatitudeCount);
+					Indices.push_back((y * LatitudeCount) + LatitudeCount + 1);
+					Indices.push_back((y * LatitudeCount) + 1);
+				}
+				else
+				{
+					// Top triangle
+					Indices.push_back((y * LatitudeCount) + i);
+					Indices.push_back((y * LatitudeCount) + i + LatitudeCount + 1);
+					Indices.push_back((y * LatitudeCount) + i + 1);
+
+					// Bottom triangle
+					Indices.push_back((y * LatitudeCount) + i);
+					Indices.push_back((y * LatitudeCount) + i + LatitudeCount);
+					Indices.push_back((y * LatitudeCount) + i + LatitudeCount+ 1);
+				}
+			}
+		}
+		else if (y == (SegmentCount / 2) - 2)
+		{
+			uint32 LastPos = static_cast<uint32>(Vertices.size() - 1);
+			for (uint32 i = 0; i < SegmentCount - 1; i++)
+			{
+				Indices.push_back(LastPos);
+				Indices.push_back((LastPos) - (i + 1));
+				Indices.push_back((LastPos) - (i + 2));
+				if (i == SegmentCount - 2)
+				{
+					Indices.push_back(LastPos);
+					Indices.push_back(LastPos - 1);
+					Indices.push_back(LastPos - SegmentCount);
+				}
+			}
+			
+		}
+		else if (y < (SegmentCount / 2) - 2)
+		{
+			for (uint32 i = 0; i < (LatitudeCount); i++)
+			{
+				if (i == 0)
+				{
+					// Top triangle
+					Indices.push_back((y * LatitudeCount) + LatitudeCount + LatitudeCount); 
+					Indices.push_back((y * LatitudeCount) + LatitudeCount); 
+					Indices.push_back((y * LatitudeCount) + 1); 
+ 
+ 					// Bottom triangle
+					Indices.push_back((y * LatitudeCount) + LatitudeCount + LatitudeCount); 
+					Indices.push_back((y * LatitudeCount) + LatitudeCount + 1); 
+					Indices.push_back((y * LatitudeCount) + 1);
+				}
+				else
+				{
+					// Top triangle
+					Indices.push_back((y * LatitudeCount) + i);
+					Indices.push_back((y * LatitudeCount) + i + LatitudeCount + 1);
+					Indices.push_back((y * LatitudeCount) + i + 1);
+
+					// Bottom triangle
+					Indices.push_back((y * LatitudeCount) + i);
+					Indices.push_back((y * LatitudeCount) + i + LatitudeCount);
+					Indices.push_back((y * LatitudeCount) + i + LatitudeCount + 1);
+				}
 			}
 		}
 	}
+
+	m_Indices = Indices;
+	SetVertexData(Vertices);
+	Upload();
 }
 
 void Mesh::Upload()
@@ -221,112 +282,6 @@ void Mesh::Upload()
 	}
 	m_IndexBuffer = Device->CreateIndexBuffer(static_cast<uint32>(m_Indices.size() * 4), (uint8*)m_Indices.data());
 }
-/*
-Mesh Mesh::CreateSphere(uint32 NumPoints)
-{
-	UNUSED(NumPoints);
-	Mesh Result;
-	uint32 NumSphereVertices = 0;
-	uint32 NumSphereFaces = 0;
-	uint32 LatLines = NumPoints;
-	uint32 LongLines = NumPoints;
-	NumSphereVertices = ((LatLines - 2) * LongLines) + 2;
-	NumSphereFaces = ((LatLines - 3)*(LongLines) * 2) + (LongLines * 2);
-
-	float sphereYaw = 0.0f;
-	float spherePitch = 0.0f;
-	matrix Rotationx;
-	matrix Rotationy;
-
-	std::vector<float3> vertices(NumSphereVertices);
-
-	Result.GetLayout().AddItem("POSITION", INPUT_ITEM_FORMAT_FLOAT3);
-
-	float3 currVertPos = float3Set(0.0f, 0.0f, 1.0f, 0.0f);
-
-	vertices[0].x = 0.0f;
-	vertices[0].y = 0.0f;
-	vertices[0].z = 1.0f;
-
-	for (uint32 i = 0; i < LatLines - 2; ++i)
-	{
-		spherePitch = (i + 1) * (3.14 / (LatLines - 1));
-		Rotationx = XMMatrixRotationX(spherePitch);
-		for (uint32 j = 0; j < LongLines; ++j)
-		{
-			sphereYaw = j * (6.28 / (LongLines));
-			Rotationy = XMMatrixRotationZ(sphereYaw);
-			currVertPos = float33TransformNormal(float3Set(0.0f, 0.0f, 1.0f, 0.0f), (Rotationx * Rotationy));
-			currVertPos = float33Normalize(currVertPos);
-			vertices[i*LongLines + j + 1].x = float3GetX(currVertPos);
-			vertices[i*LongLines + j + 1].y = float3GetY(currVertPos);
-			vertices[i*LongLines + j + 1].z = float3GetZ(currVertPos);
-		}
-	}
-
-	vertices[NumSphereVertices - 1].x = 0.0f;
-	vertices[NumSphereVertices - 1].y = 0.0f;
-	vertices[NumSphereVertices - 1].z = -1.0f;
-	Result.SetVertexData<float3>(vertices);
-
-	std::vector<uint32> indices(NumSphereFaces * 3);
-
-	int k = 0;
-	for (uint32 l = 0; l < LongLines - 1; ++l)
-	{
-		indices[k] = 0;
-		indices[k + 1] = l + 1;
-		indices[k + 2] = l + 2;
-		k += 3;
-	}
-
-	indices[k] = 0;
-	indices[k + 1] = LongLines;
-	indices[k + 2] = 1;
-	k += 3;
-
-	for (uint32 i = 0; i < LatLines - 3; ++i)
-	{
-		for (uint32 j = 0; j < LongLines - 1; ++j)
-		{
-			indices[k] = i * LongLines + j + 1;
-			indices[k + 1] = i * LongLines + j + 2;
-			indices[k + 2] = (i + 1)*LongLines + j + 1;
-
-			indices[k + 3] = (i + 1)*LongLines + j + 1;
-			indices[k + 4] = i * LongLines + j + 2;
-			indices[k + 5] = (i + 1)*LongLines + j + 2;
-
-			k += 6; // next quad
-		}
-
-		indices[k] = (i*LongLines) + LongLines;
-		indices[k + 1] = (i*LongLines) + 1;
-		indices[k + 2] = ((i + 1)*LongLines) + LongLines;
-
-		indices[k + 3] = ((i + 1)*LongLines) + LongLines;
-		indices[k + 4] = (i*LongLines) + 1;
-		indices[k + 5] = ((i + 1)*LongLines) + 1;
-
-		k += 6;
-	}
-
-	for (uint32 l = 0; l < LongLines - 1; ++l)
-	{
-		indices[k] = NumSphereVertices - 1;
-		indices[k + 1] = (NumSphereVertices - 1) - (l + 1);
-		indices[k + 2] = (NumSphereVertices - 1) - (l + 2);
-		k += 3;
-	}
-
-	indices[k] = NumSphereVertices - 1;
-	indices[k + 1] = (NumSphereVertices - 1) - LongLines;
-	indices[k + 2] = NumSphereVertices - 2;
-	Result.SetIndices(indices);
-
-	return Result;
-}
-*/
 
 void Mesh::AddData(float* pDatas, uint32 Size)
 {

@@ -228,7 +228,13 @@ static FUNCTION_INFO GetFunctionInfo(std::string FunctionDecl)
 					VarInfo.Semantic.push_back(C);
 				}
 			}
-			Result.Parameters.push_back(VarInfo);
+			if (VarInfo.Semantic.find("SV_") != std::string::npos)
+			{
+			}
+			else
+			{
+				Result.Parameters.push_back(VarInfo);
+			}
 			RESET_VAR();
 		}
 		else
@@ -1668,7 +1674,7 @@ FULL_PIPELINE_DESCRIPTOR ParseGraphicsShader(const std::string& InFile, const st
 			// If its a system type then we assume that the semantics are passed in here
 			if (IsSystemType(VarInfo))
 			{
-				if (VarHasSemantic(VarInfo))
+				if (VarHasSemantic(VarInfo) && VarInfo.Semantic.find("SV_") == std::string::npos)
 				{
 					VSInputs.push_back(VarInfo);
 				}
@@ -1681,7 +1687,7 @@ FULL_PIPELINE_DESCRIPTOR ParseGraphicsShader(const std::string& InFile, const st
 
 				for (auto& Var : StructureInfo.Variables)
 				{
-					if (VarHasSemantic(Var))
+					if (VarHasSemantic(Var) && Var.Semantic.find("SV_") == std::string::npos)
 					{
 						VSInputs.push_back(Var);
 					}
