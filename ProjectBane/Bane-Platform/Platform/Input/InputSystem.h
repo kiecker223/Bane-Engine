@@ -1,6 +1,7 @@
 #pragma once
 #include "../System/Window.h"
 #include "InputMouseDevice.h"
+#include "InputKeyboardDevice.h"
 
 class InputSystem
 {
@@ -13,7 +14,8 @@ public:
 	void Update();
 
 	Window* MainWindow;
-	InputMouseDevice Mouse;
+	InputMouseDevice	Mouse;
+	InputKeyboardDevice Keyboard;
 	static InputSystem* GInstance;
 };
 

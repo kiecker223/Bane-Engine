@@ -23,7 +23,6 @@ public:
 
 	void Start() override final
 	{
-		InputState = new uint8[256];
 	}
 
 	void Tick(float DT) override final
@@ -31,31 +30,30 @@ public:
 		double Dt = static_cast<double>(DT);
 		float RotationSpeed = 0.1f;
 		Transform* ST = GetTransform();
-		GetKeyboardState(InputState);
 		static const double3 Up(0.0, 1.0, 0.0);
 		float2 MouseDelta = GetInput()->Mouse.GetMouseDelta();
 		double3 Forward = ST->GetForward();
 		double3 Right = ST->GetRightVector();
-		if (InputState[0x57] & 0x80)
+		if (GetInput()->Keyboard.GetKeyDown(KEY_W))
 		{
 			ST->Translate((ST->GetForward() * Speed) * Dt);
 		}
-		if (InputState[0x53] & 0x80)
+		if (GetInput()->Keyboard.GetKeyDown(KEY_S))
 		{
 			ST->Translate((-ST->GetForward() * Speed) * Dt);
 		}
-		if (InputState[0x41] & 0x80)
+		if (GetInput()->Keyboard.GetKeyDown(KEY_D))
 		{
 			ST->Translate((Right * Speed) * Dt);
 		}
-		if (InputState[0x44] & 0x80)
+		if (GetInput()->Keyboard.GetKeyDown(KEY_A))
 		{
 			ST->Translate((-Right * Speed) * Dt);
 		}
-		std::cout << MouseDelta.x << " : " << MouseDelta.y << std::endl;
+		std::cout << "Mouse delta: " << MouseDelta.x << " : " << MouseDelta.y << std::endl;
 		if (abs(MouseDelta.y) > 0.f)
 		{
-			ST->GetRotation() *= Quaternion::FromAxisAngle(Right, -MouseDelta.y * RotationSpeed * DT);
+			ST->GetRotation() *= Quaternion::FromAxisAngle(Right, MouseDelta.y * RotationSpeed * DT);
 			ST->GetRotation().Normalize();
 		}
 		if (abs(MouseDelta.x) > 0.f)

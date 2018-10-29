@@ -2,6 +2,7 @@
 
 #include "Common.h"
 #include "../Input/InputMouseDevice.h"
+#include "../Input/InputKeyboardDevice.h"
 
 class Window
 {
@@ -35,6 +36,11 @@ public:
 		m_Mouse = pDev;
 	}
 
+	inline void SetKeyboardDevice(InputKeyboardDevice* pDev)
+	{
+		m_Keyboard = pDev;
+	}
+
 	bool QuitRequested();
 
 	static inline void SetMainWindow(Window* pWindow)
@@ -53,5 +59,6 @@ private:
 	uint32 m_width, m_height;
 	WindowHandle* m_windowHandle;
 	InputMouseDevice* m_Mouse;
+	InputKeyboardDevice* m_Keyboard;
 };
 

@@ -111,8 +111,8 @@ void Application::Run()
 	while (!m_Window->QuitRequested())
 	{
 		Scene* pCurrentScene = GetSceneManager()->CurrentScene;
+		auto Now = Clock::now();
 		UpdateInput();
-
 		RenderLoop RL;
 		RL.SetSkybox({ pCurrentScene->GetSkybox(), float3(0.f, 0.f, 0.f) });
 		pCurrentScene->Render(RL);
@@ -120,7 +120,6 @@ void Application::Run()
 		m_SceneRenderer->Submit(RL);
 		m_SceneRenderer->Render();
 
-		auto Now = Clock::now();
 		auto DeltaTime = Now - TimeStart;
 		TimeStart = Now;
 		float Dt = static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(DeltaTime).count()) / 1E+9f;

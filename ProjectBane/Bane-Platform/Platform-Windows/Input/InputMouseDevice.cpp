@@ -36,22 +36,9 @@ struct InputMouseDevice::Impl
 
 		Mouse->SetDataFormat(&c_dfDIMouse2);
 
-		BANE_CHECK(
-			SUCCEEDED(
-				DirectInput->CreateDevice(
-					GUID_SysKeyboard,
-					&Keyboard,
-					nullptr
-				)
-			)
-		);
-
-		Keyboard->SetDataFormat(&c_dfDIKeyboard);
 	}
-
 	IDirectInput8* DirectInput;
 	IDirectInputDevice8* Mouse;
-	IDirectInputDevice8* Keyboard;
 	float2 MouseDelta;
 	float2 MousePosition;
 	float2 LastMousePosition;
