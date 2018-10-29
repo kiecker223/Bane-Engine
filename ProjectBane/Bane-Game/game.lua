@@ -1,7 +1,7 @@
 group "Game"
 project "BaneGame"
     kind "StaticLib"
-    links {"BaneObject", "BaneCore", "BaneGraphicsCore", "BanePhysics" }
+    links {"BaneObject", "BaneCore", "BanePlatform", "BaneGraphicsCore", "BanePhysics" }
     includedirs { 
         "../Bane-Common",
         "../Bane-Math",
@@ -9,6 +9,7 @@ project "BaneGame"
         "../Bane-Core",
 		"../Bane-Graphics-Core",
 		"../Bane-Physics",
+		"../Bane-Platform",
         "../External/include"}
 
 --  libdirs {"../External/libs/" }

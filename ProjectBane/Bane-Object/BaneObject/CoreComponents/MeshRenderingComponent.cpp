@@ -20,11 +20,6 @@ void MeshRenderingComponent::Start()
 
 void MeshRenderingComponent::GraphicsUpdate(RenderLoop& Loop)
 {
-	double3 CamPos = GetSceneManager()->CurrentScene->GetCameraEntity()->GetTransform()->GetPosition();
 	auto Mat = GetOwner()->GetMatrixAffectedByParents();
 	Loop.AddDrawable(RenderedMesh, RenderedMaterial, Mat);
 }
-
-
-
-

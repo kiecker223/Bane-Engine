@@ -24,7 +24,7 @@ public:
 		return m_Position;
 	}
 
-	inline Quaternion GetRotation()
+	inline Quaternion& GetRotation()
 	{
 		return m_Rotation;
 	}
@@ -114,7 +114,7 @@ public:
 	inline double3 GetRightVector() const
 	{
 		static const double3 Up(0., 1., 0.);
-		return cross(GetForward(), Up);
+		return normalized(cross(GetForward(), Up));
 	}
 
 private:

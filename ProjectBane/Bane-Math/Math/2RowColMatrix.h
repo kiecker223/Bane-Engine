@@ -129,7 +129,7 @@ struct uint322x2
 {
 	using TT = uint322x2;
 	using T = uint32;
-	using RowType = uint322;
+	using RowType = uint2;
 	static const uint32 NumRows = 2;
 	static const uint32 NumCols = 2;
 

@@ -19,7 +19,7 @@ TComponentHandle<Component> Entity::GetComponentByHash(uint64 Hash)
 	}
 
 	if (IndexToUse >= 0)
-		return TComponentHandle<Component>(&m_Allocator.GetAllocatedObjects(), IndexToUse, &m_Allocator.PtrBegin);
+		return TComponentHandle<Component>(&m_Allocator.PtrBegin, static_cast<ptrdiff_t>(m_Components[IndexToUse]));
 	return nullptr;
 }
 

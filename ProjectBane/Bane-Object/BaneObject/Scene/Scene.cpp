@@ -108,7 +108,7 @@ void Scene::Tick(float DT)
 		for (auto& e : m_EntityAddList)
 		{
 			m_Entities.push_back(e);
-			e.pEntity->Start();
+			m_EntityStartList.push_back(e);
 			auto PhysicsProps = e.pEntity->GetPhysicsProperties();
 			if (PhysicsProps.bCanTick)
 			{
@@ -117,10 +117,19 @@ void Scene::Tick(float DT)
 				Body.Position = e.pEntity->GetTransform()->GetPosition();
 				Body.Radius = 1.f;
 				Body.Velocity = PhysicsProps.Velocity;
+				Body.AngularVelocity = PhysicsProps.AngularVelocity;
 				e.pEntity->GetPhysicsProperties().PhysicsWorldHandle = m_World.AddBody(Body);
 			}
 		}
 		m_EntityAddList.clear();
+	}
+	if (m_EntityStartList.size() > 0)
+	{
+		for (uint32 i = 0; i < m_EntityStartList.size(); i++)
+		{
+			m_EntityStartList[i].pEntity->Start();
+		}
+		m_EntityStartList.clear();
 	}
 	if (m_World.IsReadyForRead())
 	{
@@ -128,7 +137,7 @@ void Scene::Tick(float DT)
 	}
 }
 
-void Scene::PhysicsUpdate(const PhysicsUpdateBuffer UpdateBuffer)
+void Scene::PhysicsUpdate(const PhysicsUpdateBuffer& UpdateBuffer)
 {
 	if (UpdateBuffer.Bodies.size() > 0)
 	{
@@ -137,8 +146,16 @@ void Scene::PhysicsUpdate(const PhysicsUpdateBuffer UpdateBuffer)
 			if (e.pEntity->GetPhysicsProperties().bCanTick)
 			{
 				uint32 PhysicsHandle = e.pEntity->GetPhysicsProperties().PhysicsWorldHandle;
-				e.pEntity->GetTransform()->SetPosition(UpdateBuffer.Bodies[PhysicsHandle].Position);
+				auto& Body = UpdateBuffer.Bodies[PhysicsHandle];
+				e.pEntity->GetTransform()->SetPosition(Body.Position);
 				e.pEntity->GetPhysicsProperties().Velocity = UpdateBuffer.Bodies[PhysicsHandle].Velocity;
+				auto& CurrentRotation = e.pEntity->GetTransform()->GetRotation();
+				float RadsPerSecond = length(fromDouble3(Body.AngularVelocity));
+				if (!isnan(RadsPerSecond) && abs(RadsPerSecond) > 0.0f)
+				{
+					CurrentRotation *= Quaternion::FromAxisAngle(fromDouble3(normalized(Body.AngularVelocity)), RadsPerSecond);
+					CurrentRotation.Normalize();
+				}
 			}
 		}
 	}
@@ -154,7 +171,7 @@ void Scene::Render(RenderLoop& RL)
 
 void Scene::DumpScene()
 {
-	m_World.MessageList.push_back(PhysicsMessage(0, true));
+	m_World.MessageQueue.AllocMessage<PhysicsMessage>(true);
 	m_MeshCache.Destroy();
 	for (auto& e : m_Entities)
 	{

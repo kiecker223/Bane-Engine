@@ -187,7 +187,7 @@ struct uint324x4
 	using TT = uint324x4;
 	using TT3 = uint323x3;
 	using TT2 = uint322x2;
-	using RowType = uint324;
+	using RowType = uint4;
 	static const uint32 NumRows = 4;
 	static const uint32 NumCols = 4;
 

@@ -241,7 +241,6 @@ void D3D12TextureBase::UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void*
 		memcpy(UploadBuffer->MappedPointer, Pointer, Size);
 		for (uint32 i = 0; i < ArrayCount; i++)
 		{
-			
 			D3D12_SUBRESOURCE_DATA ResourceData = { };
 			ResourceData.pData = (const void*)&Ptr[ImgSize * i];
 			ResourceData.RowPitch = Width * StepSize;

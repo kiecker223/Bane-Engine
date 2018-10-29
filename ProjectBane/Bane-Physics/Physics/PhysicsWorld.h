@@ -5,22 +5,11 @@
 #include <utility>
 #include <functional>
 #include <thread>
+#include "PhysicsMessageList.h"
 
 
-class PhysicsMessage
-{
-public:
 
-	PhysicsMessage(uint32 InEntityIDSource, bool bInQuit) : EntityIDSource(InEntityIDSource), bQuit(bInQuit) { }
 
-	uint32 EntityIDSource;
-	bool bQuit;
-
-	virtual void Execute(PhysicsBody& BodyToOperate)
-	{
-		UNUSED(BodyToOperate);
-	}
-};
 
 // Unused for the moment, fired to the entity system when, say a particular mesh was cut in half
 class PhysicsToApplicationMessage
@@ -54,13 +43,15 @@ public:
 		return m_bUnlockedForRead;
 	}
 
+
 	void UpdatePhysics();
 	
 	std::thread PhysicsThread;
+	ApplicationToPhysicsQueue MessageQueue;
 	PhysicsUpdateBuffer UpdateBuffer;
 	std::vector<PhysicsBody> Bodies;
 	std::vector<PhysicsBody> AddList;
-	std::vector<PhysicsMessage> MessageList;
+	
 	uint32 CurrentId;
 	bool bRunningPhysicsSim;
 

@@ -107,55 +107,49 @@ class TComponentHandle
 	friend class TComponentHandle;
 public:
 
-	inline TComponentHandle() : m_AllocObjects(nullptr), m_Index(0), m_AllocObjectsStart(nullptr) { }
+	inline TComponentHandle() : m_AllocObjectsStart(nullptr), m_Offset(0) { }
 
 	template<typename TOther>
 	inline TComponentHandle(const TComponentHandle<TOther>& Other)
 	{
-		m_AllocObjects = Other.m_AllocObjects;
-		m_Index = Other.m_Index;
+		m_Offset = Other.m_Offset;
 		m_AllocObjectsStart = Other.m_AllocObjectsStart;
 	}
 
 	inline TComponentHandle(const TComponentHandle& Other)
 	{
-		m_AllocObjects = Other.m_AllocObjects;
-		m_Index = Other.m_Index;
+		m_Offset = Other.m_Offset;
 		m_AllocObjectsStart = Other.m_AllocObjectsStart;
 	}
 
  	inline TComponentHandle(TComponentHandle&& Other)
  	{
- 		m_AllocObjects = Other.m_AllocObjects;
- 		m_Index = Other.m_Index;
+ 		m_Offset = Other.m_Offset;
 		m_AllocObjectsStart = Other.m_AllocObjectsStart;
  	}
 
-	inline TComponentHandle(const nullptr_t Other) : m_AllocObjects(nullptr), m_Index(0), m_AllocObjectsStart(nullptr)
+	inline TComponentHandle(const nullptr_t Other) : m_AllocObjectsStart(nullptr), m_Offset(0)
 	{
 		UNUSED(Other);
 	}
 
-	inline TComponentHandle(std::vector<Component*>* AllocObjects, uint32 Index, uint8** AllocObjectsStart)
+	inline TComponentHandle(uint8** AllocObjectsStart, ptrdiff_t Offset)
 	{
-		m_AllocObjects = AllocObjects;
-		m_Index = Index;
+		m_Offset = Offset;
 		m_AllocObjectsStart = AllocObjectsStart;
 	}
 
 	template<typename TOther>
 	inline TComponentHandle<T>& operator = (const TComponentHandle<TOther>& Other)
 	{
-		m_AllocObjects = Other.m_AllocObjects;
-		m_Index = Other.m_Index;
+		m_Offset = Other.m_Offset;
 		m_AllocObjectsStart = Other.m_AllocObjectsStart;
 		return *this;
 	}
 	
 	inline TComponentHandle& operator = (const TComponentHandle& Other)
 	{
-		m_AllocObjects = Other.m_AllocObjects;
-		m_Index = Other.m_Index;
+		m_Offset = Other.m_Offset;
 		m_AllocObjectsStart = Other.m_AllocObjectsStart;
 		return *this;
 	}
@@ -163,8 +157,7 @@ public:
 	inline TComponentHandle<T>& operator = (const nullptr_t Other) 
 	{
 		UNUSED(Other);
-		m_AllocObjects = nullptr;
-		m_Index = 0;
+		m_Offset = 0;
 		m_AllocObjectsStart = nullptr;
 		return *this;
 	}
@@ -172,23 +165,22 @@ public:
 	inline T* operator ->()
 	{
 #ifdef _DEBUG
-		BANE_CHECK(m_AllocObjects);
+		BANE_CHECK(m_AllocObjectsStart);
 #endif
-		return reinterpret_cast<T*>(reinterpret_cast<ptrdiff_t>(*m_AllocObjectsStart) + reinterpret_cast<ptrdiff_t>((*m_AllocObjects)[m_Index]));
+		return reinterpret_cast<T*>(reinterpret_cast<ptrdiff_t>(*m_AllocObjectsStart) + m_Offset);
 	}
 
 	inline T& operator ->() const
 	{
 #ifdef _DEBUG
-		BANE_CHECK(m_AllocObjects);
+		BANE_CHECK(m_AllocObjectsStart);
 #endif
-		return reinterpret_cast<T*>(reinterpret_cast<ptrdiff_t>(*m_AllocObjectsStart) + reinterpret_cast<ptrdiff_t>((*m_AllocObjects)[m_Index]));
+		return reinterpret_cast<T*>(reinterpret_cast<ptrdiff_t>(*m_AllocObjectsStart) + m_Offset);
 	}
 
 private:
 
-	uint32 m_Index;
-	std::vector<Component*>* m_AllocObjects;
+	ptrdiff_t m_Offset;
 	uint8** m_AllocObjectsStart;
 };
 
@@ -223,7 +215,7 @@ public:
 	inline TComponentHandle<T> AddComponent()
 	{
 		T* RetPointer = m_Allocator.AllocateObject<T>();
-		TComponentHandle<T> Result(&m_Allocator.GetAllocatedObjects(), static_cast<uint32>(m_Components.size()), &m_Allocator.PtrBegin);
+		TComponentHandle<T> Result(&m_Allocator.PtrBegin, reinterpret_cast<ptrdiff_t>(m_Allocator.AllocatedObjects[m_Components.size()]));
 		m_Components.push_back(T::ClassHash);
 		RetPointer->m_Owner = this;
 		RetPointer->m_Transform = &m_Transform;
@@ -239,7 +231,7 @@ public:
 	inline TComponentHandle<T> AddAndConstructComponent(U&&... Params)
 	{
 		T* RetPointer = m_Allocator.AllocateObjectCtor<T>(Params...);
-		TComponentHandle<T> Result(&m_Allocator.GetAllocatedObjects(), static_cast<uint32>(m_Components.size()), &m_Allocator.PtrBegin);
+		TComponentHandle<T> Result(&m_Allocator.PtrBegin, reinterpret_cast<ptrdiff_t>(m_Allocator.AllocatedObjects[m_Components.size()]));
 		m_Components.push_back(T::ClassHash);
 		RetPointer->m_Owner = this;
 		RetPointer->m_Transform = &m_Transform;
@@ -302,6 +294,11 @@ public:
 	inline PhysicsProperties& GetPhysicsProperties()
 	{
 		return m_PhysicsProperties;
+	}
+
+	inline uint32 GetComponentCount() const
+	{
+		return static_cast<uint32>(m_Components.size());
 	}
 
 private:

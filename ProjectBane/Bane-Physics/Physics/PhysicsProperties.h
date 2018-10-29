@@ -15,5 +15,6 @@ public:
 
 	double Mass;
 	double3 Velocity;
+	double3 AngularVelocity;
 	uint32 PhysicsWorldHandle;
 };

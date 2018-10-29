@@ -758,6 +758,7 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 ISamplerState* D3D12GraphicsDevice::CreateSamplerState(const SAMPLER_DESC& Desc)
 {
 	D3D12_SAMPLER_DESC CreationDesc = D3D12_TranslateSamplerDesc(Desc);
+
 	return new D3D12SamplerState(CreationDesc, Desc);
 }
 

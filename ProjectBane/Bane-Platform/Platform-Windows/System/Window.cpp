@@ -1,5 +1,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <KieckerMath.h>
 #include "../../Platform/System/Window.h"
 
 
@@ -101,6 +102,7 @@ void Window::Open(const char* windowName, uint32 width, uint32 height, bool isFu
 	}
 	m_width = width;
 	m_height = height;
+
 }
 
 bool Window::QuitRequested()

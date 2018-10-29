@@ -18,6 +18,8 @@ void PhysicsWorld::UpdatePhysics()
 	// At the start lock the physics buffer
 	while (bRunningPhysicsSim)
 	{
+		using Clock = std::chrono::high_resolution_clock;
+		auto Start = Clock::now();
 		if (AddList.size() > 0)
 		{
 			for (auto& Body : AddList)
@@ -27,20 +29,23 @@ void PhysicsWorld::UpdatePhysics()
 			AddList.clear();
 		}
 
-		if (MessageList.size() > 0)
+		if (MessageQueue.GetMessageCount() > 0)
 		{
-			for (auto& Message : MessageList)
+			auto* Message = MessageQueue.GetMessage(0);
+			while (Message->pNext)
 			{
-				if (Message.bQuit)
+				if (Message->bQuit)
 				{
 					bRunningPhysicsSim = false;
 				}
+				else
+				{
+					Message->Execute(Bodies[Message->BodyId]);
+					Message = Message->pNext;
+				}
 			}
-			MessageList.clear();
 		}
 
-		using Clock = std::chrono::high_resolution_clock;
-		auto Start = Clock::now();
 		m_bUnlockedForRead = false;
 		for (auto& Body : Bodies)
 		{
@@ -58,16 +63,24 @@ void PhysicsWorld::UpdatePhysics()
 				ForceDir *= Force;
 				double3 AccelerationDir = ForceDir / Body.Mass;
 				Body.Velocity += (AccelerationDir * (1. / 60.));
-				if (length(Body.Velocity) > 0.0001)
+				if (!isNan(Body.Velocity))
+				{
 					Body.Position += Body.Velocity;
+					if (isNan(Body.Position))
+					{
+						__debugbreak();
+					}
+				}
+				else
+				{
+					__debugbreak();
+				}
 			}
 		}
 		UpdateBuffer.Bodies = Bodies;
 		m_bUnlockedForRead = true;
 		auto TimeTaken = Clock::now() - Start;
-		//std::cout << "Time taken: " << static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(TimeTaken).count() / 1E+9f) << std::endl;
 		std::chrono::nanoseconds SleepTime = (std::chrono::nanoseconds(16666667) - std::chrono::duration_cast<std::chrono::nanoseconds>(TimeTaken));
-		//BANE_CHECK(SleepTime > std::chrono::nanoseconds(0));
 		std::this_thread::sleep_for(SleepTime);
 	}
 	std::cout << "Quiting physics thread" << std::endl;

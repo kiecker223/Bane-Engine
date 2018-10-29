@@ -8,6 +8,7 @@
 #include <Platform/System/Logging/Logger.h>
 #include <Platform/System/Process.h>
 #include <Code/EntryPoint.h>
+#include <Platform/Input/InputSystem.h>
 #include <iostream>
 #include <sys/timeb.h>
 #include <sys/utime.h>
@@ -76,7 +77,7 @@ void Application::InitSystems()
 		ScreenHeight = uint32(ScreenHeight * (float)0.9);
 		OpenApplicationWindow("Unnamed window", ScreenWidth, ScreenHeight);
 	}
-
+	InitializeInput(m_Window);
 	ApiRuntime::CreateRuntime();
 	GetApiRuntime()->Initialize(m_Window);
 
@@ -110,7 +111,8 @@ void Application::Run()
 	while (!m_Window->QuitRequested())
 	{
 		Scene* pCurrentScene = GetSceneManager()->CurrentScene;
-		
+		UpdateInput();
+
 		RenderLoop RL;
 		RL.SetSkybox({ pCurrentScene->GetSkybox(), float3(0.f, 0.f, 0.f) });
 		pCurrentScene->Render(RL);

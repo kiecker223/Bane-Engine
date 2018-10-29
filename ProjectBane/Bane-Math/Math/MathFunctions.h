@@ -108,6 +108,16 @@ inline float dot(const float2& Lhs, const float2& Rhs)
 	return Result;
 }
 
+inline float angleBetween(const float2& Lhs, const float2& Rhs)
+{
+	return degrees(acosf(dot(Lhs, Rhs)));
+}
+
+inline float angleBetween(const float3& Lhs, const float3& Rhs)
+{
+	return degrees(acosf(dot(Lhs, Rhs)));
+}
+
 inline float4 reflect(const float4& Incidence, const float4& Normal)
 {
 	return Incidence - (Normal * (2.0f * dot(Normal, Incidence)));
@@ -297,6 +307,15 @@ inline double2 refract(const double2& Incidence, const double2& Normal, double I
 	return (Incidence * IndicesToRefraction) - (Normal * (IndicesToRefraction * NDotI + sqrt(K)));
 }
 
+inline double angleBetween(const double3& Lhs, const double3& Rhs)
+{
+	return degreesD(acos(dot(Lhs, Rhs)));
+}
+
+inline double angleBetween(const double2& Lhs, const double2& Rhs)
+{
+	return degreesD(acos(dot(Lhs, Rhs)));
+}
 
 inline float3 cross(const float3& Lhs, const float3& Rhs)
 {
@@ -354,6 +373,17 @@ inline matrix matProjection(float Aspect, float FovY, float Near, float Far)
 		0.f, 0.f, -1.f, 0.f
 	);
 	return Result;
+}
+
+template<class T>
+inline bool isNan(const T& InVal)
+{
+	T::T Test = 0.f;
+	for (uint32 i = 0; i < T::ColCount; i++)
+	{
+		Test += InVal[i];
+	}
+	return isnan(Test);
 }
 
 // inline matrix xRotation(float Degrees)

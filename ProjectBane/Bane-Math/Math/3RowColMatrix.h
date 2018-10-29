@@ -158,7 +158,7 @@ struct uint323x3
 	using TT = uint323x3;
 	using TT2 = uint322x2;
 	using T = uint32;
-	using RowType = uint323;
+	using RowType = uint3;
 	static const uint32 NumRows = 3;
 	static const uint32 NumCols = 3;
 

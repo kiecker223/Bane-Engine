@@ -4,6 +4,7 @@
 #include <iostream>
 #include <windows.h>
 #include <WinUser.h>
+#include <Platform/Input/InputSystem.h>
 #include "KieckerMath.h"
 #include "BaneObject/Entity/Transform.h"
 #include "Common.h"
@@ -28,14 +29,13 @@ public:
 	void Tick(float DT) override final
 	{
 		double Dt = static_cast<double>(DT);
-		float RotationSpeed = 30.f;
+		float RotationSpeed = 0.1f;
 		Transform* ST = GetTransform();
 		GetKeyboardState(InputState);
 		static const double3 Up(0.0, 1.0, 0.0);
-
-		double3 Right;
+		float2 MouseDelta = GetInput()->Mouse.GetMouseDelta();
 		double3 Forward = ST->GetForward();
-		Right = cross(Forward, Up);
+		double3 Right = ST->GetRightVector();
 		if (InputState[0x57] & 0x80)
 		{
 			ST->Translate((ST->GetForward() * Speed) * Dt);
@@ -52,22 +52,17 @@ public:
 		{
 			ST->Translate((-Right * Speed) * Dt);
 		}
-		if (InputState[0x51] & 0x80)
+		std::cout << MouseDelta.x << " : " << MouseDelta.y << std::endl;
+		if (abs(MouseDelta.y) > 0.f)
 		{
-			ST->Rotate(fromDouble3(ST->GetRightVector()) * -RotationSpeed * DT);
+			ST->GetRotation() *= Quaternion::FromAxisAngle(Right, -MouseDelta.y * RotationSpeed * DT);
+			ST->GetRotation().Normalize();
 		}
-		if (InputState[0x52] & 0x80)
+		if (abs(MouseDelta.x) > 0.f)
 		{
-			ST->Rotate(float3(0.0f, -RotationSpeed * DT, 0.0f) * fromDouble3(ST->GetUpVector()));
+			ST->GetRotation() *= Quaternion::FromAxisAngle(float3(0.f, 1.f, 0.f), MouseDelta.x * RotationSpeed * DT);
+			ST->GetRotation().Normalize();
 		}
-		if (InputState[0x46] & 0x80)
-		{
-			ST->Rotate(float3(0.0f, RotationSpeed * DT, 0.0f) * fromDouble3(ST->GetUpVector()));
-		}
-		if (InputState[0x45] & 0x80)
-		{
-			ST->Rotate(fromDouble3(ST->GetRightVector()) * RotationSpeed * DT);
- 		}
 	}
 };
 

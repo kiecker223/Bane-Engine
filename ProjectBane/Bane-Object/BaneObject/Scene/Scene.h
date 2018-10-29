@@ -35,7 +35,7 @@ public:
 	bool EntityExists(uint64 Id);
 
 	void Tick(float DT);
-	void PhysicsUpdate(const PhysicsUpdateBuffer UpdateBuffer); // Poor name!
+	void PhysicsUpdate(const PhysicsUpdateBuffer& UpdateBuffer);
 	void Render(RenderLoop& RL);
 	void DumpScene();
 	void LoadFromMetaData(const SCENE_DATA* Data);
@@ -87,6 +87,7 @@ private:
 	};
 	std::vector<EntityHashEntry> m_Entities;
 	std::vector<EntityHashEntry> m_EntityAddList;
+	std::vector<EntityHashEntry> m_EntityStartList;
 };
 
 // Scene* GetCurrentScene();

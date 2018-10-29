@@ -259,12 +259,12 @@ struct int4
 #pragma endregion
 };
 
-struct uint324
+struct uint4
 {
 	using T = uint32;
-	using TT = uint324;
-	using TT3 = uint323;
-	using TT2 = uint322;
+	using TT = uint4;
+	using TT3 = uint3;
+	using TT2 = uint2;
 	static const uint32 ColCount = 4;
 
 	union
@@ -290,7 +290,7 @@ struct uint324
 		T p[ColCount];
 	};
 
-	uint324()
+	uint4()
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -298,7 +298,7 @@ struct uint324
 		}
 	}
 
-	uint324(T X, T Y, T Z, T W) :
+	uint4(T X, T Y, T Z, T W) :
 		x(X),
 		y(Y),
 		z(Z),
@@ -306,7 +306,7 @@ struct uint324
 	{
 	}
 
-	uint324(const TT& SelfType)
+	uint4(const TT& SelfType)
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -314,7 +314,7 @@ struct uint324
 		}
 	}
 
-	uint324(T X, T Y, TT2 ZW) :
+	uint4(T X, T Y, TT2 ZW) :
 		x(X),
 		y(Y),
 		z(ZW.x),
@@ -322,7 +322,7 @@ struct uint324
 	{
 	}
 
-	uint324(TT3 XYZ, T W) :
+	uint4(TT3 XYZ, T W) :
 		x(XYZ.x),
 		y(XYZ.y),
 		z(XYZ.w),

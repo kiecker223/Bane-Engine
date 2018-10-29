@@ -61,6 +61,11 @@ public:
 		*this = Quaternion::FromAxisAngle(Axis, Angle);
 	}
 
+	inline static Quaternion Identity() 
+	{
+		return Quaternion(1.f, 0.f, 0.f, 0.f);
+	}
+
 	inline Quaternion& operator = (const Quaternion& Rhs)
 	{
 		w = Rhs.w;
@@ -70,23 +75,40 @@ public:
 		return *this;
 	}
 
-	inline static Quaternion FromAxisAngle(const float3& InAxis, const float Angle)
+	inline static Quaternion FromAxisAngle(const float3& InAxis, const float InAngle)
 	{
-		float3 Axis = InAxis;
+		float3 Axis = (InAxis);
+		float Angle = InAngle;
+		if (InAngle > 6.28318531f)
+		{
+			Angle = fmod(Angle, 6.28318531f);
+		}
 		Quaternion Result;
-		const float s = sinf(Angle / 2);
+		const float s = sinf(Angle / 2.f);
 		Result.x = Axis.x * s;
 		Result.y = Axis.y * s;
 		Result.z = Axis.z * s;
-		Result.w = cosf(Angle / 2);
-		Result.Normalize(); // The length is always 1
+		Result.w = cosf(Angle / 2.f);
+		Result.Normalize();
 		return Result;
+	}
+
+	inline static Quaternion FromAxisAngle(const double3& InAxis, const float InAngle)
+	{
+		return FromAxisAngle(float3(static_cast<float>(InAxis.x), static_cast<float>(InAxis.y), static_cast<float>(InAxis.z)), InAngle);
+	}
+
+	inline static Quaternion FromDirection(const float3& Direction)
+	{
+		float Angle = atan2f(Direction.x, Direction.z);
+		return Quaternion(0.0f, sinf(Angle / 2.f), 0.f, cosf(Angle / 2.f));
 	}
 
 	inline Quaternion Conjugate()
 	{
 		return Quaternion(-x, -y, -z, w);
 	}
+
 
 	inline Quaternion operator * (const Quaternion& Rhs) const
 	{
@@ -111,7 +133,11 @@ public:
 
 	inline float3 GetForward() const
 	{
-		return float3(2.f * (x * z - w * y), 2.f * (y * z + w * z), 1.f - 2.f * (x * x + y * y));
+		return float3(
+			2.f * x * z - 2.f * w * y,
+			2.f * y * z + 2.f * w * x,
+			1.f - 2.f * y * y - 2.f * x * x
+		);
 	}
 
 	inline float3 GetBack() const
@@ -121,7 +147,11 @@ public:
 
 	inline float3 GetUp() const
 	{
-		return float3(2.f * (x * y + w * z), 1.f - 2.f * (x * x + z * z), 2.f * (y * z - w * x));
+		return float3(
+			2.f * x * y * 2.f * w * z, 
+			1.f - 2.f * z * z - 2.f * x * x,
+			2.f * z * y - 2.f * x * w
+		);
 	}
 
 	inline float3 GetDown() const
@@ -131,7 +161,11 @@ public:
 
 	inline float3 GetRight() const
 	{
-		return float3(1.f - 2.f * (y * y + z * z), 2.f * (x * y - w * z), 2.f * (x * z + w * y));
+		return float3(
+			1.f - 2.f *z *z - 2.f * y * y,
+			-2.f * z * w + 2 * y * x,
+			2 * y * w + 2 * z * x
+		);
 	}
 
 	inline float3 GetLeft() const
@@ -151,6 +185,15 @@ public:
 			float4(0.f, 0.f, 0.f, 1.f)
 		);
 		return Result;
+	}
+
+	inline float3x3 RotationMatrix3x3() const
+	{
+		return float3x3(
+			GetRight(),
+			GetUp(),
+			GetForward()
+		);
 	}
 
 	inline Quaternion Normalized() const
@@ -231,6 +274,12 @@ public:
 		Result.w = cos(Angle / 2);
 		Result.Normalize(); // The length is always 1
 		return Result;
+	}
+
+	inline static Quaternion64 FromDirection(const double3& Direction)
+	{
+		double Angle = atan2(Direction.x, Direction.z);
+		return Quaternion64(0.0f, sin(Angle / 2.f), 0.f, cos(Angle / 2.f));
 	}
 
 	inline Quaternion64 Conjugate()

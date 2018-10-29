@@ -225,10 +225,10 @@ struct int2
 #pragma endregion
 };
 
-struct uint322
+struct uint2
 {
 	using T = uint32;
-	using TT = uint322;
+	using TT = uint2;
 	static const uint32 ColCount = 2;
 	union
 	{
@@ -238,7 +238,7 @@ struct uint322
 		T p[ColCount];
 	};
 
-	uint322()
+	uint2()
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -246,13 +246,13 @@ struct uint322
 		}
 	}
 	
-	uint322(T X, T Y) :
+	uint2(T X, T Y) :
 		x(X),
 		y(Y)
 	{
 	}
 
-	uint322(const TT& SelfType)
+	uint2(const TT& SelfType)
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{

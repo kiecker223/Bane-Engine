@@ -1,8 +1,8 @@
 group "Platform"
 project "BanePlatform"
     kind "StaticLib"
-	links { "BaneCommon" }
-    includedirs { "../Bane-Common" }
+	links { "BaneCommon", "dinput8", "dxguid" }
+    includedirs { "../Bane-Common", "../Bane-Math" }
     filter "system:windows"
         files {
             "Platform-Windows/**.cpp"
@@ -10,6 +10,7 @@ project "BanePlatform"
     
 	files {
 		"Platform/System/File/**.cpp",
+		"Platform/Input/**.cpp",
 		"**.h"
 	}
  

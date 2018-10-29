@@ -247,27 +247,27 @@ struct int3
 #pragma endregion
 };
 
-struct uint323
+struct uint3
 {
 	using T = uint32;
-	using TT = uint323;
-	using TT2 = uint322;
+	using TT = uint3;
+	using TT2 = uint2;
 	static const uint32 ColCount = 3;
-	uint323()
+	uint3()
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = T(0);
 		}
 	}
-	uint323(T X, T Y, T Z) :
+	uint3(T X, T Y, T Z) :
 		x(X),
 		y(Y),
 		z(Z)
 	{
 	}
 
-	uint323(const TT& SelfType)
+	uint3(const TT& SelfType)
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -275,14 +275,14 @@ struct uint323
 		}
 	}
 
-	uint323(T X, TT2 YZ) :
+	uint3(T X, TT2 YZ) :
 		x(X),
 		y(YZ.x),
 		z(YZ.y)
 	{
 	}
 
-	uint323(TT2 XY, T Z) :
+	uint3(TT2 XY, T Z) :
 		x(XY.x),
 		y(XY.y),
 		z(Z)

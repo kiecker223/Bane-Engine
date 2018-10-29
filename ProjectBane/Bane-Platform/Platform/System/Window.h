@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Common.h"
-
+#include "../Input/InputMouseDevice.h"
 
 class Window
 {
@@ -30,6 +30,10 @@ public:
 	inline float AspectYX() const { return (float)m_height / (float)m_width; }
 
 	void Open(const char* windowName, uint32 width, uint32 height, bool isFullscreen = false);
+	inline void SetMouseDevice(InputMouseDevice* pDev)
+	{
+		m_Mouse = pDev;
+	}
 
 	bool QuitRequested();
 
@@ -48,5 +52,6 @@ private:
 	static Window* GMainWindow;
 	uint32 m_width, m_height;
 	WindowHandle* m_windowHandle;
+	InputMouseDevice* m_Mouse;
 };
 
