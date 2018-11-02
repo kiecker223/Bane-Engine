@@ -150,10 +150,10 @@ void Scene::PhysicsUpdate(const PhysicsUpdateBuffer& UpdateBuffer)
 				e.pEntity->GetTransform()->SetPosition(Body.Position);
 				e.pEntity->GetPhysicsProperties().Velocity = UpdateBuffer.Bodies[PhysicsHandle].Velocity;
 				auto& CurrentRotation = e.pEntity->GetTransform()->GetRotation();
-				float RadsPerSecond = length(fromDouble3(Body.AngularVelocity));
+				double RadsPerSecond = length(Body.AngularVelocity);
 				if (!isnan(RadsPerSecond) && abs(RadsPerSecond) > 0.0f)
 				{
-					CurrentRotation *= Quaternion::FromAxisAngle(fromDouble3(normalized(Body.AngularVelocity)), RadsPerSecond);
+					CurrentRotation *= Quaternion::FromAxisAngle(normalized(Body.AngularVelocity), RadsPerSecond);
 					CurrentRotation.Normalize();
 				}
 			}
@@ -178,6 +178,7 @@ void Scene::DumpScene()
 		delete e.pEntity;
 	}
 	m_Entities.clear();
+	m_World.DestroyThread();
 }
 
 void Scene::LoadFromMetaData(const SCENE_DATA* Data)

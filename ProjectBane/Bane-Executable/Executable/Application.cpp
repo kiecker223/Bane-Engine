@@ -6,6 +6,7 @@
 #include "Graphics/IO/TextureCache.h"
 #include "Graphics/IO/ShaderCache.h"
 #include <Platform/System/Logging/Logger.h>
+#include <Core/Data/Timer.h>
 #include <Platform/System/Process.h>
 #include <Code/EntryPoint.h>
 #include <Platform/Input/InputSystem.h>
@@ -104,14 +105,14 @@ void Application::InitSystems()
 }
 
 void Application::Run()
-{	
-	using Clock = std::chrono::high_resolution_clock;
-	auto TimeStart = Clock::now();
+{
+	Timer FrameTime;
 
 	while (!m_Window->QuitRequested())
 	{
+		FrameTime.StartTimer();
 		Scene* pCurrentScene = GetSceneManager()->CurrentScene;
-		auto Now = Clock::now();
+		
 		UpdateInput();
 		RenderLoop RL;
 		RL.SetSkybox({ pCurrentScene->GetSkybox(), float3(0.f, 0.f, 0.f) });
@@ -120,10 +121,8 @@ void Application::Run()
 		m_SceneRenderer->Submit(RL);
 		m_SceneRenderer->Render();
 
-		auto DeltaTime = Now - TimeStart;
-		TimeStart = Now;
-		float Dt = static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(DeltaTime).count()) / 1E+9f;
-		pCurrentScene->Tick(Dt);
+		FrameTime.EndTimer();
+		pCurrentScene->Tick(FrameTime.GetTimerElapsedSeconds());
 		m_SceneRenderer->Present();
 	}
 

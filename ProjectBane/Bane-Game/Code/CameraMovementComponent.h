@@ -28,29 +28,29 @@ public:
 	void Tick(float DT) override final
 	{
 		double Dt = static_cast<double>(DT);
-		float RotationSpeed = 0.1f;
+		float RotationSpeed = 0.3f;
 		Transform* ST = GetTransform();
 		static const double3 Up(0.0, 1.0, 0.0);
 		float2 MouseDelta = GetInput()->Mouse.GetMouseDelta();
 		double3 Forward = ST->GetForward();
 		double3 Right = ST->GetRightVector();
-		if (GetInput()->Keyboard.GetKeyDown(KEY_W))
+		if (GetInput()->Keyboard.GetKey(KEY_W))
 		{
 			ST->Translate((ST->GetForward() * Speed) * Dt);
 		}
-		if (GetInput()->Keyboard.GetKeyDown(KEY_S))
+		if (GetInput()->Keyboard.GetKey(KEY_S))
 		{
 			ST->Translate((-ST->GetForward() * Speed) * Dt);
 		}
-		if (GetInput()->Keyboard.GetKeyDown(KEY_D))
+		if (GetInput()->Keyboard.GetKey(KEY_D))
 		{
 			ST->Translate((Right * Speed) * Dt);
 		}
-		if (GetInput()->Keyboard.GetKeyDown(KEY_A))
+		if (GetInput()->Keyboard.GetKey(KEY_A))
 		{
 			ST->Translate((-Right * Speed) * Dt);
 		}
-		std::cout << "Mouse delta: " << MouseDelta.x << " : " << MouseDelta.y << std::endl;
+
 		if (abs(MouseDelta.y) > 0.f)
 		{
 			ST->GetRotation() *= Quaternion::FromAxisAngle(Right, MouseDelta.y * RotationSpeed * DT);

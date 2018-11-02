@@ -27,16 +27,21 @@ public:
 
 	inline bool GetKeyDown(EKEY Key) const
 	{
-		return m_Keys[Key];
+		return m_Keys[Key] && !m_PrevKeys[Key];
 	}
 	inline bool GetKeyUp(EKEY Key) const
 	{
-		return m_PrevKeys[Key];
+		return m_PrevKeys[Key] && !m_Keys[Key];
 	}
 	inline bool KeyHeld(EKEY Key) const
 	{
 		return m_PrevKeys[Key] && m_Keys[Key];
 	}
+	inline bool GetKey(EKEY Key) const 
+	{
+		return m_Keys[Key];
+	}
+
 
 	void Update();
 	inline void Clear()

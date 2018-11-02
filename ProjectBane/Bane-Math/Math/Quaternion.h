@@ -98,6 +98,11 @@ public:
 		return FromAxisAngle(float3(static_cast<float>(InAxis.x), static_cast<float>(InAxis.y), static_cast<float>(InAxis.z)), InAngle);
 	}
 
+	inline static Quaternion FromAxisAngle(const double3& InAxis, const double InAngle)
+	{
+		return FromAxisAngle(InAxis, static_cast<float>(InAngle));
+	}
+
 	inline static Quaternion FromDirection(const float3& Direction)
 	{
 		float Angle = atan2f(Direction.x, Direction.z);

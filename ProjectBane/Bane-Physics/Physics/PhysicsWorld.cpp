@@ -22,9 +22,10 @@ void PhysicsWorld::UpdatePhysics()
 		auto Start = Clock::now();
 		if (AddList.size() > 0)
 		{
+			std::lock_guard<std::mutex> ScopedMutex(BodyAddMutex);
 			for (auto& Body : AddList)
 			{
-				Bodies.push_back(Body);
+				m_Bodies.push_back(Body);
 			}
 			AddList.clear();
 		}
@@ -40,16 +41,17 @@ void PhysicsWorld::UpdatePhysics()
 				}
 				else
 				{
-					Message->Execute(Bodies[Message->BodyId]);
+					Message->Execute(m_Bodies[Message->BodyId]);
 					Message = Message->pNext;
 				}
 			}
 		}
 
 		m_bUnlockedForRead = false;
-		for (auto& Body : Bodies)
+		/*
+		for (auto& Body : m_Bodies)
 		{
-			for (auto& OtherBody : Bodies)
+			for (auto& OtherBody : m_Bodies)
 			{
 				if (OtherBody.Handle == Body.Handle)
 				{
@@ -58,6 +60,11 @@ void PhysicsWorld::UpdatePhysics()
 				double3 ForceDir = OtherBody.Position - Body.Position;
 				double DistanceFromBody = length(ForceDir);
 				normalize(ForceDir);
+				
+				if (DistanceFromBody < 1e-1) 
+				{
+					continue;
+				}
 
 				double Force = M_GRAV_CONST * ((Body.Mass * OtherBody.Mass) / (DistanceFromBody * DistanceFromBody));
 				ForceDir *= Force;
@@ -77,7 +84,8 @@ void PhysicsWorld::UpdatePhysics()
 				}
 			}
 		}
-		UpdateBuffer.Bodies = Bodies;
+		*/
+		UpdateBuffer.Bodies = m_Bodies;
 		m_bUnlockedForRead = true;
 		auto TimeTaken = Clock::now() - Start;
 		std::chrono::nanoseconds SleepTime = (std::chrono::nanoseconds(16666667) - std::chrono::duration_cast<std::chrono::nanoseconds>(TimeTaken));

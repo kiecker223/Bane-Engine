@@ -4,6 +4,7 @@
 #include "Core/Containers/HeapQueue.h"
 #include "Graphics/IO/TextureCache.h"
 #include "BaneObject/CoreComponents/CameraComponent.h"
+#include "SwapParentPlanet.h"
 #include "CameraMovementComponent.h"
 
 
@@ -115,24 +116,101 @@ typedef struct PLANET_START_INFO {
 	double3 Velocity;
 } PLANET_START_INFO;
 
+/*
+	N = longitude of the ascending node
+	i = inclination to the ecliptic (plane of the Earth's orbit)
+	w = argument of perihelion
+	a = semi-major axis, or mean distance from Sun
+	e = eccentricity (0=circle, 0-1=ellipse, 1=parabola)
+	M = mean anomaly (0 at perihelion; increases uniformly with time)
+*/
+
 typedef struct PLANET_ORBIT_INFO {
-	double Periapsis;
-	double Apoapsis;
-	double OribitalPeriod;
-	double Eccentricity;
+	std::string PlanetName;
 	double LongitudeOfAscendingNode;
-	double ArgumentOfPerigee;
-	double Inclination;
+	double InclinationOfEcliptic;
+	double ArgumentOfPerihelion;
+	double SemimajorAxis;
+	double Eccentricity;
+	double MeanAnomaly;
 } PLANET_ORBIT_INFO;
+
+double3 SunPosition = double3(M_NEGATIVE_INFINITY, M_NEGATIVE_INFINITY, M_NEGATIVE_INFINITY);
+
+/*
+	N = longitude of the ascending node
+	i = inclination to the ecliptic (plane of the Earth's orbit)
+	w = argument of perihelion
+	a = semi-major axis, or mean distance from Sun
+	e = eccentricity (0=circle, 0-1=ellipse, 1=parabola)
+	M = mean anomaly (0 at perihelion; increases uniformly with time)
+
+	w1 = N + w   = longitude of perihelion
+	L  = M + w1  = mean longitude
+	q  = a*(1-e) = perihelion distance
+	Q  = a*(1+e) = aphelion distance
+	P  = a ^ 1.5 = orbital period (years if a is in AU, astronomical units)
+	T  = Epoch_of_M - (M(deg)/360_deg) / P  = time of perihelion
+	v  = true anomaly (angle between position and perihelion)
+	E  = eccentric anomaly
+*/
+
+
 
 PLANET_START_INFO PlacePlanet(const PLANET_ORBIT_INFO& OrbitInfo, double Time)
 {
 	PLANET_START_INFO Result;
-	double SemimajorAxis = (OrbitInfo.Periapsis + OrbitInfo.Apoapsis) / 2.;
-	double SemiminorAxis = SemimajorAxis * sqrt(1 - (OrbitInfo.Eccentricity * OrbitInfo.Eccentricity));
-	double EccentricAnomaly = SolveEccentricAnomaly(Time, OrbitInfo.OribitalPeriod, OrbitInfo.Eccentricity, 0);
-	Result.Position.x = SemimajorAxis * (cos(EccentricAnomaly) - OrbitInfo.Eccentricity);
-	Result.Position.z = SemiminorAxis * sin(EccentricAnomaly);
+	UNUSED(Time);
+	if (OrbitInfo.PlanetName != "Earth")
+	{
+		double EccentricAnomaly = OrbitInfo.MeanAnomaly + (OrbitInfo.Eccentricity * (180.0 / _M_PI_)) * sin(OrbitInfo.MeanAnomaly) * (1.0 + OrbitInfo.Eccentricity * cos(OrbitInfo.MeanAnomaly));
+		double E0 = EccentricAnomaly;
+		double E1 = 0.;
+		if (OrbitInfo.Eccentricity > 0.06)
+		{
+			for (uint32 i = 0; i < 100; i++)
+			{
+				E1 = E0 - (E0 - (OrbitInfo.Eccentricity*(180./_M_PI_)) * sin(E0) - OrbitInfo.MeanAnomaly) / (1 - OrbitInfo.Eccentricity * cos(E0));
+				if (abs(E1 - E0) <= 1E-4)
+				{
+					break;
+				}
+			}
+			EccentricAnomaly = E0;
+		}
+		double xv = OrbitInfo.SemimajorAxis * cos(EccentricAnomaly) - OrbitInfo.Eccentricity;
+		double yv = OrbitInfo.SemimajorAxis * sqrt(1.0 - OrbitInfo.Eccentricity * OrbitInfo.Eccentricity) * sin(EccentricAnomaly);
+		double TrueAnomaly = atan2(yv, xv);
+		double Distance = sqrt(xv * xv + yv * yv);
+		double SinVW = sin(TrueAnomaly + OrbitInfo.ArgumentOfPerihelion);
+		double CosVW = cos(TrueAnomaly + OrbitInfo.ArgumentOfPerihelion);
+		double CosI = cos(OrbitInfo.LongitudeOfAscendingNode);
+		double SinI = sin(OrbitInfo.LongitudeOfAscendingNode);
+		double CosInclination = cos(OrbitInfo.InclinationOfEcliptic);
+		Result.Position = double3(
+			Distance * (CosI * CosVW - SinI * SinVW * CosInclination),
+			Distance * (SinVW * sin(OrbitInfo.InclinationOfEcliptic)),
+			Distance * (SinI * CosVW + CosI * SinVW * CosInclination)
+		);
+	}
+	if (OrbitInfo.PlanetName == "Sun")
+	{
+		SunPosition = Result.Position;
+		Result.Position = double3(0.0, 0.0, 0.0);
+		return Result;
+	}
+	if (OrbitInfo.PlanetName == "Earth")
+	{
+		Result.Position = -SunPosition;
+	}
+	
+	if (OrbitInfo.PlanetName != "Sun")
+	{
+		BANE_CHECK(!isNan(Result.Position));
+		//Result.Position -= SunPosition; 
+		double3 RightVector = normalized(cross(normalized(Result.Position), double3(0., 1., 0.)));
+		Result.Velocity = RightVector * sqrt(M_GRAV_CONST * ((2.0 / length(Result.Position)) - (1.0 / OrbitInfo.SemimajorAxis)));
+	}
 	return Result;
 }
 
@@ -146,8 +224,23 @@ void InitApplication()
 		AllocMesh->GenerateUVSphere(32);
 		SpaceLevel->GetMeshCache().SaveMesh(AllocMesh, "Sphere");
 	}
+	std::cout << "Astronomical unit check: " << M_AU(1.0) << std::endl;
+	const double TimeArg = 9000.;
 	{
+		PLANET_START_INFO SInfo = PlacePlanet(
+			{
+				"Sun",
+				0.0, 
+				0.0, 
+				282.9404 + 4.70935E-5 * TimeArg,
+				M_AU(1.0), 
+				0.016709 - 1.151E-9*TimeArg,
+				356.0470 + 0.9856002585 * TimeArg
+			},
+			TimeArg);
 		Entity* Sun = SpaceLevel->CreateEntity("Sun");
+		std::cout << "Sun position: " << SInfo.Position.x << " " << SInfo.Position.y << " " << SInfo.Position.z << std::endl;
+		Sun->GetTransform()->SetPosition(SInfo.Position);
 		Sun->GetPhysicsProperties().Mass = 1.989e30;
 		auto SunMesh = Sun->AddComponent<MeshRenderingComponent>();
 		SunMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
@@ -157,11 +250,21 @@ void InitApplication()
 		//FollowedPlanet = Sun;
 	}
 	Entity* FollowedPlanet = nullptr;
-	
-	const double TimeArg = 1000.;
 	{
-		PLANET_START_INFO SInfo = PlacePlanet({ 460008700000.0, 69817332000.0, 88., 0.2056, 48.3396, 7.005 }, TimeArg);
+		PLANET_START_INFO SInfo = PlacePlanet(
+			{
+				"Mercury",
+				48.3313 + 3.24587E-5 * TimeArg,
+				7.0047 + 5.00E-8 * TimeArg,
+				29.1241 + 1.01444E-5 * TimeArg, 
+				M_AU(0.397098),
+				0.205635 + 5.59E-10 * TimeArg,
+				168.6562 + 4.0923344368 * TimeArg
+			},
+			TimeArg
+		);
 		Entity* Mercury = SpaceLevel->CreateEntity("Mercury");
+		std::cout << "Mercury Distance: " << length(SInfo.Position) << std::endl;
 		Mercury->GetPhysicsProperties().Mass = 3.285e23;
 		//Mercury->GetPhysicsProperties().Velocity = double3((M_GRAV_CONST * 1.989e30) / DFS, 0., 0.);
 		Mercury->GetPhysicsProperties().bCanTick = false;
@@ -170,13 +273,25 @@ void InitApplication()
 		MercuryMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		MercuryMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		MercuryMesh->RenderedMaterial.SetTexture("Resources/2k_mercury.jpg", 0);
-		Mercury->GetTransform()->Scale(4879000.0);
+		Mercury->GetTransform()->Scale(4879000.0 * 1000.);
 	}
 	{
-		PLANET_START_INFO SInfo = PlacePlanet({ 107475372000.0, 108939198000.0, 224.69, 0.006, 76.6726, 3.3977 }, TimeArg);
+		PLANET_START_INFO SInfo = PlacePlanet(
+			{ 
+				"Venus", 
+				76.6799 + 2.46590E-5 * TimeArg, 
+				3.3946 + 2.75E-8 * TimeArg, 
+				54.8910 + 1.38374E-5 * TimeArg,
+				M_AU(0.723330),	
+				0.006773 - 1.302E-9 * TimeArg, 
+				48.0052 + 1.6021302244 * TimeArg 
+			}, 
+			TimeArg
+		);
+		std::cout << "Venus distance: " << length(SInfo.Position) << std::endl;
 		Entity* Venus = SpaceLevel->CreateEntity("Venus");
 		Venus->GetPhysicsProperties().Mass = 4.867e24f;
-		Venus->GetPhysicsProperties().Velocity = double3(0., 0.0, 0.0);
+		Venus->GetPhysicsProperties().Velocity = double3(0.0, 0.0, 0.0);
 		Venus->GetPhysicsProperties().bCanTick = false;
 		Venus->GetTransform()->SetPosition(SInfo.Position);
 		std::cout << SInfo.Position.x << " : " << SInfo.Position.y << " : " << SInfo.Position.z << std::endl;
@@ -185,12 +300,13 @@ void InitApplication()
 		VenusMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		VenusMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		VenusMesh->RenderedMaterial.SetTexture("Resources/8k_venus_atmosphere.jpg", 0);
-		Venus->GetTransform()->Scale(12104000.);
+		Venus->GetTransform()->Scale(12104000.*1000.);
 		//FollowedPlanet = Venus;
 	}
 	{
 		Entity* Earth = SpaceLevel->CreateEntity("Earth");
-		PLANET_START_INFO SInfo = PlacePlanet({ 147094882000.0, 152100915000.0, 365.25, 0.016, 0, 0 }, TimeArg);
+		PLANET_START_INFO SInfo = PlacePlanet({ "Earth", 0., 0., 0., M_AU(1.0), 0., 0. }, TimeArg);
+		std::cout << "Earth Distance: " << length(SInfo.Position) << std::endl;
 		Earth->GetPhysicsProperties().Mass = 5.97219e24;
 		Earth->GetPhysicsProperties().Velocity = double3(30000.0 * (1. / 60.), 0., 0.);
 		Earth->GetPhysicsProperties().AngularVelocity = double3(0., 1., 0.) * (7.2921159e-5 * (1. / 60.));
@@ -201,17 +317,30 @@ void InitApplication()
 		EarthMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		EarthMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		EarthMesh->RenderedMaterial.SetTexture("Resources/EarthNoClouds.jpg", 0);
-		Earth->GetTransform()->Scale(12742000.0);
-
+		Earth->GetTransform()->Scale(12742000.0 * 1000.);
+		FollowedPlanet = Earth;
+	}
+	{
+		PLANET_START_INFO SInfo = PlacePlanet(
+			{
+				"Moon",
+				125.1228 - 0.0529538083 * TimeArg,
+				5.1454,
+				318.0634 + 0.1643573223 * TimeArg,
+				60.266 * (12742000.0 / 2.),
+				0.054900,
+				1163654 + 13.069929509 * TimeArg
+			},
+			TimeArg
+		);
 		Entity* Luna = SpaceLevel->CreateEntity("Luna");
 		Luna->GetPhysicsProperties().Mass = 7.34767309e22;
 		Luna->GetPhysicsProperties().Velocity = double3((M_GRAV_CONST * 1.989e30 / M_AU(1.) + 384400000.), 0., 0.);
-		Luna->GetTransform()->SetPosition(double3(0., 0., M_AU(1.) + 384400000.));
+		Luna->GetTransform()->SetPosition(SInfo.Position);
 		auto LunaMesh = Luna->AddComponent<MeshRenderingComponent>();
 		LunaMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		LunaMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		Luna->GetTransform()->Scale(3474000.0);
-		FollowedPlanet = Earth;
 	}
 
 	Entity* CamEntity = SpaceLevel->CreateEntity("Camera");
@@ -220,8 +349,9 @@ void InitApplication()
 	CamEntity->GetTransform()->SetRotation(float3(0.f, 0.f, 0.f));
 	auto Cam = CamEntity->AddComponent<CameraComponent>();
 	Cam->ZNear = 1e-2f;
-	Cam->ZFar = 1e+21f;
-	CamEntity->AddComponent<CameraMovementComponent>()->Speed = 1e7;
+	Cam->ZFar = 1e+21f; 
+	CamEntity->AddComponent<CameraMovementComponent>()->Speed = 1e11;
+	CamEntity->AddComponent<SwapParentPlanet>();
 }
 
 

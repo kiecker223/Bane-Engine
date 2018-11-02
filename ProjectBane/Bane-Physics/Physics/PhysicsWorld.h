@@ -5,6 +5,7 @@
 #include <utility>
 #include <functional>
 #include <thread>
+#include <mutex>
 #include "PhysicsMessageList.h"
 
 
@@ -26,6 +27,7 @@ public:
 
 	inline uint32 AddBody(PhysicsBody& InBody)
 	{
+		std::lock_guard<std::mutex> ScopedMutex(BodyAddMutex);
 		InBody.Handle = CurrentId;
 		CurrentId++;
 		AddList.push_back(InBody);
@@ -35,7 +37,6 @@ public:
 	void SpawnThread();
 	inline void DestroyThread()
 	{
-		PhysicsThread.join();
 	}
 
 	inline bool IsReadyForRead() const
@@ -49,14 +50,14 @@ public:
 	std::thread PhysicsThread;
 	ApplicationToPhysicsQueue MessageQueue;
 	PhysicsUpdateBuffer UpdateBuffer;
-	std::vector<PhysicsBody> Bodies;
 	std::vector<PhysicsBody> AddList;
-	
+	std::mutex BodyAddMutex;
 	uint32 CurrentId;
 	bool bRunningPhysicsSim;
 
 private:
 
+	std::vector<PhysicsBody> m_Bodies;
 	bool m_bUnlockedForRead;
 };
 
