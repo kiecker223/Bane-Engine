@@ -7,7 +7,7 @@
 #include <thread>
 #include <mutex>
 #include "PhysicsMessageList.h"
-
+#include <functional>
 
 
 
@@ -18,6 +18,12 @@ class PhysicsToApplicationMessage
 public:
 };
 
+
+typedef struct PHYSICS_RAY {
+	double3 Position;
+	double3 Direction;
+	double MaxDistance;
+} PHYSICS_RAY;
 
 class PhysicsWorld
 {
@@ -34,6 +40,8 @@ public:
 		return InBody.Handle;
 	}
 
+	PhysicsBody CastRay(const PHYSICS_RAY& InRay);
+	void CastRayAtSpeedOfLight(const PHYSICS_RAY& InRay, std::function<PhysicsBody()>& HitFunc);
 	void SpawnThread();
 	inline void DestroyThread()
 	{

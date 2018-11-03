@@ -323,8 +323,6 @@ void InitApplication()
 		Venus->GetPhysicsProperties().Mass = 4.867e24f;
 		Venus->GetPhysicsProperties().Velocity = SInfo.Velocity * (1.0 / 60.0);
 		Venus->GetTransform()->SetPosition(SInfo.Position);
-		std::cout << SInfo.Position.x << " : " << SInfo.Position.y << " : " << SInfo.Position.z << std::endl;
-		std::cout << length(SInfo.Position) << std::endl;
 		auto VenusMesh = Venus->AddComponent<MeshRenderingComponent>();
 		VenusMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		VenusMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
@@ -340,8 +338,6 @@ void InitApplication()
 		Earth->GetPhysicsProperties().Velocity = SInfo.Velocity * (1.0 / 60.0);
 		Earth->GetPhysicsProperties().AngularVelocity = double3(0., 1., 0.) * (7.2921159e-5 * (1. / 60.));
 		Earth->GetTransform()->SetPosition(SInfo.Position);
-		std::cout << "Earth Position : " << SInfo.Position.x << " : " << SInfo.Position.y << " : " << SInfo.Position.z << std::endl;
-		std::cout << "Earth Distance : " << length(SInfo.Position) << std::endl;
 		auto EarthMesh = Earth->AddComponent<MeshRenderingComponent>();
 		EarthMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		EarthMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
@@ -380,7 +376,7 @@ void InitApplication()
 	auto Cam = CamEntity->AddComponent<CameraComponent>();
 	Cam->ZNear = 1e-2f;
 	Cam->ZFar = 1e+21f; 
-	CamEntity->AddComponent<CameraMovementComponent>()->Speed = 1e7;
+	CamEntity->AddComponent<CameraMovementComponent>()->Speed = 3e7;
 	CamEntity->AddComponent<SwapParentPlanet>();
 }
 

@@ -1028,3 +1028,34 @@ struct double4
 
 #pragma endregion
 };
+
+
+inline float4 fromDouble4(const double4& InVal)
+{
+	return float4(static_cast<float>(InVal.x), static_cast<float>(InVal.y), static_cast<float>(InVal.z), static_cast<float>(InVal.w));
+}
+
+inline float3 fromDouble3(const double3& InVal)
+{
+	return float3(static_cast<float>(InVal.x), static_cast<float>(InVal.y), static_cast<float>(InVal.z));
+}
+
+inline float2 fromDouble2(const double2& InVal)
+{
+	return float2(static_cast<float>(InVal.x), static_cast<float>(InVal.y));
+}
+
+inline double4 fromFloat4(const float4& InVal)
+{
+	return double4(static_cast<double>(InVal.x), static_cast<double>(InVal.y), static_cast<double>(InVal.z), static_cast<double>(InVal.w));
+}
+
+inline double3 fromFloat3(const float3& InVal)
+{
+	return double3(static_cast<double>(InVal.x), static_cast<double>(InVal.y), static_cast<double>(InVal.z));
+}
+
+inline double2 fromFloat2(const float2& InVal)
+{
+	return double2(static_cast<double>(InVal.x), static_cast<double>(InVal.y));
+}

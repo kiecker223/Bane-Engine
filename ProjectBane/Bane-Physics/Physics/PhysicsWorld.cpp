@@ -13,6 +13,16 @@ void PhysicsWorld::SpawnThread()
 	}));
 }
 
+PhysicsBody PhysicsWorld::CastRay(const PHYSICS_RAY& InRay)
+{
+
+}
+
+void PhysicsWorld::CastRayAtSpeedOfLight(const PHYSICS_RAY& InRay, std::function<PhysicsBody()>& HitFunc)
+{
+
+}
+
 void PhysicsWorld::UpdatePhysics()
 {
 	// At the start lock the physics buffer

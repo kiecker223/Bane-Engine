@@ -14,12 +14,10 @@ void PhysicsMesh::CreateFromMesh(const Mesh* pMesh, const float3& Scale)
 		for (uint32 x = 0; x < 3; x++)
 		{
 			uint32 FaceIndex = Indices[i + x];
-			Vertex Vert;
 			const FloatInt* pData = &Data[Stride * FaceIndex];
-			Vert.Point = fromFloat3(float3(pData[0].F * Scale.x, pData[1].F * Scale.y, pData[2].F * Scale.z));
-			Vert.Normal = fromFloat3(float3(pData[3].F * Scale.x, pData[4].F * Scale.y, pData[5].F * Scale.z));
-			CurrFace.Vertices[x] = Vert;
+			CurrFace.Points[i] = fromFloat3(float3(pData[0].F * Scale.x, pData[1].F * Scale.y, pData[2].F * Scale.z));
 		}
+		CurrFace.Normal = normalized(cross(CurrFace.Points[1] - CurrFace.Points[0], CurrFace.Points[2] - CurrFace.Points[0]));
 		Faces.push_back(CurrFace);
 	}
 }

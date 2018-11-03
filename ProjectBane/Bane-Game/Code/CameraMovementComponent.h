@@ -28,7 +28,7 @@ public:
 	void Tick(float DT) override final
 	{
 		double Dt = static_cast<double>(DT);
-		float RotationSpeed = 0.3f;
+		float RotationSpeed = 1.0f;
 		Transform* ST = GetTransform();
 		static const double3 Up(0.0, 1.0, 0.0);
 		float2 MouseDelta = GetInput()->Mouse.GetMouseDelta();

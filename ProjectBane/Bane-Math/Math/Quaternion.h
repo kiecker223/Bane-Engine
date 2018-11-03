@@ -192,12 +192,34 @@ public:
 		return Result;
 	}
 
+	inline double4x4 RotationMatrixDoubles() const
+	{
+		const double3 R = fromFloat3(GetRight());
+		const double3 U = fromFloat3(GetUp());
+		const double3 F = fromFloat3(GetForward());
+		return double4x4(
+			double4(R, 0.f),
+			double4(U, 0.f),
+			double4(F, 0.f),
+			double4(0.f, 0.f, 0.f, 0.f)
+		);
+	}
+
 	inline float3x3 RotationMatrix3x3() const
 	{
 		return float3x3(
 			GetRight(),
 			GetUp(),
 			GetForward()
+		);
+	}
+
+	inline double3x3 RotationMatrix3x3Doubles() const
+	{
+		return double3x3(
+			fromFloat3(GetRight()),
+			fromFloat3(GetUp()),
+			fromFloat3(GetForward())
 		);
 	}
 
