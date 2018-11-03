@@ -48,7 +48,6 @@ void PhysicsWorld::UpdatePhysics()
 		}
 
 		m_bUnlockedForRead = false;
-		/*
 		for (auto& Body : m_Bodies)
 		{
 			for (auto& OtherBody : m_Bodies)
@@ -84,7 +83,6 @@ void PhysicsWorld::UpdatePhysics()
 				}
 			}
 		}
-		*/
 		UpdateBuffer.Bodies = m_Bodies;
 		m_bUnlockedForRead = true;
 		auto TimeTaken = Clock::now() - Start;

@@ -3,8 +3,6 @@
 #include <IL/il.h>
 #include <IL/devil_cpp_wrapper.hpp>
 
-
-
 TextureCache* TextureCache::GInstance = nullptr;
 
 void TextureCache::InitCache()
@@ -77,9 +75,10 @@ ITexture2D* TextureCache::LoadTexture(const std::string& TextureName)
 		Data.Pointer = Buffer;
 		Data.Step = Step;
 		Result = GetApiRuntime()->GetGraphicsDevice()->CreateTexture2D(Width, Height, FORMAT_R8G8B8A8_UNORM, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
+		Result->SetDebugName(TextureName);
 		GetApiRuntime()->GetGraphicsDevice()->GenerateMips(Result);
 		AddTexture(TextureName, Result);
-		delete[](uint8*)Buffer;
+		delete[] (uint8*)Buffer;
 	}
 	else
 	{
@@ -219,7 +218,7 @@ SUBRESOURCE_DATA TextureCache::CreateTexData(LOADED_IMAGE* InImages, uint32& Out
 }
 
 
-byte* TextureCache::InternalLoadImage(const char* FileName, int32& OutWidth, int32& OutHeight, int32& OutStep, bool bFlip)
+uint8* TextureCache::InternalLoadImage(const char* FileName, int32& OutWidth, int32& OutHeight, int32& OutStep, bool bFlip)
 {
 	uint8* Buffer;
 	ilImage Img;

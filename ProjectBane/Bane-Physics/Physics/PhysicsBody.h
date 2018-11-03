@@ -3,6 +3,11 @@
 #include <vector>
 
 
+typedef enum EPHYSICS_BODY_TYPE {
+	PHYSICS_BODY_TYPE_SPHERE,
+	PHYSICS_BODY_TYPE_MESH
+} EPHYSICS_BODY_TYPE;
+
 // Currently assumes that everythings a sphere
 class PhysicsBody
 {

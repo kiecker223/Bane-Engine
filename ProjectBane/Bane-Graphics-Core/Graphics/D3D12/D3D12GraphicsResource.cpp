@@ -214,19 +214,20 @@ D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth
 	D3D12_CLEAR_VALUE* pClearValue = ((Usage & TEXTURE_USAGE_DEPTH_STENCIL) == TEXTURE_USAGE_DEPTH_STENCIL || 
 									 ((Usage & TEXTURE_USAGE_RENDER_TARGET) == TEXTURE_USAGE_RENDER_TARGET)) ? &ClearValue : nullptr;
 	
-	D3D12ERRORCHECK(
-		Device->CreateCommittedResource(
-			&HeapProps,
-			D3D12_HEAP_FLAG_NONE,
-			&ResourceDesc,
-			InitialState,
-			pClearValue,
-			IID_PPV_ARGS(&Resource.D3DResource)
-		)
-	);
+ 	D3D12ERRORCHECK(
+ 		Device->CreateCommittedResource(
+ 			&HeapProps,
+ 			D3D12_HEAP_FLAG_NONE,
+ 			&ResourceDesc,
+ 			InitialState,
+ 			pClearValue,
+ 			IID_PPV_ARGS(&Resource.D3DResource)
+ 		)
+ 	);
 	CurrentState = InitialState;
 }
 
+static uint32 UploadResourceId = 0;
 
 void D3D12TextureBase::UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void* Pointer, const uint32 InWidth, const uint32 InHeight, const uint32 InDepth, const uint32 StepSize)
 {
@@ -253,6 +254,7 @@ void D3D12TextureBase::UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void*
 	{
 		uint64 RequiredSize = GetRequiredIntermediateSize(Resource.D3DResource, 0, 1);
 		D3D12Buffer* UploadBuffer = new D3D12Buffer(Resource.GetParentDevice(), RequiredSize, BUFFER_USAGE_UPLOAD);
+		UploadBuffer->SetDebugName("Upload Resource: " + std::to_string(UploadResourceId++));
 		D3D12_SUBRESOURCE_DATA ResourceData = { };
 		ResourceData.pData = Pointer;
 		ResourceData.RowPitch = Width * StepSize;

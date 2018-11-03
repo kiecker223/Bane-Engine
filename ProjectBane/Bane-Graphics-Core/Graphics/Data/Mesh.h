@@ -82,6 +82,7 @@ public:
 	inline const std::vector<FloatInt>& GetVertices() const { return m_Vertices; }
 	inline const std::vector<uint32>& GetIndices() const { return m_Indices; }
 	inline MeshLayout& GetLayout() { return m_Layout; }
+	inline MeshLayout GetLayout() const { return m_Layout; }
 
 	inline IVertexBuffer* GetVertexBuffer() const { return m_VertexBuffer; }
 	inline IIndexBuffer* GetIndexBuffer() const { return m_IndexBuffer; }

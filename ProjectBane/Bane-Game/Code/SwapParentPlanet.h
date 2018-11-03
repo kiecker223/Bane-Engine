@@ -18,6 +18,7 @@ public:
 	void Start() override
 	{
 		Planets.push_back(GetScene()->FindEntity("Sun"));
+		Planets.push_back(GetScene()->FindEntity("Luna"));
 		Planets.push_back(GetScene()->FindEntity("Earth"));
 		Planets.push_back(GetScene()->FindEntity("Venus"));
 		Planets.push_back(GetScene()->FindEntity("Mercury"));
