@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <Core/Containers/Array.h>
 #include <Common.h>
 
 class IProcessHandle 
@@ -25,4 +25,4 @@ protected:
 };
 
 
-IProcessHandle* StartProcess(const std::string& ProcessName, const std::vector<std::string>& ProcessArguments);
+IProcessHandle* StartProcess(const std::string& ProcessName, const TArray<std::string>& ProcessArguments);

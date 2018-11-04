@@ -13,14 +13,16 @@ void PhysicsWorld::SpawnThread()
 	}));
 }
 
-PhysicsBody PhysicsWorld::CastRay(const PHYSICS_RAY& InRay)
+bool PhysicsWorld::CastRay(const PHYSICS_RAY& InRay, PhysicsBody& HitBody)
 {
-
+	UNUSED(InRay);
+	UNUSED(HitBody);
+	return false;
 }
 
 void PhysicsWorld::CastRayAtSpeedOfLight(const PHYSICS_RAY& InRay, std::function<PhysicsBody()>& HitFunc)
 {
-
+	UNUSED(InRay); UNUSED(HitFunc);
 }
 
 void PhysicsWorld::UpdatePhysics()
@@ -30,14 +32,14 @@ void PhysicsWorld::UpdatePhysics()
 	{
 		using Clock = std::chrono::high_resolution_clock;
 		auto Start = Clock::now();
-		if (AddList.size() > 0)
+		if (AddList.GetElementCount() > 0)
 		{
 			std::lock_guard<std::mutex> ScopedMutex(BodyAddMutex);
 			for (auto& Body : AddList)
 			{
-				m_Bodies.push_back(Body);
+				m_Bodies.Add(Body);
 			}
-			AddList.clear();
+			AddList.Empty();
 		}
 
 		if (MessageQueue.GetMessageCount() > 0)

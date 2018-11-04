@@ -107,18 +107,18 @@ void GraphicsCommandBuffer::Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 Thre
 	AllocateCommand<DispatchCommand>(ThreadX, ThreadY, ThreadZ);
 }
 
-byte* GraphicsCommandBuffer::Allocate(ptrdiff_t NewOffset)
+uint8* GraphicsCommandBuffer::Allocate(ptrdiff_t NewOffset)
 {
 	if (PtrCurrent + NewOffset > PtrEnd)
 	{
-		byte* OldPtr = PtrStart;
+		uint8* OldPtr = PtrStart;
 		ptrdiff_t OldSize = PtrCurrent - OldPtr;
 
 		Reallocate(OldSize * 2);
-		for (int i = 0; i < Commands.size(); i++)
+		for (uint32 i = 0; i < Commands.GetElementCount(); i++)
 		{
 			auto*& Command = Commands[i];
-			Command = reinterpret_cast<IGraphicsCommand*>(PtrStart + (reinterpret_cast<byte*>(Command) - OldPtr));
+			Command = reinterpret_cast<IGraphicsCommand*>(PtrStart + (reinterpret_cast<uint8*>(Command) - OldPtr));
 		}
 	}
 	else

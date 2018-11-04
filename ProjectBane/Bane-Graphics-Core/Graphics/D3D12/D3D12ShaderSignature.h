@@ -3,7 +3,7 @@
 #include "Common.h"
 #include "../Interfaces/PipelineState.h"
 #include <string>
-#include <vector>
+#include <Core/Containers/Array.h>
 #include <d3d12.h>
 #include "D3D12Helper.h"
 
@@ -45,8 +45,8 @@ public:
 
 	inline void AddParameter(const D3D12_SHADER_PARAMETER& Parameter)
 	{
-		ShaderParams.push_back(Parameter);
-		RootParamIndexes[(uint32)Parameter.Type].push_back(NumParameters);
+		ShaderParams.Add(Parameter);
+		RootParamIndexes[(uint32)Parameter.Type].Add(NumParameters);
 		NumParameters++;
 		switch (Parameter.Type)
 		{
@@ -64,16 +64,16 @@ public:
 
 	inline void AddStaticSampler(const D3D12_STATIC_SAMPLER_DESC& SamplerDesc)
 	{
-		StaticSamplers.push_back(SamplerDesc);
+		StaticSamplers.Add(SamplerDesc);
 	}
 	
 	uint32 NumConstantBuffers;
 	uint32 NumShaderResourceViews;
 	uint32 NumUnorderedAccessViews;
-	std::vector<D3D12_SHADER_PARAMETER> ShaderParams;
-	std::vector<uint32> RootParamIndexes[D3D12_SHADER_PARAMETER_NUM_TYPES];
+	TArray<D3D12_SHADER_PARAMETER> ShaderParams;
+	TArray<uint32> RootParamIndexes[D3D12_SHADER_PARAMETER_NUM_TYPES];
 	uint32 NumParameters;
-	std::vector<D3D12_STATIC_SAMPLER_DESC> StaticSamplers;
+	TArray<D3D12_STATIC_SAMPLER_DESC> StaticSamplers;
 };
 
 inline bool operator == (const D3D12ShaderSignatureParameterList& Left, const D3D12ShaderSignatureParameterList& Right)
@@ -90,9 +90,9 @@ inline bool operator == (const D3D12ShaderSignatureParameterList& Left, const D3
 	{
 		return false;
 	}
-	if (Left.ShaderParams.size() == Right.ShaderParams.size())
+	if (Left.ShaderParams.GetElementCount() == Right.ShaderParams.GetElementCount())
 	{
-		for (uint32 i = 0; i < Left.ShaderParams.size(); i++)
+		for (uint32 i = 0; i < Left.ShaderParams.GetElementCount(); i++)
 		{
 			if (Left.ShaderParams[i] != Right.ShaderParams[i])
 			{
@@ -104,9 +104,9 @@ inline bool operator == (const D3D12ShaderSignatureParameterList& Left, const D3
 	{
 		return false;
 	}
-	if (Left.StaticSamplers.size() == Right.StaticSamplers.size())
+	if (Left.StaticSamplers.GetElementCount() == Right.StaticSamplers.GetElementCount())
 	{
-		for (uint32 i = 0; i < Left.StaticSamplers.size(); i++)
+		for (uint32 i = 0; i < Left.StaticSamplers.GetElementCount(); i++)
 		{
 			if (Left.StaticSamplers[i] != Right.StaticSamplers[i])
 			{

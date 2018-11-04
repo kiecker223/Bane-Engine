@@ -33,7 +33,7 @@ Mesh::Mesh(const Mesh& InMesh) :
 {
 }
 
-Mesh::Mesh(const std::vector<FloatInt>& InVertices, const std::vector<uint32>& InIndices) :
+Mesh::Mesh(const TArray<FloatInt>& InVertices, const TArray<uint32>& InIndices) :
 	m_VertexBuffer(nullptr),
 	m_IndexBuffer(nullptr),
 	m_Name("No Named Mesh"),
@@ -42,7 +42,7 @@ Mesh::Mesh(const std::vector<FloatInt>& InVertices, const std::vector<uint32>& I
 {
 }
 
-void ProcessMesh(aiMesh* pMesh, std::vector<uint32>& OutIndices, std::vector<FloatInt>& OutVertices)
+void ProcessMesh(aiMesh* pMesh, TArray<uint32>& OutIndices, TArray<FloatInt>& OutVertices)
 {
 	for (uint32 i = 0; i < pMesh->mNumVertices; i++)
 	{
@@ -76,7 +76,7 @@ void ProcessMesh(aiMesh* pMesh, std::vector<uint32>& OutIndices, std::vector<Flo
 		uint32 FloatsSize = sizeof(Mesh::Vertex) / sizeof(float);
 		for (uint32 z = 0; z < FloatsSize; z++)
 		{
-			OutVertices.push_back(pFloats[z]);
+			OutVertices.Add(pFloats[z]);
 		}
 	}
 	for (uint32 i = 0; i < pMesh->mNumFaces; i++)
@@ -84,12 +84,12 @@ void ProcessMesh(aiMesh* pMesh, std::vector<uint32>& OutIndices, std::vector<Flo
 		aiFace Face = pMesh->mFaces[i];
 		for (uint32 j = 0; j < Face.mNumIndices; j++)
 		{
-			OutIndices.push_back(Face.mIndices[j]);
+			OutIndices.Add(Face.mIndices[j]);
 		}
 	}
 }
 
-void ProcessScene(const aiScene* pScene, aiNode* pRootNode, std::vector<uint32>& OutIndices, std::vector<FloatInt>& OutVertices)
+void ProcessScene(const aiScene* pScene, aiNode* pRootNode, TArray<uint32>& OutIndices, TArray<FloatInt>& OutVertices)
 {
 	for (uint32 i = 0; i < pRootNode->mNumMeshes; i++)
 	{
@@ -125,20 +125,20 @@ bool Mesh::LoadFromFile(const std::string& FileName)
 	return true;
 }
 
-void Mesh::SetVertices(const std::vector<FloatInt>& InVertices)
+void Mesh::SetVertices(const TArray<FloatInt>& InVertices)
 {
 	m_Vertices = InVertices;
 }
 
-void Mesh::SetIndices(const std::vector<uint32>& InIndices)
+void Mesh::SetIndices(const TArray<uint32>& InIndices)
 {
 	m_Indices = InIndices;
 }
 
 void Mesh::GenerateUVSphere(uint32 SegmentCount)
 {
-	std::vector<Vertex> Vertices;
-	std::vector<uint32> Indices;
+	TArray<Vertex> Vertices;
+	TArray<uint32> Indices;
 	float3 TopPoint(0.f, 0.5f, 0.f);
 	const float LatitudeSpacing = 1.0f / (static_cast<float>(SegmentCount) + 1.0f);
 	const float LongitudeSpacing = 1.0f / (static_cast<float>(SegmentCount));
@@ -148,11 +148,11 @@ void Mesh::GenerateUVSphere(uint32 SegmentCount)
 		const float PercentDown = static_cast<float>(y) / static_cast<float>(SegmentCount / 2);
 		if (y == 0)
 		{
-			Vertices.push_back({ TopPoint, normalized(TopPoint), float3(), float3(), float2(0.5f, 1.0f) });
+			Vertices.Add({ TopPoint, normalized(TopPoint), float3(), float3(), float2(0.5f, 1.0f) });
 		}
 		else if (y == ((SegmentCount / 2)))
 		{
-			Vertices.push_back({ -TopPoint, normalized(-TopPoint), float3(), float3(), float2(0.5f, 0.0f) });
+			Vertices.Add({ -TopPoint, normalized(-TopPoint), float3(), float3(), float2(0.5f, 0.0f) });
 		}
 		else
 		{
@@ -160,11 +160,11 @@ void Mesh::GenerateUVSphere(uint32 SegmentCount)
 			{
 				const float PercentAroundCrown = (static_cast<float>(i) / static_cast<float>(SegmentCount));
 				float3 Point = (float3x3)(matRotY(radians(PercentAroundCrown * 360.f)) * matRotX(radians(PercentDown * 180.f))) * TopPoint;
-				Vertices.push_back({ Point, normalized(Point), float3(), float3(), float2(1.0f - PercentAroundCrown, 1.0f - PercentDown) });
+				Vertices.Add({ Point, normalized(Point), float3(), float3(), float2(1.0f - PercentAroundCrown, 1.0f - PercentDown) });
  				if (i == SegmentCount - 1)
  				{
  					Point = (float3x3)(matRotY(radians(360.f)) * matRotX(radians(PercentDown * 180.f))) * TopPoint;
- 					Vertices.push_back({ Point, normalized(Point), float3(), float3(), float2(0.0f, 1.0f - PercentDown) });
+ 					Vertices.Add({ Point, normalized(Point), float3(), float3(), float2(0.0f, 1.0f - PercentDown) });
  				}
 			}
 		}
@@ -176,14 +176,14 @@ void Mesh::GenerateUVSphere(uint32 SegmentCount)
 		{
 			for (uint32 i = 0; i < LatitudeCount - 1; i++)
 			{
-				Indices.push_back(0);
-				Indices.push_back(i + 1);
-				Indices.push_back(i + 2);
+				Indices.Add(0);
+				Indices.Add(i + 1);
+				Indices.Add(i + 2);
 				if (i == LatitudeCount - 2)
 				{
-					Indices.push_back(0);
-					Indices.push_back(LatitudeCount);
-					Indices.push_back(1);
+					Indices.Add(0);
+					Indices.Add(LatitudeCount);
+					Indices.Add(1);
 				}
 			}
 			for (uint32 i = 0; i < (LatitudeCount); i++)
@@ -191,42 +191,42 @@ void Mesh::GenerateUVSphere(uint32 SegmentCount)
 				if (i == 0)
 				{
 					// Top triangle
-					Indices.push_back((y * LatitudeCount) + LatitudeCount + LatitudeCount);
-					Indices.push_back((y * LatitudeCount) + LatitudeCount);
-					Indices.push_back((y * LatitudeCount) + 1);
+					Indices.Add((y * LatitudeCount) + LatitudeCount + LatitudeCount);
+					Indices.Add((y * LatitudeCount) + LatitudeCount);
+					Indices.Add((y * LatitudeCount) + 1);
 
 					// Bottom triangle
-					Indices.push_back((y * LatitudeCount) + LatitudeCount + LatitudeCount);
-					Indices.push_back((y * LatitudeCount) + LatitudeCount + 1);
-					Indices.push_back((y * LatitudeCount) + 1);
+					Indices.Add((y * LatitudeCount) + LatitudeCount + LatitudeCount);
+					Indices.Add((y * LatitudeCount) + LatitudeCount + 1);
+					Indices.Add((y * LatitudeCount) + 1);
 				}
 				else
 				{
 					// Top triangle
-					Indices.push_back((y * LatitudeCount) + i);
-					Indices.push_back((y * LatitudeCount) + i + LatitudeCount + 1);
-					Indices.push_back((y * LatitudeCount) + i + 1);
+					Indices.Add((y * LatitudeCount) + i);
+					Indices.Add((y * LatitudeCount) + i + LatitudeCount + 1);
+					Indices.Add((y * LatitudeCount) + i + 1);
 
 					// Bottom triangle
-					Indices.push_back((y * LatitudeCount) + i);
-					Indices.push_back((y * LatitudeCount) + i + LatitudeCount);
-					Indices.push_back((y * LatitudeCount) + i + LatitudeCount+ 1);
+					Indices.Add((y * LatitudeCount) + i);
+					Indices.Add((y * LatitudeCount) + i + LatitudeCount);
+					Indices.Add((y * LatitudeCount) + i + LatitudeCount+ 1);
 				}
 			}
 		}
 		else if (y == (SegmentCount / 2) - 2)
 		{
-			uint32 LastPos = static_cast<uint32>(Vertices.size() - 1);
+			uint32 LastPos = static_cast<uint32>(Vertices.GetElementCount() - 1);
 			for (uint32 i = 0; i < SegmentCount - 1; i++)
 			{
-				Indices.push_back(LastPos);
-				Indices.push_back((LastPos) - (i + 1));
-				Indices.push_back((LastPos) - (i + 2));
+				Indices.Add(LastPos);
+				Indices.Add((LastPos) - (i + 1));
+				Indices.Add((LastPos) - (i + 2));
 				if (i == SegmentCount - 2)
 				{
-					Indices.push_back(LastPos);
-					Indices.push_back(LastPos - 1);
-					Indices.push_back(LastPos - SegmentCount);
+					Indices.Add(LastPos);
+					Indices.Add(LastPos - 1);
+					Indices.Add(LastPos - SegmentCount);
 				}
 			}
 			
@@ -238,26 +238,26 @@ void Mesh::GenerateUVSphere(uint32 SegmentCount)
 				if (i == 0)
 				{
 					// Top triangle
-					Indices.push_back((y * LatitudeCount) + LatitudeCount + LatitudeCount); 
-					Indices.push_back((y * LatitudeCount) + LatitudeCount); 
-					Indices.push_back((y * LatitudeCount) + 1); 
+					Indices.Add((y * LatitudeCount) + LatitudeCount + LatitudeCount); 
+					Indices.Add((y * LatitudeCount) + LatitudeCount); 
+					Indices.Add((y * LatitudeCount) + 1); 
  
  					// Bottom triangle
-					Indices.push_back((y * LatitudeCount) + LatitudeCount + LatitudeCount); 
-					Indices.push_back((y * LatitudeCount) + LatitudeCount + 1); 
-					Indices.push_back((y * LatitudeCount) + 1);
+					Indices.Add((y * LatitudeCount) + LatitudeCount + LatitudeCount); 
+					Indices.Add((y * LatitudeCount) + LatitudeCount + 1); 
+					Indices.Add((y * LatitudeCount) + 1);
 				}
 				else
 				{
 					// Top triangle
-					Indices.push_back((y * LatitudeCount) + i);
-					Indices.push_back((y * LatitudeCount) + i + LatitudeCount + 1);
-					Indices.push_back((y * LatitudeCount) + i + 1);
+					Indices.Add((y * LatitudeCount) + i);
+					Indices.Add((y * LatitudeCount) + i + LatitudeCount + 1);
+					Indices.Add((y * LatitudeCount) + i + 1);
 
 					// Bottom triangle
-					Indices.push_back((y * LatitudeCount) + i);
-					Indices.push_back((y * LatitudeCount) + i + LatitudeCount);
-					Indices.push_back((y * LatitudeCount) + i + LatitudeCount + 1);
+					Indices.Add((y * LatitudeCount) + i);
+					Indices.Add((y * LatitudeCount) + i + LatitudeCount);
+					Indices.Add((y * LatitudeCount) + i + LatitudeCount + 1);
 				}
 			}
 		}
@@ -275,19 +275,19 @@ void Mesh::Upload()
 	{
 		delete m_VertexBuffer;
 	}
-	m_VertexBuffer = Device->CreateVertexBuffer(static_cast<uint32>(m_Vertices.size()) * sizeof(FloatInt), (uint8*)m_Vertices.data());
+	m_VertexBuffer = Device->CreateVertexBuffer(static_cast<uint32>(m_Vertices.GetElementCount()) * sizeof(FloatInt), (uint8*)m_Vertices.GetData());
 	if (m_IndexBuffer)
 	{
 		delete m_IndexBuffer;
 	}
-	m_IndexBuffer = Device->CreateIndexBuffer(static_cast<uint32>(m_Indices.size() * 4), (uint8*)m_Indices.data());
+	m_IndexBuffer = Device->CreateIndexBuffer(static_cast<uint32>(m_Indices.GetElementCount() * 4), (uint8*)m_Indices.GetData());
 }
 
 void Mesh::AddData(float* pDatas, uint32 Size)
 {
 	for (uint32 i = 0; i < Size; i++)
 	{
-		m_Vertices.push_back(pDatas[i]);
+		m_Vertices.Add(pDatas[i]);
 	}
 }
 
@@ -295,6 +295,6 @@ void Mesh::AddData(int* pDatas, uint32 Size)
 {
 	for (uint32 i = 0; i < Size; i++)
 	{
-		m_Vertices.push_back(pDatas[i]);
+		m_Vertices.Add(pDatas[i]);
 	}
 }

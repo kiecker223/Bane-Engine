@@ -191,10 +191,10 @@ public:
 		return (NumSMPs > 0);
 	}
 
-	std::vector<D3D12_CONSTANT_BUFFER_OFFSET_PAIR> ConstantBuffers; 
-	std::vector<D3D12SamplerState*> Samplers;
-	std::vector<D3D12GPUResource*> ShaderResources;
-	std::vector<D3D12GPUResource*> UnorderedAccessResources;
+	TArray<D3D12_CONSTANT_BUFFER_OFFSET_PAIR> ConstantBuffers; 
+	TArray<D3D12SamplerState*> Samplers;
+	TArray<D3D12GPUResource*> ShaderResources;
+	TArray<D3D12GPUResource*> UnorderedAccessResources;
 	D3D12DescriptorAllocation BaseSMPAllocation;
 	D3D12DescriptorAllocation BaseSRVAllocation;
 	D3D12DescriptorAllocation BaseUAVAllocation;

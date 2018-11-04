@@ -77,11 +77,6 @@ double Eps3(double Eccentricity, double M, double StartingValue)
 	return t5 / ((0.5*t3 - 1. / 6.*t1*t6)*Eccentricity*t6 + t2);
 }
 
-double SolvePassageOfPericenter()
-{
-	return 0.0;
-}
-
 double SolveEccentricAnomaly(double Time, double Period, double Eccentricity, double TimePeriod)
 {
 	double Tolerance;

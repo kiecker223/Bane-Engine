@@ -52,9 +52,9 @@
 // 	public:
 // 		
 // 		void InitializeStream(const std::string& InRawData);
-// 		std::vector<std::string> Tokenize(std::string InData);
+// 		TArray<std::string> Tokenize(std::string InData);
 // 
-// 		std::vector<Token> Tokens;
+// 		TArray<Token> Tokens;
 // 
 // 	};
 // 

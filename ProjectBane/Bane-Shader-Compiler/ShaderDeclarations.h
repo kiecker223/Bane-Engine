@@ -1,9 +1,9 @@
 #pragma once
 #include "Common/Types.h"
-#include <vector>
+#include <Core/Containers/Array.h>
 
 typedef struct SHADER_BYTECODE {
-	std::vector<uint8> ByteCode;
+	TArray<uint8> ByteCode;
 } SHADER_BYTECODE;
 
 enum CompilerFlags

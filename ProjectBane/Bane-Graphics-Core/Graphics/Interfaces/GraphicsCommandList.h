@@ -497,20 +497,19 @@ public:
 	template<typename T, class... U>
 	inline void AllocateCommand(U&& ...Args)
 	{
-		Commands.push_back((IGraphicsCommand*)(new ((void*)Allocate(sizeof(T))) T(std::forward<U>(Args)...)));
+		Commands.Add((IGraphicsCommand*)(new ((void*)Allocate(sizeof(T))) T(std::forward<U>(Args)...)));
 	}
 	template<typename T>
 	inline void AllocateCommand()
 	{
-		Commands.push_back((IGraphicsCommand*)(new ((void*)Allocate(sizeof(T))) T()));
+		Commands.Add((IGraphicsCommand*)(new ((void*)Allocate(sizeof(T))) T()));
 	}
 
-	byte* Allocate(ptrdiff_t NewOffset);
-
-	byte* PtrStart = nullptr;
-	byte* PtrCurrent = nullptr;
-	byte* PtrEnd = nullptr;
-	std::vector<IGraphicsCommand*> Commands;
+	uint8* Allocate(ptrdiff_t NewOffset);
+	uint8* PtrStart = nullptr;
+	uint8* PtrCurrent = nullptr;
+	uint8* PtrEnd = nullptr;
+	TArray<IGraphicsCommand*> Commands;
 private:
 	void Reallocate(size_t NewSize);
 };

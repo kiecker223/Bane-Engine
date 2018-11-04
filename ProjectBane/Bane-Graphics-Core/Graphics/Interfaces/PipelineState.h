@@ -2,7 +2,7 @@
 #include "Common.h"
 #include "Core/Data/Format.h"
 #include "../D3D12/D3D12Helper.h"
-#include <vector>
+#include <Core/Containers/Array.h>
 
 
 typedef enum ESHADER_STAGE {
@@ -16,7 +16,7 @@ typedef enum ESHADER_STAGE {
 class ShaderByteCode
 {
 public:
-	std::vector<uint8> ByteCode;
+	TArray<uint8> ByteCode;
 };
 
 class IShader
@@ -275,13 +275,13 @@ typedef struct GFX_INPUT_ITEM_DESC {
 } GFX_INPUT_ITEM_DESC;
 
 typedef struct GFX_INPUT_LAYOUT_DESC {
-	std::vector<GFX_INPUT_ITEM_DESC> InputItems;
+	TArray<GFX_INPUT_ITEM_DESC> InputItems;
 } GFX_INPUT_LAYOUT_DESC;
 
 inline uint32 GetLayoutDescSize(const GFX_INPUT_LAYOUT_DESC& InDesc)
 {
 	uint32 Result = 0;
-	for (uint32 i = 0; i < InDesc.InputItems.size(); i++)
+	for (uint32 i = 0; i < InDesc.InputItems.GetElementCount(); i++)
 	{
 		Result += TranslateItemFormatSize(InDesc.InputItems[i].ItemFormat);
 	}

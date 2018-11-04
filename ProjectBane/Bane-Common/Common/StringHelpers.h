@@ -1,20 +1,20 @@
 #pragma once
 
 #include <sstream>
-#include <vector>
+#include <Core/Containers/Array.h>
 #include <string>
 
 
-inline std::vector<std::string> SplitString(const std::string& InStr, const char Delimiter)
+inline TArray<std::string> SplitString(const std::string& InStr, const char Delimiter)
 {
 	std::istringstream Str(InStr);
 
-	std::vector<std::string> Result;
+	TArray<std::string> Result;
 
 	std::string Buff;
 	while (std::getline(Str, Buff, Delimiter))
 	{
-		Result.push_back(Buff);
+		Result.Add(Buff);
 	}
 	return Result;
 }
@@ -79,9 +79,9 @@ inline bool IsWhiteSpace(const std::string& TestStr)
 }
 
 
-inline std::vector<std::string> Tokenize(const std::string& InRawStr, const std::string& Delimiters)
+inline TArray<std::string> Tokenize(const std::string& InRawStr, const std::string& Delimiters)
 {
-	std::vector<std::string> Result;
+	TArray<std::string> Result;
 	size_t Start = InRawStr.find_first_not_of(Delimiters);
 	size_t End = InRawStr.find_first_of(Delimiters, 0);
 
@@ -90,7 +90,7 @@ inline std::vector<std::string> Tokenize(const std::string& InRawStr, const std:
 		std::string SubStr = InRawStr.substr(Start, End);
 		if (!SubStr.empty())
 		{
-			Result.push_back(SubStr);
+			Result.Add(SubStr);
 		}
 
 		Start = End + 1;

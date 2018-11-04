@@ -10,17 +10,6 @@
 // Disable anonymous structures warnings
 #pragma warning(disable:4201)
 
-inline uint32 NextPowerOfTwo(uint32 Value)
-{
-	Value--;
-	Value |= Value >> 1;
-	Value |= Value >> 2;
-	Value |= Value >> 4;
-	Value |= Value >> 8;
-	Value |= Value >> 16;
-	Value++;
-	return Value;
-}
 
 
 #include "Math/MathFunctions.h"

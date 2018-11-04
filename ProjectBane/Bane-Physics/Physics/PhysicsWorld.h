@@ -1,7 +1,7 @@
 #pragma once
 #include "PhysicsBody.h"
 #include "PhysicsUpdateBuffer.h"
-#include <vector>
+#include <Core/Containers/Array.h>
 #include <utility>
 #include <functional>
 #include <thread>
@@ -31,16 +31,17 @@ public:
 
 	PhysicsWorld() : CurrentId(0), bRunningPhysicsSim(true), m_bUnlockedForRead(true) { }
 
-	inline uint32 AddBody(PhysicsBody& InBody)
+	inline uint32 AddBody(PHYSICS_BODY_CREATE_INFO Info)
 	{
 		std::lock_guard<std::mutex> ScopedMutex(BodyAddMutex);
-		InBody.Handle = CurrentId;
+		Info.Handle = CurrentId;
 		CurrentId++;
-		AddList.push_back(InBody);
-		return InBody.Handle;
+		PhysicsBody Body(Info);
+		AddList.Add(Body);
+		return Info.Handle;
 	}
 
-	PhysicsBody CastRay(const PHYSICS_RAY& InRay);
+	bool CastRay(const PHYSICS_RAY& InRay, PhysicsBody& HitBody);
 	void CastRayAtSpeedOfLight(const PHYSICS_RAY& InRay, std::function<PhysicsBody()>& HitFunc);
 	void SpawnThread();
 	inline void DestroyThread()
@@ -58,14 +59,14 @@ public:
 	std::thread PhysicsThread;
 	ApplicationToPhysicsQueue MessageQueue;
 	PhysicsUpdateBuffer UpdateBuffer;
-	std::vector<PhysicsBody> AddList;
+	TArray<PhysicsBody> AddList;
 	std::mutex BodyAddMutex;
 	uint32 CurrentId;
 	bool bRunningPhysicsSim;
 
 private:
 
-	std::vector<PhysicsBody> m_Bodies;
+	TArray<PhysicsBody> m_Bodies;
 	bool m_bUnlockedForRead;
 };
 

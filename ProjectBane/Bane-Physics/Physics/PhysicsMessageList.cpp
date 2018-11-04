@@ -3,7 +3,7 @@
 
 void ApplicationToPhysicsQueue::Reset()
 {
-	m_AllocatedObjects.clear();
+	m_AllocatedObjects.Empty();
 	m_Current = m_Start;
 }
 
@@ -36,6 +36,6 @@ uint8* ApplicationToPhysicsQueue::Alloc(uint32 Size)
 
 	uint8* Result = m_Current;
 	m_Current = reinterpret_cast<uint8*>(reinterpret_cast<ptrdiff_t>(m_Current) + static_cast<ptrdiff_t>(Size));
-	m_AllocatedObjects.push_back(reinterpret_cast<ptrdiff_t>(m_Current) - reinterpret_cast<ptrdiff_t>(m_Start));
+	m_AllocatedObjects.Add(reinterpret_cast<ptrdiff_t>(m_Current) - reinterpret_cast<ptrdiff_t>(m_Start));
 	return Result;
 }

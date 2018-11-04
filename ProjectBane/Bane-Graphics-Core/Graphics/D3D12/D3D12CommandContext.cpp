@@ -8,17 +8,17 @@
 
 void D3D12CommandList::FlushDestructionQueue()
 {
-	if (UploadResourcesToDestroy.empty())
+	if (UploadResourcesToDestroy.IsEmpty())
 	{
 		return;
 	}
-	for (int i = 0; i < UploadResourcesToDestroy.size(); i++)
+	for (uint32 i = 0; i < UploadResourcesToDestroy.GetElementCount(); i++)
 	{
 		auto& Resource = UploadResourcesToDestroy[i];
 		Resource.Destroy();
 	}
 
-	UploadResourcesToDestroy.clear();
+	UploadResourcesToDestroy.Empty();
 }
 
 void D3D12GraphicsCommandContext::BeginPass(IRenderPassInfo* InRenderPass)
@@ -100,7 +100,7 @@ void D3D12GraphicsCommandContext::SetGraphicsResourceTable(const IShaderResource
 		D3DCL->SetGraphicsRootSignature(Table->AssociatedSignature.RootSignature);
 	}
 
-	for (uint32 i = 0; i < Table->ConstantBuffers.size(); i++)
+	for (uint32 i = 0; i < Table->ConstantBuffers.GetElementCount(); i++)
 	{
 		if (Table->ConstantBuffers[i].ConstantBuffer != nullptr)
 		{
@@ -229,7 +229,7 @@ void D3D12GraphicsCommandContext::SetComputeResourceTable(const IShaderResourceT
 		D3DCL->SetComputeRootSignature(Table->AssociatedSignature.RootSignature);
 	}
 
-	for (uint32 i = 0; i < Table->ConstantBuffers.size(); i++)
+	for (uint32 i = 0; i < Table->ConstantBuffers.GetElementCount(); i++)
 	{
 		if (Table->ConstantBuffers[i].ConstantBuffer != nullptr)
 		{
@@ -301,9 +301,9 @@ void D3D12GraphicsCommandContext::CommitResources()
 			}
 		}
 	}
-	if (!CurrentTable->ShaderResources.empty())
+	if (!CurrentTable->ShaderResources.IsEmpty())
 	{
-		for (uint32 i = 0; i < CurrentTable->ShaderResources.size(); i++)
+		for (uint32 i = 0; i < CurrentTable->ShaderResources.GetElementCount(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->ShaderResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_GRAPHICS))
@@ -312,9 +312,9 @@ void D3D12GraphicsCommandContext::CommitResources()
 			}
 		}
 	}
-	if (!CurrentTable->UnorderedAccessResources.empty())
+	if (!CurrentTable->UnorderedAccessResources.IsEmpty())
 	{
-		for (uint32 i = 0; i < CurrentTable->UnorderedAccessResources.size(); i++)
+		for (uint32 i = 0; i < CurrentTable->UnorderedAccessResources.GetElementCount(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->UnorderedAccessResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_GRAPHICS))
@@ -368,7 +368,7 @@ void D3D12ComputeCommandContext::SetComputeResourceTable(const IShaderResourceTa
 		D3DCL->SetComputeRootSignature(Table->AssociatedSignature.RootSignature);
 	}
 
-	for (uint32 i = 0; i < Table->ConstantBuffers.size(); i++)
+	for (uint32 i = 0; i < Table->ConstantBuffers.GetElementCount(); i++)
 	{
 		if (Table->ConstantBuffers[i].ConstantBuffer != nullptr)
 		{
@@ -418,9 +418,9 @@ void D3D12ComputeCommandContext::CommitResources()
 
 	bHasCheckedCurrentTable = true;
 	// Leave out constant buffers because they are constant read?
-	if (!CurrentTable->ShaderResources.empty())
+	if (!CurrentTable->ShaderResources.IsEmpty())
 	{
-		for (uint32 i = 0; i < CurrentTable->ShaderResources.size(); i++)
+		for (uint32 i = 0; i < CurrentTable->ShaderResources.GetElementCount(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->ShaderResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_COMPUTE))
@@ -429,9 +429,9 @@ void D3D12ComputeCommandContext::CommitResources()
 			}
 		}
 	}
-	if (!CurrentTable->UnorderedAccessResources.empty())
+	if (!CurrentTable->UnorderedAccessResources.IsEmpty())
 	{
-		for (uint32 i = 0; i < CurrentTable->UnorderedAccessResources.size(); i++)
+		for (uint32 i = 0; i < CurrentTable->UnorderedAccessResources.GetElementCount(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->UnorderedAccessResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_COMPUTE))

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <Core/Containers/Array.h>
 #include <memory>
 #include "Common.h"
 #include "KieckerMath.h"
@@ -29,7 +29,7 @@ public:
 	inline void AddItem(const std::string& Name, EINPUT_ITEM_FORMAT Format)
 	{
 		Stride += TranslateItemFormatSize(Format);
-		Inputs.push_back(Name);
+		Inputs.Add(Name);
 	}
 
 	inline void SetLayout(IInputLayout* Layout)
@@ -44,7 +44,7 @@ public:
 	inline void Reset()
 	{
 		Stride = 0;
-		Inputs.clear();
+		Inputs.Empty();
 	}
 
 	inline MeshLayout& operator = (const MeshLayout& Rhs)
@@ -55,7 +55,7 @@ public:
 	}
 
 	uint32 Stride;
-	std::vector<std::string> Inputs;
+	TArray<std::string> Inputs;
 };
 
 class Mesh
@@ -77,16 +77,16 @@ public:
 	// Calls Upload()
 	Mesh(const Mesh& Rhs);
 	// Does not call Upload()
-	Mesh(const std::vector<FloatInt>& InVertices, const std::vector<uint32>& InIndices);
+	Mesh(const TArray<FloatInt>& InVertices, const TArray<uint32>& InIndices);
 
-	inline const std::vector<FloatInt>& GetVertices() const { return m_Vertices; }
-	inline const std::vector<uint32>& GetIndices() const { return m_Indices; }
+	inline const TArray<FloatInt>& GetVertices() const { return m_Vertices; }
+	inline const TArray<uint32>& GetIndices() const { return m_Indices; }
 	inline MeshLayout& GetLayout() { return m_Layout; }
 	inline MeshLayout GetLayout() const { return m_Layout; }
 
 	inline IVertexBuffer* GetVertexBuffer() const { return m_VertexBuffer; }
 	inline IIndexBuffer* GetIndexBuffer() const { return m_IndexBuffer; }
-	inline const uint32 GetIndexCount() const { return static_cast<uint32>(m_Indices.size()); }
+	inline const uint32 GetIndexCount() const { return static_cast<uint32>(m_Indices.GetElementCount()); }
 
 	inline void SetName(const std::string& Name) { m_Name = Name; }
 	inline std::string GetName() const { return m_Name; }
@@ -95,15 +95,15 @@ public:
 
 	// none of these call Upload()
 	template<class T>
-	inline void SetVertexData(const std::vector<T>& InVertices)
+	inline void SetVertexData(const TArray<T>& InVertices)
 	{
-		std::vector<FloatInt> Res(InVertices.size() * (sizeof(T) / sizeof(FloatInt)));
-		memcpy((void*)Res.data(), (void*)InVertices.data(), InVertices.size() * (sizeof(T)));
+		TArray<FloatInt> Res(InVertices.GetElementCount() * (sizeof(T) / sizeof(FloatInt)));
+		memcpy((void*)Res.GetData(), (void*)InVertices.GetData(), InVertices.GetElementCount() * (sizeof(T)));
 		SetVertices(Res);
 	}
 
-	void SetVertices(const std::vector<FloatInt>& InVertices);
-	void SetIndices(const std::vector<uint32>& InIndices);
+	void SetVertices(const TArray<FloatInt>& InVertices);
+	void SetIndices(const TArray<uint32>& InIndices);
 	void GenerateUVSphere(uint32 SegmentCount);
 
 	void Upload(); // Call an explicit upload to gpu
@@ -127,8 +127,8 @@ public:
 		m_VertexBuffer = nullptr;
 		delete m_IndexBuffer;
 		m_IndexBuffer = nullptr;
-		m_Vertices.clear();
-		m_Indices.clear();
+		m_Vertices.Empty();
+		m_Indices.Empty();
 	}
 
 private:
@@ -154,7 +154,7 @@ private:
 	IIndexBuffer* m_IndexBuffer;
 	std::string m_Name; // Filename, or asset name
 	MeshLayout m_Layout;
-	std::vector<FloatInt> m_Vertices;
-	std::vector<uint32> m_Indices;
+	TArray<FloatInt> m_Vertices;
+	TArray<uint32> m_Indices;
 };
 

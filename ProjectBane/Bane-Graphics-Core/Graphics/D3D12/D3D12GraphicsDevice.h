@@ -31,11 +31,11 @@ public:
 	virtual IComputeShader* CreateComputeShader(const std::string& ByteCode) final override;
 
 	virtual bool SupportsPrecompiledShaders() const final override { return true; }
-	virtual IVertexShader* CreateVertexShaderFromBytecode(const std::vector<uint8>& ByteCode);
-	virtual IPixelShader* CreatePixelShaderFromBytecode(const std::vector<uint8>& ByteCode);
-	virtual IGeometryShader* CreateGeometryShaderFromBytecode(const std::vector<uint8>& ByteCode);
-	virtual IHullShader* CreateHullShaderFromBytecode(const std::vector<uint8>& ByteCode);
-	virtual IComputeShader* CreateComputeShaderFromBytecode(const std::vector<uint8>& ByteCode);
+	virtual IVertexShader* CreateVertexShaderFromBytecode(const TArray<uint8>& ByteCode);
+	virtual IPixelShader* CreatePixelShaderFromBytecode(const TArray<uint8>& ByteCode);
+	virtual IGeometryShader* CreateGeometryShaderFromBytecode(const TArray<uint8>& ByteCode);
+	virtual IHullShader* CreateHullShaderFromBytecode(const TArray<uint8>& ByteCode);
+	virtual IComputeShader* CreateComputeShaderFromBytecode(const TArray<uint8>& ByteCode);
 
 	virtual IGraphicsPipelineState* CreatePipelineState(const GFX_PIPELINE_STATE_DESC* Desc) final override;
 	virtual IComputePipelineState* CreatePipelineState(const COMPUTE_PIPELINE_STATE_DESC* Desc) final override;
@@ -114,7 +114,7 @@ private:
 	static uint32 GCurrentFrameIndex;
 
 	StackQueue<D3D12CommandList*, 16> m_AvailableCLs[COMMAND_CONTEXT_TYPE_NUM_TYPES];
-	std::vector<D3D12GraphicsCommandContext*> m_AvailableContexts;
+	TArray<D3D12GraphicsCommandContext*> m_AvailableContexts;
 	D3D12ComputeCommandContext* m_ComputeContext;
 	D3D12ComputePipelineState* m_GenerateMipsPipeline2D;
 	D3D12ShaderResourceTable* m_GenerateMipsTable2D;

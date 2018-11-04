@@ -1,14 +1,14 @@
 #pragma once
 
 #include "Common.h"
-#include <vector>
+#include <Core/Containers/Array.h>
 #include <string>
 
 std::string ReadEntireFile(const std::string& FileName);
 
 void EnsureFileDirectoryExists(const std::string& FileName);
 
-std::vector<std::string> GetAllFilesInFolder(const std::string& FolderName);
+TArray<std::string> GetAllFilesInFolder(const std::string& FolderName);
 
 uint8* ReadFileBinary(const std::string& FileName, size_t fileSize);
 

@@ -1,19 +1,33 @@
 #pragma once
 
 #include <KieckerMath.h>
-#include <vector>
+#include <Core/Containers/Array.h>
 #include <Graphics/Data/Mesh.h>
 
 class PhysicsMesh
 {
+public:
+	PhysicsMesh() { }
+	PhysicsMesh(const PhysicsMesh& Other) :
+		Faces(Other.Faces),
+		Indices(Other.Indices)
+	{
+	}
 	struct Face
 	{
 		double3 Points[3];
 		double3 Normal;
 	};
 
-	std::vector<Face> Faces;
-	std::vector<uint32> Indices;
+	TArray<Face> Faces;
+	TArray<uint32> Indices;
+
+	inline PhysicsMesh& operator = (const PhysicsMesh& Rhs)
+	{
+		Faces = Rhs.Faces;
+		Indices = Rhs.Indices;
+		return *this;
+	}
 
 	inline Face GetFaceOriented(const uint32 FaceIdx, const double3& Position, const Quaternion& Rotation)
 	{

@@ -9,7 +9,7 @@
 TComponentHandle<Component> Entity::GetComponentByHash(uint64 Hash)
 {
 	int IndexToUse = -1;
-	for (uint32 i = 0; i < m_Components.size(); i++)
+	for (uint32 i = 0; i < m_Components.GetElementCount(); i++)
 	{
 		if (m_Components[i] == Hash)
 		{
@@ -49,12 +49,12 @@ void Entity::UpdateRenderObjects(RenderLoop& RL)
 
 void Entity::AddChild(EntityIdentifier Child)
 {
-	m_Children.push_back(Child);
+	m_Children.Add(Child);
 }
 
 void Entity::RemoveChild(uint32 ChildIndex)
 {
-	m_Children.erase(m_Children.begin() + ChildIndex);
+	m_Children.RemoveAt(ChildIndex);
 }
 
 float4x4 Entity::GetMatrixAffectedByParents() const

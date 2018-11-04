@@ -21,7 +21,7 @@ public:
 
 	inline uint32 GetMessageCount() const
 	{
-		return static_cast<uint32>(m_AllocatedObjects.size());
+		return m_AllocatedObjects.GetElementCount();
 	}
 
 	template<typename T>
@@ -36,7 +36,7 @@ public:
 	inline T* AllocMessage(bool bQuit)
 	{
 		T* Result = new (Alloc(sizeof(T))) T(bQuit);
-		GetMessage(static_cast<uint32>(m_AllocatedObjects.size()) - 1)->pNext = Result;
+		GetMessage(static_cast<uint32>(m_AllocatedObjects.GetElementCount()) - 1)->pNext = Result;
 		return Result;
 	}
 
@@ -54,7 +54,7 @@ private:
 
 	uint8* Alloc(uint32 Size);
 
-	std::vector<ptrdiff_t> m_AllocatedObjects;
+	TArray<ptrdiff_t> m_AllocatedObjects;
 	uint8* m_Start;
 	uint8* m_Current;
 	uint8* m_Last;

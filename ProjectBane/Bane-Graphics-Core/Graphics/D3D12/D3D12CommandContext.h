@@ -16,7 +16,7 @@ public:
 	ID3D12CommandAllocator* CommandAllocator;
 	ID3D12CommandList* CommandList;
 
-	// TODO: Replace std::vector with my DynamicArray implementation, to prevent getting killed by the fact it resets its pointer when its cleared
+	// TODO: Replace TArray with my DynamicArray implementation, to prevent getting killed by the fact it resets its pointer when its cleared
 
 	struct UploadResource
 	{
@@ -37,8 +37,8 @@ public:
 		}
 	};
 
-	std::vector<UploadResource> UploadResourcesToDestroy;
-	std::vector<DedicatedResource> CommitedResources;
+	TArray<UploadResource> UploadResourcesToDestroy;
+	TArray<DedicatedResource> CommitedResources;
 	bool bNeedsWaitForComputeQueue = false;
 	bool bNeedsWaitForGraphicsQueue = false;
 
@@ -52,7 +52,7 @@ public:
 	{
 		UploadResource Res;
 		Res.Resource = Resource;
-		UploadResourcesToDestroy.push_back(Res);
+		UploadResourcesToDestroy.Add(Res);
 	}
 
 	// See if this is even needed, because I imagine this incurs a significant perf cost
@@ -60,7 +60,7 @@ public:
 	{
 		DedicatedResource Res;
 		Res.Resource = Resource;
-		CommitedResources.push_back(Res);
+		CommitedResources.Add(Res);
 	}
 
 	inline D3D12CommandList& operator = (const D3D12CommandList& Rhs)
@@ -74,15 +74,15 @@ public:
 
 	inline void FlushCommitQueue()
 	{
-		if (CommitedResources.empty())
+		if (CommitedResources.IsEmpty())
 		{
 			return;
 		}
-		for (uint32 i = 0; i < CommitedResources.size(); i++)
+		for (uint32 i = 0; i < CommitedResources.GetElementCount(); i++)
 		{
 			CommitedResources[i].Uncommit();
 		}
-		CommitedResources.clear();
+		CommitedResources.Empty();
 	}
 
 	inline void Reset()

@@ -32,7 +32,7 @@ void RenderLoop::AddDrawable(const Mesh* pMesh, const Material& Mat, const float
 {
 	GRenderGlobals.MeshData.Buffer[GRenderGlobals.MeshData.Size].Parameters = Mat.GetMaterialParameters();
 	GRenderGlobals.MeshData.Buffer[GRenderGlobals.MeshData.Size].Model = Transformation;
-	m_Current.Meshes.push_back({ 
+	m_Current.Meshes.Add({ 
 		pMesh->GetVertexBuffer(),
 		pMesh->GetIndexBuffer(),
 		Mat.GetShaderConfiguration(),
@@ -70,11 +70,11 @@ void RenderLoop::SetSkybox(const SKYBOX_DATA& Skybox)
 void RenderLoop::Draw()
 {
 	RENDER_LOOP_DRAW_COMMIT Prev = m_Current;
-	m_Commits.push_back(m_Current);
+	m_Commits.Add(m_Current);
 	m_Current.CameraIdxOffset = GRenderGlobals.CameraData.Size;
 	m_Current.MeshData_NumUsed = 0;
 	m_Current.MeshData_Offset = Prev.MeshData_NumUsed;
-	m_Current.Meshes.clear();
+	m_Current.Meshes.Empty();
 }
 
 void RenderLoop::ResetForNextFrame()

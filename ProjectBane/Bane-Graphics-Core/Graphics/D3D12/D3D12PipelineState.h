@@ -11,7 +11,7 @@ class NO_VTABLE D3D12Shader
 public:
 	static const ESHADER_STAGE Stage = ShaderStage;
 
-	D3D12Shader(const std::vector<uint8>& InCompiledCode) :
+	D3D12Shader(const TArray<uint8>& InCompiledCode) :
 		CompiledCode(InCompiledCode)
 	{
 	}
@@ -19,19 +19,19 @@ public:
 	inline D3D12_SHADER_BYTECODE GetShaderByteCode() const
 	{
 		D3D12_SHADER_BYTECODE Ret = { };
-		Ret.pShaderBytecode = CompiledCode.data();
-		Ret.BytecodeLength = CompiledCode.size();
+		Ret.pShaderBytecode = CompiledCode.GetData();
+		Ret.BytecodeLength = CompiledCode.GetElementCount();
 		return Ret;
 	}
 
 	std::string ByteCode;
-	std::vector<uint8> CompiledCode;
+	TArray<uint8> CompiledCode;
 };
 
 class D3D12VertexShader : public IVertexShader, public D3D12Shader<SHADER_STAGE_VERTEX>
 {
 public:
-	D3D12VertexShader(const std::vector<uint8>& InCompiledCode)
+	D3D12VertexShader(const TArray<uint8>& InCompiledCode)
 		: D3D12Shader(InCompiledCode)
 	{
 	}
@@ -40,7 +40,7 @@ public:
 class D3D12PixelShader : public IPixelShader, public D3D12Shader<SHADER_STAGE_PIXEL>
 {
 public:
-	D3D12PixelShader(const std::vector<uint8>& InCompiledCode)
+	D3D12PixelShader(const TArray<uint8>& InCompiledCode)
 		: D3D12Shader(InCompiledCode)
 	{
 	}
@@ -49,7 +49,7 @@ public:
 class D3D12HullShader : public IHullShader, public D3D12Shader<SHADER_STAGE_HULL>
 {
 public:
-	D3D12HullShader(const std::vector<uint8>& InCompiledCode)
+	D3D12HullShader(const TArray<uint8>& InCompiledCode)
 		: D3D12Shader(InCompiledCode)
 	{
 	}
@@ -58,7 +58,7 @@ public:
 class D3D12GeometryShader : public IGeometryShader, public D3D12Shader<SHADER_STAGE_GEOMETRY>
 {
 public:
-	D3D12GeometryShader(const std::vector<uint8>& InCompiledCode)
+	D3D12GeometryShader(const TArray<uint8>& InCompiledCode)
 		: D3D12Shader(InCompiledCode)
 	{
 	}
@@ -67,7 +67,7 @@ public:
 class D3D12ComputeShader : public IComputeShader, public D3D12Shader<SHADER_STAGE_COMPUTE>
 {
 public:
-	D3D12ComputeShader(const std::vector<uint8>& InCompiledCode)
+	D3D12ComputeShader(const TArray<uint8>& InCompiledCode)
 		: D3D12Shader(InCompiledCode)
 	{
 	}

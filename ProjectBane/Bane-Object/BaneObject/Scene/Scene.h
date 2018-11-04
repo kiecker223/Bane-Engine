@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include <Core/Containers/Array.h>
 #include <fstream>
 #include <string>
 #include <map>
@@ -85,9 +85,9 @@ private:
 		uint64 Hash;
 		Entity* pEntity;
 	};
-	std::vector<EntityHashEntry> m_Entities;
-	std::vector<EntityHashEntry> m_EntityAddList;
-	std::vector<EntityHashEntry> m_EntityStartList;
+	TArray<EntityHashEntry> m_Entities;
+	TArray<EntityHashEntry> m_EntityAddList;
+	TArray<EntityHashEntry> m_EntityStartList;
 };
 
 // Scene* GetCurrentScene();

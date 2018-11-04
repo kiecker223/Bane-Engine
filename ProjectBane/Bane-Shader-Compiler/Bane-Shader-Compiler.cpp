@@ -104,12 +104,12 @@ typedef struct FULL_PIPELINE_DESCRIPTOR {
 
 static bool HasGeometryShader(const FULL_PIPELINE_DESCRIPTOR& Desc)
 {
-	return Desc.GS.ByteCode.size() > 0;
+	return Desc.GS.ByteCode.GetElementCount() > 0;
 }
 
 static bool HasHullShader(const FULL_PIPELINE_DESCRIPTOR& Desc)
 {
-	return Desc.HS.ByteCode.size() > 0;
+	return Desc.HS.ByteCode.GetElementCount() > 0;
 }
 
 static FULL_PIPELINE_DESCRIPTOR CreateDefaultDescriptor()
@@ -147,14 +147,14 @@ static bool VarHasSemantic(const VARIABLE_INFO& InVar)
 
 typedef struct STRUCT_INFO {
 	std::string Name;
-	std::vector<VARIABLE_INFO> Variables;
+	TArray<VARIABLE_INFO> Variables;
 } STRUCT_INFO;
 
 typedef struct FUNCTION_INFO {
 	std::string ReturnType;
 	std::string Name;
 	std::string Semantic;
-	std::vector<VARIABLE_INFO> Parameters;
+	TArray<VARIABLE_INFO> Parameters;
 } FUNCTION_INFO;
 
 static std::string ParseToEndOfScope(const std::string& Str, size_t Loc);
@@ -233,13 +233,13 @@ static FUNCTION_INFO GetFunctionInfo(std::string FunctionDecl)
 			}
 			else
 			{
-				Result.Parameters.push_back(VarInfo);
+				Result.Parameters.Add(VarInfo);
 			}
 			RESET_VAR();
 		}
 		else
 		{
-			Result.Parameters.push_back(VarInfo);
+			Result.Parameters.Add(VarInfo);
 			RESET_VAR();
 		}
 	}
@@ -269,7 +269,7 @@ static STRUCT_INFO GetStructInfo(std::string StructDeclaration)
 	}
 
 	std::string Members = ParseToEndOfScope(StructDeclaration, CurrentLoc);
-	std::vector<std::string> MemberList = SplitString(Members, ';');
+	TArray<std::string> MemberList = SplitString(Members, ';');
 
 	for (std::string& Member : MemberList)
 	{
@@ -306,7 +306,7 @@ static STRUCT_INFO GetStructInfo(std::string StructDeclaration)
 				VarInfo.Semantic.push_back(Member[i]);
 			}
 		}
-		Result.Variables.push_back(VarInfo);
+		Result.Variables.Add(VarInfo);
 
 	}
 	return Result;
@@ -1666,8 +1666,8 @@ FULL_PIPELINE_DESCRIPTOR ParseGraphicsShader(const std::string& InFile, const st
 	{
 		FUNCTION_INFO VSMainInfo = GetFunctionInfo(FindFunctionDeclaration(File, "VSMain"));
 
-		std::vector<VARIABLE_INFO> VSInputs;
-		for (size_t i = 0; i < VSMainInfo.Parameters.size(); i++)
+		TArray<VARIABLE_INFO> VSInputs;
+		for (uint32 i = 0; i < VSMainInfo.Parameters.GetElementCount(); i++)
 		{
 			VARIABLE_INFO& VarInfo = VSMainInfo.Parameters[i];
 
@@ -1676,7 +1676,7 @@ FULL_PIPELINE_DESCRIPTOR ParseGraphicsShader(const std::string& InFile, const st
 			{
 				if (VarHasSemantic(VarInfo) && VarInfo.Semantic.find("SV_") == std::string::npos)
 				{
-					VSInputs.push_back(VarInfo);
+					VSInputs.Add(VarInfo);
 				}
 			}
 			else
@@ -1689,7 +1689,7 @@ FULL_PIPELINE_DESCRIPTOR ParseGraphicsShader(const std::string& InFile, const st
 				{
 					if (VarHasSemantic(Var) && Var.Semantic.find("SV_") == std::string::npos)
 					{
-						VSInputs.push_back(Var);
+						VSInputs.Add(Var);
 					}
 				}
 			}
@@ -1701,7 +1701,7 @@ FULL_PIPELINE_DESCRIPTOR ParseGraphicsShader(const std::string& InFile, const st
 				GFX_INPUT_ITEM_DESC InputItem;
 				InputItem.Name = Parameter.Semantic;
 				InputItem.ItemFormat = TypeToItemFormat(Parameter.Type);
-				InputLayoutDesc.InputItems.push_back(InputItem);
+				InputLayoutDesc.InputItems.Add(InputItem);
 			}
 			PipelineDesc.InputLayout = InputLayoutDesc;
 		}
@@ -1739,13 +1739,13 @@ FULL_PIPELINE_DESCRIPTOR ParseGraphicsShader(const std::string& InFile, const st
 		PipelineDesc.VS = CompileVertexShader(FullShader);
 		PipelineDesc.PS = CompilePixelShader(FullShader);
 
-		if (PipelineDesc.VS.ByteCode.size() == 0)
+		if (PipelineDesc.VS.ByteCode.GetElementCount() == 0)
 		{
 			std::cout << "[ERROR] " << FileName << " Vertex Shader Failed to compile" << std::endl;
 			std::cin.get();
 			return ParseGraphicsShader(ReadEntireFile(FileName), FileName);
 		}
-		if (PipelineDesc.PS.ByteCode.size() == 0)
+		if (PipelineDesc.PS.ByteCode.GetElementCount() == 0)
 		{
 			std::cout << "[ERROR] " << FileName << " Pixel Shader Failed to compile" << std::endl;
 			std::cin.get();
@@ -1755,7 +1755,7 @@ FULL_PIPELINE_DESCRIPTOR ParseGraphicsShader(const std::string& InFile, const st
 		if (bHasHullShader)
 		{
 			PipelineDesc.HS = CompileHullShader(FullShader);
-			if (PipelineDesc.HS.ByteCode.size() == 0)
+			if (PipelineDesc.HS.ByteCode.GetElementCount() == 0)
 			{
 				std::cout << "[ERROR] " << FileName << " Hull Shader Failed to compile" << std::endl;
 				std::cin.get();
@@ -1765,7 +1765,7 @@ FULL_PIPELINE_DESCRIPTOR ParseGraphicsShader(const std::string& InFile, const st
 		if (bHasGeometryShader)
 		{
 			PipelineDesc.GS = CompileGeometryShader(FullShader);
-			if (PipelineDesc.GS.ByteCode.size() == 0)
+			if (PipelineDesc.GS.ByteCode.GetElementCount() == 0)
 			{
 				std::cout << "[ERROR] " << FileName << " Geometry Shader Failed to compile" << std::endl;
 				std::cin.get();
@@ -1843,7 +1843,7 @@ COMPUTE_PIPELINE_DESC ParseComputeShader(const std::string& InFile, const std::s
 
 	Result.CS = CompileComputeShader(InFile);
 
-	if (Result.CS.ByteCode.size() == 0)
+	if (Result.CS.ByteCode.GetElementCount() == 0)
 	{
 		std::cout << "[ERROR] Failed to compile compute shader: " << FileName;
 		std::cin.get();
@@ -1899,17 +1899,17 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 			DeclSizes[7] = strlen("$~$ GeometryShader $~$\n");
 			DeclSizes[8] = strlen("$~$ EndGeometryShader $~$\n");
 			BuffSize = DeclSizes[0] + DeclSizes[1] + DeclSizes[2] + DeclSizes[3] + DeclSizes[4];
-			BuffSize += FullDesc.VS.ByteCode.size() + 2;
-			BuffSize += FullDesc.PS.ByteCode.size() + 2;
+			BuffSize += FullDesc.VS.ByteCode.GetElementCount() + 2;
+			BuffSize += FullDesc.PS.ByteCode.GetElementCount() + 2;
 			if (HasHullShader(FullDesc))
 			{
 				BuffSize += DeclSizes[4] + DeclSizes[5];
-				BuffSize += FullDesc.HS.ByteCode.size() + 2;
+				BuffSize += FullDesc.HS.ByteCode.GetElementCount() + 2;
 			}
 			if (HasGeometryShader(FullDesc))
 			{
 				BuffSize += DeclSizes[6] + DeclSizes[7];
-				BuffSize += FullDesc.GS.ByteCode.size() + 2;
+				BuffSize += FullDesc.GS.ByteCode.GetElementCount() + 2;
 			}
 			Buff = new uint8[BuffSize];
 			P = Buff;
@@ -1918,13 +1918,13 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 			P += sizeof(ShaderHeader);
 			memcpy(P, "$~$ VertexShader $~$\n", strlen("$~$ VertexShader $~$\n"));
 			P += strlen("$~$ VertexShader $~$\n");
-			memcpy(P, FullDesc.VS.ByteCode.data(), FullDesc.VS.ByteCode.size());
-			P += FullDesc.VS.ByteCode.size();
+			memcpy(P, FullDesc.VS.ByteCode.GetData(), FullDesc.VS.ByteCode.GetElementCount());
+			P += FullDesc.VS.ByteCode.GetElementCount();
 			memcpy(P, "\n$~$ EndVertexShader $~$\n$~$ PixelShader $~$\n", strlen("\n$~$ EndVertexShader $~$\n$~$ PixelShader $~$\n"));
 			P += strlen("\n$~$ EndVertexShader $~$\n$~$ PixelShader $~$\n");
 			Header.PSStart = static_cast<uint32>(P - Buff);
-			memcpy(P, FullDesc.PS.ByteCode.data(), FullDesc.PS.ByteCode.size());
-			P += FullDesc.PS.ByteCode.size();
+			memcpy(P, FullDesc.PS.ByteCode.GetData(), FullDesc.PS.ByteCode.GetElementCount());
+			P += FullDesc.PS.ByteCode.GetElementCount();
 			memcpy(P, "\n$~$ EndPixelShader $~$\n", strlen("\n$~$ EndPixelShader $~$\n"));
 			P += strlen("\n$~$ EndPixelShader $~$\n");
 			if (HasHullShader(FullDesc))
@@ -1932,8 +1932,8 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 				memcpy(P, "$~$ HullShader $~$\n", strlen("$~$ HullShader $~$\n"));
 				P += strlen("$~$ HullShader $~$\n");
 				Header.HSStart = static_cast<uint32>(P - Buff);
-				memcpy(P, FullDesc.HS.ByteCode.data(), FullDesc.HS.ByteCode.size());
-				P += FullDesc.HS.ByteCode.size();
+				memcpy(P, FullDesc.HS.ByteCode.GetData(), FullDesc.HS.ByteCode.GetElementCount());
+				P += FullDesc.HS.ByteCode.GetElementCount();
 				memcpy(P, "\n$~$ EndHullShader $~$\n", strlen("\n$~$ EndHullShader $~$\n"));
 				P += strlen("\n$~$ EndHullShader $~$\n");
 			}
@@ -1942,8 +1942,8 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 				memcpy(P, "$~$ GeometryShader $~$\n", strlen("$~$ GeometryShader $~$\n"));
 				P += strlen("$~$ GeometryShader $~$\n");
 				Header.GSStart = static_cast<uint32>(P - Buff);
-				memcpy(P, FullDesc.GS.ByteCode.data(), FullDesc.GS.ByteCode.size());
-				P += FullDesc.GS.ByteCode.size();
+				memcpy(P, FullDesc.GS.ByteCode.GetData(), FullDesc.GS.ByteCode.GetElementCount());
+				P += FullDesc.GS.ByteCode.GetElementCount();
 				memcpy(P, "\n$~$ EndGeometryShader $~$\n", strlen("\n$~$ EndGeometryShader $~$\n"));
 				P += strlen("\n$~$ EndGeometryShader $~$\n");
 			}
@@ -1955,7 +1955,7 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 	{
 		json InputLayout = json::array();
 		
-		for (uint32 i = 0; i < FullDesc.InputLayout.InputItems.size(); i++)
+		for (uint32 i = 0; i < FullDesc.InputLayout.InputItems.GetElementCount(); i++)
 		{
 			auto& Input = FullDesc.InputLayout.InputItems[i];
 			json SavedInput;
@@ -2046,7 +2046,7 @@ static int DoCompileCompute(const std::string& SourceFile, const std::string& Se
 	PipelineDescriptor["IsGraphics"]		= false;
 	PipelineDescriptor["ShaderReference"]	= DstCompiledFile;
 	RootObject[SourceFile] = PipelineDescriptor;
-	WriteBufferToFile(DstCompiledFile, Pipeline.CS.ByteCode.data(), static_cast<uint32>(Pipeline.CS.ByteCode.size()));
+	WriteBufferToFile(DstCompiledFile, Pipeline.CS.ByteCode.GetData(), static_cast<uint32>(Pipeline.CS.ByteCode.GetElementCount()));
 	return 0;
 }
 
@@ -2072,7 +2072,7 @@ int main(int argc, char** argv)
 	std::string SrcFolder = argv[2];
 	std::string DstFolder = argv[3];
 	
-	std::vector<std::string> AllFiles = GetAllFilesInFolder(SrcFolder);
+	TArray<std::string> AllFiles = GetAllFilesInFolder(SrcFolder);
 
 	if (PlatformDest == "Dx12" || PlatformDest == "Dx11")
 	{

@@ -7,7 +7,7 @@ void D3D12CommandQueue::CompleteExecution()
 
 	for (uint32 i = 0; i < m_ExecutionQueue.GetNumElements(); i++)
 	{
-		if (!m_ExecutionQueue[i]->UploadResourcesToDestroy.empty())
+		if (!m_ExecutionQueue[i]->UploadResourcesToDestroy.IsEmpty())
 		{
 			m_ExecutionQueue[i]->FlushDestructionQueue();
 			m_ExecutionQueue[i]->FlushCommitQueue();

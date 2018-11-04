@@ -12,7 +12,7 @@ Scene::Scene()
 {
 	m_Root = new Entity(EntityIdentifier("SceneRoot"));
 	m_Root->GetPhysicsProperties().bCanTick = false;
-	m_Entities.push_back({ m_Root->GetId().HashedName, m_Root });
+	m_Entities.Add({ m_Root->GetId().HashedName, m_Root });
 }
 
 Scene::Scene(const std::string& SceneName) :
@@ -20,7 +20,7 @@ Scene::Scene(const std::string& SceneName) :
 {
 	m_Root = new Entity(EntityIdentifier("SceneRoot"));
 	m_Root->GetPhysicsProperties().bCanTick = false;
-	m_Entities.push_back({ m_Root->GetId().HashedName, m_Root });
+	m_Entities.Add({ m_Root->GetId().HashedName, m_Root });
 }
 
 Entity* Scene::CreateEntity(const std::string& EntityName)
@@ -39,7 +39,7 @@ Entity* Scene::CreateEntity(const std::string& EntityName)
 	pEntity->m_SceneOwner = this;
 	pEntity->SetParent(m_Root->GetId());
 	EntityHashEntry Entry = { pEntity->GetId().HashedName, pEntity };
-	m_EntityAddList.push_back(Entry);
+	m_EntityAddList.Add(Entry);
 	return pEntity;
 }
 
@@ -103,43 +103,48 @@ void Scene::Tick(float DT)
 	{
 		e.pEntity->Tick(DT);
 	}
-	if (m_EntityAddList.size() > 0)
+	if (m_EntityAddList.GetElementCount() > 0)
 	{
 		for (auto& e : m_EntityAddList)
 		{
-			m_Entities.push_back(e);
-			m_EntityStartList.push_back(e);
+			m_Entities.Add(e);
+			m_EntityStartList.Add(e);
 			auto PhysicsProps = e.pEntity->GetPhysicsProperties();
 			if (PhysicsProps.bCanTick)
 			{
-				PhysicsBody Body;
-				Body.Mass = PhysicsProps.Mass;
-				Body.Position = e.pEntity->GetTransform()->GetPosition();
-				Body.Radius = 1.f;
-				Body.Velocity = PhysicsProps.Velocity;
-				Body.AngularVelocity = PhysicsProps.AngularVelocity;
-				e.pEntity->GetPhysicsProperties().PhysicsWorldHandle = m_World.AddBody(Body);
+				//PHYSICS_BODY_CREATE_INFO Body = { };
+				//Orientation		;
+				//Position		;
+				//Velocity		;
+				//AngularVelocity	;
+				//Mass			;
+				//BodyType		;
+				//PhysMesh		;
+				//Sphere			;
+				//EntityHandle	;
+				//
+				//e.pEntity->GetPhysicsProperties().PhysicsWorldHandle = m_World.AddBody(Body);
 			}
 		}
-		m_EntityAddList.clear();
+		m_EntityAddList.Empty();
 	}
-	if (m_EntityStartList.size() > 0)
+	if (m_EntityStartList.GetElementCount() > 0)
 	{
-		for (uint32 i = 0; i < m_EntityStartList.size(); i++)
+		for (uint32 i = 0; i < m_EntityStartList.GetElementCount(); i++)
 		{
 			m_EntityStartList[i].pEntity->Start();
 		}
-		m_EntityStartList.clear();
+		m_EntityStartList.Empty();
 	}
 	if (m_World.IsReadyForRead())
 	{
-		PhysicsUpdate(m_World.UpdateBuffer);
+	//	PhysicsUpdate(m_World.UpdateBuffer);
 	}
 }
 
 void Scene::PhysicsUpdate(const PhysicsUpdateBuffer& UpdateBuffer)
 {
-	if (UpdateBuffer.Bodies.size() > 0)
+	if (UpdateBuffer.Bodies.GetElementCount() > 0)
 	{
 		for (auto& e : m_Entities)
 		{
@@ -177,7 +182,7 @@ void Scene::DumpScene()
 	{
 		delete e.pEntity;
 	}
-	m_Entities.clear();
+	m_Entities.Empty();
 	m_World.DestroyThread();
 }
 
@@ -193,7 +198,7 @@ void Scene::InitScene()
 	{
 		e.pEntity->SubmitRenderingComponents();
 	}
-	m_World.SpawnThread();
+	// m_World.SpawnThread();
 }
 
 

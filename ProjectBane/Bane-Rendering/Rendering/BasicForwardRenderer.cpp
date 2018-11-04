@@ -3,7 +3,7 @@
 void BasicForwardRenderer::Initialize(const Window* pWindow)
 {
 	UNUSED(pWindow);
-	m_Commits.reserve(100);
+	m_Commits.CheckGrow(100);
 	m_Device = GetApiRuntime()->GetGraphicsDevice();
 
 	m_LightBuffer = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
@@ -18,10 +18,10 @@ void BasicForwardRenderer::Render()
 
 	ctx->BeginPass(m_Device->GetBackBufferTargetPass());
 	GatherSceneData();
-	for (uint32 i = 0; i < m_Commits.size(); i++)
+	for (uint32 i = 0; i < m_Commits.GetElementCount(); i++)
 	{
 		auto& Commit = m_Commits[i];
-		for (uint32 y = 0; y < Commit.Meshes.size(); y++)
+		for (uint32 y = 0; y < Commit.Meshes.GetElementCount(); y++)
 		{
 			auto& DrawMesh = Commit.Meshes[y];
 			ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);
@@ -38,7 +38,7 @@ void BasicForwardRenderer::Render()
 
 	ctx->EndPass();
 	RenderLoop::ResetForNextFrame();
-	m_Commits.clear();
+	m_Commits.Empty();
 }
 
 void BasicForwardRenderer::Present()
@@ -54,7 +54,7 @@ void BasicForwardRenderer::Shutdown()
 void BasicForwardRenderer::Submit(const RenderLoop& pRenderLoop)
 {
 	for (auto& Commit : pRenderLoop.GetCommitedData())
-		m_Commits.push_back(Commit);
+		m_Commits.Add(Commit);
 }
 
 void BasicForwardRenderer::GatherSceneData()

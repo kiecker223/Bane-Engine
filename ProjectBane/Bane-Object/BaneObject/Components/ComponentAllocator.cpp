@@ -31,7 +31,7 @@ void ComponentAllocator::ReserveAndCopy(size_t NumBytes)
 		InternalAllocate(NumBytes);
 		PtrCurrent = PtrBegin + PrevNumBytes;
 		PtrEnd = PtrBegin + NumBytes;
-		for (uint32 i = 0; i < AllocatedObjects.size(); i++)
+		for (uint32 i = 0; i < AllocatedObjects.GetElementCount(); i++)
 		{
 			// This is a really dumb fix but essentially just set the pointer equal to the
 			// position relative from the beginning that it used to be. COMPLETELY NOT THREAD SAFE
@@ -54,7 +54,7 @@ void ComponentAllocator::RemovePointer(Component* Position)
 	PtrEnd -= Size;
 
 	int AllocatedIndex = -1;
-	for (uint32 i = 0; i < AllocatedObjects.size(); i++)
+	for (uint32 i = 0; i < AllocatedObjects.GetElementCount(); i++)
 	{
 		if (AllocatedObjects[i] == Position) 
 		{
@@ -64,6 +64,6 @@ void ComponentAllocator::RemovePointer(Component* Position)
 
 	if (AllocatedIndex >= 0)
 	{
-		AllocatedObjects.erase(AllocatedObjects.begin() + AllocatedIndex);
+		AllocatedObjects.RemoveAt(AllocatedIndex);
 	}
 }

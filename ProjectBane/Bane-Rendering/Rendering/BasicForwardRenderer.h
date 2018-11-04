@@ -33,6 +33,6 @@ private:
 	IConstantBuffer* m_MaterialConstants;
 	IConstantBuffer* m_MeshDataBuffer;
 	IConstantBuffer* m_LightBuffer;
-	std::vector<RENDER_LOOP_DRAW_COMMIT> m_Commits;
+	TArray<RENDER_LOOP_DRAW_COMMIT> m_Commits;
 
 };

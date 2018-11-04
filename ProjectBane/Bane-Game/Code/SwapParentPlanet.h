@@ -2,7 +2,7 @@
 
 #include <BaneObject.h>
 #include <Platform/Input/InputSystem.h>
-#include <vector>
+#include <Core/Containers/Array.h>
 #include <iostream>
 
 
@@ -12,21 +12,21 @@ class SwapParentPlanet : public Component
 	IMPLEMENT_COMPONENT(SwapParentPlanet)
 public:
 
-	std::vector<Entity*> Planets;
+	TArray<Entity*> Planets;
 	uint32 Index;
 
 	void Start() override
 	{
-		Planets.push_back(GetScene()->FindEntity("Sun"));
-		Planets.push_back(GetScene()->FindEntity("Luna"));
-		Planets.push_back(GetScene()->FindEntity("Earth"));
-		Planets.push_back(GetScene()->FindEntity("Venus"));
-		Planets.push_back(GetScene()->FindEntity("Mercury"));
+		Planets.Add(GetScene()->FindEntity("Sun"));
+		Planets.Add(GetScene()->FindEntity("Luna"));
+		Planets.Add(GetScene()->FindEntity("Earth"));
+		Planets.Add(GetScene()->FindEntity("Venus"));
+		Planets.Add(GetScene()->FindEntity("Mercury"));
 	}
 
 	Entity* NextPlanet()
 	{
-		Index = (Index + 1) % Planets.size();
+		Index = (Index + 1) % Planets.GetElementCount();
 		return Planets[Index];
 	}
 

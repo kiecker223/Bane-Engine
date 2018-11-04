@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <Core/Containers/Array.h>
 #include "Mesh.h"
 #include "LightData.h"
 #include "Material.h"
@@ -44,7 +44,7 @@ typedef struct RENDER_LOOP_DRAW_COMMIT {
 	uint64 MeshData_Offset;
 	uint64 MeshData_NumUsed;
 	double3 CameraPosition;
-	std::vector<DRAWABLE_MESH> Meshes;
+	TArray<DRAWABLE_MESH> Meshes;
 } RENDER_LOOP_DRAW_COMMIT;
 
 class RenderLoop
@@ -95,7 +95,7 @@ public:
 	void SetSkybox(const SKYBOX_DATA& Skybox);
 	void Draw();
 
-	inline std::vector<RENDER_LOOP_DRAW_COMMIT> const& GetCommitedData() const
+	inline TArray<RENDER_LOOP_DRAW_COMMIT> const& GetCommitedData() const
 	{
 		return m_Commits;
 	}
@@ -103,7 +103,7 @@ public:
 private:
 
 	RENDER_LOOP_DRAW_COMMIT m_Current;
-	std::vector<RENDER_LOOP_DRAW_COMMIT> m_Commits;
+	TArray<RENDER_LOOP_DRAW_COMMIT> m_Commits;
 
 };
 
