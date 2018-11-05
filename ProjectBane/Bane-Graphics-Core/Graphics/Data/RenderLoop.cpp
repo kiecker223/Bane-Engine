@@ -82,18 +82,24 @@ void RenderLoop::AddBoundingBox(BoundingBox InBox)
 	BeginNewShape();
 	InBox.Max -= m_Current.CameraPosition;
 	InBox.Min -= m_Current.CameraPosition;
+	
+	//Top face
 	AddLine(InBox.Max, double3(InBox.Max.xy, InBox.Min.z));
 	AddLine(double3(InBox.Max.xy, InBox.Min.z), double3(InBox.Min.x, InBox.Max.y, InBox.Min.z));
 	AddLine(double3(InBox.Min.x, InBox.Max.y, InBox.Min.z), double3(InBox.Min.x, InBox.Max.y, InBox.Max.z));
 	AddLine(double3(InBox.Min.x, InBox.Max.y, InBox.Max.z), InBox.Max);
-	AddLine(InBox.Max, double3(InBox.Max.x, InBox.Min.y, InBox.Max.z));
-	AddLine(double3(InBox.Max.x, InBox.Min.y, InBox.Min.z), double3(InBox.Min.x, InBox.Min.y, InBox.Min.z));
-	AddLine(double3(InBox.Min.x, InBox.Max.y, InBox.Min.z), double3(InBox.Min.x, InBox.Min.y, InBox.Max.z));
-	AddLine(double3(InBox.Min.x, InBox.Min.y, InBox.Max.z), double3(InBox.Max.x, InBox.Min.y, InBox.Max.z));
+
+	// Sides
 	AddLine(double3(InBox.Max.x, InBox.Min.y, InBox.Min.z), double3(InBox.Max.x, InBox.Max.y, InBox.Min.z));
 	AddLine(double3(InBox.Min.x, InBox.Min.y, InBox.Min.z), double3(InBox.Min.x, InBox.Max.y, InBox.Min.z));
+	AddLine(double3(InBox.Min.x, InBox.Min.y, InBox.Max.z), double3(InBox.Min.x, InBox.Max.y, InBox.Max.z));
 	AddLine(double3(InBox.Max.x, InBox.Min.y, InBox.Max.z), double3(InBox.Max.x, InBox.Max.y, InBox.Max.z));
-	AddLine(double3(InBox.Max.x, InBox.Min.y, InBox.Min.z), double3(InBox.Max.x, InBox.Max.y, InBox.Min.z));
+
+	// Bottom face
+	AddLine(double3(InBox.Max.x, InBox.Min.y, InBox.Max.z), double3(InBox.Max.x, InBox.Min.y, InBox.Min.z));
+	AddLine(double3(InBox.Max.x, InBox.Min.y, InBox.Min.z), double3(InBox.Min.x, InBox.Min.y, InBox.Min.z));
+	AddLine(double3(InBox.Min.x, InBox.Min.y, InBox.Min.z), double3(InBox.Min.x, InBox.Min.y, InBox.Max.z));
+	AddLine(double3(InBox.Min.x, InBox.Min.y, InBox.Max.z), double3(InBox.Max.x, InBox.Min.y, InBox.Max.z));
 	EndNewShape();
 }
 

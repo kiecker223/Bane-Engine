@@ -15,9 +15,7 @@ void PhysicsWorld::SpawnThread()
 
 bool PhysicsWorld::CastRay(const PHYSICS_RAY& InRay, PhysicsBody& HitBody)
 {
-	UNUSED(InRay);
-	UNUSED(HitBody);
-	return false;
+	UNUSED(InRay); UNUSED(HitBody); return false;
 }
 
 void PhysicsWorld::CastRayAtSpeedOfLight(const PHYSICS_RAY& InRay, std::function<PhysicsBody()>& HitFunc)
@@ -58,7 +56,7 @@ void PhysicsWorld::UpdatePhysics()
 				}
 			}
 		}
-		if (true) continue;
+
 		RegenerateOctTree();
 		m_bUnlockedForRead = false;
 		for (auto& Body : m_Bodies)

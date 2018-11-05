@@ -469,7 +469,7 @@ void InitApplication()
 	auto Cam = CamEntity->AddComponent<CameraComponent>();
 	Cam->ZNear = 1e-2f;
 	Cam->ZFar = 1e+21f; 
-	CamEntity->AddComponent<CameraMovementComponent>()->Speed = 3e7;
+	CamEntity->AddComponent<CameraMovementComponent>()->Speed = 1e8;
 	CamEntity->AddComponent<SwapParentPlanet>();
 }
 
