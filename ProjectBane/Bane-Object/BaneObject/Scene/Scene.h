@@ -71,11 +71,16 @@ public:
 		return m_Root;
 	}
 
+	bool bDrawPhysicsDebugInfo = false;
+
 private:
 
 	MeshCache m_MeshCache;
 	PhysicsWorld m_World;
 
+	// TODO: Remove me when you're done debugging physics stuff.
+	// please!!
+	TBinaryTree<PhysicsWorld::OctTreeNode> m_PhysOctree;
 	ITextureCube* m_Skybox;
 	std::string m_Name;
 	Entity* m_Root;

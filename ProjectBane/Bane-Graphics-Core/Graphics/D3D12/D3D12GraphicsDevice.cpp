@@ -424,7 +424,10 @@ IVertexBuffer* D3D12GraphicsDevice::CreateVertexBuffer(uint32 ByteCount, uint8* 
 	}
 
 	D3D12Buffer* Result = new D3D12Buffer(this, ByteCount, BUFFER_USAGE_GPU);
-	Result->UploadDataToGPU(m_UploadList, Buffer);
+	if (Buffer)
+	{
+		Result->UploadDataToGPU(m_UploadList, Buffer);
+	}
 	return Result;
 }
 

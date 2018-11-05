@@ -1,7 +1,6 @@
 #include "PhysicsMesh.h"
 
 
-
 void PhysicsMesh::CreateFromMesh(const Mesh* pMesh, const float3& Scale)
 {
 	Indices = pMesh->GetIndices();
@@ -21,4 +20,20 @@ void PhysicsMesh::CreateFromMesh(const Mesh* pMesh, const float3& Scale)
 		Faces.Add(CurrFace);
 	}
 }
+
+void PhysicsMesh::RecalculateBoundingBox()
+{
+	TArray<double3> Positions;
+
+	for (uint32 i = 0; i < Faces.GetElementCount(); i++)
+	{
+		for (uint32 b = 0; b < 3; b++)
+		{
+			Positions.Add(Faces[i].Points[b]);
+		}
+	}
+
+	Bounds.CalculateFromArray(Positions.GetData(), Positions.GetElementCount());
+}
+
 

@@ -83,6 +83,24 @@ public:
 	PhysicsMesh PhysMesh;
 	PHYSICS_SPHERE_INFO Sphere;
 
+	BoundingBox GetBounds() const 
+	{
+		if (BodyType == PHYSICS_BODY_TYPE_SPHERE)
+		{
+			BoundingBox Result;
+			Result.Min = double3(-Sphere.Radius, -Sphere.Radius, -Sphere.Radius) + Position;
+			Result.Max = double3(Sphere.Radius, Sphere.Radius, Sphere.Radius) + Position;
+			return Result;
+		}
+		else
+		{
+			BoundingBox Result = PhysMesh.Bounds;
+			Result.Min += Position;
+			Result.Max += Position;
+			return Result;
+		}
+	}
+
 	uint64 EntityHandle;
 	uint32 Handle;
 };

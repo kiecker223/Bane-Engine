@@ -1,0 +1,54 @@
+
+Resources
+{
+	cbuffer PositionalData : register(b0)
+	{
+		matrix View;
+		matrix Projection;
+		float3 CameraPosition;
+		float ZResolution;
+		float FarPlane;
+	}
+};
+
+Pipeline 
+{
+	// Color buffer
+	RenderTarget_0 =  
+	{
+		Format = FORMAT_R8G8B8A8_UNORM;
+	};
+
+	RasterState = 
+	{
+		Cull = false;
+		FillSolid = true;
+	};
+};
+
+struct VS_INPUT
+{
+	float3 Position : POSITION;
+};
+
+struct PS_INPUT
+{
+	float4 Position : SV_POSITION;
+};
+
+PS_INPUT VSMain(VS_INPUT Input)
+{
+	PS_INPUT Output;
+	float4 Pos = float4(Input.Position, 1.0);
+    Pos = mul(Pos, View);
+	Pos = mul(Pos, Projection);
+	Pos.z = log((ZResolution*Pos.z) + 1.0) / log((ZResolution*FarPlane) + 1.0);
+	Pos.z *= Pos.w;
+    Output.Position = Pos;
+	return Output;
+}
+
+float4 PSMain(PS_INPUT Input) : SV_TARGET0
+{
+    return float4(1.0, 1.0, 1.0, 1.0);
+}

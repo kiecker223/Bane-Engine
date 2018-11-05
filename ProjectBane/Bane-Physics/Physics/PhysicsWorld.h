@@ -2,6 +2,7 @@
 #include "PhysicsBody.h"
 #include "PhysicsUpdateBuffer.h"
 #include <Core/Containers/Array.h>
+#include <Core/Containers/BinaryTree.h>
 #include <utility>
 #include <functional>
 #include <thread>
@@ -61,11 +62,35 @@ public:
 	PhysicsUpdateBuffer UpdateBuffer;
 	TArray<PhysicsBody> AddList;
 	std::mutex BodyAddMutex;
+	std::mutex GenerateOctTreeMutex;
 	uint32 CurrentId;
 	bool bRunningPhysicsSim;
 
+	struct OctTreeNode
+	{
+		BoundingBox Bounds;
+		TArray<uint32> MeshesInBounds;
+	};
+
+	TBinaryTree<OctTreeNode>& GetOctTree()
+	{
+		return m_OctTree;
+	}
+
+	PhysicsBody& GetBody(uint32 BodyId)
+	{
+		return m_Bodies[BodyId];
+	}
+
+	void RegenerateOctTree();
+
 private:
 
+	void GenerateOctTreeImpl(TBinaryTree<OctTreeNode>::TNode* InNode);
+	BoundingBox CalculateBoundsForMeshes(const TArray<uint32>& MeshHandles);
+
+	
+	TBinaryTree<OctTreeNode> m_OctTree;
 	TArray<PhysicsBody> m_Bodies;
 	bool m_bUnlockedForRead;
 };

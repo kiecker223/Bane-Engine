@@ -112,18 +112,17 @@ void Scene::Tick(float DT)
 			auto PhysicsProps = e.pEntity->GetPhysicsProperties();
 			if (PhysicsProps.bCanTick)
 			{
-				//PHYSICS_BODY_CREATE_INFO Body = { };
-				//Orientation		;
-				//Position		;
-				//Velocity		;
-				//AngularVelocity	;
-				//Mass			;
-				//BodyType		;
-				//PhysMesh		;
-				//Sphere			;
-				//EntityHandle	;
-				//
-				//e.pEntity->GetPhysicsProperties().PhysicsWorldHandle = m_World.AddBody(Body);
+				PHYSICS_BODY_CREATE_INFO Body = { };
+				Body.Orientation = e.pEntity->GetTransform()->GetRotation();
+				Body.Position = e.pEntity->GetTransform()->GetPosition();
+				Body.Velocity = PhysicsProps.Velocity;
+				//Body.AngularVelocity;
+				Body.Mass = PhysicsProps.Mass;
+				Body.BodyType = PHYSICS_BODY_TYPE_SPHERE;
+				//Body.PhysMesh			;
+				Body.Sphere.Radius = e.pEntity->GetTransform()->GetScale().x / 2.0;
+				Body.EntityHandle = e.Hash;
+				e.pEntity->GetPhysicsProperties().PhysicsWorldHandle = m_World.AddBody(Body);
 			}
 		}
 		m_EntityAddList.Empty();
@@ -138,7 +137,7 @@ void Scene::Tick(float DT)
 	}
 	if (m_World.IsReadyForRead())
 	{
-	//	PhysicsUpdate(m_World.UpdateBuffer);
+		PhysicsUpdate(m_World.UpdateBuffer);
 	}
 }
 
@@ -154,15 +153,29 @@ void Scene::PhysicsUpdate(const PhysicsUpdateBuffer& UpdateBuffer)
 				auto& Body = UpdateBuffer.Bodies[PhysicsHandle];
 				e.pEntity->GetTransform()->SetPosition(Body.Position);
 				e.pEntity->GetPhysicsProperties().Velocity = UpdateBuffer.Bodies[PhysicsHandle].Velocity;
-				auto& CurrentRotation = e.pEntity->GetTransform()->GetRotation();
-				double RadsPerSecond = length(Body.AngularVelocity);
-				if (!isnan(RadsPerSecond) && abs(RadsPerSecond) > 0.0f)
-				{
-					CurrentRotation *= Quaternion::FromAxisAngle(normalized(Body.AngularVelocity), RadsPerSecond);
-					CurrentRotation.Normalize();
-				}
+				//auto& CurrentRotation = e.pEntity->GetTransform()->GetRotation();
+				//double RadsPerSecond = length(Body.AngularVelocity);
+				//if (!isnan(RadsPerSecond) && abs(RadsPerSecond) > 0.0f)
+				//{
+				//	CurrentRotation *= Quaternion::FromAxisAngle(normalized(Body.AngularVelocity), RadsPerSecond);
+				//	CurrentRotation.Normalize();
+				//}
 			}
 		}
+	}
+}
+
+void DrawOctsImpl(TBinaryTree<PhysicsWorld::OctTreeNode>::TNode* pNewNode, RenderLoop& RL)
+{
+	BoundingBox NewBox = pNewNode->Value.Bounds;
+	RL.AddBoundingBox(NewBox);
+	if (pNewNode->NextL)
+	{
+		DrawOctsImpl(pNewNode->NextL, RL);
+	}
+	if (pNewNode->NextR)
+	{
+		DrawOctsImpl(pNewNode->NextR, RL);
 	}
 }
 
@@ -171,6 +184,15 @@ void Scene::Render(RenderLoop& RL)
 	for (auto& e : m_Entities)
 	{
 		e.pEntity->UpdateRenderObjects(RL);
+	}
+	if (bDrawPhysicsDebugInfo)
+	{
+		if (m_World.IsReadyForRead())
+		{
+			std::lock_guard<std::mutex> ScopedLock(m_World.GenerateOctTreeMutex);
+			m_PhysOctree = m_World.GetOctTree();
+		}
+		DrawOctsImpl(m_PhysOctree.Tail, RL);
 	}
 }
 
@@ -198,7 +220,7 @@ void Scene::InitScene()
 	{
 		e.pEntity->SubmitRenderingComponents();
 	}
-	// m_World.SpawnThread();
+	m_World.SpawnThread();
 }
 
 

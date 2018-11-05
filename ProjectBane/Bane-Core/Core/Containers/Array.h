@@ -333,7 +333,6 @@ public:
 		return TBackwardIterator(GetEnd());
 	}
 
-
 private:
 
 	inline void CopyFullBuffer(TType* OldBuffer, uint32 OldBufferSize)

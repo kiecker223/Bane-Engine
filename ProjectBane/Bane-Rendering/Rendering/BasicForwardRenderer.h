@@ -33,6 +33,9 @@ private:
 	IConstantBuffer* m_MaterialConstants;
 	IConstantBuffer* m_MeshDataBuffer;
 	IConstantBuffer* m_LightBuffer;
+	IGraphicsPipelineState* m_ImmediateGeometryPS;
+	IShaderResourceTable* m_ImmediateGeometryTable;
+	TArray<IVertexBuffer*> m_ImmediateGeometry;
 	TArray<RENDER_LOOP_DRAW_COMMIT> m_Commits;
 
 };

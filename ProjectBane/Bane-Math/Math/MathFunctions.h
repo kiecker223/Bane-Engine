@@ -378,12 +378,23 @@ inline matrix matProjection(float Aspect, float FovY, float Near, float Far)
 template<class T>
 inline bool isNan(const T& InVal)
 {
-	T::T Test = 0.f;
+	T::T Test = T::T(0);
 	for (uint32 i = 0; i < T::ColCount; i++)
 	{
 		Test += InVal[i];
 	}
 	return isnan(Test);
+}
+
+template<class T>
+inline T Abs(const T& InVal)
+{
+	T Result;
+	for (uint32 i = 0; i < T::ColCount; i++)
+	{
+		Result[i] = abs(Result[i]);
+	}
+	return Result;
 }
 
 // inline matrix xRotation(float Degrees)

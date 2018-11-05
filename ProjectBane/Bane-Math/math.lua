@@ -1,12 +1,10 @@
 group "Core"
 project "BaneMath"
     kind "StaticLib"
-    links {"BaneCore"}
+    links {}
     includedirs { 
-        "../Bane-Common",  
-        "../Bane-Core",
-        "../Bane-Object",
-        "../Bane-Core-Components"}
+        "../Bane-Common" 
+		}
 
     files { "Math/**.h",
             "Math/**.cpp",

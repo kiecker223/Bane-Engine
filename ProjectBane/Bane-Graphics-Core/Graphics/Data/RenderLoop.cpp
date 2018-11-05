@@ -43,6 +43,60 @@ void RenderLoop::AddDrawable(const Mesh* pMesh, const Material& Mat, const float
 	GRenderGlobals.MeshData.Size++;
 }
 
+void RenderLoop::BeginNewShape()
+{
+	m_CurrentShape.Empty();
+}
+
+void RenderLoop::EndNewShape()
+{
+	if (GRenderGlobals.ImmediateGeometry.DrawArgs.GetElementCount() > GRenderGlobals.ImmediateGeometry.CurrentCount &&
+		GRenderGlobals.ImmediateGeometry.DrawArgs[
+		GRenderGlobals.ImmediateGeometry.CurrentCount
+			].VertexBuffer->GetSizeInBytes() <=
+			m_CurrentShape.GetElementCount() * sizeof(RENDER_LINE_DATA)
+		)
+	{
+		IBuffer* UploadBuff = GRenderGlobals.ImmediateGeometry.DrawArgs[GRenderGlobals.ImmediateGeometry.CurrentCount].UploadBuffer;
+		void* Ptr = UploadBuff->Map();
+		memcpy(Ptr, m_CurrentShape.GetData(), m_CurrentShape.GetElementCount() * sizeof(RENDER_LINE_DATA));
+	}
+	else
+	{
+		IBuffer* UploadBuff = GetApiRuntime()->GetGraphicsDevice()->CreateStagingBuffer(m_CurrentShape.GetElementCount() * sizeof(RENDER_LINE_DATA));
+		void* Ptr = UploadBuff->Map();
+		memcpy(Ptr, m_CurrentShape.GetData(), m_CurrentShape.GetElementCount() * sizeof(RENDER_LINE_DATA));
+		IBuffer* VertexBuff = GetApiRuntime()->GetGraphicsDevice()->CreateVertexBuffer(m_CurrentShape.GetElementCount() * sizeof(RENDER_LINE_DATA), nullptr);
+		GRenderGlobals.ImmediateGeometry.DrawArgs.Add({ VertexBuff, UploadBuff, m_CurrentShape.GetElementCount() * 2 });
+	}
+	GRenderGlobals.ImmediateGeometry.CurrentCount++;
+}
+
+void RenderLoop::AddLine(const double3& Start, const double3& End)
+{
+	m_CurrentShape.Add({ fromDouble3(Start), fromDouble3(End) });
+}
+
+void RenderLoop::AddBoundingBox(BoundingBox InBox)
+{
+	BeginNewShape();
+	InBox.Max -= m_Current.CameraPosition;
+	InBox.Min -= m_Current.CameraPosition;
+	AddLine(InBox.Max, double3(InBox.Max.xy, InBox.Min.z));
+	AddLine(double3(InBox.Max.xy, InBox.Min.z), double3(InBox.Min.x, InBox.Max.y, InBox.Min.z));
+	AddLine(double3(InBox.Min.x, InBox.Max.y, InBox.Min.z), double3(InBox.Min.x, InBox.Max.y, InBox.Max.z));
+	AddLine(double3(InBox.Min.x, InBox.Max.y, InBox.Max.z), InBox.Max);
+	AddLine(InBox.Max, double3(InBox.Max.x, InBox.Min.y, InBox.Max.z));
+	AddLine(double3(InBox.Max.x, InBox.Min.y, InBox.Min.z), double3(InBox.Min.x, InBox.Min.y, InBox.Min.z));
+	AddLine(double3(InBox.Min.x, InBox.Max.y, InBox.Min.z), double3(InBox.Min.x, InBox.Min.y, InBox.Max.z));
+	AddLine(double3(InBox.Min.x, InBox.Min.y, InBox.Max.z), double3(InBox.Max.x, InBox.Min.y, InBox.Max.z));
+	AddLine(double3(InBox.Max.x, InBox.Min.y, InBox.Min.z), double3(InBox.Max.x, InBox.Max.y, InBox.Min.z));
+	AddLine(double3(InBox.Min.x, InBox.Min.y, InBox.Min.z), double3(InBox.Min.x, InBox.Max.y, InBox.Min.z));
+	AddLine(double3(InBox.Max.x, InBox.Min.y, InBox.Max.z), double3(InBox.Max.x, InBox.Max.y, InBox.Max.z));
+	AddLine(double3(InBox.Max.x, InBox.Min.y, InBox.Min.z), double3(InBox.Max.x, InBox.Max.y, InBox.Min.z));
+	EndNewShape();
+}
+
 void RenderLoop::AddLight(const DIRECTIONAL_LIGHT_DATA& DirLight)
 {
 	GRenderGlobals.LightData.DirectionalLights[GRenderGlobals.LightData.NumDirectionalLights] = DirLight;
@@ -88,5 +142,6 @@ void RenderLoop::ResetForNextFrame()
 	GRenderGlobals.LightData.NumSpotLights = 0;
 	GRenderGlobals.SkyboxData.AmbientLight = float3(0.f, 0.f, 0.f);
 	GRenderGlobals.SkyboxData.Cubemap = nullptr;
+	GRenderGlobals.ImmediateGeometry.CurrentCount = 0;
 }
 

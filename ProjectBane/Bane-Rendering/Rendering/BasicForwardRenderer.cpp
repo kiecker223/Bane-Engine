@@ -1,11 +1,13 @@
 #include "BasicForwardRenderer.h"
+#include <Graphics/IO/ShaderCache.h>
 
 void BasicForwardRenderer::Initialize(const Window* pWindow)
 {
 	UNUSED(pWindow);
 	m_Commits.CheckGrow(100);
 	m_Device = GetApiRuntime()->GetGraphicsDevice();
-
+	m_ImmediateGeometryPS = GetShaderCache()->LoadGraphicsPipeline("ImmediateModeGeometry.gfx");
+	m_ImmediateGeometryTable = m_Device->CreateShaderTable(m_ImmediateGeometryPS);
 	m_LightBuffer = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
 	m_CameraConstants = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
 	m_MeshDataBuffer = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
@@ -35,7 +37,26 @@ void BasicForwardRenderer::Render()
 			ctx->DrawIndexed(DrawMesh.IndexCount, 0, 0);
 		}
 	}
-
+	{
+		auto& DrawArgs = RenderLoop::GRenderGlobals.ImmediateGeometry.DrawArgs;
+		if (!DrawArgs.IsEmpty())
+		{
+			for (uint32 i = 0; i < DrawArgs.GetElementCount(); i++)
+			{
+				ctx->CopyBuffers(DrawArgs[i].UploadBuffer, DrawArgs[i].VertexBuffer);
+			}
+			for (uint32 i = 0; i < DrawArgs.GetElementCount(); i++)
+			{
+				auto& Obj = DrawArgs[i];
+				ctx->SetGraphicsPipelineState(m_ImmediateGeometryPS);
+				m_Device->CreateShaderResourceView(m_ImmediateGeometryTable, m_CameraConstants, 0);
+				ctx->SetGraphicsResourceTable(m_ImmediateGeometryTable);
+				ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_LINES);
+				ctx->SetVertexBuffer(Obj.VertexBuffer);
+				ctx->Draw(Obj.VertexCount, 0);
+			}
+		}
+	}
 	ctx->EndPass();
 	RenderLoop::ResetForNextFrame();
 	m_Commits.Empty();
@@ -44,6 +65,11 @@ void BasicForwardRenderer::Render()
 void BasicForwardRenderer::Present()
 {
 	GetSwapChain()->Present();
+	for (auto& Geometry : m_ImmediateGeometry)
+	{
+		delete Geometry;
+	}
+	m_ImmediateGeometry.Empty();
 }
 
 void BasicForwardRenderer::Shutdown()

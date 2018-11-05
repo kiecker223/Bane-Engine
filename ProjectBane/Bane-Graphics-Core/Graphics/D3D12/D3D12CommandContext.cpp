@@ -25,6 +25,7 @@ void D3D12GraphicsCommandContext::BeginPass(IRenderPassInfo* InRenderPass)
 {
 	CommandList = ParentDevice->GetCommandList(ContextType);
 	D3DCL = CommandList->GetGraphicsCommandList();
+	CurrentTable = nullptr;
 	if (InRenderPass)
 	{
 		D3D12RenderPassInfo* RenderPass = (D3D12RenderPassInfo*)InRenderPass;
@@ -49,6 +50,7 @@ void D3D12GraphicsCommandContext::EndPass()
 	}
 	PipelineState = nullptr;
 	RootSignature = nullptr;
+	CurrentTable = nullptr;
 	CommandList->Close();
 	ParentDevice->GetCommandQueue(ContextType).ExecuteImmediate(CommandList); // Execute immediate, hopefully multiple passes per frame will hide the scheduler latency
 	CommandList = nullptr;

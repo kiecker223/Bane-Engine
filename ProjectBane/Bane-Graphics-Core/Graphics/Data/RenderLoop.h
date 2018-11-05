@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Core/Containers/Array.h>
+#include "Core/Data/BoundingBox.h"
 #include "Mesh.h"
 #include "LightData.h"
 #include "Material.h"
@@ -39,6 +40,11 @@ typedef struct DRAWABLE_MESH {
 	uint32 IndexCount;
 } DRAWABLE_MESH;
 
+typedef struct RENDER_LINE_DATA {
+	float3 Start;
+	float3 End;
+} RENDER_LINE_DATA;
+
 typedef struct RENDER_LOOP_DRAW_COMMIT {
 	uint64 CameraIdxOffset;
 	uint64 MeshData_Offset;
@@ -46,6 +52,7 @@ typedef struct RENDER_LOOP_DRAW_COMMIT {
 	double3 CameraPosition;
 	TArray<DRAWABLE_MESH> Meshes;
 } RENDER_LOOP_DRAW_COMMIT;
+
 
 class RenderLoop
 {
@@ -77,6 +84,17 @@ class RenderLoop
 			const ITextureCube* Cubemap;
 			float3 AmbientLight;
 		} SkyboxData;
+
+		struct {
+			typedef struct IMMEDIATE_GEOMETRY_DRAW_ARGS
+			{
+				IVertexBuffer* VertexBuffer;
+				IBuffer* UploadBuffer;
+				uint32 VertexCount;
+			} IMMEDIATE_GEOMETRY_DRAW_ARGS;
+			TArray<IMMEDIATE_GEOMETRY_DRAW_ARGS> DrawArgs;
+			uint32 CurrentCount;
+		} ImmediateGeometry;
 	} RENDER_LOOP_GLOBALS;
 
 public:
@@ -89,10 +107,18 @@ public:
 
 	void SetCamera(const CAMERA_DATA& CamData);
 	void AddDrawable(const Mesh* pMesh, const Material& Mat, const float4x4& Transformation);
+	
+	void BeginNewShape();
+	void EndNewShape();
+	
+	void AddLine(const double3& Start, const double3& End);
+	void AddBoundingBox(BoundingBox InBox);
+	
 	void AddLight(const DIRECTIONAL_LIGHT_DATA& DirLight);
 	void AddLight(const POINT_LIGHT_DATA& PointLight);
 	void AddLight(const SPOTLIGHT_DATA& SpotLight);
 	void SetSkybox(const SKYBOX_DATA& Skybox);
+	
 	void Draw();
 
 	inline TArray<RENDER_LOOP_DRAW_COMMIT> const& GetCommitedData() const
@@ -104,7 +130,7 @@ private:
 
 	RENDER_LOOP_DRAW_COMMIT m_Current;
 	TArray<RENDER_LOOP_DRAW_COMMIT> m_Commits;
-
+	TArray<RENDER_LINE_DATA> m_CurrentShape;
 };
 
 

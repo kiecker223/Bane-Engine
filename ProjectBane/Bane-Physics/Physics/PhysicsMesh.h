@@ -2,6 +2,7 @@
 
 #include <KieckerMath.h>
 #include <Core/Containers/Array.h>
+#include <Core/Data/BoundingBox.h>
 #include <Graphics/Data/Mesh.h>
 
 class PhysicsMesh
@@ -21,6 +22,7 @@ public:
 
 	TArray<Face> Faces;
 	TArray<uint32> Indices;
+	BoundingBox Bounds;
 
 	inline PhysicsMesh& operator = (const PhysicsMesh& Rhs)
 	{
@@ -42,4 +44,8 @@ public:
 	}
 
 	void CreateFromMesh(const Mesh* pMesh, const float3& Scale);
+
+private:
+
+	void RecalculateBoundingBox();
 };
