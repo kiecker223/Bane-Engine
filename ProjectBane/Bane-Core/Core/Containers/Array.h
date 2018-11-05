@@ -12,7 +12,6 @@ public:
 
 	TArray() : m_Start(nullptr), m_Size(0), m_FullBuffSize(0)
 	{
-		CheckGrow(2);
 	}
 
 	TArray(TType* pData, uint32 NumData) : m_Start(nullptr), m_Size(0), m_FullBuffSize(0)
@@ -34,6 +33,15 @@ public:
 
 	TArray(const TArray& Rhs) : m_Start(nullptr), m_Size(0), m_FullBuffSize(0)
 	{ 
+		if (Rhs.GetElementCount() > 0)
+		{
+			CopyFullBuffer(Rhs.GetData(), Rhs.GetElementCount());
+			m_Size = Rhs.GetElementCount();
+		}
+	}
+
+	TArray(TArray&& Rhs) : m_Start(nullptr), m_Size(0), m_FullBuffSize(0)
+	{
 		if (Rhs.GetElementCount() > 0)
 		{
 			CopyFullBuffer(Rhs.GetData(), Rhs.GetElementCount());
@@ -95,12 +103,12 @@ public:
 
 	inline void Add(TType&& Value)
 	{
-		EmplaceBack(Value);
+		EmplaceBack(std::move(Value));
 	}
 
 	inline void Add(const TType& Value)
 	{
-		EmplaceBack(std::move(Value));
+		EmplaceBack(Value);
 	}
 
 	inline uint32 GetElementCount() const 
@@ -177,7 +185,8 @@ public:
 	{
 		if (m_FullBuffSize)
 		{
-			delete[] m_Start;
+			Empty();
+			Deallocate(m_Start);
 			m_Start = nullptr;
 			m_Size = 0;
 			m_FullBuffSize = 0;
@@ -363,16 +372,26 @@ private:
 	inline void Grow(uint32 NewSize)
 	{
 		TType* OldPointer = m_Start;
-		m_Start = new TType[NewSize];
+		m_Start = Allocate(NewSize);
 		if (m_Size > 0)
 		{
 			CopyToNewBuffer(OldPointer, m_Start, m_Size);
 		}
 		if (OldPointer)
 		{
-			delete[] OldPointer;
+			Deallocate(OldPointer);
 		}
 		m_FullBuffSize = NewSize;
+	}
+
+	inline TType* Allocate(uint32 NumElements)
+	{
+		return reinterpret_cast<TType*>(new uint8[NumElements * sizeof(TType)]{});
+	}
+
+	inline void Deallocate(TType* InPtr)
+	{
+		delete[](reinterpret_cast<uint8*>(InPtr));
 	}
 
 	inline TType* GetEnd()

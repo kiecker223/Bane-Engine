@@ -58,6 +58,7 @@ void PhysicsWorld::UpdatePhysics()
 				}
 			}
 		}
+		if (true) continue;
 		RegenerateOctTree();
 		m_bUnlockedForRead = false;
 		for (auto& Body : m_Bodies)

@@ -99,9 +99,7 @@ void Application::InitSystems()
 		m_SceneRenderer = new BasicForwardRenderer();
 	}
 	m_SceneRenderer->Initialize(m_Window);
-	
-	m_StartCallback = &InitApplication;
-	m_StartCallback();
+	InitApplication();
 }
 
 void Application::Run()

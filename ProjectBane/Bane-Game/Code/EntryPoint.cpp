@@ -240,6 +240,104 @@ PLANET_START_INFO PlacePlanet(PLANET_ORBIT_INFO OrbitInfo, double Time)
 }
 
 
+std::string SomeRandoNames[] =
+{
+	std::string("asdfl;"),
+	std::string("asdfas"),
+	std::string("asdfae"),
+	std::string("jkghjk"),
+	std::string("7rtyue"),
+	std::string("yurtyj"),
+	std::string("jrtyjf"),
+	std::string("tyjdfg"),
+	std::string("dfghnt"),
+	std::string("ner5ye"),
+	std::string("nerty7"),
+	std::string("the4r5"),
+	std::string("45yrth"),
+	std::string("asdfl;"),
+	std::string("asdfas"),
+	std::string("asdfae"),
+	std::string("jkghjk"),
+	std::string("7rtyue"),
+	std::string("yurtyj"),
+	std::string("jrtyjf"),
+	std::string("tyjdfg"),
+	std::string("dfghnt"),
+	std::string("ner5ye"),
+	std::string("nerty7"),
+	std::string("the4r5"),
+	std::string("45yrth"),
+	std::string("asdfl;"),
+	std::string("asdfas"),
+	std::string("asdfae"),
+	std::string("jkghjk"),
+	std::string("7rtyue"),
+	std::string("yurtyj"),
+	std::string("jrtyjf"),
+	std::string("tyjdfg"),
+	std::string("dfghnt"),
+	std::string("ner5ye"),
+	std::string("nerty7"),
+	std::string("the4r5"),
+	std::string("45yrth"),
+	std::string("asdfl;"),
+	std::string("asdfas"),
+	std::string("asdfae"),
+	std::string("jkghjk"),
+	std::string("7rtyue"),
+	std::string("yurtyj"),
+	std::string("jrtyjf"),
+	std::string("tyjdfg"),
+	std::string("dfghnt"),
+	std::string("ner5ye"),
+	std::string("nerty7"),
+	std::string("the4r5"),
+	std::string("45yrth")
+};
+
+struct BigBoiStruct
+{
+	uint32 Elements[100];
+	//std::string OtherShit;
+
+	static BigBoiStruct Current()
+	{
+		static BigBoiStruct Result;
+		Result.Elements[Result.Elements[0] % 100]++;
+		Result.Elements[0]++;
+		//Result.OtherShit = SomeRandoNames[Result.Elements[0]];
+		return Result;
+	}
+};
+
+void InitApplication2()
+{
+	UNUSED(1);
+	UNUSED(2);
+	TArray<BigBoiStruct> OtherValues;
+	UNUSED(3);
+	{
+		TArray<BigBoiStruct> Values;
+		for (uint32 i = 0; i < 40; i++)
+		{
+			Values.Add(BigBoiStruct::Current());
+		}
+		OtherValues = Values;
+	}
+	OtherValues.ClearMemory();
+	{
+		TArray<BigBoiStruct> Values;
+		Values += BigBoiStruct::Current();
+		Values += BigBoiStruct::Current();
+		Values += BigBoiStruct::Current();
+		OtherValues = Values;
+	}
+	OtherValues.ClearMemory();
+	UNUSED(1);
+	UNUSED(2);
+}
+
 void InitApplication()
 {
 	GetSceneManager()->CreateNewScene("Space Scene");

@@ -42,7 +42,10 @@ public:
 
 	~TBinaryTree()
 	{
-		RecursiveDelete();
+		if (Tail)
+		{
+			RecursiveDelete();
+		}
 	}
 
 	inline TBinaryTree& operator = (const TBinaryTree& Rhs)

@@ -65,11 +65,6 @@ void BasicForwardRenderer::Render()
 void BasicForwardRenderer::Present()
 {
 	GetSwapChain()->Present();
-	for (auto& Geometry : m_ImmediateGeometry)
-	{
-		delete Geometry;
-	}
-	m_ImmediateGeometry.Empty();
 }
 
 void BasicForwardRenderer::Shutdown()

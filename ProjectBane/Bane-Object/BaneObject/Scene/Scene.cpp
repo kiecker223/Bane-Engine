@@ -204,7 +204,7 @@ void Scene::DumpScene()
 	{
 		delete e.pEntity;
 	}
-	m_Entities.Empty();
+	m_Entities.ClearMemory();
 	m_World.DestroyThread();
 }
 
