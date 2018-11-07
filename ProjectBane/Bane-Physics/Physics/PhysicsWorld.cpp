@@ -64,7 +64,7 @@ void PhysicsWorld::UpdatePhysics()
 			for (auto& OtherBody : m_Bodies)
 			{
 				if (OtherBody.Handle == Body.Handle)
-				{
+				{    
 					continue;
 				}
 				double3 ForceDir = OtherBody.Position - Body.Position;

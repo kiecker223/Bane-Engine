@@ -28,7 +28,7 @@ public:
 	inline T* AllocMessage(uint32 ParentHandle)
 	{
 		T* Result = new (Alloc(sizeof(T))) T(ParentHandle);
-		GetMessage(m_AllocatedObjects.size() - 1)->pNext = Result;
+		GetMessage(m_AllocatedObjects.GetElementCount() - 1)->pNext = Result;
 		return Result;
 	}
 
