@@ -26,7 +26,7 @@ public:
 
 	Entity* NextPlanet()
 	{
-		Index = (Index + 1) % Planets.GetElementCount();
+		Index = (Index + 1) % Planets.GetCount();
 		return Planets[Index];
 	}
 

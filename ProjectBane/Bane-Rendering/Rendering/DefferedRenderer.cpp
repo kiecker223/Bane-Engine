@@ -86,10 +86,10 @@ void DefferedRenderer::Render()
 	GatherSceneData();
 	ctx->BeginPass(m_DefferedPass);
 
-	for (uint32 i = 0; i < m_DrawCommits.GetElementCount(); i++)
+	for (uint32 i = 0; i < m_DrawCommits.GetCount(); i++)
 	{
 		auto& Commit = m_DrawCommits[i];
-		for (uint32 b = 0; b < static_cast<uint32>(Commit.Meshes.GetElementCount()); b++)
+		for (uint32 b = 0; b < static_cast<uint32>(Commit.Meshes.GetCount()); b++)
 		{
 			auto& DrawMesh = Commit.Meshes[b];
 			ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);

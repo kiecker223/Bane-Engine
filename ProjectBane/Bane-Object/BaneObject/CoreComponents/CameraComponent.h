@@ -27,7 +27,6 @@ public:
 	float ZFar;
 	ECAMERA_TYPE ProjectionType;
 	
-
 	float4x4 GetProjection() const;
 	float4x4 GetLookAt() const;
 

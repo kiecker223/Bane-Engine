@@ -21,14 +21,14 @@ public:
 
 	inline uint32 GetMessageCount() const
 	{
-		return m_AllocatedObjects.GetElementCount();
+		return m_AllocatedObjects.GetCount();
 	}
 
 	template<typename T>
 	inline T* AllocMessage(uint32 ParentHandle)
 	{
 		T* Result = new (Alloc(sizeof(T))) T(ParentHandle);
-		GetMessage(m_AllocatedObjects.GetElementCount() - 1)->pNext = Result;
+		GetMessage(m_AllocatedObjects.GetCount() - 1)->pNext = Result;
 		return Result;
 	}
 
@@ -36,7 +36,7 @@ public:
 	inline T* AllocMessage(bool bQuit)
 	{
 		T* Result = new (Alloc(sizeof(T))) T(bQuit);
-		GetMessage(static_cast<uint32>(m_AllocatedObjects.GetElementCount()) - 1)->pNext = Result;
+		GetMessage(static_cast<uint32>(m_AllocatedObjects.GetCount()) - 1)->pNext = Result;
 		return Result;
 	}
 

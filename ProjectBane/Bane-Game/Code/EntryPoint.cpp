@@ -323,6 +323,7 @@ void InitApplication2()
 		{
 			Values.Add(BigBoiStruct::Current());
 		}
+		Values.RemoveAt(3);
 		OtherValues = Values;
 	}
 	OtherValues.ClearMemory();

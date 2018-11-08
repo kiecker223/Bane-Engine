@@ -115,7 +115,7 @@ uint8* GraphicsCommandBuffer::Allocate(ptrdiff_t NewOffset)
 		ptrdiff_t OldSize = PtrCurrent - OldPtr;
 
 		Reallocate(OldSize * 2);
-		for (uint32 i = 0; i < Commands.GetElementCount(); i++)
+		for (uint32 i = 0; i < Commands.GetCount(); i++)
 		{
 			auto*& Command = Commands[i];
 			Command = reinterpret_cast<IGraphicsCommand*>(PtrStart + (reinterpret_cast<uint8*>(Command) - OldPtr));

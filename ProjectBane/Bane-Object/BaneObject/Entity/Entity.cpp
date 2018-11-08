@@ -9,7 +9,7 @@
 TComponentHandle<Component> Entity::GetComponentByHash(uint64 Hash)
 {
 	int IndexToUse = -1;
-	for (uint32 i = 0; i < m_Components.GetElementCount(); i++)
+	for (uint32 i = 0; i < m_Components.GetCount(); i++)
 	{
 		if (m_Components[i] == Hash)
 		{
@@ -47,7 +47,7 @@ void Entity::UpdateRenderObjects(RenderLoop& RL)
 	}
 }
 
-void Entity::AddChild(EntityIdentifier Child)
+void Entity::AddChild(Entity* Child)
 {
 	m_Children.Add(Child);
 }
@@ -72,24 +72,6 @@ float4x4 Entity::GetMatrixAffectedByParents() const
 		Result *= Parent->GetTransform()->GetRawMatrix();
 	}
 	return Result;
-}
-
-Entity* Entity::GetParent() const
-{
-	if (m_Parent.IsValid())
-	{
-		return GetEntityById(m_Parent);
-	}
-	return nullptr;
-}
-
-Entity* Entity::GetChild(uint32 Idx)
-{
-	if (Idx > GetChildCount())
-	{
-		return nullptr;
-	}
-	return GetEntityById(m_Children[Idx]);
 }
 
 Entity* GetEntityById(const EntityIdentifier& Id)

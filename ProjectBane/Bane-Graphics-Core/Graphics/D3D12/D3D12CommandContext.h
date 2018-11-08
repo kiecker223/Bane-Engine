@@ -78,7 +78,7 @@ public:
 		{
 			return;
 		}
-		for (uint32 i = 0; i < CommitedResources.GetElementCount(); i++)
+		for (uint32 i = 0; i < CommitedResources.GetCount(); i++)
 		{
 			CommitedResources[i].Uncommit();
 		}

@@ -37,7 +37,7 @@ Entity* Scene::CreateEntity(const std::string& EntityName)
 	}
 	pEntity = new Entity(EntityIdentifier(SearchName));
 	pEntity->m_SceneOwner = this;
-	pEntity->SetParent(m_Root->GetId());
+	pEntity->SetParent(m_Root);
 	EntityHashEntry Entry = { pEntity->GetId().HashedName, pEntity };
 	m_EntityAddList.Add(Entry);
 	return pEntity;
@@ -103,7 +103,7 @@ void Scene::Tick(float DT)
 	{
 		e.pEntity->Tick(DT);
 	}
-	if (m_EntityAddList.GetElementCount() > 0)
+	if (m_EntityAddList.GetCount() > 0)
 	{
 		for (auto& e : m_EntityAddList)
 		{
@@ -127,9 +127,9 @@ void Scene::Tick(float DT)
 		}
 		m_EntityAddList.Empty();
 	}
-	if (m_EntityStartList.GetElementCount() > 0)
+	if (m_EntityStartList.GetCount() > 0)
 	{
-		for (uint32 i = 0; i < m_EntityStartList.GetElementCount(); i++)
+		for (uint32 i = 0; i < m_EntityStartList.GetCount(); i++)
 		{
 			m_EntityStartList[i].pEntity->Start();
 		}
@@ -143,7 +143,7 @@ void Scene::Tick(float DT)
 
 void Scene::PhysicsUpdate(const PhysicsUpdateBuffer& UpdateBuffer)
 {
-	if (UpdateBuffer.Bodies.GetElementCount() > 0)
+	if (UpdateBuffer.Bodies.GetCount() > 0)
 	{
 		for (auto& e : m_Entities)
 		{

@@ -266,7 +266,7 @@ static TArray<uint8> CompileFromByteCode(const std::string& InByteCode, ESHADER_
 	}
 
 	TArray<uint8> RetCode(static_cast<uint32>(CompiledCode->GetBufferSize()));
-	memcpy(RetCode.GetData(), CompiledCode->GetBufferPointer(), RetCode.GetElementCount());
+	memcpy(RetCode.GetData(), CompiledCode->GetBufferPointer(), RetCode.GetCount());
 	CompiledCode->Release();
 	return RetCode;
 }
@@ -279,7 +279,7 @@ IVertexShader* D3D12GraphicsDevice::CreateVertexShader(const std::string& ByteCo
 	uint32 NumUnorderedAccessViews;
 	TArray<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_VERTEX, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 #ifdef _DEBUG
-	if (CompiledCode.GetElementCount() == 0)
+	if (CompiledCode.GetCount() == 0)
 	{
 		return nullptr;
 	}
@@ -296,7 +296,7 @@ IPixelShader* D3D12GraphicsDevice::CreatePixelShader(const std::string& ByteCode
 	TArray<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_PIXEL, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 
 #ifdef _DEBUG
-	if (CompiledCode.GetElementCount() == 0)
+	if (CompiledCode.GetCount() == 0)
 	{
 		return nullptr;
 	}
@@ -313,7 +313,7 @@ IGeometryShader* D3D12GraphicsDevice::CreateGeometryShader(const std::string& By
 	uint32 NumUnorderedAccessViews;
 	TArray<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_GEOMETRY, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 #ifdef _DEBUG
-	if (CompiledCode.GetElementCount() == 0)
+	if (CompiledCode.GetCount() == 0)
 	{
 		return nullptr;
 	}
@@ -329,7 +329,7 @@ IHullShader* D3D12GraphicsDevice::CreateHullShader(const std::string& ByteCode)
 	uint32 NumUnorderedAccessViews;
 	TArray<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_HULL, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 #ifdef _DEBUG
-	if (CompiledCode.GetElementCount() == 0)
+	if (CompiledCode.GetCount() == 0)
 	{
 		return nullptr;
 	}
@@ -345,7 +345,7 @@ IComputeShader* D3D12GraphicsDevice::CreateComputeShader(const std::string& Byte
 	uint32 NumUnorderedAccessViews;
 	TArray<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_COMPUTE, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 #ifdef _DEBUG
-	if (CompiledCode.GetElementCount() == 0)
+	if (CompiledCode.GetCount() == 0)
 	{
 		return nullptr;
 	}

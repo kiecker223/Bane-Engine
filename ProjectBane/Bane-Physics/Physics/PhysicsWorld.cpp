@@ -13,9 +13,53 @@ void PhysicsWorld::SpawnThread()
 	}));
 }
 
-bool PhysicsWorld::CastRay(const PHYSICS_RAY& InRay, PhysicsBody& HitBody)
+double IntersectsBox(const BoundingBox& Box, const PHYSICS_RAY& InRay)
 {
-	UNUSED(InRay); UNUSED(HitBody); return false;
+	UNUSED(Box); UNUSED(InRay);
+	return -1.;
+}
+
+TBinaryTree<PhysicsWorld::OctTreeNode>::TNode* FindSmallestBoxIntersectedImpl(const PHYSICS_RAY& InRay, TBinaryTree<PhysicsWorld::OctTreeNode>::TNode* LastNode)
+{
+	if (IntersectsBox(LastNode->NextR->Value.Bounds, InRay) > -1.)
+	{
+		return FindSmallestBoxIntersectedImpl(InRay, LastNode->NextR);
+	}
+	else if (IntersectsBox(LastNode->NextL->Value.Bounds, InRay) > -1.)
+	{
+		return FindSmallestBoxIntersectedImpl(InRay, LastNode->NextL);
+	}
+	else
+	{
+		return LastNode;
+	}
+}
+
+bool PhysicsWorld::CastRay(const PHYSICS_RAY& InRay, RAY_HIT_INFO& OutInfo)
+{
+	std::lock_guard<std::mutex> LockGuard(GenerateOctTreeMutex);
+
+	auto* SmallestNode = FindSmallestBoxIntersectedImpl(InRay, m_OctTree.Tail);
+
+	// We can assume that if it wasn't able to get to the smallest possible type of bounding box it just intersected
+	// a parent box and missed it altogether
+	if (SmallestNode->Value.MeshesInBounds.GetCount() == 1)
+	{
+		auto& Body = GetBody(SmallestNode->Value.MeshesInBounds[0]);
+		double3 Normal;
+		double Result = Body.TestRayHit(InRay.Position, InRay.Direction, Normal);
+		if (Result > -1.)
+		{
+			OutInfo.Body = &Body;
+		}
+		OutInfo.Position = InRay.Position + (InRay.Direction * Result);
+		OutInfo.Normal = Normal;
+		return Result > -1.f;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void PhysicsWorld::CastRayAtSpeedOfLight(const PHYSICS_RAY& InRay, std::function<PhysicsBody()>& HitFunc)
@@ -30,7 +74,7 @@ void PhysicsWorld::UpdatePhysics()
 	{
 		using Clock = std::chrono::high_resolution_clock;
 		auto Start = Clock::now();
-		if (AddList.GetElementCount() > 0)
+		if (AddList.GetCount() > 0)
 		{
 			std::lock_guard<std::mutex> ScopedMutex(BodyAddMutex);
 			for (auto& Body : AddList)
@@ -133,7 +177,7 @@ void PhysicsWorld::RegenerateOctTree()
 
 void PhysicsWorld::GenerateOctTreeImpl(TBinaryTree<OctTreeNode>::TNode* InNode)
 {
-	if (InNode->Value.MeshesInBounds.GetElementCount() > 1)
+	if (InNode->Value.MeshesInBounds.GetCount() > 1)
 	{
 		uint32 BiggestAxis = InNode->Value.Bounds.GetBiggestAxis();
 		double3 Center = InNode->Value.Bounds.GetCenter();
@@ -170,6 +214,6 @@ BoundingBox PhysicsWorld::CalculateBoundsForMeshes(const TArray<uint32>& MeshHan
 	{
 		Bounds.Add(m_Bodies[Handle].GetBounds());
 	}
-	Result.CalculateFromArray(reinterpret_cast<double3*>(Bounds.GetData()), Bounds.GetElementCount() * 2);
+	Result.CalculateFromArray(reinterpret_cast<double3*>(Bounds.GetData()), Bounds.GetCount() * 2);
 	return Result;
 }

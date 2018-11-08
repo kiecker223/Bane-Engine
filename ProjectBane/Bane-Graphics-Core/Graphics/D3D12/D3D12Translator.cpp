@@ -243,9 +243,9 @@ D3D12_INPUT_LAYOUT_DESC D3D12_TranslateInputLayout(const GFX_INPUT_LAYOUT_DESC& 
 {
 	D3D12_INPUT_LAYOUT_DESC Result;
 	
-	D3D12_INPUT_ELEMENT_DESC* ResultItems = new D3D12_INPUT_ELEMENT_DESC[InDesc.InputItems.GetElementCount()]{ };
+	D3D12_INPUT_ELEMENT_DESC* ResultItems = new D3D12_INPUT_ELEMENT_DESC[InDesc.InputItems.GetCount()]{ };
 
-	for (uint32 i = 0; i < InDesc.InputItems.GetElementCount(); i++)
+	for (uint32 i = 0; i < InDesc.InputItems.GetCount(); i++)
 	{
 		const GFX_INPUT_ITEM_DESC& Item = InDesc.InputItems[i];
 		ResultItems[i].SemanticName = new char[Item.Name.size()];
@@ -259,7 +259,7 @@ D3D12_INPUT_LAYOUT_DESC D3D12_TranslateInputLayout(const GFX_INPUT_LAYOUT_DESC& 
 
 	Result.pInputElementDescs = ResultItems;
 	ResultItems->Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	Result.NumElements = static_cast<uint32>(InDesc.InputItems.GetElementCount());
+	Result.NumElements = static_cast<uint32>(InDesc.InputItems.GetCount());
 	return Result;
 }
 

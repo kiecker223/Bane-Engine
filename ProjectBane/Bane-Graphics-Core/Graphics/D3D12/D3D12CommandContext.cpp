@@ -12,7 +12,7 @@ void D3D12CommandList::FlushDestructionQueue()
 	{
 		return;
 	}
-	for (uint32 i = 0; i < UploadResourcesToDestroy.GetElementCount(); i++)
+	for (uint32 i = 0; i < UploadResourcesToDestroy.GetCount(); i++)
 	{
 		auto& Resource = UploadResourcesToDestroy[i];
 		Resource.Destroy();
@@ -102,7 +102,7 @@ void D3D12GraphicsCommandContext::SetGraphicsResourceTable(const IShaderResource
 		D3DCL->SetGraphicsRootSignature(Table->AssociatedSignature.RootSignature);
 	}
 
-	for (uint32 i = 0; i < Table->ConstantBuffers.GetElementCount(); i++)
+	for (uint32 i = 0; i < Table->ConstantBuffers.GetCount(); i++)
 	{
 		if (Table->ConstantBuffers[i].ConstantBuffer != nullptr)
 		{
@@ -231,7 +231,7 @@ void D3D12GraphicsCommandContext::SetComputeResourceTable(const IShaderResourceT
 		D3DCL->SetComputeRootSignature(Table->AssociatedSignature.RootSignature);
 	}
 
-	for (uint32 i = 0; i < Table->ConstantBuffers.GetElementCount(); i++)
+	for (uint32 i = 0; i < Table->ConstantBuffers.GetCount(); i++)
 	{
 		if (Table->ConstantBuffers[i].ConstantBuffer != nullptr)
 		{
@@ -305,7 +305,7 @@ void D3D12GraphicsCommandContext::CommitResources()
 	}
 	if (!CurrentTable->ShaderResources.IsEmpty())
 	{
-		for (uint32 i = 0; i < CurrentTable->ShaderResources.GetElementCount(); i++)
+		for (uint32 i = 0; i < CurrentTable->ShaderResources.GetCount(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->ShaderResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_GRAPHICS))
@@ -316,7 +316,7 @@ void D3D12GraphicsCommandContext::CommitResources()
 	}
 	if (!CurrentTable->UnorderedAccessResources.IsEmpty())
 	{
-		for (uint32 i = 0; i < CurrentTable->UnorderedAccessResources.GetElementCount(); i++)
+		for (uint32 i = 0; i < CurrentTable->UnorderedAccessResources.GetCount(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->UnorderedAccessResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_GRAPHICS))
@@ -370,7 +370,7 @@ void D3D12ComputeCommandContext::SetComputeResourceTable(const IShaderResourceTa
 		D3DCL->SetComputeRootSignature(Table->AssociatedSignature.RootSignature);
 	}
 
-	for (uint32 i = 0; i < Table->ConstantBuffers.GetElementCount(); i++)
+	for (uint32 i = 0; i < Table->ConstantBuffers.GetCount(); i++)
 	{
 		if (Table->ConstantBuffers[i].ConstantBuffer != nullptr)
 		{
@@ -422,7 +422,7 @@ void D3D12ComputeCommandContext::CommitResources()
 	// Leave out constant buffers because they are constant read?
 	if (!CurrentTable->ShaderResources.IsEmpty())
 	{
-		for (uint32 i = 0; i < CurrentTable->ShaderResources.GetElementCount(); i++)
+		for (uint32 i = 0; i < CurrentTable->ShaderResources.GetCount(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->ShaderResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_COMPUTE))
@@ -433,7 +433,7 @@ void D3D12ComputeCommandContext::CommitResources()
 	}
 	if (!CurrentTable->UnorderedAccessResources.IsEmpty())
 	{
-		for (uint32 i = 0; i < CurrentTable->UnorderedAccessResources.GetElementCount(); i++)
+		for (uint32 i = 0; i < CurrentTable->UnorderedAccessResources.GetCount(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->UnorderedAccessResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_COMPUTE))

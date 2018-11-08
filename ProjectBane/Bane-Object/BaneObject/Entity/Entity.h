@@ -186,7 +186,6 @@ private:
 
 class Entity
 {
-	typedef TArray<EntityIdentifier> IdentifierList;
 	friend class Scene;
 	template<typename T>
 	friend class TComponentHandle;
@@ -215,7 +214,7 @@ public:
 	inline TComponentHandle<T> AddComponent()
 	{
 		T* RetPointer = m_Allocator.AllocateObject<T>();
-		TComponentHandle<T> Result(&m_Allocator.PtrBegin, reinterpret_cast<ptrdiff_t>(m_Allocator.AllocatedObjects[m_Components.GetElementCount()]));
+		TComponentHandle<T> Result(&m_Allocator.PtrBegin, reinterpret_cast<ptrdiff_t>(m_Allocator.AllocatedObjects[m_Components.GetCount()]));
 		m_Components.Add(T::ClassHash);
 		RetPointer->m_Owner = this;
 		RetPointer->m_Transform = &m_Transform;
@@ -248,14 +247,9 @@ public:
 		RemoveComponent(T::ClassHash);
 	}
 
-	void AddChild(EntityIdentifier Child);
+	void AddChild(Entity* Child);
 	void RemoveChild(uint32 ChildIndex);
 	float4x4 GetMatrixAffectedByParents() const;
-
-	IdentifierList& GetChildren()
-	{
-		return m_Children;
-	}
 
 	EntityIdentifier GetId() const
 	{
@@ -264,13 +258,13 @@ public:
 
 	inline void Start()
 	{
-		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().GetElementCount(); i++)
+		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().GetCount(); i++)
 			reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(m_Allocator.GetAllocatedObjects()[i]) + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin))->Start();
 	}
 
 	inline void Tick(float DT)
 	{
-		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().GetElementCount(); i++)
+		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().GetCount(); i++)
 			reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(m_Allocator.GetAllocatedObjects()[i]) + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin))->Tick(DT);
 	}
 
@@ -279,16 +273,29 @@ public:
 		return (Transform*)&m_Transform;
 	}
 
-	inline void SetParent(EntityIdentifier Parent)
+	inline void SetParent(Entity* Parent)
 	{
 		m_Parent = Parent;
 	}
 
-	Entity* GetChild(uint32 Idx);
+	inline TArray<Entity*> GetChildren()
+	{
+		return m_Children;
+	}
+
+	inline Entity* GetChild(uint32 Idx)
+	{
+		return m_Children[Idx];
+	}
+
+	inline Entity* GetParent() const
+	{
+		return m_Parent;
+	}
 
 	inline uint32 GetChildCount() const
 	{
-		return static_cast<uint32>(m_Children.GetElementCount());
+		return static_cast<uint32>(m_Children.GetCount());
 	}
 
 	inline PhysicsProperties& GetPhysicsProperties()
@@ -298,20 +305,18 @@ public:
 
 	inline uint32 GetComponentCount() const
 	{
-		return static_cast<uint32>(m_Components.GetElementCount());
+		return static_cast<uint32>(m_Components.GetCount());
 	}
 
 private:
 
 	friend class Entity;
 
-	Entity* GetParent() const;
-	
 	PhysicsProperties m_PhysicsProperties;
 	Transform m_Transform;
 	EntityIdentifier m_Id;
-	EntityIdentifier m_Parent;
-	IdentifierList m_Children;
+	Entity* m_Parent;
+	TArray<Entity*> m_Children;
 	class Scene* m_SceneOwner;
 	ComponentAllocator m_Allocator;
 	TArray<uint64> m_Components;

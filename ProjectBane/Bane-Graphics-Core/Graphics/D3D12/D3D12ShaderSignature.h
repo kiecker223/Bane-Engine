@@ -90,9 +90,9 @@ inline bool operator == (const D3D12ShaderSignatureParameterList& Left, const D3
 	{
 		return false;
 	}
-	if (Left.ShaderParams.GetElementCount() == Right.ShaderParams.GetElementCount())
+	if (Left.ShaderParams.GetCount() == Right.ShaderParams.GetCount())
 	{
-		for (uint32 i = 0; i < Left.ShaderParams.GetElementCount(); i++)
+		for (uint32 i = 0; i < Left.ShaderParams.GetCount(); i++)
 		{
 			if (Left.ShaderParams[i] != Right.ShaderParams[i])
 			{
@@ -104,9 +104,9 @@ inline bool operator == (const D3D12ShaderSignatureParameterList& Left, const D3
 	{
 		return false;
 	}
-	if (Left.StaticSamplers.GetElementCount() == Right.StaticSamplers.GetElementCount())
+	if (Left.StaticSamplers.GetCount() == Right.StaticSamplers.GetCount())
 	{
-		for (uint32 i = 0; i < Left.StaticSamplers.GetElementCount(); i++)
+		for (uint32 i = 0; i < Left.StaticSamplers.GetCount(); i++)
 		{
 			if (Left.StaticSamplers[i] != Right.StaticSamplers[i])
 			{

@@ -441,7 +441,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 			pHeader = reinterpret_cast<ShaderHeader*>(FileBinary);
 			TArray<uint8> VSByteCode;
 			VSByteCode.Resize(pHeader->PSStart - 78);
-			memcpy(VSByteCode.GetData(), FileBinary + 33, VSByteCode.GetElementCount());
+			memcpy(VSByteCode.GetData(), FileBinary + 33, VSByteCode.GetCount());
 			Desc.VS = Device->CreateVertexShaderFromBytecode(VSByteCode);
 			// If we don't have a HullShader start location then we just assume that the shader ends at the end of the buffer
 			size_t PSStart = pHeader->PSStart;
@@ -457,7 +457,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 
 			TArray<uint8> PSByteCode;
 			PSByteCode.Resize(static_cast<uint32>(PSEnd - PSStart));
-			memcpy(PSByteCode.GetData(), FileBinary + static_cast<size_t>(PSStart), PSByteCode.GetElementCount());
+			memcpy(PSByteCode.GetData(), FileBinary + static_cast<size_t>(PSStart), PSByteCode.GetCount());
 			Desc.PS = Device->CreatePixelShaderFromBytecode(PSByteCode);
 			if (pHeader->HSStart != 0)
 			{
@@ -473,7 +473,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 				}
 				size_t HSSize = HSEnd - pHeader->HSStart;
 				HSByteCode.Resize(static_cast<uint32>(HSSize));
-				memcpy(HSByteCode.GetData(), FileBinary + static_cast<size_t>(pHeader->HSStart), HSByteCode.GetElementCount());
+				memcpy(HSByteCode.GetData(), FileBinary + static_cast<size_t>(pHeader->HSStart), HSByteCode.GetCount());
 				Desc.HS = Device->CreateHullShaderFromBytecode(HSByteCode);
 			}
 			if (pHeader->GSStart != 0)

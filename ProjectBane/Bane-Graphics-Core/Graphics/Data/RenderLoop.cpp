@@ -50,24 +50,24 @@ void RenderLoop::BeginNewShape()
 
 void RenderLoop::EndNewShape()
 {
-	if (GRenderGlobals.ImmediateGeometry.DrawArgs.GetElementCount() > GRenderGlobals.ImmediateGeometry.CurrentCount &&
+	if (GRenderGlobals.ImmediateGeometry.DrawArgs.GetCount() > GRenderGlobals.ImmediateGeometry.CurrentCount &&
 		GRenderGlobals.ImmediateGeometry.DrawArgs[
 		GRenderGlobals.ImmediateGeometry.CurrentCount
 			].VertexBuffer->GetSizeInBytes() <=
-			m_CurrentShape.GetElementCount() * sizeof(RENDER_LINE_DATA)
+			m_CurrentShape.GetCount() * sizeof(RENDER_LINE_DATA)
 		)
 	{
 		IBuffer* UploadBuff = GRenderGlobals.ImmediateGeometry.DrawArgs[GRenderGlobals.ImmediateGeometry.CurrentCount].UploadBuffer;
 		void* Ptr = UploadBuff->Map();
-		memcpy(Ptr, m_CurrentShape.GetData(), m_CurrentShape.GetElementCount() * sizeof(RENDER_LINE_DATA));
+		memcpy(Ptr, m_CurrentShape.GetData(), m_CurrentShape.GetCount() * sizeof(RENDER_LINE_DATA));
 	}
 	else
 	{
-		IBuffer* UploadBuff = GetApiRuntime()->GetGraphicsDevice()->CreateStagingBuffer(m_CurrentShape.GetElementCount() * sizeof(RENDER_LINE_DATA));
+		IBuffer* UploadBuff = GetApiRuntime()->GetGraphicsDevice()->CreateStagingBuffer(m_CurrentShape.GetCount() * sizeof(RENDER_LINE_DATA));
 		void* Ptr = UploadBuff->Map();
-		memcpy(Ptr, m_CurrentShape.GetData(), m_CurrentShape.GetElementCount() * sizeof(RENDER_LINE_DATA));
-		IBuffer* VertexBuff = GetApiRuntime()->GetGraphicsDevice()->CreateVertexBuffer(m_CurrentShape.GetElementCount() * sizeof(RENDER_LINE_DATA), nullptr);
-		GRenderGlobals.ImmediateGeometry.DrawArgs.Add({ VertexBuff, UploadBuff, m_CurrentShape.GetElementCount() * 2 });
+		memcpy(Ptr, m_CurrentShape.GetData(), m_CurrentShape.GetCount() * sizeof(RENDER_LINE_DATA));
+		IBuffer* VertexBuff = GetApiRuntime()->GetGraphicsDevice()->CreateVertexBuffer(m_CurrentShape.GetCount() * sizeof(RENDER_LINE_DATA), nullptr);
+		GRenderGlobals.ImmediateGeometry.DrawArgs.Add({ VertexBuff, UploadBuff, m_CurrentShape.GetCount() * 2 });
 	}
 	GRenderGlobals.ImmediateGeometry.CurrentCount++;
 }

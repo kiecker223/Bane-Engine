@@ -83,7 +83,24 @@ public:
 	PhysicsMesh PhysMesh;
 	PHYSICS_SPHERE_INFO Sphere;
 
-	BoundingBox GetBounds() const 
+	inline double TestRayHit(const double3& RayStart, const double3& RayDir, double3& OutNormal)
+	{
+		UNUSED(RayStart); UNUSED(RayDir); UNUSED(OutNormal);
+		double Result = -1.;
+		if (BodyType == PHYSICS_BODY_TYPE_SPHERE) 
+		{
+
+		}
+		if (BodyType == PHYSICS_BODY_TYPE_MESH)
+		{
+			for (uint32 i = 0; i < PhysMesh.Faces.GetCount(); i++)
+			{
+			}
+		}
+		return Result;
+	}
+
+	inline BoundingBox GetBounds() const 
 	{
 		if (BodyType == PHYSICS_BODY_TYPE_SPHERE)
 		{

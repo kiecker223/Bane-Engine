@@ -26,6 +26,12 @@ typedef struct PHYSICS_RAY {
 	double MaxDistance;
 } PHYSICS_RAY;
 
+typedef struct RAY_HIT_INFO {
+	PhysicsBody* Body;
+	double3 Position;
+	double3 Normal;
+} RAY_HIT_INFO;
+
 class PhysicsWorld
 {
 public:
@@ -42,7 +48,7 @@ public:
 		return Info.Handle;
 	}
 
-	bool CastRay(const PHYSICS_RAY& InRay, PhysicsBody& HitBody);
+	bool CastRay(const PHYSICS_RAY& InRay, RAY_HIT_INFO& OutInfo);
 	void CastRayAtSpeedOfLight(const PHYSICS_RAY& InRay, std::function<PhysicsBody()>& HitFunc);
 	void SpawnThread();
 	inline void DestroyThread()

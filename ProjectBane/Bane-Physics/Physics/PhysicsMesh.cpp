@@ -7,7 +7,7 @@ void PhysicsMesh::CreateFromMesh(const Mesh* pMesh, const float3& Scale)
 	const TArray<FloatInt>& Data = pMesh->GetVertices();
 	uint32 Stride = pMesh->GetLayout().Stride;
 
-	for (uint32 i = 0; i < Indices.GetElementCount() / 3; i += 3)
+	for (uint32 i = 0; i < Indices.GetCount() / 3; i += 3)
 	{
 		Face CurrFace;
 		for (uint32 x = 0; x < 3; x++)
@@ -25,7 +25,7 @@ void PhysicsMesh::RecalculateBoundingBox()
 {
 	TArray<double3> Positions;
 
-	for (uint32 i = 0; i < Faces.GetElementCount(); i++)
+	for (uint32 i = 0; i < Faces.GetCount(); i++)
 	{
 		for (uint32 b = 0; b < 3; b++)
 		{
@@ -33,7 +33,7 @@ void PhysicsMesh::RecalculateBoundingBox()
 		}
 	}
 
-	Bounds.CalculateFromArray(Positions.GetData(), Positions.GetElementCount());
+	Bounds.CalculateFromArray(Positions.GetData(), Positions.GetCount());
 }
 
 

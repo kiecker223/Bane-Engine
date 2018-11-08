@@ -68,7 +68,7 @@ private:
 
 		if (!Node->Children.IsEmpty())
 		{
-			for (uint32 i = 0; i < Node->Children.GetElementCount(); i++)
+			for (uint32 i = 0; i < Node->Children.GetCount(); i++)
 			{
 				RecursiveDeleteImpl(Node->Children[i]);
 			}

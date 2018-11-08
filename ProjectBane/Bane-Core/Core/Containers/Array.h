@@ -34,19 +34,19 @@ public:
 
 	TArray(const TArray& Rhs) : m_Start(nullptr), m_Size(0), m_FullBuffSize(0)
 	{ 
-		if (Rhs.GetElementCount() > 0)
+		if (Rhs.GetCount() > 0)
 		{
-			CopyFullBuffer(Rhs.GetData(), Rhs.GetElementCount());
-			m_Size = Rhs.GetElementCount();
+			CopyFullBuffer(Rhs.GetData(), Rhs.GetCount());
+			m_Size = Rhs.GetCount();
 		}
 	}
 
 	TArray(TArray&& Rhs) : m_Start(nullptr), m_Size(0), m_FullBuffSize(0)
 	{
-		if (Rhs.GetElementCount() > 0)
+		if (Rhs.GetCount() > 0)
 		{
-			CopyFullBuffer(Rhs.GetData(), Rhs.GetElementCount());
-			m_Size = Rhs.GetElementCount();
+			CopyFullBuffer(Rhs.GetData(), Rhs.GetCount());
+			m_Size = Rhs.GetCount();
 		}
 	}
 
@@ -57,10 +57,10 @@ public:
 
 	inline TArray& operator = (const TArray& Rhs)
 	{
-		if (Rhs.GetElementCount() > 0)
+		if (Rhs.GetCount() > 0)
 		{
-			CopyFullBuffer(Rhs.GetData(), Rhs.GetElementCount());
-			m_Size = Rhs.GetElementCount();
+			CopyFullBuffer(Rhs.GetData(), Rhs.GetCount());
+			m_Size = Rhs.GetCount();
 		}
 		return *this;
 	}
@@ -112,7 +112,7 @@ public:
 		EmplaceBack(Value);
 	}
 
-	inline uint32 GetElementCount() const 
+	inline uint32 GetCount() const 
 	{
 		return m_Size;
 	}

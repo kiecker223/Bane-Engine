@@ -20,10 +20,10 @@ void BasicForwardRenderer::Render()
 
 	ctx->BeginPass(m_Device->GetBackBufferTargetPass());
 	GatherSceneData();
-	for (uint32 i = 0; i < m_Commits.GetElementCount(); i++)
+	for (uint32 i = 0; i < m_Commits.GetCount(); i++)
 	{
 		auto& Commit = m_Commits[i];
-		for (uint32 y = 0; y < Commit.Meshes.GetElementCount(); y++)
+		for (uint32 y = 0; y < Commit.Meshes.GetCount(); y++)
 		{
 			auto& DrawMesh = Commit.Meshes[y];
 			ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);
@@ -39,13 +39,13 @@ void BasicForwardRenderer::Render()
 	}
 	{
 		auto& DrawArgs = RenderLoop::GRenderGlobals.ImmediateGeometry.DrawArgs;
-		if (!DrawArgs.IsEmpty())
+		if (RenderLoop::GRenderGlobals.ImmediateGeometry.CurrentCount)
 		{
-			for (uint32 i = 0; i < DrawArgs.GetElementCount(); i++)
+			for (uint32 i = 0; i < DrawArgs.GetCount(); i++)
 			{
 				ctx->CopyBuffers(DrawArgs[i].UploadBuffer, DrawArgs[i].VertexBuffer);
 			}
-			for (uint32 i = 0; i < DrawArgs.GetElementCount(); i++)
+			for (uint32 i = 0; i < DrawArgs.GetCount(); i++)
 			{
 				auto& Obj = DrawArgs[i];
 				ctx->SetGraphicsPipelineState(m_ImmediateGeometryPS);

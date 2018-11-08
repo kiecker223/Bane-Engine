@@ -20,7 +20,7 @@ public:
 	{
 		D3D12_SHADER_BYTECODE Ret = { };
 		Ret.pShaderBytecode = CompiledCode.GetData();
-		Ret.BytecodeLength = CompiledCode.GetElementCount();
+		Ret.BytecodeLength = CompiledCode.GetCount();
 		return Ret;
 	}
 

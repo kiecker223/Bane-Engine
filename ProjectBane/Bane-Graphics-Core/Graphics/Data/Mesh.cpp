@@ -216,7 +216,7 @@ void Mesh::GenerateUVSphere(uint32 SegmentCount)
 		}
 		else if (y == (SegmentCount / 2) - 2)
 		{
-			uint32 LastPos = static_cast<uint32>(Vertices.GetElementCount() - 1);
+			uint32 LastPos = static_cast<uint32>(Vertices.GetCount() - 1);
 			for (uint32 i = 0; i < SegmentCount - 1; i++)
 			{
 				Indices.Add(LastPos);
@@ -275,12 +275,12 @@ void Mesh::Upload()
 	{
 		delete m_VertexBuffer;
 	}
-	m_VertexBuffer = Device->CreateVertexBuffer(static_cast<uint32>(m_Vertices.GetElementCount()) * sizeof(FloatInt), (uint8*)m_Vertices.GetData());
+	m_VertexBuffer = Device->CreateVertexBuffer(static_cast<uint32>(m_Vertices.GetCount()) * sizeof(FloatInt), (uint8*)m_Vertices.GetData());
 	if (m_IndexBuffer)
 	{
 		delete m_IndexBuffer;
 	}
-	m_IndexBuffer = Device->CreateIndexBuffer(static_cast<uint32>(m_Indices.GetElementCount() * 4), (uint8*)m_Indices.GetData());
+	m_IndexBuffer = Device->CreateIndexBuffer(static_cast<uint32>(m_Indices.GetCount() * 4), (uint8*)m_Indices.GetData());
 }
 
 void Mesh::AddData(float* pDatas, uint32 Size)

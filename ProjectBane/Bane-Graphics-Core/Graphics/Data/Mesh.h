@@ -86,7 +86,7 @@ public:
 
 	inline IVertexBuffer* GetVertexBuffer() const { return m_VertexBuffer; }
 	inline IIndexBuffer* GetIndexBuffer() const { return m_IndexBuffer; }
-	inline const uint32 GetIndexCount() const { return static_cast<uint32>(m_Indices.GetElementCount()); }
+	inline const uint32 GetIndexCount() const { return static_cast<uint32>(m_Indices.GetCount()); }
 
 	inline void SetName(const std::string& Name) { m_Name = Name; }
 	inline std::string GetName() const { return m_Name; }
@@ -97,8 +97,8 @@ public:
 	template<class T>
 	inline void SetVertexData(const TArray<T>& InVertices)
 	{
-		TArray<FloatInt> Res(InVertices.GetElementCount() * (sizeof(T) / sizeof(FloatInt)));
-		memcpy((void*)Res.GetData(), (void*)InVertices.GetData(), InVertices.GetElementCount() * (sizeof(T)));
+		TArray<FloatInt> Res(InVertices.GetCount() * (sizeof(T) / sizeof(FloatInt)));
+		memcpy((void*)Res.GetData(), (void*)InVertices.GetData(), InVertices.GetCount() * (sizeof(T)));
 		SetVertices(Res);
 	}
 
