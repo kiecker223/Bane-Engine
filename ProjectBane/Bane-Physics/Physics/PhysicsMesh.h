@@ -14,6 +14,10 @@ public:
 		Indices(Other.Indices)
 	{
 	}
+	~PhysicsMesh()
+	{
+		UNUSED(1);
+	}
 	struct Face
 	{
 		double3 Points[3];

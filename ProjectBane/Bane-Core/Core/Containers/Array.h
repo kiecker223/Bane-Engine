@@ -4,6 +4,14 @@
 #include <iostream>
 
 
+inline uint32 NextPowerOfTwoClamped(uint32 Value)
+{
+	if (Value < 16)
+	{
+		Value = 16;
+	}
+	return NextPowerOfTwo(Value);
+}
 
 template<typename TType>
 class TArray
@@ -162,6 +170,7 @@ public:
 	{
 		TType Result(m_Start[Index]);
 		MoveElementsTo(Index);
+		m_Size--;
 		return Result;
 	}
 
@@ -174,12 +183,14 @@ public:
 		m_Size = 0;
 	}
 
-	inline void CheckGrow(uint32 NumNewElements)
+	inline bool CheckGrow(uint32 NumNewElements)
 	{
 		if (m_Start == nullptr || NumNewElements > m_FullBuffSize)
 		{
-			Grow(NextPowerOfTwo(NumNewElements));
+			Grow(NextPowerOfTwoClamped(NumNewElements));
+			return true;
 		}
+		return false;
 	}
 
 	inline void ClearMemory()
@@ -347,7 +358,10 @@ private:
 
 	inline void CopyFullBuffer(TType* OldBuffer, uint32 OldBufferSize)
 	{
-		CheckGrow(OldBufferSize);
+		if (!CheckGrow(OldBufferSize))
+		{
+			Empty();
+		}
 		CopyToNewBuffer(OldBuffer, m_Start, OldBufferSize);
 	}
 
@@ -376,6 +390,10 @@ private:
 		m_Start = Allocate(NewSize);
 		if (m_Size > 0)
 		{
+			for (uint32 i = 0; i < m_Size; i++)
+			{
+				OldPointer[i].~TType();
+			}
 			CopyToNewBuffer(OldPointer, m_Start, m_Size);
 		}
 		if (OldPointer)
@@ -387,12 +405,12 @@ private:
 
 	inline TType* Allocate(uint32 NumElements)
 	{
-		return reinterpret_cast<TType*>(new uint8[NumElements * sizeof(TType)]{});
+		return reinterpret_cast<TType*>(malloc(sizeof(TType) * NumElements));
 	}
 
 	inline void Deallocate(TType* InPtr)
 	{
-		delete[](reinterpret_cast<uint8*>(InPtr));
+		free(reinterpret_cast<void*>(InPtr));
 	}
 
 	inline TType* GetEnd()

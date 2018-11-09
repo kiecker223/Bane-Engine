@@ -71,7 +71,7 @@ public:
 		return m_Root;
 	}
 
-	bool bDrawPhysicsDebugInfo = true;
+	bool bDrawPhysicsDebugInfo = false;
 
 private:
 

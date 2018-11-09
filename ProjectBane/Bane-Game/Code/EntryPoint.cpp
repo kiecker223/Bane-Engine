@@ -299,19 +299,27 @@ std::string SomeRandoNames[] =
 struct BigBoiStruct
 {
 	uint32 Elements[100];
-	//std::string OtherShit;
+	
+	TArray<std::string> OtherShit;
 
+	static BigBoiStruct Result;
 	static BigBoiStruct Current()
 	{
-		static BigBoiStruct Result;
 		Result.Elements[Result.Elements[0] % 100]++;
 		Result.Elements[0]++;
-		//Result.OtherShit = SomeRandoNames[Result.Elements[0]];
+		Result.OtherShit.Add(SomeRandoNames[Result.Elements[0]]);
 		return Result;
+	}
+
+	static void DestroyCurrent()
+	{
+
 	}
 };
 
-void InitApplication2()
+BigBoiStruct BigBoiStruct::Result;
+
+void InitApplication()
 {
 	UNUSED(1);
 	UNUSED(2);
@@ -337,9 +345,11 @@ void InitApplication2()
 	OtherValues.ClearMemory();
 	UNUSED(1);
 	UNUSED(2);
+	BigBoiStruct::Result.OtherShit.ClearMemory();
+	UNUSED(23);
 }
 
-void InitApplication()
+void InitApplication2()
 {
 	GetSceneManager()->CreateNewScene("Space Scene");
 	Scene* SpaceLevel = GetSceneManager()->CurrentScene;

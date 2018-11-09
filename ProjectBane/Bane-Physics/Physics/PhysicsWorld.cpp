@@ -149,6 +149,8 @@ void PhysicsWorld::UpdatePhysics()
 
 void PhysicsWorld::RegenerateOctTree()
 {
+	if (true)
+	return;
 	std::scoped_lock<std::mutex> ScopeGuard(GenerateOctTreeMutex);
 	if (m_OctTree.Tail)
 	{

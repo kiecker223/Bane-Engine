@@ -192,11 +192,13 @@ class Entity
 public:
 
 	Entity() :
+		m_Parent(nullptr),
 		m_Allocator(2048) // Allocate with 1024 bytes
 	{
 	}
 
 	Entity(EntityIdentifier Id) :
+		m_Parent(nullptr),
 		m_Allocator(2048),
 		m_Id(Id)
 	{

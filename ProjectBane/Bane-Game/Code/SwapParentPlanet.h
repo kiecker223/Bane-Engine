@@ -40,6 +40,10 @@ public:
 			GetTransform()->SetPosition(Planet->GetTransform()->GetPosition());
 			std::cout << "PlanetName: " << Planet->GetId().Name << std::endl;
 		}
+		if (GetInput()->Keyboard.GetKeyUp(KEY_R))
+		{
+			GetScene()->bDrawPhysicsDebugInfo = !GetScene()->bDrawPhysicsDebugInfo;
+		}
 	}
 
 };
