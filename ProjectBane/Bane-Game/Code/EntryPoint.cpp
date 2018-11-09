@@ -319,19 +319,19 @@ struct BigBoiStruct
 
 BigBoiStruct BigBoiStruct::Result;
 
-void InitApplication()
+void InitApplication2()
 {
 	UNUSED(1);
 	UNUSED(2);
 	TArray<BigBoiStruct> OtherValues;
+	OtherValues.ClearMemory();
 	UNUSED(3);
 	{
 		TArray<BigBoiStruct> Values;
-		for (uint32 i = 0; i < 40; i++)
+		for (uint32 i = 0; i < 17; i++)
 		{
 			Values.Add(BigBoiStruct::Current());
 		}
-		Values.RemoveAt(3);
 		OtherValues = Values;
 	}
 	OtherValues.ClearMemory();
@@ -349,7 +349,7 @@ void InitApplication()
 	UNUSED(23);
 }
 
-void InitApplication2()
+void InitApplication()
 {
 	GetSceneManager()->CreateNewScene("Space Scene");
 	Scene* SpaceLevel = GetSceneManager()->CurrentScene;

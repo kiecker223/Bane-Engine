@@ -16,10 +16,6 @@ public:
 	{
 		TNode() : Parent(nullptr), NextL(nullptr), NextR(nullptr) { }
 		TType Value;
-		~TNode()
-		{
-			UNUSED(1);
-		}
 		template<class ...Args>
 		inline void Assign(Args&& ...InArgs)
 		{

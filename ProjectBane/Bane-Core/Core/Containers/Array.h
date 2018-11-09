@@ -20,7 +20,7 @@ public:
 
 	TArray() : m_Start(nullptr), m_Size(0), m_FullBuffSize(0)
 	{
-		CheckGrow(16);
+		//CheckGrow(16);
 	}
 
 	TArray(TType* pData, uint32 NumData) : m_Start(nullptr), m_Size(0), m_FullBuffSize(0)
@@ -56,6 +56,7 @@ public:
 			CopyFullBuffer(Rhs.GetData(), Rhs.GetCount());
 			m_Size = Rhs.GetCount();
 		}
+		Rhs.ClearMemory();
 	}
 
 	~TArray()
@@ -358,10 +359,7 @@ private:
 
 	inline void CopyFullBuffer(TType* OldBuffer, uint32 OldBufferSize)
 	{
-		if (!CheckGrow(OldBufferSize))
-		{
-			Empty();
-		}
+		CheckGrow(OldBufferSize);
 		CopyToNewBuffer(OldBuffer, m_Start, OldBufferSize);
 	}
 
@@ -380,26 +378,24 @@ private:
 	{
 		for (uint32 i = Location; i < m_Size - 2; i++)
 		{
+			m_Start[i].~TType();
 			new (&m_Start[i]) TType(m_Start[i + 1]);
 		}
 	}
 
 	inline void Grow(uint32 NewSize)
 	{
-		TType* OldPointer = m_Start;
-		m_Start = Allocate(NewSize);
-		if (m_Size > 0)
+		TType* NewPointer = Allocate(NewSize);
+		if (m_FullBuffSize)
 		{
 			for (uint32 i = 0; i < m_Size; i++)
 			{
-				OldPointer[i].~TType();
+				new (&NewPointer[i]) TType(m_Start[i]);
+				m_Start[i].~TType();
 			}
-			CopyToNewBuffer(OldPointer, m_Start, m_Size);
+			Deallocate(m_Start);
 		}
-		if (OldPointer)
-		{
-			Deallocate(OldPointer);
-		}
+		m_Start = NewPointer;
 		m_FullBuffSize = NewSize;
 	}
 
