@@ -25,17 +25,28 @@ Scene::Scene(const std::string& SceneName) :
 
 Entity* Scene::CreateEntity(const std::string& EntityName)
 {
-	std::string SearchName = EntityName;
-	Entity* pEntity = FindEntity(SearchName);
+	Entity* pEntity = FindEntity(EntityName);
+	std::string FinalName;
 	// Slow
 	uint32 Index = 1;
-	while (pEntity)
+	if (pEntity)
 	{
-		SearchName = GenerateNewName(SearchName, Index);
-		pEntity = FindEntity(SearchName);
-		Index++;
+		while (pEntity)
+		{
+			std::string SearchName = GenerateNewName(EntityName, Index);
+			pEntity = FindEntity(SearchName);
+			Index++;
+			if (!pEntity)
+			{
+				FinalName = SearchName;
+			}
+		}
 	}
-	pEntity = new Entity(EntityIdentifier(SearchName));
+	else
+	{
+		FinalName = EntityName;
+	}
+	pEntity = new Entity(EntityIdentifier(FinalName));
 	pEntity->m_SceneOwner = this;
 	pEntity->SetParent(m_Root);
 	EntityHashEntry Entry = { pEntity->GetId().HashedName, pEntity };

@@ -13,19 +13,30 @@ void PhysicsWorld::SpawnThread()
 	}));
 }
 
-double IntersectsBox(const BoundingBox& Box, const PHYSICS_RAY& InRay)
+bool IntersectsBox(const BoundingBox& Box, const PHYSICS_RAY& InRay)
 {
-	UNUSED(Box); UNUSED(InRay);
-	return -1.;
+	for (uint32 i = 0; i < 3; i++)
+	{
+		double t0 = min((Box.Min[i] - InRay.Position[i]) / InRay.Direction[i], (Box.Max[i] - InRay.Position[i]) / InRay.Direction[i]);
+		double t1 = max((Box.Min[i] - InRay.Position[i]) / InRay.Direction[i], (Box.Max[i] - InRay.Position[i]) / InRay.Direction[i]);
+
+		double MinVal = max(t0, 1e-3);
+		double MaxVal = min(t1, M_POSITIVE_INFINITY);
+		if (MaxVal < MinVal)
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 TBinaryTree<PhysicsWorld::OctTreeNode>::TNode* FindSmallestBoxIntersectedImpl(const PHYSICS_RAY& InRay, TBinaryTree<PhysicsWorld::OctTreeNode>::TNode* LastNode)
 {
-	if (IntersectsBox(LastNode->NextR->Value.Bounds, InRay) > -1.)
+	if (LastNode->NextR && IntersectsBox(LastNode->NextR->Value.Bounds, InRay))
 	{
 		return FindSmallestBoxIntersectedImpl(InRay, LastNode->NextR);
 	}
-	else if (IntersectsBox(LastNode->NextL->Value.Bounds, InRay) > -1.)
+	else if (LastNode->NextL && IntersectsBox(LastNode->NextL->Value.Bounds, InRay))
 	{
 		return FindSmallestBoxIntersectedImpl(InRay, LastNode->NextL);
 	}
@@ -51,10 +62,11 @@ bool PhysicsWorld::CastRay(const PHYSICS_RAY& InRay, RAY_HIT_INFO& OutInfo)
 		if (Result > -1.)
 		{
 			OutInfo.Body = &Body;
+			OutInfo.Position = InRay.Position + (InRay.Direction * Result);
+			OutInfo.Normal = Normal;
+			return true;
 		}
-		OutInfo.Position = InRay.Position + (InRay.Direction * Result);
-		OutInfo.Normal = Normal;
-		return Result > -1.f;
+		return false;
 	}
 	else
 	{
@@ -149,8 +161,6 @@ void PhysicsWorld::UpdatePhysics()
 
 void PhysicsWorld::RegenerateOctTree()
 {
-	if (true)
-	return;
 	std::scoped_lock<std::mutex> ScopeGuard(GenerateOctTreeMutex);
 	if (m_OctTree.Tail)
 	{

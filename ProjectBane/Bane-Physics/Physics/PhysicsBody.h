@@ -83,13 +83,35 @@ public:
 	PhysicsMesh PhysMesh;
 	PHYSICS_SPHERE_INFO Sphere;
 
+
+	inline double HitSphere(const double3& RayPos, const double3& RayDir, double Radius)
+	{
+		double3 OriginMCenter = RayPos - Position;
+		double A = dot(RayDir, RayDir);
+		double B = 2 * dot(OriginMCenter, RayDir);
+		double C = dot(OriginMCenter, OriginMCenter) - (Radius * Radius);
+		double Discriminate = (B * B) - (4 * A * C);
+		double SqrDiscriminate = sqrt(Discriminate);
+		double T = (-B - SqrDiscriminate) / (2 * A);
+		if (T < M_POSITIVE_INFINITY && T > 1e-3)
+		{
+			return T;
+		}
+		T = (-B + SqrDiscriminate) / (2 * A);
+		if (T < M_POSITIVE_INFINITY && T > 1e-3)
+		{
+			return T;
+		}
+		return -1.;
+	}
+
 	inline double TestRayHit(const double3& RayStart, const double3& RayDir, double3& OutNormal)
 	{
-		UNUSED(RayStart); UNUSED(RayDir); UNUSED(OutNormal);
 		double Result = -1.;
 		if (BodyType == PHYSICS_BODY_TYPE_SPHERE) 
 		{
-
+			Result = HitSphere(RayStart, RayDir, Sphere.Radius);
+			OutNormal = (RayStart + (RayDir * Result)) - Position;
 		}
 		if (BodyType == PHYSICS_BODY_TYPE_MESH)
 		{

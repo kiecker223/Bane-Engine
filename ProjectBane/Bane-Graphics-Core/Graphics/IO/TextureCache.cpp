@@ -49,6 +49,10 @@ void TextureCache::InitCache()
 	Device->GenerateMips(m_DefaultBlack);
 	Device->GenerateMips(m_DefaultBlue);
 	Device->GenerateMips(m_DefaultNormal);
+	AddTexture("DefaultWhite", m_DefaultWhite);
+	AddTexture("DefaultBlack", m_DefaultBlack);
+	AddTexture("DefaultBlue", m_DefaultBlue);
+	AddTexture("DefaultNormal", m_DefaultNormal);
 }
 
 void TextureCache::DestroyCache()

@@ -71,6 +71,12 @@ public:
 		return m_Root;
 	}
 
+
+	inline PhysicsWorld& GetPhysicsWorld()
+	{
+		return m_World;
+	}
+
 	bool bDrawPhysicsDebugInfo = false;
 
 private:

@@ -3,6 +3,7 @@
 #include <BaneObject.h>
 #include <Platform/Input/InputSystem.h>
 #include <Core/Containers/Array.h>
+#include "BaneObject/CoreComponents/MeshRenderingComponent.h"
 #include <iostream>
 
 
@@ -43,6 +44,26 @@ public:
 		if (GetInput()->Keyboard.GetKeyUp(KEY_R))
 		{
 			GetScene()->bDrawPhysicsDebugInfo = !GetScene()->bDrawPhysicsDebugInfo;
+		}
+		if (GetInput()->Keyboard.GetKeyDown(KEY_Q))
+		{
+			PHYSICS_RAY Ray;
+			Ray.Position = GetTransform()->GetPosition();
+			Ray.Direction = GetTransform()->GetForward(); 
+			RAY_HIT_INFO HitInfo;
+			if (GetScene()->GetPhysicsWorld().CastRay(Ray, HitInfo))
+			{
+				Entity* NewEntity = GetScene()->CreateEntity("AnotherEntity");
+				NewEntity->GetPhysicsProperties().bCanTick = false;
+				NewEntity->GetTransform()->SetPosition(HitInfo.Position);
+				NewEntity->GetTransform()->Scale(200000.);
+				Planets.Add(NewEntity);
+				auto Mrc = NewEntity->AddComponent<MeshRenderingComponent>();
+				Mrc->RenderedMesh = GetScene()->GetMeshCache().LoadMesh("Sphere");
+				Mrc->RenderedMaterial.InitializeMaterial("MainShader.gfx");
+				Mrc->RenderedMaterial.SetTexture("DefaultBlue", 0);
+				std::cout << "HitEnemy" << std::endl;
+			}
 		}
 	}
 
