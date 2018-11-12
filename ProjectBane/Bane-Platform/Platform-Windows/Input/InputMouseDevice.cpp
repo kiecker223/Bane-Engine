@@ -51,9 +51,9 @@ struct InputMouseDevice::Impl
 		DIMOUSESTATE2 MouseState = { };
 		Mouse->Acquire();
 		Mouse->GetDeviceState(sizeof(DIMOUSESTATE2), &MouseState);
-		MousePosition = LastMousePosition;
-		MousePosition = float2(static_cast<float>(MouseState.lX), static_cast<float>(MouseState.lY));
-		MouseDelta = MousePosition - LastMousePosition;
+		LastMousePosition = MousePosition;
+		MouseDelta = float2(static_cast<float>(MouseState.lX), static_cast<float>(MouseState.lY));
+		MousePosition += MouseDelta;
 	}
 };
 

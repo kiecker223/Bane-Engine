@@ -37,18 +37,12 @@ public:
 
 	inline TNode* Add(TType&& Val)
 	{
-		TNode* NewNode = new TNode();
-		NewNode->Assign(Val);
-		Head->Next = NewNode;
-		NewNode->Last = Head;
-		Head = NewNode;
-		Size++;
-		return NewNode;
+		return AddImpl(std::forward<TType>(Val));
 	}
 
 	inline TNode* Add(const TType& Val)
 	{
-		return Add(std::move<T>(Val));
+		return AddImpl(Val);
 	}
 
 	inline void RecursiveDelete()
@@ -64,6 +58,20 @@ public:
 		Head = nullptr;
 	}
 
+private:
+
+	TNode* AddImpl(const TType& Val)
+	{
+		TNode* NewNode = new TNode();
+		NewNode->Assign(Val);
+		Head->Next = NewNode;
+		NewNode->Last = Head;
+		Head = NewNode;
+		Size++;
+		return NewNode;
+	}
+
+public:
 
 	TNode* Head;
 	TNode* Tail;

@@ -25,7 +25,7 @@ public:
 
 		inline double TestRayHit(const double3& RayPos, const double3& RayDir, double3& OutNormal)
 		{
-			UNUSED(RayPos); UNUSED(RayDir), UNUSED(OutNormal);
+			UNUSED(RayPos); UNUSED(RayDir); UNUSED(OutNormal);
 			return -1.;
 		}
 	};
