@@ -113,7 +113,7 @@ private:
 
 	static uint32 GCurrentFrameIndex;
 
-	StackQueue<D3D12CommandList*, 16> m_AvailableCLs[COMMAND_CONTEXT_TYPE_NUM_TYPES];
+	TStack<D3D12CommandList*, 16> m_AvailableCLs[COMMAND_CONTEXT_TYPE_NUM_TYPES];
 	TArray<D3D12GraphicsCommandContext*> m_AvailableContexts;
 	D3D12ComputeCommandContext* m_ComputeContext;
 	D3D12ComputePipelineState* m_GenerateMipsPipeline2D;

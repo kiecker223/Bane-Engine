@@ -158,8 +158,8 @@ public:
 	D3D12ShaderResourceTable* CurrentTable;
 	ID3D12RootSignature* RootSignature;
 	D3D12GraphicsDevice* ParentDevice;
-	StackQueue<D3D12_RESOURCE_BARRIER, 32> PendingTransitions;
-	StackQueue<D3D12GPUResource*, 32> TransitionedResources;
+	TStack<D3D12_RESOURCE_BARRIER, 32> PendingTransitions;
+	TStack<D3D12GPUResource*, 32> TransitionedResources;
 	D3D12_RECT ScissorRect;
 	D3D12_VIEWPORT Viewport;
 };
@@ -198,6 +198,6 @@ public:
 	D3D12ShaderResourceTable* CurrentTable;
 	ID3D12RootSignature* RootSignature;
 	D3D12GraphicsDevice* ParentDevice;
-	StackQueue<D3D12_RESOURCE_BARRIER, 32> PendingTransitions;
-	StackQueue<D3D12GPUResource*, 32> TransitionedResources;
+	TStack<D3D12_RESOURCE_BARRIER, 32> PendingTransitions;
+	TStack<D3D12GPUResource*, 32> TransitionedResources;
 };

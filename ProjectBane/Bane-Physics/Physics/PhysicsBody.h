@@ -92,6 +92,10 @@ public:
 		double C = dot(OriginMCenter, OriginMCenter) - (Radius * Radius);
 		double Discriminate = (B * B) - (4 * A * C);
 		double SqrDiscriminate = sqrt(Discriminate);
+		if (isnan(SqrDiscriminate))
+		{
+			return -1.;
+		}
 		double T = (-B - SqrDiscriminate) / (2 * A);
 		if (T < M_POSITIVE_INFINITY && T > 1e-3)
 		{
@@ -117,6 +121,7 @@ public:
 		{
 			for (uint32 i = 0; i < PhysMesh.Faces.GetCount(); i++)
 			{
+				
 			}
 		}
 		return Result;

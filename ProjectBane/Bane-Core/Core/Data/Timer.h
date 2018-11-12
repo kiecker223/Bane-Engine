@@ -24,10 +24,11 @@ public:
 		return static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(End - Start).count()) / 1E+9f;
 	}
 
-	inline float GetTimerElapsedNanoseconds()
+	inline uint64 GetTimerElapsedNanoseconds()
 	{
-		return static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(End - Start).count());
+		return std::chrono::duration_cast<std::chrono::nanoseconds>(End - Start).count();
 	}
+
 
 	TimePoint Start;
 	TimePoint End;

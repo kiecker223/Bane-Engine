@@ -15,7 +15,7 @@ class D3D12CommandQueue
 
 public:
 
-	typedef StackQueue<D3D12CommandList*, 16> Queue;
+	typedef TStack<D3D12CommandList*, 16> Queue;
 
 	D3D12CommandQueue() :
 		m_FenceValue(0)

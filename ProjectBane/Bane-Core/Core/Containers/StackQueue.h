@@ -4,19 +4,19 @@
 #include <array>
 
 template<typename TType, uint32 TMAX_SIZE>
-class StackQueue
+class TStack
 {
 public:
 
 	static const uint32 MAX_SIZE = TMAX_SIZE;
-	typedef StackQueue<TType, MAX_SIZE> ThisType;
+	typedef TStack<TType, MAX_SIZE> ThisType;
 
-	StackQueue() : 
+	TStack() : 
 		NumUsed(0)
 	{
 	}
 
-	StackQueue(ThisType& Rhs)
+	TStack(ThisType& Rhs)
 	{
 		CopyFrom(Rhs);
 	}
