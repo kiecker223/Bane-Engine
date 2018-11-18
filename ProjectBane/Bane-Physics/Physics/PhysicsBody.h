@@ -121,7 +121,12 @@ public:
 		{
 			for (uint32 i = 0; i < PhysMesh.Faces.GetCount(); i++)
 			{
-				
+				PhysicsMesh::Face OrientedFace = PhysMesh.GetFaceOriented(i, Position, Orientation);
+				double TestedHit = OrientedFace.TestRayHit(RayStart, RayDir, OutNormal);
+				if (TestedHit > -1.)
+				{
+					return TestedHit;
+				}
 			}
 		}
 		return Result;

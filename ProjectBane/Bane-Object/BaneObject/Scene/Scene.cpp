@@ -11,7 +11,6 @@ static std::string GenerateNewName(std::string OriginalName, uint32 Count)
 Scene::Scene()
 {
 	m_Root = new Entity(EntityIdentifier("SceneRoot"));
-	m_Root->GetPhysicsProperties().bCanTick = false;
 	m_Entities.Add({ m_Root->GetId().HashedName, m_Root });
 }
 
@@ -19,7 +18,6 @@ Scene::Scene(const std::string& SceneName) :
 	m_Name(SceneName)
 {
 	m_Root = new Entity(EntityIdentifier("SceneRoot"));
-	m_Root->GetPhysicsProperties().bCanTick = false;
 	m_Entities.Add({ m_Root->GetId().HashedName, m_Root });
 }
 
@@ -120,21 +118,6 @@ void Scene::Tick(float DT)
 		{
 			m_Entities.Add(e);
 			m_EntityStartList.Add(e);
-			auto PhysicsProps = e.pEntity->GetPhysicsProperties();
-			if (PhysicsProps.bCanTick)
-			{
-				PHYSICS_BODY_CREATE_INFO Body = { };
-				Body.Orientation = e.pEntity->GetTransform()->GetRotation();
-				Body.Position = e.pEntity->GetTransform()->GetPosition();
-				Body.Velocity = PhysicsProps.Velocity;
-				//Body.AngularVelocity;
-				Body.Mass = PhysicsProps.Mass;
-				Body.BodyType = PHYSICS_BODY_TYPE_SPHERE;
-				//Body.PhysMesh			;
-				Body.Sphere.Radius = e.pEntity->GetTransform()->GetScale().x / 2.0;
-				Body.EntityHandle = e.Hash;
-				e.pEntity->GetPhysicsProperties().PhysicsWorldHandle = m_World.AddBody(Body);
-			}
 		}
 		m_EntityAddList.Empty();
 	}
@@ -146,35 +129,8 @@ void Scene::Tick(float DT)
 		}
 		m_EntityStartList.Empty();
 	}
-	if (m_World.IsReadyForRead())
-	{
-		PhysicsUpdate(m_World.UpdateBuffer);
-	}
 }
 
-void Scene::PhysicsUpdate(const PhysicsUpdateBuffer& UpdateBuffer)
-{
-	if (UpdateBuffer.Bodies.GetCount() > 0)
-	{
-		for (auto& e : m_Entities)
-		{
-			if (e.pEntity->GetPhysicsProperties().bCanTick)
-			{
-				uint32 PhysicsHandle = e.pEntity->GetPhysicsProperties().PhysicsWorldHandle;
-				auto& Body = UpdateBuffer.Bodies[PhysicsHandle];
-				e.pEntity->GetTransform()->SetPosition(Body.Position);
-				e.pEntity->GetPhysicsProperties().Velocity = UpdateBuffer.Bodies[PhysicsHandle].Velocity;
-				//auto& CurrentRotation = e.pEntity->GetTransform()->GetRotation();
-				//double RadsPerSecond = length(Body.AngularVelocity);
-				//if (!isnan(RadsPerSecond) && abs(RadsPerSecond) > 0.0f)
-				//{
-				//	CurrentRotation *= Quaternion::FromAxisAngle(normalized(Body.AngularVelocity), RadsPerSecond);
-				//	CurrentRotation.Normalize();
-				//}
-			}
-		}
-	}
-}
 
 void DrawOctsImpl(TBinaryTree<PhysicsWorld::OctTreeNode>::TNode* pNewNode, RenderLoop& RL)
 {
@@ -209,7 +165,7 @@ void Scene::Render(RenderLoop& RL)
 
 void Scene::DumpScene()
 {
-	m_World.MessageQueue.AllocMessage<PhysicsMessage>(true);
+	m_World.bRunningPhysicsSim = false;
 	m_MeshCache.Destroy();
 	for (auto& e : m_Entities)
 	{

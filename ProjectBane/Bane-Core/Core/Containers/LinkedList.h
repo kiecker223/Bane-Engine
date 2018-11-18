@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Common/Types.h"
 
 template<typename TType>
 class TLinkedList
@@ -11,7 +11,7 @@ public:
 		template<class ...Args>
 		void Assign(Args&& ...InArgs)
 		{
-			new (&Value) TType(std::forward<Args>(...Args));
+			new (&Value) TType(std::forward<Args...>(InArgs...));
 		}
 		TType Value;
 		TNode* Next;
@@ -63,12 +63,13 @@ private:
 	TNode* AddImpl(const TType& Val)
 	{
 		TNode* NewNode = new TNode();
-		NewNode->Assign(Val);
+		Head->Assign(Val);
 		Head->Next = NewNode;
 		NewNode->Last = Head;
+		TNode* OldHead = Head;
 		Head = NewNode;
 		Size++;
-		return NewNode;
+		return OldHead;
 	}
 
 public:

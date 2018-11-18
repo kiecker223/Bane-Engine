@@ -35,7 +35,7 @@ public:
 	bool EntityExists(uint64 Id);
 
 	void Tick(float DT);
-	void PhysicsUpdate(const PhysicsUpdateBuffer& UpdateBuffer);
+	//void PhysicsUpdate(const PhysicsUpdateBuffer& UpdateBuffer);
 	void Render(RenderLoop& RL);
 	void DumpScene();
 	void LoadFromMetaData(const SCENE_DATA* Data);

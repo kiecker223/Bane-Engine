@@ -1,8 +1,6 @@
 #include "PhysicsWorld.h"
 #include <iostream>
 
-// Gravitational constant  G = (6.6747*10^-11)
-// Gravitational equation F = G*((m1*m2)/r*r)
 
 
 void PhysicsWorld::SpawnThread()
@@ -96,20 +94,13 @@ void PhysicsWorld::UpdatePhysics()
 			AddList.Empty();
 		}
 
-		if (MessageQueue.GetMessageCount() > 0)
+		if (!MessageQueue.Queue.IsEmpty())
 		{
-			auto* Message = MessageQueue.GetMessage(0);
-			while (Message->pNext)
+			std::lock_guard<std::mutex> ScopedMutex(MessageQueue.PushMessageMutex);
+			while (!MessageQueue.Queue.IsEmpty())
 			{
-				if (Message->bQuit)
-				{
-					bRunningPhysicsSim = false;
-				}
-				else
-				{
-					Message->Execute(m_Bodies[Message->BodyId]);
-					Message = Message->pNext;
-				}
+				auto Val = MessageQueue.Queue.Dequeue();
+				Val.Callback(GetBody(Val.Handle));
 			}
 		}
 
@@ -120,33 +111,40 @@ void PhysicsWorld::UpdatePhysics()
 			for (auto& OtherBody : m_Bodies)
 			{
 				if (OtherBody.Handle == Body.Handle)
-				{    
+				{
 					continue;
 				}
 				double3 ForceDir = OtherBody.Position - Body.Position;
 				double DistanceFromBody = length(ForceDir);
 				normalize(ForceDir);
-				
-				if (DistanceFromBody < 1e-1) 
+
+				if (DistanceFromBody < 1e-1)
 				{
 					continue;
 				}
 
 				double Force = M_GRAV_CONST * ((Body.Mass * OtherBody.Mass) / (DistanceFromBody * DistanceFromBody));
-				ForceDir *= Force;
-				double3 AccelerationDir = ForceDir / Body.Mass;
-				Body.Velocity += (AccelerationDir * (1. / 60.));
-				if (!isNan(Body.Velocity))
+				if (Force > 0.0)
 				{
-					Body.Position += Body.Velocity;
-					if (isNan(Body.Position))
+					ForceDir *= Force;
+					double3 AccelerationDir = ForceDir / Body.Mass;
+					Body.Velocity += (AccelerationDir * (1. / 60.));
+					if (!isNan(Body.Velocity))
+					{
+						Body.Position += Body.Velocity;
+						if (isNan(Body.Position))
+						{
+							__debugbreak();
+						}
+					}
+					else
 					{
 						__debugbreak();
 					}
 				}
 				else
 				{
-					__debugbreak();
+					continue;
 				}
 			}
 		}
@@ -184,14 +182,23 @@ void PhysicsWorld::RegenerateOctTree()
 	auto* RootNode = m_OctTree.Tail;
 	RootNode->Value.Bounds = EntireScene;
 	RootNode->Value.MeshesInBounds = AllIds;
-	GenerateOctTreeImpl(RootNode);
+	uint32 CallDepth = 0;
+	GenerateOctTreeImpl(RootNode, CallDepth);
 }
 
-void PhysicsWorld::GenerateOctTreeImpl(TBinaryTree<OctTreeNode>::TNode* InNode)
+void PhysicsWorld::GenerateOctTreeImpl(TBinaryTree<OctTreeNode>::TNode* InNode, uint32& CallDepth)
 {
+	if (CallDepth > 40)
+	{
+		__debugbreak();
+	}
 	if (InNode->Value.MeshesInBounds.GetCount() > 1)
 	{
 		uint32 BiggestAxis = InNode->Value.Bounds.GetBiggestAxis();
+		if (BiggestAxis == 3)
+		{
+			BiggestAxis = CallDepth % 2;
+		}
 		double3 Center = InNode->Value.Bounds.GetCenter();
 		TArray<uint32> LNodeMeshes;
 		TArray<uint32> RNodeMeshes;
@@ -213,8 +220,10 @@ void PhysicsWorld::GenerateOctTreeImpl(TBinaryTree<OctTreeNode>::TNode* InNode)
 		auto* RNode = m_OctTree.CreateNode(InNode, { RNodeBounds, RNodeMeshes });
 		InNode->NextL = LNode;
 		InNode->NextR = RNode;
-		GenerateOctTreeImpl(LNode);
-		GenerateOctTreeImpl(RNode);
+		CallDepth++;
+		GenerateOctTreeImpl(LNode, CallDepth);
+		CallDepth++;
+		GenerateOctTreeImpl(RNode, CallDepth);
 	}
 }
 

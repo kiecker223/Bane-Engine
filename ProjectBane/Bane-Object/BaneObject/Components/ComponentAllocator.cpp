@@ -24,7 +24,7 @@ void ComponentAllocator::ReserveAndCopy(size_t NumBytes)
 	uint8* PrevBegin = PtrBegin;
 	size_t PrevNumBytes = GetNumBytesUsed();
 
-	// The behaviour of the realloc function here will not invalidate the previous pointer
+	// The behavior of the realloc function here will not invalidate the previous pointer
 	// I want to avoid the InternalFree function
 	if (!InternalReAlloc(NumBytes))
 	{

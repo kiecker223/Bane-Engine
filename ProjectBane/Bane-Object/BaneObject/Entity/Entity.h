@@ -162,6 +162,11 @@ public:
 		return *this;
 	}
 
+	inline operator bool()
+	{
+		return m_AllocObjectsStart;
+	}
+
 	inline T* operator ->()
 	{
 #ifdef _DEBUG
@@ -298,11 +303,6 @@ public:
 	inline uint32 GetChildCount() const
 	{
 		return static_cast<uint32>(m_Children.GetCount());
-	}
-
-	inline PhysicsProperties& GetPhysicsProperties()
-	{
-		return m_PhysicsProperties;
 	}
 
 	inline uint32 GetComponentCount() const

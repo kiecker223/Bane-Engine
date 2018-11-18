@@ -20,7 +20,6 @@ public:
 
 	TArray() : m_Start(nullptr), m_Size(0), m_FullBuffSize(0)
 	{
-		//CheckGrow(16);
 	}
 
 	TArray(TType* pData, uint32 NumData) : m_Start(nullptr), m_Size(0), m_FullBuffSize(0)

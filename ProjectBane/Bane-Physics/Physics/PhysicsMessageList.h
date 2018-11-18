@@ -1,61 +1,37 @@
 #pragma once
 
+#include <Core/Containers/Queue.h>
+#include <functional>
 #include "PhysicsBody.h"
 #include "PhysicsMessage.h"
+
+typedef struct PHYSICS_MESSAGE_CALLBACK {
+	std::function<void(PhysicsBody&)> Callback;
+	uint32 Handle;
+} PHYSICS_MESSAGE_CALLBACK;
 
 class ApplicationToPhysicsQueue
 {
 public:
-
-	ApplicationToPhysicsQueue() : m_Start(nullptr), m_Current(nullptr), m_Last(nullptr) { InitialAlloc(1024); }
-
-	ApplicationToPhysicsQueue(uint32 InitialSize)
+	
+	ApplicationToPhysicsQueue()
 	{
-		InitialAlloc(InitialSize);
+		UNUSED(1);
+		UNUSED(2);
+		int i = 0;
+		i += 1;
+		int b = i;
+		UNUSED(b);
 	}
 
-	inline uint32 GetCurrentBufferSize() const
+	void AddCallback(const PHYSICS_MESSAGE_CALLBACK& Callback)
 	{
-		return static_cast<uint32>(reinterpret_cast<ptrdiff_t>(m_Last) - reinterpret_cast<ptrdiff_t>(m_Start));
+		std::lock_guard<std::mutex> ScopedMutex(PushMessageMutex);
+		Queue.Enqueue(Callback);
 	}
 
-	inline uint32 GetMessageCount() const
-	{
-		return m_AllocatedObjects.GetCount();
-	}
-
-	template<typename T>
-	inline T* AllocMessage(uint32 ParentHandle)
-	{
-		T* Result = new (Alloc(sizeof(T))) T(ParentHandle);
-		GetMessage(m_AllocatedObjects.GetCount() - 1)->pNext = Result;
-		return Result;
-	}
-
-	template<typename T>
-	inline T* AllocMessage(bool bQuit)
-	{
-		T* Result = new (Alloc(sizeof(T))) T(bQuit);
-		GetMessage(static_cast<uint32>(m_AllocatedObjects.GetCount()) - 1)->pNext = Result;
-		return Result;
-	}
-
-	void Reset();
-
-	inline PhysicsMessage* GetMessage(uint32 Index)
-	{
-		return reinterpret_cast<PhysicsMessage*>(m_AllocatedObjects[Index] + reinterpret_cast<ptrdiff_t>(m_Start));
-	}
-
+	std::mutex PushMessageMutex;
+	TQueue<PHYSICS_MESSAGE_CALLBACK> Queue;
 private:
 
-	void InitialAlloc(uint32 Size);
-	void AllocateBiggerAndCopy(uint32 NewSize);
-
-	uint8* Alloc(uint32 Size);
-
-	TArray<ptrdiff_t> m_AllocatedObjects;
-	uint8* m_Start;
-	uint8* m_Current;
-	uint8* m_Last;
 };

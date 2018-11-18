@@ -28,11 +28,9 @@ public:
 		return m_Type;
 	}
 
-	inline DIRECTIONAL_LIGHT_DATA GetDirectionalLight() const;
-
-	inline POINT_LIGHT_DATA GetPointLight() const;
-
-	inline SPOTLIGHT_DATA GetSpotLight() const;
+	DIRECTIONAL_LIGHT_DATA GetDirectionalLight() const;
+	POINT_LIGHT_DATA GetPointLight() const;
+	SPOTLIGHT_DATA GetSpotLight() const;
 	
 	float3 Color;
 	float Range;

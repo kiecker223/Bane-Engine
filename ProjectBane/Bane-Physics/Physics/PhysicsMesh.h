@@ -14,10 +14,7 @@ public:
 		Indices(Other.Indices)
 	{
 	}
-	~PhysicsMesh()
-	{
-		UNUSED(1);
-	}
+
 	struct Face
 	{
 		double3 Points[3];
@@ -51,6 +48,7 @@ public:
 			Result.Points[i] += Position;
 		}
 		Result.Normal = (RotationMat * Result.Normal);
+		return Result;
 	}
 
 	void CreateFromMesh(const Mesh* pMesh, const float3& Scale);

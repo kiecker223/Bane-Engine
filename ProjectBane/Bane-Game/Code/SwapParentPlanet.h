@@ -31,6 +31,17 @@ public:
 		return Planets[Index];
 	}
 
+	void PrintPlanetData()
+	{
+		for (auto* Planet : Planets)
+		{
+			TComponentHandle<SphereCollisionComponent> SCC = Planet->GetComponent<SphereCollisionComponent>();
+			if (SCC)
+			{
+				std::cout << "Planet handle for planet: " << Planet->GetId().Name << " " << SCC->GetBodyId() << std::endl;
+			}
+		}
+	}
 
 	void Tick(float Dt) override 
 	{
@@ -54,7 +65,7 @@ public:
 			if (GetScene()->GetPhysicsWorld().CastRay(Ray, HitInfo))
 			{
 				Entity* NewEntity = GetScene()->CreateEntity("AnotherEntity");
-				NewEntity->GetPhysicsProperties().bCanTick = false;
+				//NewEntity->GetPhysicsProperties().bCanTick = false;
 				NewEntity->GetTransform()->SetPosition(HitInfo.Position);
 				NewEntity->GetTransform()->Scale(200000.);
 				Planets.Add(NewEntity);
@@ -64,6 +75,10 @@ public:
 				Mrc->RenderedMaterial.SetTexture("DefaultBlue", 0);
 				std::cout << "HitEnemy" << std::endl;
 			}
+		}
+		if (GetInput()->Keyboard.GetKeyDown(KEY_Z))
+		{
+			PrintPlanetData();
 		}
 	}
 

@@ -3,6 +3,7 @@
 #include <iostream>
 #include "Core/Containers/HeapQueue.h"
 #include "Graphics/IO/TextureCache.h"
+#include "BaneObject/CoreComponents/SphereCollisionComponent.h"
 #include "BaneObject/CoreComponents/CameraComponent.h"
 #include "SwapParentPlanet.h"
 #include "CameraMovementComponent.h"
@@ -41,8 +42,6 @@ public:
 	void Tick(float Dt) override 
 	{
 		UNUSED(Dt);
-		auto Vel = GetOwner()->GetPhysicsProperties().Velocity;
-		std::cout << Vel.x << " : " << Vel.y << " : " << Vel.z << std::endl;
 	}
 };
 
@@ -375,12 +374,15 @@ void InitApplication()
 		Entity* Sun = SpaceLevel->CreateEntity("Sun");
 		std::cout << "Sun position: " << SInfo.Position.x << " " << SInfo.Position.y << " " << SInfo.Position.z << std::endl;
 		Sun->GetTransform()->SetPosition(SInfo.Position);
-		Sun->GetPhysicsProperties().Mass = 1.989e30;
 		auto SunMesh = Sun->AddComponent<MeshRenderingComponent>();
 		SunMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		SunMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		SunMesh->RenderedMaterial.SetTexture("Resources/8k_sun.jpg", 0);
 		Sun->GetTransform()->Scale(1391016000.0);
+		auto SCC = Sun->AddComponent<SphereCollisionComponent>();
+		SCC->SetPosition(SInfo.Position);
+		SCC->SetMass(1.989e30);
+		SCC->SetRadius(1391016000.0 / 2.);
 		//FollowedPlanet = Sun;
 	}
 	Entity* FollowedPlanet = nullptr;
@@ -399,8 +401,6 @@ void InitApplication()
 		);
 		Entity* Mercury = SpaceLevel->CreateEntity("Mercury");
 		std::cout << "Mercury Distance: " << length(SInfo.Position) << std::endl;
-		Mercury->GetPhysicsProperties().Mass = 3.285e23;
-		Mercury->GetPhysicsProperties().Velocity = SInfo.Velocity * (1.0 / 60.);
 		//Mercury->GetPhysicsProperties().bCanTick = false;
 		Mercury->GetTransform()->SetPosition(SInfo.Position);
 		auto MercuryMesh = Mercury->AddComponent<MeshRenderingComponent>();
@@ -408,6 +408,11 @@ void InitApplication()
 		MercuryMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		MercuryMesh->RenderedMaterial.SetTexture("Resources/2k_mercury.jpg", 0);
 		Mercury->GetTransform()->Scale(4879000.0);
+		auto SCC = Mercury->AddComponent<SphereCollisionComponent>();
+		SCC->SetMass(3.285e23);
+		SCC->SetVelocity(SInfo.Velocity * (1.0 / 60.));
+		SCC->SetPosition(SInfo.Position);
+		SCC->SetRadius(4879000.0 / 2.);
 	}
 	{
 		PLANET_START_INFO SInfo = PlacePlanet(
@@ -424,29 +429,37 @@ void InitApplication()
 		);
 		std::cout << "Venus distance: " << length(SInfo.Position) << std::endl;
 		Entity* Venus = SpaceLevel->CreateEntity("Venus");
-		Venus->GetPhysicsProperties().Mass = 4.867e24f;
-		Venus->GetPhysicsProperties().Velocity = SInfo.Velocity * (1.0 / 60.0);
 		Venus->GetTransform()->SetPosition(SInfo.Position);
 		auto VenusMesh = Venus->AddComponent<MeshRenderingComponent>();
 		VenusMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		VenusMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		VenusMesh->RenderedMaterial.SetTexture("Resources/8k_venus_atmosphere.jpg", 0);
 		Venus->GetTransform()->Scale(12104000.);
+		auto SCC = Venus->AddComponent<SphereCollisionComponent>();
+		SCC->SetPosition(SInfo.Position);
+		SCC->SetVelocity(SInfo.Velocity);
+		SCC->SetMass(4.867e24);
+		SCC->SetRadius(12104000. / 2.);
 		//FollowedPlanet = Venus;
 	}
 	{
 		Entity* Earth = SpaceLevel->CreateEntity("Earth");
 		PLANET_START_INFO SInfo = PlacePlanet({ "Earth", 0., 0., 0., M_AU(1.0), 0., 0. }, TimeArg);
 		std::cout << "Earth Distance: " << length(SInfo.Position) << std::endl;
-		Earth->GetPhysicsProperties().Mass = 5.97219e24;
-		Earth->GetPhysicsProperties().Velocity = SInfo.Velocity * (1.0 / 60.0);
-		Earth->GetPhysicsProperties().AngularVelocity = double3(0., 1., 0.) * (7.2921159e-5 * (1. / 60.));
-		Earth->GetTransform()->SetPosition(SInfo.Position);
+		//Earth->GetPhysicsProperties().Mass = 5.97219e24;
+		//Earth->GetPhysicsProperties().Velocity = SInfo.Velocity * (1.0 / 60.0);
+		//Earth->GetPhysicsProperties().AngularVelocity = double3(0., 1., 0.) * (7.2921159e-5 * (1. / 60.));
+		//Earth->GetTransform()->SetPosition(SInfo.Position);
 		auto EarthMesh = Earth->AddComponent<MeshRenderingComponent>();
 		EarthMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		EarthMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		EarthMesh->RenderedMaterial.SetTexture("Resources/EarthNoClouds.jpg", 0);
 		Earth->GetTransform()->Scale(12742000.0);
+		auto SCC = Earth->AddComponent<SphereCollisionComponent>();
+		SCC->SetMass(5.97219e24);
+		SCC->SetVelocity(SInfo.Velocity * 1.0 / 60.);
+		SCC->SetPosition(SInfo.Position);
+		SCC->SetRadius(12742000.0 / 2.);
 		FollowedPlanet = Earth;
 	}
 	{
@@ -463,19 +476,20 @@ void InitApplication()
 			TimeArg
 		);
 		Entity* Luna = SpaceLevel->CreateEntity("Luna");
-		Luna->GetPhysicsProperties().Mass = 7.34767309e22;
-		Luna->GetPhysicsProperties().Velocity = SInfo.Velocity * (1.0 / 60.0);
-		Luna->GetTransform()->SetPosition(SInfo.Position);
 		auto LunaMesh = Luna->AddComponent<MeshRenderingComponent>();
 		LunaMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		LunaMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		LunaMesh->RenderedMaterial.SetTexture("Resources/8k_moon.jpg", 0);
 		Luna->GetTransform()->Scale(3474000.0);
+		auto SCC = Luna->AddComponent<SphereCollisionComponent>();
+		SCC->SetMass(7.34767309e22);
+		SCC->SetVelocity(SInfo.Velocity * (1. / 60.));
+		SCC->SetPosition(SInfo.Position);
+		SCC->SetRadius(3474000.0 / 2.);
 	}
 
 	Entity* CamEntity = SpaceLevel->CreateEntity("Camera");
 	CamEntity->GetTransform()->SetPosition(FollowedPlanet->GetTransform()->GetPosition());
-	CamEntity->GetPhysicsProperties().bCanTick = false;
 	CamEntity->GetTransform()->SetRotation(float3(0.f, 0.f, 0.f));
 	auto Cam = CamEntity->AddComponent<CameraComponent>();
 	Cam->ZNear = 1e-2f;

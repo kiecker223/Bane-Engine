@@ -9,15 +9,10 @@ void LightComponent::GraphicsUpdate(RenderLoop& Loop)
 
 void LightComponent::SetLightType(ELIGHT_TYPE LightType)
 {
-	ELIGHT_TYPE PrevType = m_Type;
-	if (LightType == PrevType)
-	{
-		return;
-	}
 	m_Type = LightType;
 }
 
-inline DIRECTIONAL_LIGHT_DATA LightComponent::GetDirectionalLight() const
+DIRECTIONAL_LIGHT_DATA LightComponent::GetDirectionalLight() const
 {
 	BANE_CHECK(m_Type == LIGHT_TYPE_DIRECTIONAL);
 	DIRECTIONAL_LIGHT_DATA Result = {};
@@ -28,7 +23,7 @@ inline DIRECTIONAL_LIGHT_DATA LightComponent::GetDirectionalLight() const
 	return Result;
 }
 
-inline POINT_LIGHT_DATA LightComponent::GetPointLight() const
+POINT_LIGHT_DATA LightComponent::GetPointLight() const
 {
 	//BANE_CHECK(m_Type == LIGHT_TYPE_POINT);
 	POINT_LIGHT_DATA Result = {};
@@ -39,7 +34,7 @@ inline POINT_LIGHT_DATA LightComponent::GetPointLight() const
 	return Result;
 }
 
-inline SPOTLIGHT_DATA LightComponent::GetSpotLight() const
+SPOTLIGHT_DATA LightComponent::GetSpotLight() const
 {
 	//BANE_CHECK(m_Type == LIGHT_TYPE_SPOT);
 	SPOTLIGHT_DATA Result = {};

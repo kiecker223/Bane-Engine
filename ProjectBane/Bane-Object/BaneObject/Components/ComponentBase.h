@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Common.h"
+#include "Common/Hash.h"
 #include <string>
 #include <type_traits>
 
@@ -59,23 +60,14 @@ private:
 
 
 
-constexpr const uint64 Component_HashImpl(uint64 InResult, const char* Pointer)
-{
-	return !*Pointer ? Component_HashImpl((((InResult << 5) + InResult) + *Pointer), Pointer + 1) : InResult;
-}
-
-
-template<typename T>
-constexpr const uint64 BuildClassHash()
-{
-	constexpr uint64 Result = 5381;
-	return Component_HashImpl(Result, T::ClassName);
-}
 
 #define IMPLEMENT_COMPONENT(x) \
 public: \
 static constexpr const char* ClassName = #x; \
-static constexpr const uint64 ClassHash = BuildClassHash<x>(); \
+PRAGMA_STATEMENT(warning(push)) \
+PRAGMA_STATEMENT(warning(disable:4307)) \
+static constexpr const uint64 ClassHash = GetDJB264BitHash_ConstExpr(#x); \
+PRAGMA_STATEMENT(warning(pop)) \
 uint32 GetTypeSize() const override { return sizeof(x); } \
 static uint32 StaticTypeSize() { return sizeof(x); } \
 private:

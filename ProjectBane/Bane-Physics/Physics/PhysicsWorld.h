@@ -36,7 +36,15 @@ class PhysicsWorld
 {
 public:
 
-	PhysicsWorld() : CurrentId(0), bRunningPhysicsSim(true), m_bUnlockedForRead(true) { }
+	PhysicsWorld() : CurrentId(0), bRunningPhysicsSim(true), m_bUnlockedForRead(true), MessageQueue() 
+	{
+		UNUSED(1);
+		UNUSED(2);
+		int i = 0;
+		i += 1;
+		int b = i;
+		UNUSED(b);
+	}
 
 	inline uint32 AddBody(PHYSICS_BODY_CREATE_INFO Info)
 	{
@@ -64,9 +72,9 @@ public:
 	void UpdatePhysics();
 	
 	std::thread PhysicsThread;
-	ApplicationToPhysicsQueue MessageQueue;
 	PhysicsUpdateBuffer UpdateBuffer;
 	TArray<PhysicsBody> AddList;
+	ApplicationToPhysicsQueue MessageQueue;
 	std::mutex BodyAddMutex;
 	std::mutex GenerateOctTreeMutex;
 	uint32 CurrentId;
@@ -92,7 +100,7 @@ public:
 
 private:
 
-	void GenerateOctTreeImpl(TBinaryTree<OctTreeNode>::TNode* InNode);
+	void GenerateOctTreeImpl(TBinaryTree<OctTreeNode>::TNode* InNode, uint32& CallDepth);
 	BoundingBox CalculateBoundsForMeshes(const TArray<uint32>& MeshHandles);
 
 	

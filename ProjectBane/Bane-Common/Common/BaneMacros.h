@@ -25,6 +25,14 @@
 
 #define NO_VTABLE __declspec(novtable)
 
+#if defined(WIN32) || defined(WIN64) || defined(_WIN32) || defined(_WIN32_) || defined(CYGWIN)
+#define PRAGMA_STATEMENT(x) __pragma(x)
+#elif defined(__unix__)
+#define PRAGMA_STATEMENT(x) _Pragma(x)
+#else
+#error Unrecognized platform
+#endif
+
 #define UNUSED(expr) do { (void)(expr); } while (0)
 
 #define GRAV_CONST 6.6747E-11f

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "RenderComponent.h"
-//#include "Graphics/Data/RenderLoop.h"
 #include <Graphics/Data/RenderLoop.h>
 
 

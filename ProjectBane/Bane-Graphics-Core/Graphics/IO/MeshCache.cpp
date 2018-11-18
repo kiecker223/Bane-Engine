@@ -1,5 +1,5 @@
 #include "MeshCache.h"
-#include <queue>
+#include <Core/Containers/Queue.h>
 
 
 class MeshAllocator
@@ -8,10 +8,10 @@ public:
 
 	void Initialize(uint32 NumMeshes)
 	{
-		BasePointer = new Mesh[NumMeshes];
+		BasePointer = new Mesh[NumMeshes]();
 		for (uint32 i = 0; i < NumMeshes; i++)
 		{
-			FreeList.push(BasePointer + i);
+			FreeList.Enqueue(BasePointer + i);
 		}
 	}
 	
@@ -22,19 +22,16 @@ public:
 
 	Mesh* AllocateMesh()
 	{
-		BANE_CHECK(FreeList.size() > 0);
-		Mesh* Result = FreeList.front();
-		FreeList.pop();
-		return Result;
+		return FreeList.Dequeue();
 	}
 
 	void DeallocateMesh(Mesh* pMesh)
 	{
-		FreeList.push(pMesh);
+		FreeList.Enqueue(pMesh);
 	}
 
 	Mesh* BasePointer;
-	std::queue<Mesh*> FreeList;
+	TQueue<Mesh*> FreeList;
 };
 
 static MeshAllocator GMeshAllocator;
