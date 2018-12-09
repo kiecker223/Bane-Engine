@@ -30,7 +30,7 @@ public:
 			new (&Value) TType(std::forward<Args>(InArgs...));
 		}
 		TNode* Parent;
-		TArray<TNode*> Children;
+		std::vector<TNode*> Children;
 	};
 
 	inline void RecursiveDelete()
@@ -40,12 +40,21 @@ public:
 		Tail = nullptr;
 	}
 
+	inline void Initialize()
+	{
+		Head = new TNode();
+		Tail = Head;
+	}
+
 	template<typename... Args>
 	inline TNode* EmplaceItem(TNode* Parent, Args&& ...InArgs)
 	{
 		TNode* Result = new TNode();
-		Result->Assign(InArgs);
-		Result->Parent = Parent;
+		Head->Assign(InArgs);
+		Head->Parent = Parent;
+		auto* OldHead = Head;
+		Head = Result;
+		return Head;
 	}
 
 	inline TNode* AddItem(TType&& Value, TNode* Parent)
@@ -68,7 +77,7 @@ private:
 
 		if (!Node->Children.IsEmpty())
 		{
-			for (uint32 i = 0; i < Node->Children.GetCount(); i++)
+			for (uint32 i = 0; i < Node->Children.size(); i++)
 			{
 				RecursiveDeleteImpl(Node->Children[i]);
 			}

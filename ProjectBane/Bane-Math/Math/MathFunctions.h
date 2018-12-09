@@ -592,3 +592,11 @@ inline double4x4 matTransformation(const double3& Position, const Quaternion64& 
 
 	return Result;
 }
+
+inline bool testSphereIntersection(const double3& LhsCenter, double LhsRadius, const double3& RhsCenter, double RhsRadius)
+{
+	double3 D = LhsCenter - RhsCenter;
+	double Dist2 = dot(D, D);
+	double RadiusSum = LhsRadius + RhsRadius;
+	return Dist2 <= RadiusSum * RadiusSum;
+}

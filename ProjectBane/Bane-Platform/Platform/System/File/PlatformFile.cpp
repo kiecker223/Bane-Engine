@@ -3,12 +3,12 @@
 #include <iostream>
 #include <fstream>
 
-TArray<std::string> GetAllFilesInFolder(const std::string& FolderName) {
-	TArray<std::string> Result;
+std::vector<std::string> GetAllFilesInFolder(const std::string& FolderName) {
+	std::vector<std::string> Result;
 
 	for (auto& File : std::filesystem::directory_iterator(FolderName))
 	{
-		Result.Add(File.path().filename().string());
+		Result.push_back(File.path().filename().string());
 	}
 
 	return Result;

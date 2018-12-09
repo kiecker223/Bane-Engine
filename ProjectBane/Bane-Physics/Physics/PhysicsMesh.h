@@ -1,7 +1,7 @@
 #pragma once
 
 #include <KieckerMath.h>
-#include <Core/Containers/Array.h>
+#include <vector>
 #include <Core/Data/BoundingBox.h>
 #include <Graphics/Data/Mesh.h>
 
@@ -27,8 +27,8 @@ public:
 		}
 	};
 
-	TArray<Face> Faces;
-	TArray<uint32> Indices;
+	std::vector<Face> Faces;
+	std::vector<uint32> Indices;
 	BoundingBox Bounds;
 
 	inline PhysicsMesh& operator = (const PhysicsMesh& Rhs)

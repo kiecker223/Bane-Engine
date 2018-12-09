@@ -1,5 +1,5 @@
 #pragma once
-#include <Core/Containers/Array.h>
+#include <vector>
 #include <fstream>
 #include <string>
 #include <map>
@@ -12,6 +12,14 @@
 typedef struct SCENE_DATA {
 	void* unused;
 } SCENE_DATA;
+
+class RayHitInformation
+{
+public:
+	double3 Position;
+	double3 Normal;
+	Entity* HitEntity;
+};
 
 class Scene
 {
@@ -40,6 +48,7 @@ public:
 	void DumpScene();
 	void LoadFromMetaData(const SCENE_DATA* Data);
 	void InitScene();
+	void DeleteEntity(Entity** pEntity);
 
 	inline void SetCamera(Entity* EntityCamera)
 	{
@@ -71,6 +80,7 @@ public:
 		return m_Root;
 	}
 
+	bool Raycast(const double3& RayStart, const double3& Direction, double MaxDistance, RayHitInformation& HitInfo);
 
 	inline PhysicsWorld& GetPhysicsWorld()
 	{
@@ -86,7 +96,7 @@ private:
 
 	// TODO: Remove me when you're done debugging physics stuff.
 	// please!!
-	TBinaryTree<PhysicsWorld::OctTreeNode> m_PhysOctree;
+	PhysicsWorld::OctTreeType m_PhysOctree;
 	ITextureCube* m_Skybox;
 	std::string m_Name;
 	Entity* m_Root;
@@ -96,9 +106,10 @@ private:
 		uint64 Hash;
 		Entity* pEntity;
 	};
-	TArray<EntityHashEntry> m_Entities;
-	TArray<EntityHashEntry> m_EntityAddList;
-	TArray<EntityHashEntry> m_EntityStartList;
+	std::unordered_map<uint64, Entity*> m_EntitySearchList;
+	std::vector<EntityHashEntry> m_Entities;
+	std::vector<EntityHashEntry> m_EntityAddList;
+	std::vector<EntityHashEntry> m_EntityStartList;
 };
 
 // Scene* GetCurrentScene();

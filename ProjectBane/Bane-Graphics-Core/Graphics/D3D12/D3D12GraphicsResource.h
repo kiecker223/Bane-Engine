@@ -170,28 +170,25 @@ public:
 class NO_VTABLE D3D12GPUResource : public IGPUResource
 {
 public:
+	// @note: pending state to transition to
 	D3D12_RESOURCE_STATES PendingState;
+	
+	// @note: How the GPU actually views this resource
+	D3D12_RESOURCE_STATES PromotedState;
+
+	// @note: How the runtime interprets the resource
 	D3D12_RESOURCE_STATES CurrentState;
+
+
 	D3D12ResourceLocation Resource;
 	void* MappedPointer;
 
-	D3D12GPUResource() : CurrentState(D3D12_RESOURCE_STATE_COMMON), PendingState(D3D12_RESOURCE_STATE_INVALID_STATE), ResourceOwnership(COMMAND_CONTEXT_TYPE_INVALID) { }
+	D3D12GPUResource() : CurrentState(D3D12_RESOURCE_STATE_COMMON), PendingState(D3D12_RESOURCE_STATE_INVALID_STATE), PromotedState(D3D12_RESOURCE_STATE_COMMON), ResourceOwnership(COMMAND_CONTEXT_TYPE_INVALID) { }
 	virtual ~D3D12GPUResource() 
 	{
 	}
 
-	inline bool CheckResourceTransitionValid(D3D12_RESOURCE_STATES NewState)
-	{
-		if (PendingState == NewState)
-		{
-			return false; // Invalid transition
-		}
-		if (CurrentState == NewState)
-		{
-			return false; // No need
-		}
-		return true; // Go ahead and transition
-	}
+	virtual bool CheckResourceTransitionValid(D3D12_RESOURCE_STATES NewState) = 0;
 
 	inline bool HasContextDependency() const
 	{
@@ -266,6 +263,8 @@ public:
 		Resource.SetDebugName(DebugName);
 	}
 
+	bool CheckResourceTransitionValid(D3D12_RESOURCE_STATES NewState) override final;
+
 	std::string GetDebugName() const override
 	{
 		return Resource.DebugName;
@@ -314,6 +313,7 @@ public:
 
 	void* Map() final override;
 	void Unmap() final override;
+	bool CheckResourceTransitionValid(D3D12_RESOURCE_STATES NewState) override final;
 
 	virtual uint32 GetWidth() const final override { return Width; }
 	virtual uint32 GetHeight() const final override { return Height; }

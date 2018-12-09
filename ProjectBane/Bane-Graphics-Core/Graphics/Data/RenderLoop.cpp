@@ -10,6 +10,11 @@ RenderLoop::RenderLoop()
 	{
 		GRenderGlobals.MeshData.Buffer = reinterpret_cast<MESH_RENDER_DATA*>(new byte[GPU_BUFFER_MIN_SIZE]);
 	}
+	if (GRenderGlobals.ImmediateGeometry.VertexBuffer == nullptr)
+	{
+		GRenderGlobals.ImmediateGeometry.VertexBuffer = GetApiRuntime()->GetGraphicsDevice()->CreateVertexBuffer(KILOBYTE(1524), nullptr);
+		GRenderGlobals.ImmediateGeometry.VertexBuffer->SetDebugName("Immediate mode Vertex Buffer");
+	}
 	m_Current.CameraIdxOffset = 0;
 }
 
@@ -32,7 +37,7 @@ void RenderLoop::AddDrawable(const Mesh* pMesh, const Material& Mat, const float
 {
 	GRenderGlobals.MeshData.Buffer[GRenderGlobals.MeshData.Size].Parameters = Mat.GetMaterialParameters();
 	GRenderGlobals.MeshData.Buffer[GRenderGlobals.MeshData.Size].Model = Transformation;
-	m_Current.Meshes.Add({ 
+	m_Current.Meshes.push_back({ 
 		pMesh->GetVertexBuffer(),
 		pMesh->GetIndexBuffer(),
 		Mat.GetShaderConfiguration(),
@@ -45,36 +50,47 @@ void RenderLoop::AddDrawable(const Mesh* pMesh, const Material& Mat, const float
 
 void RenderLoop::BeginNewShape()
 {
-	m_CurrentShape.Empty();
+	m_CurrentShape.clear();
 }
 
 void RenderLoop::EndNewShape()
 {
-	if (GRenderGlobals.ImmediateGeometry.DrawArgs.GetCount() > GRenderGlobals.ImmediateGeometry.CurrentCount &&
+	if (GRenderGlobals.ImmediateGeometry.DrawArgs.size() > GRenderGlobals.ImmediateGeometry.CurrentCount &&
 		GRenderGlobals.ImmediateGeometry.DrawArgs[
 		GRenderGlobals.ImmediateGeometry.CurrentCount
-			].VertexBuffer->GetSizeInBytes() <=
-			m_CurrentShape.GetCount() * sizeof(RENDER_LINE_DATA)
+			].UploadBuffer->GetSizeInBytes() ==
+			m_CurrentShape.size() * sizeof(RENDER_LINE_DATA)
 		)
 	{
 		IBuffer* UploadBuff = GRenderGlobals.ImmediateGeometry.DrawArgs[GRenderGlobals.ImmediateGeometry.CurrentCount].UploadBuffer;
 		void* Ptr = UploadBuff->Map();
-		memcpy(Ptr, m_CurrentShape.GetData(), m_CurrentShape.GetCount() * sizeof(RENDER_LINE_DATA));
+		memcpy(Ptr, m_CurrentShape.data(), m_CurrentShape.size() * sizeof(RENDER_LINE_DATA));
+		UploadBuff->Unmap();
 	}
 	else
 	{
-		IBuffer* UploadBuff = GetApiRuntime()->GetGraphicsDevice()->CreateStagingBuffer(m_CurrentShape.GetCount() * sizeof(RENDER_LINE_DATA));
+		IBuffer* UploadBuff = GetApiRuntime()->GetGraphicsDevice()->CreateStagingBuffer(static_cast<uint32>(m_CurrentShape.size()) * sizeof(RENDER_LINE_DATA));
 		void* Ptr = UploadBuff->Map();
-		memcpy(Ptr, m_CurrentShape.GetData(), m_CurrentShape.GetCount() * sizeof(RENDER_LINE_DATA));
-		IBuffer* VertexBuff = GetApiRuntime()->GetGraphicsDevice()->CreateVertexBuffer(m_CurrentShape.GetCount() * sizeof(RENDER_LINE_DATA), nullptr);
-		GRenderGlobals.ImmediateGeometry.DrawArgs.Add({ VertexBuff, UploadBuff, m_CurrentShape.GetCount() * 2 });
+		memcpy(Ptr, m_CurrentShape.data(), m_CurrentShape.size() * sizeof(RENDER_LINE_DATA));
+		UploadBuff->Unmap();
+		GRenderGlobals.ImmediateGeometry.DrawArgs.push_back(
+			RENDER_LOOP_GLOBALS::IMMEDIATE_GEOMETRY::IMMEDIATE_GEOMETRY_DRAW_ARGS(UploadBuff, static_cast<uint32>(m_CurrentShape.size() * 2))
+		);
+	}
+	if (GRenderGlobals.ImmediateGeometry.CurrentCount * sizeof(RENDER_LINE_DATA) > GPU_BUFFER_MIN_SIZE && false)
+	{
+		auto* OldBuff = GRenderGlobals.ImmediateGeometry.VertexBuffer;
+		auto* NewBuff = GetApiRuntime()->GetGraphicsDevice()->CreateVertexBuffer(OldBuff->GetSizeInBytes() * 2, nullptr);
+		GetApiRuntime()->GetGraphicsDevice()->GetGraphicsContext()->CopyBuffers(OldBuff, NewBuff);
+		GRenderGlobals.ImmediateGeometry.VertexBuffer = NewBuff;
+		delete OldBuff;
 	}
 	GRenderGlobals.ImmediateGeometry.CurrentCount++;
 }
 
 void RenderLoop::AddLine(const double3& Start, const double3& End)
 {
-	m_CurrentShape.Add({ fromDouble3(Start), fromDouble3(End) });
+	m_CurrentShape.push_back({ fromDouble3(Start), fromDouble3(End) });
 }
 
 void RenderLoop::AddBoundingBox(BoundingBox InBox)
@@ -130,11 +146,11 @@ void RenderLoop::SetSkybox(const SKYBOX_DATA& Skybox)
 void RenderLoop::Draw()
 {
 	RENDER_LOOP_DRAW_COMMIT Prev = m_Current;
-	m_Commits.Add(m_Current);
+	m_Commits.push_back(m_Current);
 	m_Current.CameraIdxOffset = GRenderGlobals.CameraData.Size;
 	m_Current.MeshData_NumUsed = 0;
 	m_Current.MeshData_Offset = Prev.MeshData_NumUsed;
-	m_Current.Meshes.Empty();
+	m_Current.Meshes.clear();
 }
 
 void RenderLoop::ResetForNextFrame()

@@ -10,8 +10,8 @@
 #define BANE_CHECK(x) 
 #endif
 
-#define KILOBYTE(x) x * 1000
-#define MEGABYTE(x) KILOBYTE(x) * 1000
+#define KILOBYTE(x) x * 1024
+#define MEGABYTE(x) KILOBYTE(x) * 1024
 
 #define MAKE_ALIGN(x) __declspec(align(x))
 #define SHADER_ALIGNMENT MAKE_ALIGN(sizeof(float4))

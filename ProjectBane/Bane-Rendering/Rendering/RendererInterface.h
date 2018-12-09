@@ -4,7 +4,7 @@
 #include "Graphics/Interfaces/GraphicsCommandList.h"
 #include "Graphics/Data/RenderLoop.h"
 #include <Platform/System/Window.h>
-#include <Core/Containers/Array.h>
+#include <vector>
 
 class Scene;
 class Mesh;

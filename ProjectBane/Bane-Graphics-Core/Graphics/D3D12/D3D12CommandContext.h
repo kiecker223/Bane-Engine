@@ -16,7 +16,7 @@ public:
 	ID3D12CommandAllocator* CommandAllocator;
 	ID3D12CommandList* CommandList;
 
-	// TODO: Replace TArray with my DynamicArray implementation, to prevent getting killed by the fact it resets its pointer when its cleared
+	// TODO: Replace std::vector with my DynamicArray implementation, to prevent getting killed by the fact it resets its pointer when its cleared
 
 	struct UploadResource
 	{
@@ -37,8 +37,8 @@ public:
 		}
 	};
 
-	TArray<UploadResource> UploadResourcesToDestroy;
-	TArray<DedicatedResource> CommitedResources;
+	std::vector<UploadResource> UploadResourcesToDestroy;
+	std::vector<DedicatedResource> CommitedResources;
 	bool bNeedsWaitForComputeQueue = false;
 	bool bNeedsWaitForGraphicsQueue = false;
 
@@ -52,7 +52,7 @@ public:
 	{
 		UploadResource Res;
 		Res.Resource = Resource;
-		UploadResourcesToDestroy.Add(Res);
+		UploadResourcesToDestroy.push_back(Res);
 	}
 
 	// See if this is even needed, because I imagine this incurs a significant perf cost
@@ -60,7 +60,7 @@ public:
 	{
 		DedicatedResource Res;
 		Res.Resource = Resource;
-		CommitedResources.Add(Res);
+		CommitedResources.push_back(Res);
 	}
 
 	inline D3D12CommandList& operator = (const D3D12CommandList& Rhs)
@@ -74,15 +74,15 @@ public:
 
 	inline void FlushCommitQueue()
 	{
-		if (CommitedResources.IsEmpty())
+		if (CommitedResources.empty())
 		{
 			return;
 		}
-		for (uint32 i = 0; i < CommitedResources.GetCount(); i++)
+		for (uint32 i = 0; i < CommitedResources.size(); i++)
 		{
 			CommitedResources[i].Uncommit();
 		}
-		CommitedResources.Empty();
+		CommitedResources.clear();
 	}
 
 	inline void Reset()
@@ -124,6 +124,7 @@ public:
 	virtual void Flush() override final;
 
 	virtual void SetGraphicsPipelineState(const IGraphicsPipelineState* InPipelineState) final override;
+	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer, uint64 Offset) final override;
 	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer) final override;
 	virtual void SetIndexBuffer(const IBuffer* InIndexBuffer) final override;
 	virtual void SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY InTopology) final override;
@@ -135,6 +136,7 @@ public:
 	virtual void DrawInstanced(uint32 VertexCount, uint32 InstanceCount, uint32 StartVertexLocation) final override;
 	virtual void DrawIndexedInstanced(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation, uint32 InstanceCount) final override;
 
+	virtual void CopyBufferLocations(IBuffer* Src, uint64 SrcOffset, IBuffer* Dst, uint64 DstOffset, uint64 NumBytes) final override;
 	virtual void CopyBuffers(IBuffer* Src, IBuffer* Dst) final override;
 	virtual void CopyBufferToTexture(IBuffer* Src, ITextureBase* Dst) final override;
 	virtual void CopyTextures(ITextureBase* InSrc, uint32 SrcSubresource, ITexture2D* InDst, uint32 DstSubresource) final override;

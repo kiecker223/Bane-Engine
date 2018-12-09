@@ -9,7 +9,7 @@ class TLinearAllocator
 
 
 	TType* m_Start;
-	TArray<ptrdiff_t> m_AllocatedOffsets;
+	std::vector<ptrdiff_t> m_AllocatedOffsets;
 };
 
 

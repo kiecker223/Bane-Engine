@@ -11,6 +11,7 @@ public:
 
 	float2 GetMouseDelta() const;
 	float2 GetMousePosition() const;
+	float GetScrollWheel() const;
 	bool GetButtonDown(uint32 Button) const;
 	bool GetButtonUp(uint32 Button) const;
 	bool GetDragging() const;

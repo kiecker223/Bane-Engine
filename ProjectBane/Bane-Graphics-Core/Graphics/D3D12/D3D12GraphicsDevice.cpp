@@ -44,7 +44,7 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 	m_SwapChain->Device = this;
 	uint32 AvailableThreadCount = std::thread::hardware_concurrency();
 	BANE_CHECK(AvailableThreadCount != 0);
-	m_AvailableContexts.Resize(AvailableThreadCount);
+	m_AvailableContexts.resize(AvailableThreadCount);
 
 	m_SrvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 256, true);
 	m_RtvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 48);
@@ -152,7 +152,7 @@ IComputeCommandContext* D3D12GraphicsDevice::GetComputeContext()
 	return m_ComputeContext;
 }
 
-static TArray<uint8> CompileFromByteCode(const std::string& InByteCode, ESHADER_STAGE ShaderStage, uint32& OutNumConstantBuffers, uint32& OutNumSamplers, uint32& OutNumShaderResourceViews, uint32& OutNumUnorderedAccessViews)
+static std::vector<uint8> CompileFromByteCode(const std::string& InByteCode, ESHADER_STAGE ShaderStage, uint32& OutNumConstantBuffers, uint32& OutNumSamplers, uint32& OutNumShaderResourceViews, uint32& OutNumUnorderedAccessViews)
 {
 	std::string EntryPoint = "";
 	std::string Target = "";
@@ -202,7 +202,7 @@ static TArray<uint8> CompileFromByteCode(const std::string& InByteCode, ESHADER_
 		BaneLog() << "Failed to compile shader, just gonna silently fail now "
 			<< (const char*)ErrorMessage->GetBufferPointer() << END_LINE;
 		ErrorMessage->Release();
-		return TArray<uint8>();
+		return std::vector<uint8>();
 	}
 
 	// HACK
@@ -265,8 +265,8 @@ static TArray<uint8> CompileFromByteCode(const std::string& InByteCode, ESHADER_
 		OutNumUnorderedAccessViews = 0;
 	}
 
-	TArray<uint8> RetCode(static_cast<uint32>(CompiledCode->GetBufferSize()));
-	memcpy(RetCode.GetData(), CompiledCode->GetBufferPointer(), RetCode.GetCount());
+	std::vector<uint8> RetCode(static_cast<uint32>(CompiledCode->GetBufferSize()));
+	memcpy(RetCode.data(), CompiledCode->GetBufferPointer(), RetCode.size());
 	CompiledCode->Release();
 	return RetCode;
 }
@@ -277,9 +277,9 @@ IVertexShader* D3D12GraphicsDevice::CreateVertexShader(const std::string& ByteCo
 	uint32 NumSamplers;
 	uint32 NumShaderResources;
 	uint32 NumUnorderedAccessViews;
-	TArray<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_VERTEX, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
+	std::vector<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_VERTEX, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 #ifdef _DEBUG
-	if (CompiledCode.GetCount() == 0)
+	if (CompiledCode.size() == 0)
 	{
 		return nullptr;
 	}
@@ -293,10 +293,10 @@ IPixelShader* D3D12GraphicsDevice::CreatePixelShader(const std::string& ByteCode
 	uint32 NumSamplers;
 	uint32 NumShaderResources;
 	uint32 NumUnorderedAccessViews;
-	TArray<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_PIXEL, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
+	std::vector<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_PIXEL, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 
 #ifdef _DEBUG
-	if (CompiledCode.GetCount() == 0)
+	if (CompiledCode.size() == 0)
 	{
 		return nullptr;
 	}
@@ -311,9 +311,9 @@ IGeometryShader* D3D12GraphicsDevice::CreateGeometryShader(const std::string& By
 	uint32 NumSamplers;
 	uint32 NumShaderResources;
 	uint32 NumUnorderedAccessViews;
-	TArray<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_GEOMETRY, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
+	std::vector<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_GEOMETRY, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 #ifdef _DEBUG
-	if (CompiledCode.GetCount() == 0)
+	if (CompiledCode.size() == 0)
 	{
 		return nullptr;
 	}
@@ -327,9 +327,9 @@ IHullShader* D3D12GraphicsDevice::CreateHullShader(const std::string& ByteCode)
 	uint32 NumSamplers;
 	uint32 NumShaderResources;
 	uint32 NumUnorderedAccessViews;
-	TArray<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_HULL, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
+	std::vector<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_HULL, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 #ifdef _DEBUG
-	if (CompiledCode.GetCount() == 0)
+	if (CompiledCode.size() == 0)
 	{
 		return nullptr;
 	}
@@ -343,9 +343,9 @@ IComputeShader* D3D12GraphicsDevice::CreateComputeShader(const std::string& Byte
 	uint32 NumSamplers;
 	uint32 NumShaderResources;
 	uint32 NumUnorderedAccessViews;
-	TArray<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_COMPUTE, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
+	std::vector<uint8> CompiledCode = CompileFromByteCode(ByteCode, SHADER_STAGE_COMPUTE, NumConstantBuffers, NumSamplers, NumShaderResources, NumUnorderedAccessViews);
 #ifdef _DEBUG
-	if (CompiledCode.GetCount() == 0)
+	if (CompiledCode.size() == 0)
 	{
 		return nullptr;
 	}
@@ -353,27 +353,27 @@ IComputeShader* D3D12GraphicsDevice::CreateComputeShader(const std::string& Byte
 	return new D3D12ComputeShader(CompiledCode);
 }
 
-IVertexShader* D3D12GraphicsDevice::CreateVertexShaderFromBytecode(const TArray<uint8>& InByteCode)
+IVertexShader* D3D12GraphicsDevice::CreateVertexShaderFromBytecode(const std::vector<uint8>& InByteCode)
 {
 	return new D3D12VertexShader(InByteCode);
 }
 
-IPixelShader* D3D12GraphicsDevice::CreatePixelShaderFromBytecode(const TArray<uint8>& InByteCode)
+IPixelShader* D3D12GraphicsDevice::CreatePixelShaderFromBytecode(const std::vector<uint8>& InByteCode)
 {
 	return new D3D12PixelShader(InByteCode);
 }
 
-IGeometryShader* D3D12GraphicsDevice::CreateGeometryShaderFromBytecode(const TArray<uint8>& InByteCode)
+IGeometryShader* D3D12GraphicsDevice::CreateGeometryShaderFromBytecode(const std::vector<uint8>& InByteCode)
 {
 	return new D3D12GeometryShader(InByteCode);
 }
 
-IHullShader* D3D12GraphicsDevice::CreateHullShaderFromBytecode(const TArray<uint8>& InByteCode)
+IHullShader* D3D12GraphicsDevice::CreateHullShaderFromBytecode(const std::vector<uint8>& InByteCode)
 {
 	return new D3D12HullShader(InByteCode);
 }
 
-IComputeShader* D3D12GraphicsDevice::CreateComputeShaderFromBytecode(const TArray<uint8>& InByteCode)
+IComputeShader* D3D12GraphicsDevice::CreateComputeShaderFromBytecode(const std::vector<uint8>& InByteCode)
 {
 	return new D3D12ComputeShader(InByteCode);
 }

@@ -37,12 +37,14 @@ public:
 	virtual void End() { EndPass(); }
 
 	virtual void SetGraphicsPipelineState(const IGraphicsPipelineState* PipelineState) = 0;
+	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer, uint64 Offset) = 0;
 	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer) = 0;
 	virtual void SetIndexBuffer(const IIndexBuffer* IndexBuffer) = 0;
 	virtual void SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY Topology) = 0;
 
 	virtual void SetGraphicsResourceTable(const IShaderResourceTable* InTable) = 0;
 
+	virtual void CopyBufferLocations(IBuffer* Src, uint64 SrcOffset, IBuffer* Dst, uint64 DstOffset, uint64 NumBytes) = 0;
 	virtual void CopyBuffers(IBuffer* Src, IBuffer* Dst) = 0;
 	virtual void CopyBufferToTexture(IBuffer* Src, ITextureBase* Dst) = 0;
 	virtual void CopyTextures(ITextureBase* Src, uint32 SrcSubresource, ITextureBase* Dst, uint32 DstSubresource) = 0;
@@ -497,19 +499,19 @@ public:
 	template<typename T, class... U>
 	inline void AllocateCommand(U&& ...Args)
 	{
-		Commands.Add((IGraphicsCommand*)(new ((void*)Allocate(sizeof(T))) T(std::forward<U>(Args)...)));
+		Commands.push_back((IGraphicsCommand*)(new ((void*)Allocate(sizeof(T))) T(std::forward<U>(Args)...)));
 	}
 	template<typename T>
 	inline void AllocateCommand()
 	{
-		Commands.Add((IGraphicsCommand*)(new ((void*)Allocate(sizeof(T))) T()));
+		Commands.push_back((IGraphicsCommand*)(new ((void*)Allocate(sizeof(T))) T()));
 	}
 
 	uint8* Allocate(ptrdiff_t NewOffset);
 	uint8* PtrStart = nullptr;
 	uint8* PtrCurrent = nullptr;
 	uint8* PtrEnd = nullptr;
-	TArray<IGraphicsCommand*> Commands;
+	std::vector<IGraphicsCommand*> Commands;
 private:
 	void Reallocate(size_t NewSize);
 };

@@ -24,6 +24,8 @@ Pipeline
 		Cull = false;
 		FillSolid = true;
 	};
+
+	PolygonType = POLYGON_TYPE_LINES;
 };
 
 struct VS_INPUT
@@ -43,7 +45,14 @@ PS_INPUT VSMain(VS_INPUT Input)
     Pos = mul(Pos, View);
 	Pos = mul(Pos, Projection);
 	Pos.z = log((ZResolution*Pos.z) + 1.0) / log((ZResolution*FarPlane) + 1.0);
-	Pos.z *= Pos.w;
+	if (Pos.w > 0)
+	{
+		Pos.z *= Pos.w;
+	}
+	if (Pos.z < 0)
+	{
+		Pos.z = 0;
+	}
     Output.Position = Pos;
 	return Output;
 }

@@ -1,9 +1,9 @@
 #pragma once
-#include <Core/Containers/Array.h>
+#include <vector>
 #include "PhysicsBody.h"
 
 class PhysicsUpdateBuffer
 {
 public:
-	TArray<PhysicsBody> Bodies;
+	std::vector<PhysicsBody> Bodies;
 };

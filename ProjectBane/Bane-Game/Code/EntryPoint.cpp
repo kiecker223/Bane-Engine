@@ -239,113 +239,31 @@ PLANET_START_INFO PlacePlanet(PLANET_ORBIT_INFO OrbitInfo, double Time)
 }
 
 
-std::string SomeRandoNames[] =
+struct Person
 {
-	std::string("asdfl;"),
-	std::string("asdfas"),
-	std::string("asdfae"),
-	std::string("jkghjk"),
-	std::string("7rtyue"),
-	std::string("yurtyj"),
-	std::string("jrtyjf"),
-	std::string("tyjdfg"),
-	std::string("dfghnt"),
-	std::string("ner5ye"),
-	std::string("nerty7"),
-	std::string("the4r5"),
-	std::string("45yrth"),
-	std::string("asdfl;"),
-	std::string("asdfas"),
-	std::string("asdfae"),
-	std::string("jkghjk"),
-	std::string("7rtyue"),
-	std::string("yurtyj"),
-	std::string("jrtyjf"),
-	std::string("tyjdfg"),
-	std::string("dfghnt"),
-	std::string("ner5ye"),
-	std::string("nerty7"),
-	std::string("the4r5"),
-	std::string("45yrth"),
-	std::string("asdfl;"),
-	std::string("asdfas"),
-	std::string("asdfae"),
-	std::string("jkghjk"),
-	std::string("7rtyue"),
-	std::string("yurtyj"),
-	std::string("jrtyjf"),
-	std::string("tyjdfg"),
-	std::string("dfghnt"),
-	std::string("ner5ye"),
-	std::string("nerty7"),
-	std::string("the4r5"),
-	std::string("45yrth"),
-	std::string("asdfl;"),
-	std::string("asdfas"),
-	std::string("asdfae"),
-	std::string("jkghjk"),
-	std::string("7rtyue"),
-	std::string("yurtyj"),
-	std::string("jrtyjf"),
-	std::string("tyjdfg"),
-	std::string("dfghnt"),
-	std::string("ner5ye"),
-	std::string("nerty7"),
-	std::string("the4r5"),
-	std::string("45yrth")
-};
-
-struct BigBoiStruct
-{
-	uint32 Elements[100];
-	
-	TArray<std::string> OtherShit;
-
-	static BigBoiStruct Result;
-	static BigBoiStruct Current()
+	Person()
 	{
-		Result.Elements[Result.Elements[0] % 100]++;
-		Result.Elements[0]++;
-		Result.OtherShit.Add(SomeRandoNames[Result.Elements[0]]);
-		return Result;
+		std::cout << "I am born" << std::endl;
 	}
 
-	static void DestroyCurrent()
+	Person(const Person&)
 	{
-
+		std::cout << "Copy constructor called" << std::endl;
 	}
-};
 
-BigBoiStruct BigBoiStruct::Result;
+	~Person()
+	{
+		std::cout << "I am alive'nt" << std::endl;
+	}
+
+	std::string Name;
+	uint32 Age;
+
+	std::vector<Person*> Children;
+};
 
 void InitApplication2()
 {
-	UNUSED(1);
-	UNUSED(2);
-	TArray<BigBoiStruct> OtherValues;
-	OtherValues.ClearMemory();
-	UNUSED(3);
-	{
-		TArray<BigBoiStruct> Values;
-		for (uint32 i = 0; i < 17; i++)
-		{
-			Values.Add(BigBoiStruct::Current());
-		}
-		OtherValues = Values;
-	}
-	OtherValues.ClearMemory();
-	{
-		TArray<BigBoiStruct> Values;
-		Values += BigBoiStruct::Current();
-		Values += BigBoiStruct::Current();
-		Values += BigBoiStruct::Current();
-		OtherValues = Values;
-	}
-	OtherValues.ClearMemory();
-	UNUSED(1);
-	UNUSED(2);
-	BigBoiStruct::Result.OtherShit.ClearMemory();
-	UNUSED(23);
 }
 
 void InitApplication()
@@ -382,7 +300,7 @@ void InitApplication()
 		auto SCC = Sun->AddComponent<SphereCollisionComponent>();
 		SCC->SetPosition(SInfo.Position);
 		SCC->SetMass(1.989e30);
-		SCC->SetRadius(1391016000.0 / 2.);
+		SCC->SetRadius(13910160000.0 / 2.);
 		//FollowedPlanet = Sun;
 	}
 	Entity* FollowedPlanet = nullptr;
@@ -437,7 +355,7 @@ void InitApplication()
 		Venus->GetTransform()->Scale(12104000.);
 		auto SCC = Venus->AddComponent<SphereCollisionComponent>();
 		SCC->SetPosition(SInfo.Position);
-		SCC->SetVelocity(SInfo.Velocity);
+		SCC->SetVelocity(SInfo.Velocity * 1.0 / 60.0);
 		SCC->SetMass(4.867e24);
 		SCC->SetRadius(12104000. / 2.);
 		//FollowedPlanet = Venus;
@@ -494,7 +412,7 @@ void InitApplication()
 	auto Cam = CamEntity->AddComponent<CameraComponent>();
 	Cam->ZNear = 1e-2f;
 	Cam->ZFar = 1e+21f; 
-	CamEntity->AddComponent<CameraMovementComponent>()->Speed = 1e8;
+	CamEntity->AddComponent<CameraMovementComponent>()->Speed = 1e12;
 	CamEntity->AddComponent<SwapParentPlanet>();
 }
 

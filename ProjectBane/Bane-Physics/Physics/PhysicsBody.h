@@ -1,6 +1,6 @@
 #pragma once
 #include <KieckerMath.h>
-#include <Core/Containers/Array.h>
+#include <vector>
 #include "PhysicsMesh.h"
 
 
@@ -119,7 +119,7 @@ public:
 		}
 		if (BodyType == PHYSICS_BODY_TYPE_MESH)
 		{
-			for (uint32 i = 0; i < PhysMesh.Faces.GetCount(); i++)
+			for (uint32 i = 0; i < PhysMesh.Faces.size(); i++)
 			{
 				PhysicsMesh::Face OrientedFace = PhysMesh.GetFaceOriented(i, Position, Orientation);
 				double TestedHit = OrientedFace.TestRayHit(RayStart, RayDir, OutNormal);

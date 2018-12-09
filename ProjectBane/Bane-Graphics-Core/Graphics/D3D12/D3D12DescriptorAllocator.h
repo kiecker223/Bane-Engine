@@ -1,7 +1,7 @@
 #pragma once
 
 #include <d3d12.h>
-#include <Core/Containers/Array.h>
+#include <vector>
 #include "Common.h"
 #include "../D3DCommon/D3DCommon.h"
 
@@ -60,8 +60,8 @@ public:
 
 private:
 
-	TArray<D3D12DescriptorAllocation> m_AllocList;
-	TArray<D3D12DescriptorAllocation> m_FreeList;
+	std::vector<D3D12DescriptorAllocation> m_AllocList;
+	std::vector<D3D12DescriptorAllocation> m_FreeList;
 	ID3D12DescriptorHeap* m_DescriptorHeap;
 	uint32 m_IncrementSize;
 	D3D12DescriptorAllocation m_Start;

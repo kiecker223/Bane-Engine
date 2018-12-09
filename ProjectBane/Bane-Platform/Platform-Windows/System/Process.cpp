@@ -26,7 +26,7 @@ public:
 };
 
 
-IProcessHandle* StartProcess(const std::string& ProcessName, const TArray<std::string>& ProcessArguments)
+IProcessHandle* StartProcess(const std::string& ProcessName, const std::vector<std::string>& ProcessArguments)
 {
 	WindowsProcessHandle* Result = new WindowsProcessHandle();
 	STARTUPINFO StartupInfo = { };
@@ -35,7 +35,7 @@ IProcessHandle* StartProcess(const std::string& ProcessName, const TArray<std::s
 	GetCurrentDirectoryA(256, CWD);
 	std::string ArgumentsStr = CWD;
 	ArgumentsStr += ProcessName + ' ';
-	for (uint32 i = 0; i < ProcessArguments.GetCount(); i++)
+	for (uint32 i = 0; i < ProcessArguments.size(); i++)
 	{
 		ArgumentsStr += ProcessArguments[i] + ' ';
 	}

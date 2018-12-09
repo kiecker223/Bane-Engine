@@ -8,17 +8,17 @@
 
 void D3D12CommandList::FlushDestructionQueue()
 {
-	if (UploadResourcesToDestroy.IsEmpty())
+	if (UploadResourcesToDestroy.empty())
 	{
 		return;
 	}
-	for (uint32 i = 0; i < UploadResourcesToDestroy.GetCount(); i++)
+	for (uint32 i = 0; i < UploadResourcesToDestroy.size(); i++)
 	{
 		auto& Resource = UploadResourcesToDestroy[i];
 		Resource.Destroy();
 	}
 
-	UploadResourcesToDestroy.Empty();
+	UploadResourcesToDestroy.clear();
 }
 
 void D3D12GraphicsCommandContext::BeginPass(IRenderPassInfo* InRenderPass)
@@ -70,19 +70,36 @@ void D3D12GraphicsCommandContext::SetGraphicsPipelineState(const IGraphicsPipeli
 	D3DCL->SetGraphicsRootSignature(PipelineState->ShaderSignature.RootSignature);
 }
 
+void D3D12GraphicsCommandContext::SetVertexBuffer(const IBuffer* InVertexBuffer, uint64 Offset)
+{
+	D3D12Buffer* Buffer = (D3D12Buffer*)InVertexBuffer;
+	Buffer->TransitionResource(this, D3D12_RESOURCE_STATE_GENERIC_READ);
+	Buffer->PromotedState = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+	D3D12_VERTEX_BUFFER_VIEW VbView = Buffer->GetVBView(PipelineState->Desc.InputLayout);
+	VbView.BufferLocation += Offset;
+	VbView.SizeInBytes -= static_cast<uint32>(Offset);
+	BANE_CHECK(Offset < Buffer->SizeInBytes - 1);
+	FlushResourceTransitions();
+	D3DCL->IASetVertexBuffers(0, 1, &VbView);
+}
+
 void D3D12GraphicsCommandContext::SetVertexBuffer(const IBuffer* InVertexBuffer)
 {
 	D3D12Buffer* Buffer = (D3D12Buffer*)InVertexBuffer;
-	Buffer->TransitionResource(this, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+	Buffer->TransitionResource(this, D3D12_RESOURCE_STATE_GENERIC_READ);
+	Buffer->PromotedState = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
 	D3D12_VERTEX_BUFFER_VIEW VbView = Buffer->GetVBView(PipelineState->Desc.InputLayout);
+	FlushResourceTransitions();
 	D3DCL->IASetVertexBuffers(0, 1, &VbView);
 }
 
 void D3D12GraphicsCommandContext::SetIndexBuffer(const IBuffer* InIndexBuffer)
 {
 	D3D12Buffer* Buffer = (D3D12Buffer*)InIndexBuffer;
-	Buffer->TransitionResource(this, D3D12_RESOURCE_STATE_INDEX_BUFFER);
+	Buffer->TransitionResource(this, D3D12_RESOURCE_STATE_GENERIC_READ);
+	Buffer->PromotedState = D3D12_RESOURCE_STATE_INDEX_BUFFER;
 	D3D12_INDEX_BUFFER_VIEW IbView = Buffer->GetIBView();
+	FlushResourceTransitions();
 	D3DCL->IASetIndexBuffer(&IbView);
 }
 
@@ -102,7 +119,7 @@ void D3D12GraphicsCommandContext::SetGraphicsResourceTable(const IShaderResource
 		D3DCL->SetGraphicsRootSignature(Table->AssociatedSignature.RootSignature);
 	}
 
-	for (uint32 i = 0; i < Table->ConstantBuffers.GetCount(); i++)
+	for (uint32 i = 0; i < Table->ConstantBuffers.size(); i++)
 	{
 		if (Table->ConstantBuffers[i].ConstantBuffer != nullptr)
 		{
@@ -150,12 +167,27 @@ void D3D12GraphicsCommandContext::DrawIndexedInstanced(uint32 IndexCount, uint32
 	D3DCL->DrawIndexedInstanced(IndexCount, InstanceCount, StartIndexLocation, BaseVertexLocation, 0);
 }
 
+void D3D12GraphicsCommandContext::CopyBufferLocations(IBuffer* Src, uint64 SrcOffset, IBuffer* Dst, uint64 DstOffset, uint64 NumBytes)
+{
+	D3D12Buffer* SrcBuffer = (D3D12Buffer*)Src;
+	D3D12Buffer* DstBuffer = (D3D12Buffer*)Dst;
+	SrcBuffer->TransitionResource(this, D3D12_RESOURCE_STATE_GENERIC_READ);
+	SrcBuffer->PromotedState = D3D12_RESOURCE_STATE_COPY_SOURCE;
+	DstBuffer->TransitionResource(this, D3D12_RESOURCE_STATE_COMMON);
+	DstBuffer->PromotedState = D3D12_RESOURCE_STATE_COPY_DEST;
+	FlushResourceTransitions();
+	D3DCL->CopyBufferRegion(DstBuffer->Resource.D3DResource, DstOffset, SrcBuffer->Resource.D3DResource, SrcOffset, NumBytes);
+}
+
 void D3D12GraphicsCommandContext::CopyBuffers(IBuffer* Src, IBuffer* Dst)
 {
 	D3D12Buffer* SrcBuffer = (D3D12Buffer*)Src;
 	D3D12Buffer* DstBuffer = (D3D12Buffer*)Dst;
 	SrcBuffer->TransitionResource(this, D3D12_RESOURCE_STATE_GENERIC_READ);
+	SrcBuffer->PromotedState = D3D12_RESOURCE_STATE_COPY_SOURCE;
 	DstBuffer->TransitionResource(this, D3D12_RESOURCE_STATE_COMMON);
+	DstBuffer->PromotedState = D3D12_RESOURCE_STATE_COPY_DEST;
+	FlushResourceTransitions();
 	D3DCL->CopyResource(DstBuffer->Resource.D3DResource, SrcBuffer->Resource.D3DResource);
 }
 
@@ -168,7 +200,9 @@ void D3D12GraphicsCommandContext::CopyBufferToTexture(IBuffer* Src, ITextureBase
 	D3D12_TEXTURE_COPY_LOCATION BufferSrcLocation = CD3DX12_TEXTURE_COPY_LOCATION(D3DBuf->Resource.D3DResource, 0);
 
 	D3DTex->TransitionResource(this, D3D12_RESOURCE_STATE_COMMON);
+	D3DTex->PromotedState = D3D12_RESOURCE_STATE_COPY_DEST;
 	D3DBuf->TransitionResource(this, D3D12_RESOURCE_STATE_GENERIC_READ);
+	D3DBuf->PromotedState = D3D12_RESOURCE_STATE_COPY_SOURCE;
 	FlushResourceTransitions();
 	D3DCL->CopyTextureRegion(&TexCopyLocation, D3DTex->Width, D3DTex->Height, D3DTex->Depth, &BufferSrcLocation, nullptr);
 }
@@ -181,8 +215,10 @@ void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* InSrc, uint32 SrcSu
 	D3D12_TEXTURE_COPY_LOCATION SrcCopyLocation = CD3DX12_TEXTURE_COPY_LOCATION(Src->Resource.D3DResource, SrcSubresource);
 	D3D12_TEXTURE_COPY_LOCATION DstCopyLocation = CD3DX12_TEXTURE_COPY_LOCATION(Dst->Resource.D3DResource, DstSubresource);
 
-	Src->TransitionResource(this, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	Dst->TransitionResource(this, D3D12_RESOURCE_STATE_COPY_DEST);
+	Src->TransitionResource(this, D3D12_RESOURCE_STATE_GENERIC_READ);
+	Src->PromotedState = D3D12_RESOURCE_STATE_COPY_SOURCE;
+	Dst->TransitionResource(this, D3D12_RESOURCE_STATE_COMMON);
+	Dst->PromotedState = D3D12_RESOURCE_STATE_COPY_DEST;
 	FlushResourceTransitions();
 	D3DCL->CopyTextureRegion(&DstCopyLocation, 0, 0, 0, &SrcCopyLocation, nullptr);
 }
@@ -196,7 +232,9 @@ void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* InSrc, int3 SrcLoca
 	D3D12_TEXTURE_COPY_LOCATION	DstCopyLocation = CD3DX12_TEXTURE_COPY_LOCATION(Dst->Resource.D3DResource, 0);
 
 	Src->TransitionResource(this, D3D12_RESOURCE_STATE_GENERIC_READ);
+	Src->PromotedState = D3D12_RESOURCE_STATE_COPY_SOURCE;
 	Dst->TransitionResource(this, D3D12_RESOURCE_STATE_COMMON);
+	Dst->PromotedState = D3D12_RESOURCE_STATE_COPY_DEST;
 	FlushResourceTransitions();
 
 	D3D12_BOX SrcBox = { };
@@ -231,7 +269,7 @@ void D3D12GraphicsCommandContext::SetComputeResourceTable(const IShaderResourceT
 		D3DCL->SetComputeRootSignature(Table->AssociatedSignature.RootSignature);
 	}
 
-	for (uint32 i = 0; i < Table->ConstantBuffers.GetCount(); i++)
+	for (uint32 i = 0; i < Table->ConstantBuffers.size(); i++)
 	{
 		if (Table->ConstantBuffers[i].ConstantBuffer != nullptr)
 		{
@@ -303,9 +341,9 @@ void D3D12GraphicsCommandContext::CommitResources()
 			}
 		}
 	}
-	if (!CurrentTable->ShaderResources.IsEmpty())
+	if (!CurrentTable->ShaderResources.empty())
 	{
-		for (uint32 i = 0; i < CurrentTable->ShaderResources.GetCount(); i++)
+		for (uint32 i = 0; i < CurrentTable->ShaderResources.size(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->ShaderResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_GRAPHICS))
@@ -314,9 +352,9 @@ void D3D12GraphicsCommandContext::CommitResources()
 			}
 		}
 	}
-	if (!CurrentTable->UnorderedAccessResources.IsEmpty())
+	if (!CurrentTable->UnorderedAccessResources.empty())
 	{
-		for (uint32 i = 0; i < CurrentTable->UnorderedAccessResources.GetCount(); i++)
+		for (uint32 i = 0; i < CurrentTable->UnorderedAccessResources.size(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->UnorderedAccessResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_GRAPHICS))
@@ -370,7 +408,7 @@ void D3D12ComputeCommandContext::SetComputeResourceTable(const IShaderResourceTa
 		D3DCL->SetComputeRootSignature(Table->AssociatedSignature.RootSignature);
 	}
 
-	for (uint32 i = 0; i < Table->ConstantBuffers.GetCount(); i++)
+	for (uint32 i = 0; i < Table->ConstantBuffers.size(); i++)
 	{
 		if (Table->ConstantBuffers[i].ConstantBuffer != nullptr)
 		{
@@ -420,9 +458,9 @@ void D3D12ComputeCommandContext::CommitResources()
 
 	bHasCheckedCurrentTable = true;
 	// Leave out constant buffers because they are constant read?
-	if (!CurrentTable->ShaderResources.IsEmpty())
+	if (!CurrentTable->ShaderResources.empty())
 	{
-		for (uint32 i = 0; i < CurrentTable->ShaderResources.GetCount(); i++)
+		for (uint32 i = 0; i < CurrentTable->ShaderResources.size(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->ShaderResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_COMPUTE))
@@ -431,9 +469,9 @@ void D3D12ComputeCommandContext::CommitResources()
 			}
 		}
 	}
-	if (!CurrentTable->UnorderedAccessResources.IsEmpty())
+	if (!CurrentTable->UnorderedAccessResources.empty())
 	{
-		for (uint32 i = 0; i < CurrentTable->UnorderedAccessResources.GetCount(); i++)
+		for (uint32 i = 0; i < CurrentTable->UnorderedAccessResources.size(); i++)
 		{
 			D3D12GPUResource* pResource = CurrentTable->UnorderedAccessResources[i];
 			if (pResource && pResource->RegisterDependency(COMMAND_CONTEXT_TYPE_COMPUTE))

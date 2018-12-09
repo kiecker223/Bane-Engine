@@ -42,6 +42,7 @@ struct InputMouseDevice::Impl
 	float2 MouseDelta;
 	float2 MousePosition;
 	float2 LastMousePosition;
+	float MouseScroll;
 	bool bButtons[5];
 	bool bLastButtons[5];
 	bool bDragging;
@@ -54,6 +55,7 @@ struct InputMouseDevice::Impl
 		LastMousePosition = MousePosition;
 		MouseDelta = float2(static_cast<float>(MouseState.lX), static_cast<float>(MouseState.lY));
 		MousePosition += MouseDelta;
+		MouseScroll = static_cast<float>(MouseState.lZ);
 	}
 };
 
@@ -76,6 +78,11 @@ float2 InputMouseDevice::GetMouseDelta() const
 float2 InputMouseDevice::GetMousePosition() const
 {
 	return m_Impl->MousePosition;
+}
+
+float InputMouseDevice::GetScrollWheel() const
+{
+	return m_Impl->MouseScroll;
 }
 
 bool InputMouseDevice::GetButtonDown(uint32 Button) const

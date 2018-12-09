@@ -42,7 +42,7 @@ private:
 		ISamplerState* SkySampler;
 	} m_OnScreenQuad;
 
-	TArray<RENDER_LOOP_DRAW_COMMIT> m_DrawCommits;
+	std::vector<RENDER_LOOP_DRAW_COMMIT> m_DrawCommits;
 
 	float Frame = 0.0f;
 	

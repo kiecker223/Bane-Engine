@@ -105,7 +105,7 @@ void Application::InitSystems()
 void Application::Run()
 {
 	Timer FrameTime;
-
+	float DT = 0.f;
 	while (!m_Window->QuitRequested())
 	{
 		FrameTime.StartTimer();
@@ -119,9 +119,10 @@ void Application::Run()
 		m_SceneRenderer->Submit(RL);
 		m_SceneRenderer->Render();
 
-		FrameTime.EndTimer();
-		pCurrentScene->Tick(FrameTime.GetTimerElapsedSeconds());
+		pCurrentScene->Tick(DT);
 		m_SceneRenderer->Present();
+		FrameTime.EndTimer();
+		DT = FrameTime.GetTimerElapsedSeconds();
 	}
 
 	GetSceneManager()->CurrentScene->DumpScene();

@@ -116,11 +116,15 @@ public:
 	{
 		for (uint32 i = 0; i < NumRenderTargets; i++)
 		{
-			RenderTargets[i]->GetCurrentFrame().Texture->TransitionResource(Context, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			auto* Tex = RenderTargets[i]->GetCurrentFrame().Texture;
+			Tex->TransitionResource(Context, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			Tex->PromotedState = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		}
 		if (HasDepthStencil())
 		{
-			DepthStencil->GetCurrentFrame().Texture->TransitionResource(Context, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			auto* Tex = DepthStencil->GetCurrentFrame().Texture;
+			Tex->TransitionResource(Context, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			Tex->PromotedState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 		}
 	}
 
@@ -128,11 +132,15 @@ public:
 	{
 		for (uint32 i = 0; i < NumRenderTargets; i++)
 		{
-			RenderTargets[i]->GetCurrentFrame().Texture->TransitionResource(Context, D3D12_RESOURCE_STATE_PRESENT);
+			auto* Tex = RenderTargets[i]->GetCurrentFrame().Texture;
+			Tex->TransitionResource(Context, D3D12_RESOURCE_STATE_PRESENT);
+			Tex->PromotedState = D3D12_RESOURCE_STATE_PRESENT;
 		}
 		if (HasDepthStencil())
 		{
-			DepthStencil->GetCurrentFrame().Texture->TransitionResource(Context, D3D12_RESOURCE_STATE_DEPTH_READ);
+			auto* Tex = DepthStencil->GetCurrentFrame().Texture;
+			Tex->TransitionResource(Context, D3D12_RESOURCE_STATE_DEPTH_READ);
+			Tex->PromotedState = D3D12_RESOURCE_STATE_DEPTH_READ;
 		}
 	}
 
@@ -191,10 +199,10 @@ public:
 		return (NumSMPs > 0);
 	}
 
-	TArray<D3D12_CONSTANT_BUFFER_OFFSET_PAIR> ConstantBuffers; 
-	TArray<D3D12SamplerState*> Samplers;
-	TArray<D3D12GPUResource*> ShaderResources;
-	TArray<D3D12GPUResource*> UnorderedAccessResources;
+	std::vector<D3D12_CONSTANT_BUFFER_OFFSET_PAIR> ConstantBuffers; 
+	std::vector<D3D12SamplerState*> Samplers;
+	std::vector<D3D12GPUResource*> ShaderResources;
+	std::vector<D3D12GPUResource*> UnorderedAccessResources;
 	D3D12DescriptorAllocation BaseSMPAllocation;
 	D3D12DescriptorAllocation BaseSRVAllocation;
 	D3D12DescriptorAllocation BaseUAVAllocation;

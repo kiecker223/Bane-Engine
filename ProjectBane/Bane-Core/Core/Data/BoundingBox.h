@@ -48,11 +48,44 @@ public:
 		return 3;
 	}
 
+	inline bool PointInBounds(const double3& Point) const
+	{
+		for (uint32 i = 0; i < 3; i++)
+		{
+			if (Point[i] < Min[i] || Point[i] > Max[i])
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	inline bool IntersectsOther(const BoundingBox& Rhs) const
+	{
+		for (uint32 i = 0; i < 3; i++)
+		{
+			if (Max[i] < Rhs.Min[i] || Min[i] > Rhs.Max[i]) return false;
+		}
+		return true;
+	}
+
 	inline double3 GetCenter() const 
 	{
 		return Min + (GetExtents() / 2.0);
 	}
 
+	inline double3 ClosestPoint(const double3& InPoint) const
+	{
+		double3 Result;
+		for (uint32 i = 0; i < 3; i++)
+		{
+			if (InPoint[i] > Max[i]) { Result[i] = Max[i]; continue; }
+			if (InPoint[i] < Min[i]) { Result[i] = Min[i]; continue; }
+			Result[i] = InPoint[i];
+		}
+		return Result;
+	}
+	
 	inline double GetArea() const 
 	{
 		auto Extents = GetExtents();

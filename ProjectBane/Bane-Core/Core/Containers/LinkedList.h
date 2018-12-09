@@ -18,6 +18,84 @@ public:
 		TNode* Last;
 	};
 
+	class TForwardIterator
+	{
+	public:
+
+		using pointer = TNode*;
+
+		inline bool operator ==(const TForwardIterator& Rhs)
+		{
+			return Node == Rhs.Node;
+		}
+
+		inline bool operator != (const TForwardIterator& Rhs)
+		{
+			return !(*this == Rhs);
+		}
+
+		inline TForwardIterator& operator ++()
+		{
+			Node = Node->Next;
+		}
+
+		inline TForwardIterator& operator --()
+		{
+			Node = Node->Last;
+		}
+
+		inline TNode* operator*()
+		{
+			return Node;
+		}
+
+		TNode* Node;
+	};
+
+	class TBackwardIterator
+	{
+	public:
+
+		using pointer = TNode*;
+
+		inline bool operator == (const TBackwardIterator& Rhs)
+		{
+			return Node == Rhs.Node;
+		}
+
+		inline bool operator != (const TBackwardIterator& Rhs)
+		{
+			return !(*this == Rhs);
+		}
+
+		inline TBackwardIterator& operator ++()
+		{
+			Node = Node->Last;
+		}
+
+		inline TBackwardIterator& operator --()
+		{
+			Node = Node->Next;
+		}
+
+		inline TNode* operator*()
+		{
+			return Node;
+		}
+
+		TNode* Node;
+	};
+
+	inline TForwardIterator begin()
+	{
+		return { Tail };
+	}
+
+	inline TForwardIterator end()
+	{
+		return { Head };
+	}
+
 	TLinkedList()
 	{
 		Construct();
@@ -71,6 +149,7 @@ private:
 		Size++;
 		return OldHead;
 	}
+
 
 public:
 

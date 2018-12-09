@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Core/Containers/Array.h>
+#include <vector>
 #include "Core/Data/BoundingBox.h"
 #include "Mesh.h"
 #include "LightData.h"
@@ -50,7 +50,7 @@ typedef struct RENDER_LOOP_DRAW_COMMIT {
 	uint64 MeshData_Offset;
 	uint64 MeshData_NumUsed;
 	double3 CameraPosition;
-	TArray<DRAWABLE_MESH> Meshes;
+	std::vector<DRAWABLE_MESH> Meshes;
 } RENDER_LOOP_DRAW_COMMIT;
 
 
@@ -85,14 +85,21 @@ class RenderLoop
 			float3 AmbientLight;
 		} SkyboxData;
 
-		struct {
+		struct IMMEDIATE_GEOMETRY {
+			IVertexBuffer* VertexBuffer;
 			typedef struct IMMEDIATE_GEOMETRY_DRAW_ARGS
 			{
-				IVertexBuffer* VertexBuffer;
+				IMMEDIATE_GEOMETRY_DRAW_ARGS() { }
+				IMMEDIATE_GEOMETRY_DRAW_ARGS(IBuffer* InUploadBuffer, uint32 InVertexCount) : UploadBuffer(InUploadBuffer), VertexCount(InVertexCount)
+				{
+				}
+				~IMMEDIATE_GEOMETRY_DRAW_ARGS()
+				{
+				}
 				IBuffer* UploadBuffer;
 				uint32 VertexCount;
 			} IMMEDIATE_GEOMETRY_DRAW_ARGS;
-			TArray<IMMEDIATE_GEOMETRY_DRAW_ARGS> DrawArgs;
+			std::vector<IMMEDIATE_GEOMETRY_DRAW_ARGS> DrawArgs;
 			uint32 CurrentCount;
 		} ImmediateGeometry;
 	} RENDER_LOOP_GLOBALS;
@@ -121,7 +128,7 @@ public:
 	
 	void Draw();
 
-	inline TArray<RENDER_LOOP_DRAW_COMMIT> const& GetCommitedData() const
+	inline std::vector<RENDER_LOOP_DRAW_COMMIT> const& GetCommitedData() const
 	{
 		return m_Commits;
 	}
@@ -129,8 +136,8 @@ public:
 private:
 
 	RENDER_LOOP_DRAW_COMMIT m_Current;
-	TArray<RENDER_LOOP_DRAW_COMMIT> m_Commits;
-	TArray<RENDER_LINE_DATA> m_CurrentShape;
+	std::vector<RENDER_LOOP_DRAW_COMMIT> m_Commits;
+	std::vector<RENDER_LINE_DATA> m_CurrentShape;
 };
 
 

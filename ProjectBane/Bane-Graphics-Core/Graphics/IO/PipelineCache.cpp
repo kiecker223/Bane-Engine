@@ -15,7 +15,7 @@
 	]
 */
 
-void SerializePipelines(const TArray<IGraphicsPipelineState*>& GFXPipelines, const TArray<IComputePipelineState*>& CMPPipelines)
+void SerializePipelines(const std::vector<IGraphicsPipelineState*>& GFXPipelines, const std::vector<IComputePipelineState*>& CMPPipelines)
 {
 	UNUSED(GFXPipelines);
 	UNUSED(CMPPipelines);
@@ -23,7 +23,7 @@ void SerializePipelines(const TArray<IGraphicsPipelineState*>& GFXPipelines, con
 
 
 
-void DeserializePipelines(TArray<IGraphicsPipelineState*>& GFXPipelines, const TArray<IComputePipelineState*>& CMPPipelines)
+void DeserializePipelines(std::vector<IGraphicsPipelineState*>& GFXPipelines, const std::vector<IComputePipelineState*>& CMPPipelines)
 {
 	UNUSED(GFXPipelines);
 	UNUSED(CMPPipelines);

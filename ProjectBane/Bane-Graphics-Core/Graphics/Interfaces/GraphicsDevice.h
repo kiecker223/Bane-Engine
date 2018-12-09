@@ -35,11 +35,11 @@ public:
 	virtual IComputeShader* CreateComputeShader(const std::string& ByteCode) = 0;
 
 	virtual bool SupportsPrecompiledShaders() const = 0;
-	virtual IVertexShader*		CreateVertexShaderFromBytecode(const TArray<uint8>& ByteCode) {	UNUSED(ByteCode); return nullptr; };
-	virtual IPixelShader*		CreatePixelShaderFromBytecode(const TArray<uint8>& ByteCode) {		UNUSED(ByteCode); return nullptr; };
-	virtual IGeometryShader*	CreateGeometryShaderFromBytecode(const TArray<uint8>& ByteCode) {	UNUSED(ByteCode); return nullptr; };
-	virtual IHullShader*		CreateHullShaderFromBytecode(const TArray<uint8>& ByteCode) {		UNUSED(ByteCode); return nullptr; };
-	virtual IComputeShader*		CreateComputeShaderFromBytecode(const TArray<uint8>& ByteCode) {	UNUSED(ByteCode); return nullptr; };
+	virtual IVertexShader*		CreateVertexShaderFromBytecode(const std::vector<uint8>& ByteCode) {	UNUSED(ByteCode); return nullptr; };
+	virtual IPixelShader*		CreatePixelShaderFromBytecode(const std::vector<uint8>& ByteCode) {		UNUSED(ByteCode); return nullptr; };
+	virtual IGeometryShader*	CreateGeometryShaderFromBytecode(const std::vector<uint8>& ByteCode) {	UNUSED(ByteCode); return nullptr; };
+	virtual IHullShader*		CreateHullShaderFromBytecode(const std::vector<uint8>& ByteCode) {		UNUSED(ByteCode); return nullptr; };
+	virtual IComputeShader*		CreateComputeShaderFromBytecode(const std::vector<uint8>& ByteCode) {	UNUSED(ByteCode); return nullptr; };
 
 	virtual IGraphicsPipelineState* CreatePipelineState(const GFX_PIPELINE_STATE_DESC* Desc) = 0;
 	virtual IComputePipelineState* CreatePipelineState(const COMPUTE_PIPELINE_STATE_DESC* Desc) = 0;

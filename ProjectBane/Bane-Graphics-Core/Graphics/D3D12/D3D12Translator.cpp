@@ -2,14 +2,14 @@
 #include "D3D12PipelineState.h"
 #include <d3d12.h>
 #include <DirectXColors.h>
-#include <Core/Containers/Array.h>
+#include <vector>
 
-static TArray<D3D12_BLEND> D3D12BlendTypes;
-static TArray<D3D12_BLEND_OP> D3D12BlendOperations;
-static TArray<D3D12_LOGIC_OP> D3D12LogicOperations;
-static TArray<D3D12_COMPARISON_FUNC> D3D12ComparisonFunctions;
-static TArray<D3D12_STENCIL_OP> D3D12StencilOperations;
-static TArray<D3D12_PRIMITIVE_TOPOLOGY_TYPE> D3D12PrimitiveTopologyTypes;
+static std::vector<D3D12_BLEND> D3D12BlendTypes;
+static std::vector<D3D12_BLEND_OP> D3D12BlendOperations;
+static std::vector<D3D12_LOGIC_OP> D3D12LogicOperations;
+static std::vector<D3D12_COMPARISON_FUNC> D3D12ComparisonFunctions;
+static std::vector<D3D12_STENCIL_OP> D3D12StencilOperations;
+static std::vector<D3D12_PRIMITIVE_TOPOLOGY_TYPE> D3D12PrimitiveTopologyTypes;
 
 // This is an awful implementation of how to do filtering types, but its the fastest thing I can come up with
 // Forget about the MIP_LINEAR and MIP_POINT, I know they are used for mipmaps but I'll be creating the mip maps myself
@@ -56,14 +56,14 @@ namespace D3D12Blends
 	D3D12_FILTER_MAXIMUM_MIN_MAG_MIP_LINEAR	= 0x195,
 	*/
 
-	//static TArray<D3D12_BLEND> AvailableMagPoint;
-	//static TArray<D3D12_BLEND> AvailableMagLinear;
-	//static TArray<D3D12_BLEND> AvailableMinPoint;
-	//static TArray<D3D12_BLEND> AvailableMinLinear;
-	//static TArray<D3D12_BLEND> AvailableMinPointMipLinear;
-	//static TArray<D3D12_BLEND> AvailableMinPointMipPoint;
-	//static TArray<D3D12_BLEND> AvailableMinLinearMipLinear;
-	//static TArray<D3D12_BLEND> AvailableMinLinearMipPoint;
+	//static std::vector<D3D12_BLEND> AvailableMagPoint;
+	//static std::vector<D3D12_BLEND> AvailableMagLinear;
+	//static std::vector<D3D12_BLEND> AvailableMinPoint;
+	//static std::vector<D3D12_BLEND> AvailableMinLinear;
+	//static std::vector<D3D12_BLEND> AvailableMinPointMipLinear;
+	//static std::vector<D3D12_BLEND> AvailableMinPointMipPoint;
+	//static std::vector<D3D12_BLEND> AvailableMinLinearMipLinear;
+	//static std::vector<D3D12_BLEND> AvailableMinLinearMipPoint;
 }
 
 void InitializeD3D12Translator()
@@ -89,8 +89,8 @@ void InitializeD3D12Translator()
 			D3D12_BLEND_INV_SRC1_ALPHA
 		};
 
-		D3D12BlendTypes.Resize(19);
-		memcpy((void*)D3D12BlendTypes.GetData(), Blends, sizeof(Blends));
+		D3D12BlendTypes.resize(19);
+		memcpy((void*)D3D12BlendTypes.data(), Blends, sizeof(Blends));
 	}
 
 	{
@@ -102,8 +102,8 @@ void InitializeD3D12Translator()
 			D3D12_BLEND_OP_MAX
 		};
 
-		D3D12BlendOperations.Resize(5);
-		memcpy((void*)D3D12BlendOperations.GetData(), BlendOps, sizeof(BlendOps));
+		D3D12BlendOperations.resize(5);
+		memcpy((void*)D3D12BlendOperations.data(), BlendOps, sizeof(BlendOps));
 	}
 	{
 		D3D12_LOGIC_OP LogicOps[16] = {
@@ -125,8 +125,8 @@ void InitializeD3D12Translator()
 			D3D12_LOGIC_OP_OR_INVERTED
 		};
 
-		D3D12LogicOperations.Resize(16);
-		memcpy((void*)D3D12LogicOperations.GetData(), LogicOps, sizeof(LogicOps));
+		D3D12LogicOperations.resize(16);
+		memcpy((void*)D3D12LogicOperations.data(), LogicOps, sizeof(LogicOps));
 	}
 	{
 		D3D12_COMPARISON_FUNC ComparisonFunctions[8] = {
@@ -140,8 +140,8 @@ void InitializeD3D12Translator()
 			D3D12_COMPARISON_FUNC_ALWAYS
 		};
 
-		D3D12ComparisonFunctions.Resize(8);
-		memcpy((void*)D3D12ComparisonFunctions.GetData(), ComparisonFunctions, sizeof(ComparisonFunctions));
+		D3D12ComparisonFunctions.resize(8);
+		memcpy((void*)D3D12ComparisonFunctions.data(), ComparisonFunctions, sizeof(ComparisonFunctions));
 	}
 	{
 		D3D12_STENCIL_OP StencilOperations[8] = {
@@ -155,8 +155,8 @@ void InitializeD3D12Translator()
 			D3D12_STENCIL_OP_DECR
 		};
 
-		D3D12StencilOperations.Resize(8);
-		memcpy((void*)D3D12StencilOperations.GetData(), StencilOperations, sizeof(StencilOperations));
+		D3D12StencilOperations.resize(8);
+		memcpy((void*)D3D12StencilOperations.data(), StencilOperations, sizeof(StencilOperations));
 	}
 	{
 		/*
@@ -171,8 +171,8 @@ void InitializeD3D12Translator()
 			D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 
 			D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE  // Duplicate because d3d12 is weird about this
 		};
-		D3D12PrimitiveTopologyTypes.Resize(4);
-		memcpy((void*)D3D12PrimitiveTopologyTypes.GetData(), PrimitiveTopologies, sizeof(PrimitiveTopologies));
+		D3D12PrimitiveTopologyTypes.resize(4);
+		memcpy((void*)D3D12PrimitiveTopologyTypes.data(), PrimitiveTopologies, sizeof(PrimitiveTopologies));
 	}
 	InitializeD3DCommonTranslator();
 }
@@ -243,9 +243,9 @@ D3D12_INPUT_LAYOUT_DESC D3D12_TranslateInputLayout(const GFX_INPUT_LAYOUT_DESC& 
 {
 	D3D12_INPUT_LAYOUT_DESC Result;
 	
-	D3D12_INPUT_ELEMENT_DESC* ResultItems = new D3D12_INPUT_ELEMENT_DESC[InDesc.InputItems.GetCount()]{ };
+	D3D12_INPUT_ELEMENT_DESC* ResultItems = new D3D12_INPUT_ELEMENT_DESC[InDesc.InputItems.size()]{ };
 
-	for (uint32 i = 0; i < InDesc.InputItems.GetCount(); i++)
+	for (uint32 i = 0; i < InDesc.InputItems.size(); i++)
 	{
 		const GFX_INPUT_ITEM_DESC& Item = InDesc.InputItems[i];
 		ResultItems[i].SemanticName = new char[Item.Name.size()];
@@ -259,7 +259,7 @@ D3D12_INPUT_LAYOUT_DESC D3D12_TranslateInputLayout(const GFX_INPUT_LAYOUT_DESC& 
 
 	Result.pInputElementDescs = ResultItems;
 	ResultItems->Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	Result.NumElements = static_cast<uint32>(InDesc.InputItems.GetCount());
+	Result.NumElements = static_cast<uint32>(InDesc.InputItems.size());
 	return Result;
 }
 

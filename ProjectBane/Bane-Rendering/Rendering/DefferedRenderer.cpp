@@ -15,7 +15,7 @@ DefferedRenderer::~DefferedRenderer()
 
 void DefferedRenderer::Initialize(const Window* pWindow)
 {
-	m_DrawCommits.CheckGrow(100);
+	m_DrawCommits.reserve(100);
 	
 	m_Device = GetApiRuntime()->GetGraphicsDevice();
 	uint32 Height = pWindow->GetHeight();
@@ -86,10 +86,10 @@ void DefferedRenderer::Render()
 	GatherSceneData();
 	ctx->BeginPass(m_DefferedPass);
 
-	for (uint32 i = 0; i < m_DrawCommits.GetCount(); i++)
+	for (uint32 i = 0; i < m_DrawCommits.size(); i++)
 	{
 		auto& Commit = m_DrawCommits[i];
-		for (uint32 b = 0; b < static_cast<uint32>(Commit.Meshes.GetCount()); b++)
+		for (uint32 b = 0; b < static_cast<uint32>(Commit.Meshes.size()); b++)
 		{
 			auto& DrawMesh = Commit.Meshes[b];
 			ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);
@@ -123,7 +123,7 @@ void DefferedRenderer::Render()
 
 	ctx->EndPass();
 	RenderLoop::ResetForNextFrame();
-	m_DrawCommits.Empty();
+	m_DrawCommits.clear();
 }
 
 void DefferedRenderer::Present()
@@ -165,7 +165,7 @@ void DefferedRenderer::Submit(const RenderLoop& InRenderLoop)
 {
 	for (auto& Commit : InRenderLoop.GetCommitedData())
 	{
-		m_DrawCommits.Add(Commit);
+		m_DrawCommits.push_back(Commit);
 	}
 }
 

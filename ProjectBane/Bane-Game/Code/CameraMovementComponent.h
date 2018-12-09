@@ -50,16 +50,23 @@ public:
 		{
 			ST->Translate((-Right * Speed) * Dt);
 		}
-
-		if (abs(MouseDelta.y) > 0.f)
+		if (GetInput()->Mouse.GetScrollWheel() > 0.f)
 		{
-			ST->GetRotation() *= Quaternion::FromAxisAngle(Right, MouseDelta.y * RotationSpeed * DT);
-			ST->GetRotation().Normalize();
+			Speed *= 10.0;
 		}
-		if (abs(MouseDelta.x) > 0.f)
+		if (GetInput()->Mouse.GetScrollWheel() < 0.f)
 		{
+			Speed /= 10.0;
+		}
+		if (abs(MouseDelta.y) > 0.f)
+ 		{
+			ST->GetRotation() *= Quaternion::FromAxisAngle(Right, MouseDelta.y * RotationSpeed * DT);
+ 			ST->GetRotation().Normalize();
+		}
+ 		if (abs(MouseDelta.x) > 0.f)
+ 		{
 			ST->GetRotation() *= Quaternion::FromAxisAngle(float3(0.f, 1.f, 0.f), MouseDelta.x * RotationSpeed * DT);
-			ST->GetRotation().Normalize();
+ 			ST->GetRotation().Normalize();
 		}
 	}
 };

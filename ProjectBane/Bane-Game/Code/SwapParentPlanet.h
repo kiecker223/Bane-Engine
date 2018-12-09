@@ -2,7 +2,7 @@
 
 #include <BaneObject.h>
 #include <Platform/Input/InputSystem.h>
-#include <Core/Containers/Array.h>
+#include <vector>
 #include "BaneObject/CoreComponents/MeshRenderingComponent.h"
 #include <iostream>
 
@@ -13,21 +13,21 @@ class SwapParentPlanet : public Component
 	IMPLEMENT_COMPONENT(SwapParentPlanet)
 public:
 
-	TArray<Entity*> Planets;
+	std::vector<Entity*> Planets;
 	uint32 Index;
 
 	void Start() override
 	{
-		Planets.Add(GetScene()->FindEntity("Sun"));
-		Planets.Add(GetScene()->FindEntity("Luna"));
-		Planets.Add(GetScene()->FindEntity("Earth"));
-		Planets.Add(GetScene()->FindEntity("Venus"));
-		Planets.Add(GetScene()->FindEntity("Mercury"));
+		Planets.push_back(GetScene()->FindEntity("Sun"));
+		Planets.push_back(GetScene()->FindEntity("Luna"));
+		Planets.push_back(GetScene()->FindEntity("Earth"));
+		Planets.push_back(GetScene()->FindEntity("Venus"));
+		Planets.push_back(GetScene()->FindEntity("Mercury"));
 	}
 
 	Entity* NextPlanet()
 	{
-		Index = (Index + 1) % Planets.GetCount();
+		Index = (Index + 1) % Planets.size();
 		return Planets[Index];
 	}
 
@@ -51,6 +51,7 @@ public:
 			Entity* Planet = NextPlanet();
 			GetTransform()->SetPosition(Planet->GetTransform()->GetPosition());
 			std::cout << "PlanetName: " << Planet->GetId().Name << std::endl;
+			GetTransform()->SetRotation(0.f, 0.f, 0.f);
 		}
 		if (GetInput()->Keyboard.GetKeyUp(KEY_R))
 		{
@@ -65,21 +66,26 @@ public:
 			if (GetScene()->GetPhysicsWorld().CastRay(Ray, HitInfo))
 			{
 				Entity* NewEntity = GetScene()->CreateEntity("AnotherEntity");
-				//NewEntity->GetPhysicsProperties().bCanTick = false;
 				NewEntity->GetTransform()->SetPosition(HitInfo.Position);
 				NewEntity->GetTransform()->Scale(200000.);
-				Planets.Add(NewEntity);
+				Planets.push_back(NewEntity);
 				auto Mrc = NewEntity->AddComponent<MeshRenderingComponent>();
 				Mrc->RenderedMesh = GetScene()->GetMeshCache().LoadMesh("Sphere");
 				Mrc->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 				Mrc->RenderedMaterial.SetTexture("DefaultBlue", 0);
 				std::cout << "HitEnemy" << std::endl;
+				auto SCC = NewEntity->AddComponent<SphereCollisionComponent>();
+				auto OtherSCC = GetScene()->FindEntity(HitInfo.Body.EntityHandle)->GetComponent<SphereCollisionComponent>();
+				SCC->SetRadius(100000.0);
+				SCC->SetPosition(HitInfo.Position);
+				SCC->SetMass(10000.0);
+				SCC->SetVelocity(OtherSCC->GetVelocity());
 			}
 		}
 		if (GetInput()->Keyboard.GetKeyDown(KEY_Z))
 		{
 			PrintPlanetData();
 		}
-	}
+	}                                
 
 };

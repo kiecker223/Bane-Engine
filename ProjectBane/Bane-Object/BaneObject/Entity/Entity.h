@@ -221,8 +221,8 @@ public:
 	inline TComponentHandle<T> AddComponent()
 	{
 		T* RetPointer = m_Allocator.AllocateObject<T>();
-		TComponentHandle<T> Result(&m_Allocator.PtrBegin, reinterpret_cast<ptrdiff_t>(m_Allocator.AllocatedObjects[m_Components.GetCount()]));
-		m_Components.Add(T::ClassHash);
+		TComponentHandle<T> Result(&m_Allocator.PtrBegin, reinterpret_cast<ptrdiff_t>(m_Allocator.AllocatedObjects[m_Components.size()]));
+		m_Components.push_back(T::ClassHash);
 		RetPointer->m_Owner = this;
 		RetPointer->m_Transform = &m_Transform;
 		RetPointer->m_Scene = m_SceneOwner;
@@ -265,13 +265,13 @@ public:
 
 	inline void Start()
 	{
-		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().GetCount(); i++)
+		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
 			reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(m_Allocator.GetAllocatedObjects()[i]) + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin))->Start();
 	}
 
 	inline void Tick(float DT)
 	{
-		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().GetCount(); i++)
+		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
 			reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(m_Allocator.GetAllocatedObjects()[i]) + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin))->Tick(DT);
 	}
 
@@ -285,7 +285,7 @@ public:
 		m_Parent = Parent;
 	}
 
-	inline TArray<Entity*> GetChildren()
+	inline std::vector<Entity*> GetChildren()
 	{
 		return m_Children;
 	}
@@ -302,12 +302,12 @@ public:
 
 	inline uint32 GetChildCount() const
 	{
-		return static_cast<uint32>(m_Children.GetCount());
+		return static_cast<uint32>(m_Children.size());
 	}
 
 	inline uint32 GetComponentCount() const
 	{
-		return static_cast<uint32>(m_Components.GetCount());
+		return static_cast<uint32>(m_Components.size());
 	}
 
 private:
@@ -318,10 +318,10 @@ private:
 	Transform m_Transform;
 	EntityIdentifier m_Id;
 	Entity* m_Parent;
-	TArray<Entity*> m_Children;
+	std::vector<Entity*> m_Children;
 	class Scene* m_SceneOwner;
 	ComponentAllocator m_Allocator;
-	TArray<uint64> m_Components;
+	std::vector<uint64> m_Components;
 };
 
 Entity* GetEntityById(const EntityIdentifier& Id);

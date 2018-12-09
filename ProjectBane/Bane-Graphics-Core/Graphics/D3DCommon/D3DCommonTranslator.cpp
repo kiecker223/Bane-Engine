@@ -1,7 +1,7 @@
 #include "D3DCommonTranslator.h"
 
 
-static TArray<D3D_PRIMITIVE_TOPOLOGY> D3DPrimitiveTopologies;
+static std::vector<D3D_PRIMITIVE_TOPOLOGY> D3DPrimitiveTopologies;
 
 
 void InitializeD3DCommonTranslator()
@@ -13,8 +13,8 @@ void InitializeD3DCommonTranslator()
 			D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP
 		};
 
-		D3DPrimitiveTopologies.Resize(3);
-		memcpy((void*)D3DPrimitiveTopologies.GetData(), PrimitiveTopology, sizeof(PrimitiveTopology));
+		D3DPrimitiveTopologies.resize(3);
+		memcpy((void*)D3DPrimitiveTopologies.data(), PrimitiveTopology, sizeof(PrimitiveTopology));
 	}
 }
 

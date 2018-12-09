@@ -1,8 +1,8 @@
 #pragma once
 #include "PhysicsBody.h"
 #include "PhysicsUpdateBuffer.h"
-#include <Core/Containers/Array.h>
-#include <Core/Containers/BinaryTree.h>
+#include <vector>
+#include <Core/Containers/Tree.h>
 #include <utility>
 #include <functional>
 #include <thread>
@@ -27,7 +27,7 @@ typedef struct PHYSICS_RAY {
 } PHYSICS_RAY;
 
 typedef struct RAY_HIT_INFO {
-	PhysicsBody* Body;
+	PhysicsBody Body;
 	double3 Position;
 	double3 Normal;
 } RAY_HIT_INFO;
@@ -38,12 +38,6 @@ public:
 
 	PhysicsWorld() : CurrentId(0), bRunningPhysicsSim(true), m_bUnlockedForRead(true), MessageQueue() 
 	{
-		UNUSED(1);
-		UNUSED(2);
-		int i = 0;
-		i += 1;
-		int b = i;
-		UNUSED(b);
 	}
 
 	inline uint32 AddBody(PHYSICS_BODY_CREATE_INFO Info)
@@ -52,7 +46,7 @@ public:
 		Info.Handle = CurrentId;
 		CurrentId++;
 		PhysicsBody Body(Info);
-		AddList.Add(Body);
+		AddList.push_back(Body);
 		return Info.Handle;
 	}
 
@@ -73,20 +67,41 @@ public:
 	
 	std::thread PhysicsThread;
 	PhysicsUpdateBuffer UpdateBuffer;
-	TArray<PhysicsBody> AddList;
+	std::vector<PhysicsBody> AddList;
 	ApplicationToPhysicsQueue MessageQueue;
 	std::mutex BodyAddMutex;
 	std::mutex GenerateOctTreeMutex;
 	uint32 CurrentId;
 	bool bRunningPhysicsSim;
 
-	struct OctTreeNode
+	struct PhysicsBodyRef
 	{
-		BoundingBox Bounds;
-		TArray<uint32> MeshesInBounds;
+		uint32 Handle;
+		double3 Position;
 	};
 
-	TBinaryTree<OctTreeNode>& GetOctTree()
+	struct OctTreeNode
+	{
+		OctTreeNode()
+		{
+		}
+
+		OctTreeNode(const BoundingBox& InBounds, const PhysicsBodyRef& InMainBody, const std::vector<PhysicsBodyRef>& InBodies) :
+			Bounds(InBounds),
+			MainBody(InMainBody),
+			MeshesInBounds(InBodies)
+		{
+		}
+
+		BoundingBox Bounds;
+		PhysicsBodyRef MainBody; // Given that there is only one mesh in these bounds, or that there will be submeshes in these bounds?
+		std::vector<PhysicsBodyRef> MeshesInBounds;
+	};
+
+	
+	using OctTreeType = TTree<OctTreeNode, 8>;
+
+	inline OctTreeType& GetOctTree()
 	{
 		return m_OctTree;
 	}
@@ -100,12 +115,13 @@ public:
 
 private:
 
-	void GenerateOctTreeImpl(TBinaryTree<OctTreeNode>::TNode* InNode, uint32& CallDepth);
-	BoundingBox CalculateBoundsForMeshes(const TArray<uint32>& MeshHandles);
+	void GenerateOctTreeImpl(OctTreeType::TNode* ParentNode, OctTreeType::TNode* InNode, uint32 ChildIdx, uint32& CallDepth);
+	BoundingBox CalculateBoundsForMeshes(const std::vector<uint32>& MeshHandles);
+	BoundingBox GetEntireSceneBounds();
 
-	
-	TBinaryTree<OctTreeNode> m_OctTree;
-	TArray<PhysicsBody> m_Bodies;
+	uint32 m_OctTreeDepth;
+	OctTreeType m_OctTree;
+	std::vector<PhysicsBody> m_Bodies;
 	bool m_bUnlockedForRead;
 };
 

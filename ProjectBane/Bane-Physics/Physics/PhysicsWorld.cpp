@@ -1,10 +1,12 @@
 #include "PhysicsWorld.h"
+#include <algorithm>
 #include <iostream>
 
 
 
 void PhysicsWorld::SpawnThread()
 {
+	m_OctTreeDepth = 1;
 	PhysicsThread = std::move(std::thread([this]()
 	{
 		this->UpdatePhysics();
@@ -28,48 +30,70 @@ bool IntersectsBox(const BoundingBox& Box, const PHYSICS_RAY& InRay)
 	return true;
 }
 
-TBinaryTree<PhysicsWorld::OctTreeNode>::TNode* FindSmallestBoxIntersectedImpl(const PHYSICS_RAY& InRay, TBinaryTree<PhysicsWorld::OctTreeNode>::TNode* LastNode)
+void FindSmallestBoxesIntersectedImpl(std::vector<PhysicsWorld::OctTreeType::TNode*>& OutNodes, PhysicsWorld::OctTreeType::TNode* LastNode, const PHYSICS_RAY& InRay)
 {
-	if (LastNode->NextR && IntersectsBox(LastNode->NextR->Value.Bounds, InRay))
+	for (uint32 i = 0; i < 8; i++)
 	{
-		return FindSmallestBoxIntersectedImpl(InRay, LastNode->NextR);
-	}
-	else if (LastNode->NextL && IntersectsBox(LastNode->NextL->Value.Bounds, InRay))
-	{
-		return FindSmallestBoxIntersectedImpl(InRay, LastNode->NextL);
-	}
-	else
-	{
-		return LastNode;
+		if (LastNode->Children[i])
+		{
+			if (IntersectsBox(LastNode->Children[i]->Value.Bounds, InRay)) 
+			{
+				// Does this have any child nodes?
+				if (LastNode->Children[i]->Children[0])
+				{
+					FindSmallestBoxesIntersectedImpl(OutNodes, LastNode->Children[i], InRay);
+				}
+				// if not then add it to the list of boxes we intersected
+				else
+				{
+					OutNodes.push_back(LastNode);
+				}
+			}
+		}
 	}
 }
 
 bool PhysicsWorld::CastRay(const PHYSICS_RAY& InRay, RAY_HIT_INFO& OutInfo)
 {
-	std::lock_guard<std::mutex> LockGuard(GenerateOctTreeMutex);
-
-	auto* SmallestNode = FindSmallestBoxIntersectedImpl(InRay, m_OctTree.Tail);
-
-	// We can assume that if it wasn't able to get to the smallest possible type of bounding box it just intersected
-	// a parent box and missed it altogether
-	if (SmallestNode->Value.MeshesInBounds.GetCount() == 1)
+	using TNode = OctTreeType::TNode;
+	std::vector<TNode*> IntersectedNodes;
+	// Find a more performant way to get this done
+	std::lock_guard<std::mutex> ScopeLock(GenerateOctTreeMutex); 
+	FindSmallestBoxesIntersectedImpl(IntersectedNodes, m_OctTree.Base, InRay);
+	std::sort(IntersectedNodes.begin(), IntersectedNodes.end(), [InRay](const TNode* Lhs, const TNode* Rhs)
 	{
-		auto& Body = GetBody(SmallestNode->Value.MeshesInBounds[0]);
+		double DistanceLhs = length(Lhs->Value.Bounds.GetCenter() - InRay.Position);
+		double DistanceRhs = length(Rhs->Value.Bounds.GetCenter() - InRay.Position);
+		return DistanceLhs < DistanceRhs;
+	});
+
+	for (auto* Node : IntersectedNodes)
+	{
+		double LeastT = M_POSITIVE_INFINITY;
+		uint32 HandleOfClosestObj = 0xffffffff;
 		double3 Normal;
-		double Result = Body.TestRayHit(InRay.Position, InRay.Direction, Normal);
-		if (Result > -1.)
+		if (Node->Value.MeshesInBounds.size() > 0)
 		{
-			OutInfo.Body = &Body;
-			OutInfo.Position = InRay.Position + (InRay.Direction * Result);
-			OutInfo.Normal = Normal;
-			return true;
+			for (auto& MeshId : Node->Value.MeshesInBounds)
+			{
+				auto& Body = GetBody(MeshId.Handle);
+				double T = (Body.TestRayHit(InRay.Position, InRay.Direction, Normal));
+				if (T < LeastT)
+				{
+					LeastT = T;
+					HandleOfClosestObj = Body.Handle;
+				}
+			}
+			if (LeastT > -1.)
+			{
+				OutInfo.Body = GetBody(HandleOfClosestObj);
+				OutInfo.Position = InRay.Position + (InRay.Direction * LeastT);
+				OutInfo.Normal = Normal;
+				return true;
+			}
 		}
-		return false;
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 void PhysicsWorld::CastRayAtSpeedOfLight(const PHYSICS_RAY& InRay, std::function<PhysicsBody()>& HitFunc)
@@ -84,14 +108,14 @@ void PhysicsWorld::UpdatePhysics()
 	{
 		using Clock = std::chrono::high_resolution_clock;
 		auto Start = Clock::now();
-		if (AddList.GetCount() > 0)
+		if (AddList.size() > 0)
 		{
 			std::lock_guard<std::mutex> ScopedMutex(BodyAddMutex);
 			for (auto& Body : AddList)
 			{
-				m_Bodies.Add(Body);
+				m_Bodies.push_back(Body);
 			}
-			AddList.Empty();
+			AddList.clear();
 		}
 
 		if (!MessageQueue.Queue.IsEmpty())
@@ -141,6 +165,10 @@ void PhysicsWorld::UpdatePhysics()
 					{
 						__debugbreak();
 					}
+					if (testSphereIntersection(Body.Position, Body.Sphere.Radius, OtherBody.Position, OtherBody.Sphere.Radius))
+					{
+						__debugbreak();
+					}
 				}
 				else
 				{
@@ -152,7 +180,10 @@ void PhysicsWorld::UpdatePhysics()
 		m_bUnlockedForRead = true;
 		auto TimeTaken = Clock::now() - Start;
 		std::chrono::nanoseconds SleepTime = (std::chrono::nanoseconds(16666667) - std::chrono::duration_cast<std::chrono::nanoseconds>(TimeTaken));
-		std::this_thread::sleep_for(SleepTime);
+		if (SleepTime > std::chrono::nanoseconds(0))
+		{
+			std::this_thread::sleep_for(SleepTime);
+		}
 	}
 	std::cout << "Quiting physics thread" << std::endl;
 }
@@ -160,81 +191,147 @@ void PhysicsWorld::UpdatePhysics()
 void PhysicsWorld::RegenerateOctTree()
 {
 	std::scoped_lock<std::mutex> ScopeGuard(GenerateOctTreeMutex);
-	if (m_OctTree.Tail)
+
+	using TNode = OctTreeType::TNode;
+
+	//m_OctTree.RecursivelyDelete();
+	if (!m_OctTree.Base)
 	{
-		m_OctTree.RecursiveDelete();
-		m_OctTree.Initialize();
+		m_OctTree.Base = new OctTreeType::TNode();
 	}
-	// Thread safety!
-	if (!m_bUnlockedForRead)
+	BoundingBox EntireScene = GetEntireSceneBounds();
+	
+	std::vector<PhysicsBodyRef> PhysBodyRefs(m_Bodies.size());
+	for (uint32 i = 0; i < m_Bodies.size(); i++)
 	{
+		PhysBodyRefs[i].Handle = i;
+		PhysBodyRefs[i].Position = m_Bodies[i].Position;
+	}
+	
+	m_OctTree.Base->Value.Bounds = EntireScene;
+	m_OctTree.Base->Value.MainBody = { 0xffffffff, double3(0., 0., 0.) };
+	m_OctTree.Base->Value.MeshesInBounds = PhysBodyRefs;
+
+	for (uint32 i = 0; i < 8; i++)
+	{
+		if (!m_OctTree.Base->Children[i])
+		{
+			m_OctTree.Base->Children[i] = new TNode();
+			m_OctTree.Base->Children[i]->Parent = m_OctTree.Base;
+		}
+		uint32 CallDepth = 0;
+		GenerateOctTreeImpl(m_OctTree.Base, m_OctTree.Base->Children[i], i, CallDepth);
+	}
+}
+
+void PhysicsWorld::GenerateOctTreeImpl(OctTreeType::TNode* ParentNode, OctTreeType::TNode* InNode, uint32 ChildIdx, uint32& CallDepth)
+{
+	using TNode = OctTreeType::TNode;
+	BoundingBox LastBounds = ParentNode->Value.Bounds;
+	double3 LastCenter = LastBounds.GetCenter();
+	double3 LastExtents = LastBounds.GetExtents();
+	double3 HalfExtents = LastExtents / 2.;
+	BoundingBox NewBounds;
+
+	switch (ChildIdx)
+	{
+		case 0:
+		{
+			NewBounds.Min = LastBounds.Min;
+			NewBounds.Max = LastCenter;
+		} break;
+		case 1:
+		{
+			NewBounds.Min = double3(LastCenter.x, LastBounds.Min.y, LastBounds.Min.z);
+			NewBounds.Max = LastCenter + double3(HalfExtents.x, 0., 0.);
+		} break;
+		case 2:
+		{
+			NewBounds.Min = double3(LastBounds.Min.xy, LastCenter.z);
+			NewBounds.Max = LastCenter + double3(0., 0., HalfExtents.z);
+		} break;
+		case 3:
+		{
+			NewBounds.Min = double3(LastCenter.x, LastBounds.Min.y, LastCenter.z);
+			NewBounds.Max = LastCenter + double3(HalfExtents.x, 0., HalfExtents.z);
+		} break;
+		case 4:
+		{
+			NewBounds.Min = double3(LastBounds.Min.x, LastCenter.y, LastBounds.Min.z);
+			NewBounds.Max = LastCenter + double3(0., HalfExtents.y, 0.);
+		} break;
+		case 5:
+		{
+			NewBounds.Min = double3(LastCenter.x, LastCenter.y, LastBounds.Min.z);
+			NewBounds.Max = LastCenter + double3(HalfExtents.x, HalfExtents.y, 0.);
+		} break;
+		case 6:
+		{
+			NewBounds.Min = double3(LastBounds.Min.x, LastCenter.y, LastCenter.z);
+			NewBounds.Max = LastCenter + double3(0., HalfExtents.y, -HalfExtents.z);
+		} break;
+		case 7:
+		{
+			NewBounds.Min = LastCenter;
+			NewBounds.Max = LastBounds.Max;
+		} break;
+	}
+	InNode->Value.Bounds = NewBounds;
+
+	for (uint32 i = 0; i < ParentNode->Value.MeshesInBounds.size(); i++)
+	{
+
+	}
+
+	if (ChildIdx == 0)
+	{
+		CallDepth++;
+	}
+
+	if (CallDepth < m_OctTreeDepth)
+	{
+		for (uint32 i = 0; i < 8; i++)
+		{
+			if (!InNode->Children[i])
+			{
+				InNode->Children[i] = new TNode();
+				InNode->Children[i]->Parent = InNode;
+			}
+			GenerateOctTreeImpl(InNode, InNode->Children[i], i, CallDepth);
+		}
+	}
+	if (ChildIdx == 7)
+	{
+		CallDepth--;
 		return;
 	}
-
-	TArray<uint32> AllIds;
-	for (auto& Body : m_Bodies)
-	{
-		AllIds.Add(Body.Handle);
-	}
-
-	BoundingBox EntireScene = CalculateBoundsForMeshes(AllIds);
-	
-	auto* RootNode = m_OctTree.Tail;
-	RootNode->Value.Bounds = EntireScene;
-	RootNode->Value.MeshesInBounds = AllIds;
-	uint32 CallDepth = 0;
-	GenerateOctTreeImpl(RootNode, CallDepth);
 }
 
-void PhysicsWorld::GenerateOctTreeImpl(TBinaryTree<OctTreeNode>::TNode* InNode, uint32& CallDepth)
-{
-	if (CallDepth > 40)
-	{
-		__debugbreak();
-	}
-	if (InNode->Value.MeshesInBounds.GetCount() > 1)
-	{
-		uint32 BiggestAxis = InNode->Value.Bounds.GetBiggestAxis();
-		if (BiggestAxis == 3)
-		{
-			BiggestAxis = CallDepth % 2;
-		}
-		double3 Center = InNode->Value.Bounds.GetCenter();
-		TArray<uint32> LNodeMeshes;
-		TArray<uint32> RNodeMeshes;
-		for (auto& Id : InNode->Value.MeshesInBounds)
-		{
-			auto& Body = GetBody(Id);
-			if (Body.Position[BiggestAxis] > Center[BiggestAxis])
-			{
-				LNodeMeshes.Add(Id);
-			}
-			else
-			{
-				RNodeMeshes.Add(Id);
-			}
-		}
-		BoundingBox LNodeBounds = CalculateBoundsForMeshes(LNodeMeshes);
-		BoundingBox RNodeBounds = CalculateBoundsForMeshes(RNodeMeshes);
-		auto* LNode = m_OctTree.CreateNode(InNode, { LNodeBounds, LNodeMeshes });
-		auto* RNode = m_OctTree.CreateNode(InNode, { RNodeBounds, RNodeMeshes });
-		InNode->NextL = LNode;
-		InNode->NextR = RNode;
-		CallDepth++;
-		GenerateOctTreeImpl(LNode, CallDepth);
-		CallDepth++;
-		GenerateOctTreeImpl(RNode, CallDepth);
-	}
-}
 
-BoundingBox PhysicsWorld::CalculateBoundsForMeshes(const TArray<uint32>& MeshHandles)
+BoundingBox PhysicsWorld::CalculateBoundsForMeshes(const std::vector<uint32>& MeshHandles)
 {
 	BoundingBox Result;
-	TArray<BoundingBox> Bounds;
+	std::vector<BoundingBox> Bounds;
 	for (auto& Handle : MeshHandles)
 	{
-		Bounds.Add(m_Bodies[Handle].GetBounds());
+		Bounds.push_back(m_Bodies[Handle].GetBounds());
 	}
-	Result.CalculateFromArray(reinterpret_cast<double3*>(Bounds.GetData()), Bounds.GetCount() * 2);
+	Result.CalculateFromArray(reinterpret_cast<double3*>(Bounds.data()), static_cast<uint32>(Bounds.size() * 2));
 	return Result;
 }
+
+BoundingBox PhysicsWorld::GetEntireSceneBounds()
+{
+	BoundingBox Result;
+	std::vector<BoundingBox> Bounds;
+	for (uint32 i = 0; i < m_Bodies.size(); i++)
+	{
+		Bounds.push_back(m_Bodies[i].GetBounds());
+	}
+	Result.CalculateFromArray(reinterpret_cast<double3*>(Bounds.data()), static_cast<uint32>(Bounds.size() * 2));
+	return Result;
+}
+
+
+
+

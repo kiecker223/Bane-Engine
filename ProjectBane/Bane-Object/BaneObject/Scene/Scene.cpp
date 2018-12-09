@@ -11,14 +11,14 @@ static std::string GenerateNewName(std::string OriginalName, uint32 Count)
 Scene::Scene()
 {
 	m_Root = new Entity(EntityIdentifier("SceneRoot"));
-	m_Entities.Add({ m_Root->GetId().HashedName, m_Root });
+	m_Entities.push_back({ m_Root->GetId().HashedName, m_Root });
 }
 
 Scene::Scene(const std::string& SceneName) :
 	m_Name(SceneName)
 {
 	m_Root = new Entity(EntityIdentifier("SceneRoot"));
-	m_Entities.Add({ m_Root->GetId().HashedName, m_Root });
+	m_Entities.push_back({ m_Root->GetId().HashedName, m_Root });
 }
 
 Entity* Scene::CreateEntity(const std::string& EntityName)
@@ -48,7 +48,7 @@ Entity* Scene::CreateEntity(const std::string& EntityName)
 	pEntity->m_SceneOwner = this;
 	pEntity->SetParent(m_Root);
 	EntityHashEntry Entry = { pEntity->GetId().HashedName, pEntity };
-	m_EntityAddList.Add(Entry);
+	m_EntityAddList.push_back(Entry);
 	return pEntity;
 }
 
@@ -64,21 +64,12 @@ Entity* Scene::FindEntity(const EntityIdentifier& EntityId)
 
 Entity* Scene::FindEntity(uint64 Id)
 {
-	auto FoundRes = std::find_if(m_Entities.begin(), m_Entities.end(),
-		[&](const EntityHashEntry& Entry)
-		{
-			if (Entry.Hash == Id)
-			{
-				return true;
-			}
-			return false;
-		}
-	);
-	if (FoundRes == m_Entities.end())
+	auto FoundRes = m_EntitySearchList.find(Id);
+	if (FoundRes == m_EntitySearchList.end())
 	{
 		return nullptr;
 	}
-	return FoundRes->pEntity;
+	return FoundRes->second;
 }
 
 bool Scene::EntityExists(const std::string& EntityName)
@@ -112,38 +103,46 @@ void Scene::Tick(float DT)
 	{
 		e.pEntity->Tick(DT);
 	}
-	if (m_EntityAddList.GetCount() > 0)
+	if (m_EntityAddList.size() > 0)
 	{
 		for (auto& e : m_EntityAddList)
 		{
-			m_Entities.Add(e);
-			m_EntityStartList.Add(e);
+			m_Entities.push_back(e);
+			m_EntityStartList.push_back(e);
+			if (m_EntitySearchList.find(e.Hash) == m_EntitySearchList.end())
+			{
+				m_EntitySearchList[e.Hash] = e.pEntity;
+			}
+			else
+			{
+				__debugbreak();
+			}
 		}
-		m_EntityAddList.Empty();
+		m_EntityAddList.clear();
 	}
-	if (m_EntityStartList.GetCount() > 0)
+	if (m_EntityStartList.size() > 0)
 	{
-		for (uint32 i = 0; i < m_EntityStartList.GetCount(); i++)
+		for (uint32 i = 0; i < m_EntityStartList.size(); i++)
 		{
 			m_EntityStartList[i].pEntity->Start();
 		}
-		m_EntityStartList.Empty();
+		m_EntityStartList.clear();
 	}
 }
 
 
-void DrawOctsImpl(TBinaryTree<PhysicsWorld::OctTreeNode>::TNode* pNewNode, RenderLoop& RL)
+void DrawOctsImpl(PhysicsWorld::OctTreeType::TNode* pNewNode, RenderLoop& RL, uint32& CallDepth)
 {
-	BoundingBox NewBox = pNewNode->Value.Bounds;
-	RL.AddBoundingBox(NewBox);
-	if (pNewNode->NextL)
+	using TNode = PhysicsWorld::OctTreeType::TNode;
+	CallDepth++;
+	for (uint32 i = 0; i < 8; i++)
 	{
-		DrawOctsImpl(pNewNode->NextL, RL);
+		if (pNewNode->Children[i])
+		{
+			DrawOctsImpl(pNewNode->Children[i], RL, CallDepth);
+		}
 	}
-	if (pNewNode->NextR)
-	{
-		DrawOctsImpl(pNewNode->NextR, RL);
-	}
+	RL.AddBoundingBox(pNewNode->Value.Bounds);
 }
 
 void Scene::Render(RenderLoop& RL)
@@ -157,9 +156,15 @@ void Scene::Render(RenderLoop& RL)
 		if (m_World.IsReadyForRead())
 		{
 			std::lock_guard<std::mutex> ScopedLock(m_World.GenerateOctTreeMutex);
+			if (m_PhysOctree.Base)
+			{
+				m_PhysOctree.RecursivelyDelete();
+			}
 			m_PhysOctree = m_World.GetOctTree();
 		}
-		DrawOctsImpl(m_PhysOctree.Tail, RL);
+		uint32 CallDepth = 0;
+		DrawOctsImpl(m_PhysOctree.Base, RL, CallDepth);
+		UNUSED(CallDepth);
 	}
 }
 
@@ -171,7 +176,7 @@ void Scene::DumpScene()
 	{
 		delete e.pEntity;
 	}
-	m_Entities.ClearMemory();
+	m_Entities.clear();
 	m_World.DestroyThread();
 }
 
@@ -190,4 +195,20 @@ void Scene::InitScene()
 	m_World.SpawnThread();
 }
 
+void Scene::DeleteEntity(Entity** ppEntity)
+{
+	UNUSED(ppEntity);
+}
 
+bool Scene::Raycast(const double3& RayStart, const double3& Direction, double MaxDistance, RayHitInformation& HitInfo)
+{
+	RAY_HIT_INFO RayHitInfo;
+	if (m_World.CastRay({ RayStart, Direction, MaxDistance }, RayHitInfo))
+	{
+		HitInfo.Normal = RayHitInfo.Normal;
+		HitInfo.Position = RayHitInfo.Position;
+		HitInfo.HitEntity = FindEntity(RayHitInfo.Body.EntityHandle);
+		return true;
+	}
+	return false;
+}

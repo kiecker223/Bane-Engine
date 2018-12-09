@@ -1,5 +1,5 @@
 #pragma once
-#include <Core/Containers/Array.h>
+#include <vector>
 #include <mutex>
 #include "ComponentBase.h"
 #define WIN32_LEAN_AND_MEAN
@@ -47,7 +47,7 @@ public:
 			return AllocateObject<C>();
 		}
 		C* Pointer = new ((void*)PtrCurrent) C();
-		AllocatedObjects.Add(reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(Pointer) - reinterpret_cast<ptrdiff_t>(PtrBegin)));
+		AllocatedObjects.push_back(reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(Pointer) - reinterpret_cast<ptrdiff_t>(PtrBegin)));
 		PtrCurrent += sizeof(C);
 		return (C*)Pointer;
 	}
@@ -115,7 +115,7 @@ public:
 	uint8* PtrEnd;
 	uint8* PtrCurrent;
 
-	TArray<Component*> AllocatedObjects;
+	std::vector<Component*> AllocatedObjects;
 	std::mutex ThreadLock;
 	
 	inline Component* GetComponent(uint32 Index)
@@ -123,7 +123,7 @@ public:
 		return reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(AllocatedObjects[Index]) + reinterpret_cast<ptrdiff_t>(PtrBegin));
 	}
 
-	inline TArray<Component*>& GetAllocatedObjects()
+	inline std::vector<Component*>& GetAllocatedObjects()
 	{
 		// std::lock_guard<std::mutex> LockGuard(ThreadLock);
 		return AllocatedObjects;
