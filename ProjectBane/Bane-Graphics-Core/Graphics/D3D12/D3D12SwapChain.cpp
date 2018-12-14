@@ -19,13 +19,15 @@ bool D3D12SwapChain::Initialize(IDXGIFactory2* Factory, IDXGIAdapter* InAdapter,
 	Desc.Scaling = DXGI_SCALING_STRETCH;
 	Desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 	Desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
-	Desc.Flags = 0;
+	Desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-	IDXGISwapChain1* TempSwapChain = nullptr;
-	HRESULT HRes = Factory->CreateSwapChainForHwnd(MainQueue, WindowHandle, &Desc, nullptr, nullptr, &TempSwapChain);
+	DXGI_SWAP_CHAIN_FULLSCREEN_DESC Fullscreen = { };
+	Fullscreen.Windowed = true;
 
-	TempSwapChain->QueryInterface(&SwapChain);
+	HRESULT HRes = Factory->CreateSwapChainForHwnd(MainQueue, WindowHandle, &Desc, &Fullscreen, nullptr, reinterpret_cast<IDXGISwapChain1**>(&SwapChain));
 
+	//IDXGIOutput* pOutput;
+	//SwapChain->GetContainingOutput(&pOutput);
 	return SUCCEEDED(HRes);
 }
 

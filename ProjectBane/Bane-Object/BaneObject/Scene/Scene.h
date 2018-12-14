@@ -97,6 +97,7 @@ private:
 	// TODO: Remove me when you're done debugging physics stuff.
 	// please!!
 	PhysicsWorld::OctTreeType m_PhysOctree;
+	std::vector<PhysicsWorld::OctTreeType::TNode*> m_NodesIntersected;
 	ITextureCube* m_Skybox;
 	std::string m_Name;
 	Entity* m_Root;

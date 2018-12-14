@@ -46,7 +46,7 @@ void FindSmallestBoxesIntersectedImpl(std::vector<PhysicsWorld::OctTreeType::TNo
 				// if not then add it to the list of boxes we intersected
 				else
 				{
-					OutNodes.push_back(LastNode);
+					OutNodes.push_back(LastNode->Children[i]);
 				}
 			}
 		}
@@ -66,10 +66,10 @@ bool PhysicsWorld::CastRay(const PHYSICS_RAY& InRay, RAY_HIT_INFO& OutInfo)
 		double DistanceRhs = length(Rhs->Value.Bounds.GetCenter() - InRay.Position);
 		return DistanceLhs < DistanceRhs;
 	});
-
+	DebugRayCastIntersectedNodes = IntersectedNodes;
 	for (auto* Node : IntersectedNodes)
 	{
-		double LeastT = M_POSITIVE_INFINITY;
+		double LeastT = std::numeric_limits<double>::infinity();
 		uint32 HandleOfClosestObj = 0xffffffff;
 		double3 Normal;
 		if (Node->Value.MeshesInBounds.size() > 0)
@@ -78,13 +78,13 @@ bool PhysicsWorld::CastRay(const PHYSICS_RAY& InRay, RAY_HIT_INFO& OutInfo)
 			{
 				auto& Body = GetBody(MeshId.Handle);
 				double T = (Body.TestRayHit(InRay.Position, InRay.Direction, Normal));
-				if (T < LeastT)
+				if (T < LeastT && T > -1.)
 				{
 					LeastT = T;
 					HandleOfClosestObj = Body.Handle;
 				}
 			}
-			if (LeastT > -1.)
+			if (LeastT > -1. && LeastT < std::numeric_limits<double>::infinity())
 			{
 				OutInfo.Body = GetBody(HandleOfClosestObj);
 				OutInfo.Position = InRay.Position + (InRay.Direction * LeastT);
@@ -134,7 +134,7 @@ void PhysicsWorld::UpdatePhysics()
 		{
 			for (auto& OtherBody : m_Bodies)
 			{
-				if (OtherBody.Handle == Body.Handle)
+				if (OtherBody.Handle == Body.Handle || OtherBody.Mass < 1e15)
 				{
 					continue;
 				}
@@ -167,7 +167,8 @@ void PhysicsWorld::UpdatePhysics()
 					}
 					if (testSphereIntersection(Body.Position, Body.Sphere.Radius, OtherBody.Position, OtherBody.Sphere.Radius))
 					{
-						__debugbreak();
+						Body.Velocity = double3(0., 0., 0.);
+						OtherBody.Velocity = double3(0., 0., 0.);
 					}
 				}
 				else
@@ -179,6 +180,7 @@ void PhysicsWorld::UpdatePhysics()
 		UpdateBuffer.Bodies = m_Bodies;
 		m_bUnlockedForRead = true;
 		auto TimeTaken = Clock::now() - Start;
+		SecondsTakenForThread = static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(TimeTaken).count()) / 1e9f;
 		std::chrono::nanoseconds SleepTime = (std::chrono::nanoseconds(16666667) - std::chrono::duration_cast<std::chrono::nanoseconds>(TimeTaken));
 		if (SleepTime > std::chrono::nanoseconds(0))
 		{
@@ -187,6 +189,26 @@ void PhysicsWorld::UpdatePhysics()
 	}
 	std::cout << "Quiting physics thread" << std::endl;
 }
+
+void RecursivelyClearTreeImpl(PhysicsWorld::OctTreeType::TNode* Node)
+{
+	using TNode = PhysicsWorld::OctTreeType::TNode;
+	for (uint32 i = 0; i < 8; i++)
+	{
+		if (Node->Children[i])
+		{
+			RecursivelyClearTreeImpl(Node->Children[i]);
+		}
+	}
+	Node->Value.MeshesInBounds.clear();
+}
+
+void RecursivelyClearTree(PhysicsWorld::OctTreeType& OctTree)
+{
+	using TNode = PhysicsWorld::OctTreeType::TNode;
+	RecursivelyClearTreeImpl(OctTree.Base);
+}
+
 
 void PhysicsWorld::RegenerateOctTree()
 {
@@ -199,6 +221,10 @@ void PhysicsWorld::RegenerateOctTree()
 	{
 		m_OctTree.Base = new OctTreeType::TNode();
 	}
+	else
+	{
+		RecursivelyClearTree(m_OctTree);
+	}
 	BoundingBox EntireScene = GetEntireSceneBounds();
 	
 	std::vector<PhysicsBodyRef> PhysBodyRefs(m_Bodies.size());
@@ -206,6 +232,7 @@ void PhysicsWorld::RegenerateOctTree()
 	{
 		PhysBodyRefs[i].Handle = i;
 		PhysBodyRefs[i].Position = m_Bodies[i].Position;
+		PhysBodyRefs[i].Bounds = m_Bodies[i].GetBounds();
 	}
 	
 	m_OctTree.Base->Value.Bounds = EntireScene;
@@ -219,9 +246,18 @@ void PhysicsWorld::RegenerateOctTree()
 			m_OctTree.Base->Children[i] = new TNode();
 			m_OctTree.Base->Children[i]->Parent = m_OctTree.Base;
 		}
+		else
+		{
+			m_OctTree.Base->Children[i]->Value.MeshesInBounds.clear();
+		}
 		uint32 CallDepth = 0;
 		GenerateOctTreeImpl(m_OctTree.Base, m_OctTree.Base->Children[i], i, CallDepth);
 	}
+}
+
+static bool AllComponentsBigger(const double3& Lhs, const double3& Rhs)
+{
+	return (Lhs.x > Rhs.x && Lhs.y > Rhs.y && Lhs.z > Rhs.z);
 }
 
 void PhysicsWorld::GenerateOctTreeImpl(OctTreeType::TNode* ParentNode, OctTreeType::TNode* InNode, uint32 ChildIdx, uint32& CallDepth)
@@ -278,32 +314,43 @@ void PhysicsWorld::GenerateOctTreeImpl(OctTreeType::TNode* ParentNode, OctTreeTy
 	}
 	InNode->Value.Bounds = NewBounds;
 
-	for (uint32 i = 0; i < ParentNode->Value.MeshesInBounds.size(); i++)
-	{
+	auto NewExtents = NewBounds.GetExtents();
 
-	}
+	//bool bStopShrinking;
 
-	if (ChildIdx == 0)
+	if (ParentNode->Value.MeshesInBounds.size() > 0)
 	{
-		CallDepth++;
-	}
-
-	if (CallDepth < m_OctTreeDepth)
-	{
-		for (uint32 i = 0; i < 8; i++)
+		auto& MeshesInBounds = ParentNode->Value.MeshesInBounds;
+		for (uint32 i = 0; i < MeshesInBounds.size(); i++)
 		{
-			if (!InNode->Children[i])
+			auto& MeshInBounds = MeshesInBounds[i];
+			if (InNode->Value.Bounds.PointInBounds(MeshInBounds.Position))
 			{
-				InNode->Children[i] = new TNode();
-				InNode->Children[i]->Parent = InNode;
+				InNode->Value.MeshesInBounds.push_back(MeshInBounds);
 			}
-			GenerateOctTreeImpl(InNode, InNode->Children[i], i, CallDepth);
+			else
+			{
+				if (AllComponentsBigger(MeshInBounds.Bounds.GetExtents(), NewBounds.GetExtents()))
+				{
+					InNode->Value.MeshesInBounds.push_back(MeshInBounds);
+				}
+			}
 		}
 	}
-	if (ChildIdx == 7)
+	
+	if (InNode->Value.MeshesInBounds.size() <= 1)
 	{
-		CallDepth--;
 		return;
+	}
+
+	for (uint32 i = 0; i < 8; i++)
+	{
+		if (!InNode->Children[i])
+		{
+			InNode->Children[i] = new TNode();
+			InNode->Children[i]->Parent = InNode;
+		}
+		GenerateOctTreeImpl(InNode, InNode->Children[i], i, CallDepth);
 	}
 }
 

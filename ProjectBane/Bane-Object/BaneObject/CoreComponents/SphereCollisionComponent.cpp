@@ -19,12 +19,16 @@ void SphereCollisionComponent::Tick(float DT)
 	UNUSED(DT);
 	if (GetScene()->GetPhysicsWorld().IsReadyForRead())
 	{
-		auto& RefBody = GetScene()->GetPhysicsWorld().UpdateBuffer.Bodies[m_Body];
-		m_Position = RefBody.Position;
-		m_Velocity = RefBody.Velocity;
-		m_AngularVelocity = double4(normalized(RefBody.AngularVelocity), length(RefBody.AngularVelocity));
-		m_Mass = RefBody.Mass;
-		GetTransform()->SetPosition(RefBody.Position);
+		auto& Bodies = GetScene()->GetPhysicsWorld().UpdateBuffer.Bodies;
+		if (Bodies.size() - 1 >= m_Body)
+		{
+			auto& RefBody = Bodies[m_Body];
+			m_Position = RefBody.Position;
+			m_Velocity = RefBody.Velocity;
+			m_AngularVelocity = double4(normalized(RefBody.AngularVelocity), length(RefBody.AngularVelocity));
+			m_Mass = RefBody.Mass;
+			GetTransform()->SetPosition(RefBody.Position);
+		}
 	}
 }
 

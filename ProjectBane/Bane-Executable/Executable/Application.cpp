@@ -74,8 +74,8 @@ void Application::InitSystems()
 	{
 		uint32 ScreenWidth  = GetSystemMetrics(SM_CXSCREEN);
 		uint32 ScreenHeight = GetSystemMetrics(SM_CYSCREEN);
-		ScreenWidth = uint32(ScreenWidth *  (float)0.9);
-		ScreenHeight = uint32(ScreenHeight * (float)0.9);
+		//ScreenWidth = uint32(ScreenWidth *  (float)0.9);
+		//ScreenHeight = uint32(ScreenHeight * (float)0.9);
 		OpenApplicationWindow("Unnamed window", ScreenWidth, ScreenHeight);
 	}
 	InitializeInput(m_Window);

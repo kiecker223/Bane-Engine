@@ -14,11 +14,19 @@ public:
 	class TNode
 	{
 	public:
-		TNode() : Parent(nullptr), Children{ nullptr }
+		TNode() : Parent(nullptr)
 		{
+			for (uint32 i = 0; i < NumChildrenPerNode; i++)
+			{
+				Children[i] = nullptr;
+			}
 		}
 		TNode(TType& ValRef)
 		{
+			for (uint32 i = 0; i < NumChildrenPerNode; i++)
+			{
+				Children[i] = nullptr;
+			}
 			Assign(ValRef);
 		}
 		TType Value;

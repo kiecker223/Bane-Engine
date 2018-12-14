@@ -62,8 +62,8 @@ public:
 			PHYSICS_RAY Ray;
 			Ray.Position = GetTransform()->GetPosition();
 			Ray.Direction = GetTransform()->GetForward(); 
-			RAY_HIT_INFO HitInfo;
-			if (GetScene()->GetPhysicsWorld().CastRay(Ray, HitInfo))
+			RayHitInformation HitInfo;
+			if (GetScene()->Raycast(Ray.Position, Ray.Direction, std::numeric_limits<double>::infinity(), HitInfo))
 			{
 				Entity* NewEntity = GetScene()->CreateEntity("AnotherEntity");
 				NewEntity->GetTransform()->SetPosition(HitInfo.Position);
@@ -75,7 +75,7 @@ public:
 				Mrc->RenderedMaterial.SetTexture("DefaultBlue", 0);
 				std::cout << "HitEnemy" << std::endl;
 				auto SCC = NewEntity->AddComponent<SphereCollisionComponent>();
-				auto OtherSCC = GetScene()->FindEntity(HitInfo.Body.EntityHandle)->GetComponent<SphereCollisionComponent>();
+				auto OtherSCC = HitInfo.HitEntity->GetComponent<SphereCollisionComponent>();
 				SCC->SetRadius(100000.0);
 				SCC->SetPosition(HitInfo.Position);
 				SCC->SetMass(10000.0);

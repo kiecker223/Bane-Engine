@@ -1,6 +1,7 @@
 #include "Scene.h"
 #include "Graphics/Data/RenderLoop.h"
 #include <algorithm>
+#include <iostream>
 
 
 static std::string GenerateNewName(std::string OriginalName, uint32 Count)
@@ -96,7 +97,6 @@ bool Scene::EntityExists(uint64 Id)
 	) != m_Entities.end();
 }
 
-
 void Scene::Tick(float DT)
 {
 	for (auto& e : m_Entities)
@@ -128,6 +128,10 @@ void Scene::Tick(float DT)
 		}
 		m_EntityStartList.clear();
 	}
+	if (m_World.IsReadyForRead())
+	{
+//		std::cout << "Max time for physics thread: " << 1.f / 60.f << "\nPhysics thread has taken: " << m_World.SecondsTakenForThread << std::endl;
+	}
 }
 
 
@@ -155,16 +159,24 @@ void Scene::Render(RenderLoop& RL)
 	{
 		if (m_World.IsReadyForRead())
 		{
-			std::lock_guard<std::mutex> ScopedLock(m_World.GenerateOctTreeMutex);
-			if (m_PhysOctree.Base)
-			{
-				m_PhysOctree.RecursivelyDelete();
-			}
-			m_PhysOctree = m_World.GetOctTree();
+// 			std::lock_guard<std::mutex> ScopedLock(m_World.GenerateOctTreeMutex);
+// 			if (m_PhysOctree.Base)
+// 			{
+// 				m_PhysOctree.RecursivelyDelete();
+// 			}
+// 			m_PhysOctree = m_World.GetOctTree();
+//			uint32 CallDepth;
+//			DrawOctsImpl(m_PhysOctree.Base, RL, CallDepth);
+//			UNUSED(CallDepth);
+			m_NodesIntersected = m_World.DebugRayCastIntersectedNodes;
 		}
-		uint32 CallDepth = 0;
-		DrawOctsImpl(m_PhysOctree.Base, RL, CallDepth);
-		UNUSED(CallDepth);
+		if (m_NodesIntersected.size() > 0)
+		{
+			for (uint32 i = 0; i < m_NodesIntersected.size(); i++)
+			{
+				RL.AddBoundingBox(m_NodesIntersected[i]->Value.Bounds);
+			}
+		}
 	}
 }
 
@@ -208,6 +220,7 @@ bool Scene::Raycast(const double3& RayStart, const double3& Direction, double Ma
 		HitInfo.Normal = RayHitInfo.Normal;
 		HitInfo.Position = RayHitInfo.Position;
 		HitInfo.HitEntity = FindEntity(RayHitInfo.Body.EntityHandle);
+		m_NodesIntersected = m_World.DebugRayCastIntersectedNodes;
 		return true;
 	}
 	return false;

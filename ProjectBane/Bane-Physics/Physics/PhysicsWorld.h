@@ -57,7 +57,7 @@ public:
 	{
 	}
 
-	inline bool IsReadyForRead() const
+	inline bool IsReadyForRead()
 	{
 		return m_bUnlockedForRead;
 	}
@@ -73,11 +73,13 @@ public:
 	std::mutex GenerateOctTreeMutex;
 	uint32 CurrentId;
 	bool bRunningPhysicsSim;
+	float SecondsTakenForThread;
 
 	struct PhysicsBodyRef
 	{
 		uint32 Handle;
 		double3 Position;
+		BoundingBox Bounds;
 	};
 
 	struct OctTreeNode
@@ -112,6 +114,8 @@ public:
 	}
 
 	void RegenerateOctTree();
+
+	std::vector<OctTreeType::TNode*> DebugRayCastIntersectedNodes;
 
 private:
 
