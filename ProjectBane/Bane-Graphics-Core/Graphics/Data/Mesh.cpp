@@ -210,7 +210,7 @@ void Mesh::GenerateUVSphere(uint32 SegmentCount)
 					// Bottom triangle
 					Indices.push_back((y * LatitudeCount) + i);
 					Indices.push_back((y * LatitudeCount) + i + LatitudeCount);
-					Indices.push_back((y * LatitudeCount) + i + LatitudeCount+ 1);
+					Indices.push_back((y * LatitudeCount) + i + LatitudeCount + 1);
 				}
 			}
 		}
@@ -265,6 +265,85 @@ void Mesh::GenerateUVSphere(uint32 SegmentCount)
 
 	m_Indices = Indices;
 	SetVertexData(Vertices);
+	Upload();
+}
+
+void Mesh::GenerateCylinder(uint32 RadialSegments, uint32 HeightSegments)
+{
+	float3 TopMost = float3(0.f, 0.5f, 0.f);
+	float3 BottomMost = -TopMost;
+
+	std::vector<Vertex> Vertices;
+	
+	{
+		Vertex Vert;
+		Vert.Position = TopMost;
+		Vertices.push_back(Vert);
+	}
+	for (uint32 y = 0; y < HeightSegments + 1; y++)
+	{
+		float PercentDown = (float)y / (float)HeightSegments;
+		for (uint32 i = 0; i < RadialSegments; i++)
+		{
+			float PercentAround = (float)i / (float)RadialSegments;
+			matrix RotateAround = matRotY(radians(PercentAround * 360));
+			float3 Point = float3(0.f, 0.5f, -0.5f);
+
+			float3 NewPoint = ((float3x3)RotateAround * Point) - float3(0.f, PercentDown, 0.f);
+
+			Vertex Vert;
+			Vert.Position = NewPoint;
+			Vertices.push_back(Vert);
+		}
+	}
+	{
+		Vertex Vert;
+		Vert.Position = BottomMost;
+		Vertices.push_back(Vert);
+	}
+
+	std::vector<uint32> Indices;
+	for (uint32 i = 1; i < RadialSegments; i++)
+	{
+		Indices.push_back(0);
+		Indices.push_back(i);
+		Indices.push_back(i + 1);
+	}
+	Indices.push_back(0);
+	Indices.push_back(RadialSegments);
+	Indices.push_back(1);
+	for (uint32 y = 0; y < HeightSegments; y++)
+	{
+		for (uint32 i = 0; i < RadialSegments - 1; i++)
+		{
+			uint32 CurrentIdx = (y * RadialSegments + 1) + i;
+			Indices.push_back(CurrentIdx);
+			Indices.push_back(CurrentIdx + RadialSegments);
+			Indices.push_back(CurrentIdx + RadialSegments + 1);
+			Indices.push_back(CurrentIdx);
+			Indices.push_back(CurrentIdx + 1);
+			Indices.push_back(CurrentIdx + RadialSegments + 1);
+		}
+		// Here we can assume that we are at the end of the segment for the given line
+		uint32 Idx = y + 1;
+		Indices.push_back(Idx * RadialSegments);
+		Indices.push_back(Idx * RadialSegments + 1);
+		Indices.push_back(Idx * RadialSegments + (RadialSegments));
+		Indices.push_back(y * RadialSegments + (RadialSegments));
+		Indices.push_back(y * RadialSegments + 1);
+		Indices.push_back(y * RadialSegments + RadialSegments + 1);
+	}
+	for (uint32 i = static_cast<uint32>(Vertices.size()) - 1; i > static_cast<uint32>(Vertices.size() - 1) - RadialSegments; i--)
+	{
+		Indices.push_back(static_cast<uint32>(Vertices.size()) - 1);
+		Indices.push_back(i);
+		Indices.push_back(i - 1);
+	}
+	Indices.push_back(static_cast<uint32>(Vertices.size()) - 1);
+	Indices.push_back(static_cast<uint32>(Vertices.size() - 1) - RadialSegments);
+	Indices.push_back(static_cast<uint32>(Vertices.size()) - 2);
+	SetVertexData(Vertices);
+	SetIndices(Indices);
 	Upload();
 }
 

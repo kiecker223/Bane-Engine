@@ -66,7 +66,7 @@ public:
 
 	struct Vertex
 	{
-		float3 Postition;
+		float3 Position;
 		float3 Normal;
 		float3 Binormal;
 		float3 Tangent;
@@ -105,6 +105,7 @@ public:
 	void SetVertices(const std::vector<FloatInt>& InVertices);
 	void SetIndices(const std::vector<uint32>& InIndices);
 	void GenerateUVSphere(uint32 SegmentCount);
+	void GenerateCylinder(uint32 RadialSegments, uint32 HeightSegments);
 
 	void Upload(); // Call an explicit upload to gpu
 	

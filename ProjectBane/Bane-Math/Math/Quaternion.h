@@ -243,6 +243,24 @@ public:
 		z /= Length;
 		return *this;
 	}
+
+
+	// Credit to: https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
+	// very clean and performant solution
+// 	inline double3 RotateVector(const double3& InVector)
+// 	{
+// 		double3 Result;
+// 		// Extract the vector part of the quaternion
+// 		double3 u(q.x, q.y, q.z);
+// 
+// 		// Extract the scalar part of the quaternion
+// 		double s = q.w;
+// 
+// 		// Do the math
+// 		Result = u * (2.0 * dot(u, InVector))
+// 			+ (InVector * (s*s - dot(u, u)))
+// 			+ cross(u, InVector) * (2.0f * s);
+// 	}
 };
 
 struct Quaternion64

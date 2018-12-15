@@ -7,6 +7,8 @@
 #include "BaneObject/CoreComponents/CameraComponent.h"
 #include "SwapParentPlanet.h"
 #include "CameraMovementComponent.h"
+#include "BaneObject/CoreComponents/CylinderCollisionComponent.h"
+#include "RaycastTestComponent.h"
 
 
 
@@ -238,35 +240,40 @@ PLANET_START_INFO PlacePlanet(PLANET_ORBIT_INFO OrbitInfo, double Time)
 	return Result;
 }
 
-
-struct Person
+void InitApplication()
 {
-	Person()
+	GetSceneManager()->CreateNewScene("Test scene");
+	Scene* Level = GetSceneManager()->CurrentScene;
 	{
-		std::cout << "I am born" << std::endl;
+		Mesh* AllocMesh = Level->GetMeshCache().AllocateMesh();
+		AllocMesh->GenerateUVSphere(32);
+		Level->GetMeshCache().SaveMesh(AllocMesh, "Sphere");
+
+		AllocMesh = Level->GetMeshCache().AllocateMesh();
+		AllocMesh->GenerateCylinder(32, 3);
+		Level->GetMeshCache().SaveMesh(AllocMesh, "Cylinder");
 	}
 
-	Person(const Person&)
-	{
-		std::cout << "Copy constructor called" << std::endl;
-	}
+	Entity* CameraEntity = Level->CreateEntity("Camera");
+	auto CamComp = CameraEntity->AddComponent<CameraComponent>();
+	CamComp->ZNear = 1e-2f;
+	CamComp->ZFar = 1e+21f;
+	CameraEntity->AddComponent<CameraMovementComponent>()->Speed = 1.;
+	CameraEntity->AddComponent<RaycastTestComponent>();
 
-	~Person()
-	{
-		std::cout << "I am alive'nt" << std::endl;
-	}
-
-	std::string Name;
-	uint32 Age;
-
-	std::vector<Person*> Children;
-};
-
-void InitApplication2()
-{
+	// Not actually a cylinder mesh yet!
+	Entity* CylinderMeshTest = Level->CreateEntity("Collision test");
+	auto MCC = CylinderMeshTest->AddComponent<MeshRenderingComponent>();
+	MCC->RenderedMesh = Level->GetMeshCache().LoadMesh("Cylinder");
+	MCC->RenderedMaterial.InitializeMaterial("MainShader.gfx");
+	MCC->RenderedMaterial.SetDiffuseTexture("Resources/8k_moon.jpg");
+	auto CCC = CylinderMeshTest->AddComponent<CylinderCollisionComponent>();
+	CCC->SetMass(10.0);
+	CCC->SetPosition(double3());
+	
 }
 
-void InitApplication()
+void InitApplication2()
 {
 	GetSceneManager()->CreateNewScene("Space Scene");
 	Scene* SpaceLevel = GetSceneManager()->CurrentScene;
@@ -358,16 +365,11 @@ void InitApplication()
 		SCC->SetVelocity(SInfo.Velocity * 1.0 / 60.0);
 		SCC->SetMass(4.867e24);
 		SCC->SetRadius(12104000. / 2.);
-		//FollowedPlanet = Venus;
 	}
 	{
 		Entity* Earth = SpaceLevel->CreateEntity("Earth");
 		PLANET_START_INFO SInfo = PlacePlanet({ "Earth", 0., 0., 0., M_AU(1.0), 0., 0. }, TimeArg);
 		std::cout << "Earth Distance: " << length(SInfo.Position) << std::endl;
-		//Earth->GetPhysicsProperties().Mass = 5.97219e24;
-		//Earth->GetPhysicsProperties().Velocity = SInfo.Velocity * (1.0 / 60.0);
-		//Earth->GetPhysicsProperties().AngularVelocity = double3(0., 1., 0.) * (7.2921159e-5 * (1. / 60.));
-		//Earth->GetTransform()->SetPosition(SInfo.Position);
 		auto EarthMesh = Earth->AddComponent<MeshRenderingComponent>();
 		EarthMesh->RenderedMesh = SpaceLevel->GetMeshCache().LoadMesh("Sphere");
 		EarthMesh->RenderedMaterial.InitializeMaterial("MainShader.gfx");

@@ -44,6 +44,7 @@ Pipeline
 		Cull = false;
 		FillSolid = true;
 	};
+
 };
 
 struct VS_INPUT
@@ -53,7 +54,7 @@ struct VS_INPUT
 	float3 Binormal : BINORMAL;
 	float3 Tangent : TANGENT;
 	float2 TexCoords : TEXCOORD;
-//	uint Id : SV_VERTEXID;
+	uint Id : SV_VERTEXID;
 };
 
 struct PS_INPUT
@@ -64,7 +65,7 @@ struct PS_INPUT
 	float3 Binormal : BINORMAL;
 	float3 Tangent : TANGENT;
 	float2 TexCoords : TEXCOORD;
-//	uint Id : VERTEXID;
+	uint Id : VERTEXID;
 };
 
 PS_INPUT VSMain(VS_INPUT Input)
@@ -77,7 +78,7 @@ PS_INPUT VSMain(VS_INPUT Input)
 	Pos = mul(Pos, Projection);
 	Pos.z = log((ZResolution*Pos.z) + 1.0) / log((ZResolution*FarPlane) + 1.0);
 	Pos.z *= Pos.w;
-//	Output.Id = Input.Id;
+	Output.Id = Input.Id;
 	Output.Position = Pos;
 	Output.WorldPos = mul(float4(Input.Position, 1.0f), Model).xyz;
 	Output.Normal =   normalize(mul(Input.Normal,   (float3x3)Model));
@@ -98,7 +99,7 @@ float rand2(in uint Value, uint o)
 
 float4 PSMain(PS_INPUT Input) : SV_TARGET0
 {
-	return float4(AlbedoTexture.Sample(DefaultSampler, Input.TexCoords).rgb, 1.0);
-	//return float4(rand2(Input.Id, 1), rand2(Input.Id, 2), rand2(Input.Id, 3), 1.0);
+	//return float4(AlbedoTexture.Sample(DefaultSampler, Input.TexCoords).rgb, 1.0);
+	return float4(rand2(Input.Id, 1), rand2(Input.Id, 2), rand2(Input.Id, 3), 1.0);
 	//return float4(Input.TexCoords.x, Input.TexCoords.x, Input.TexCoords.x, 1.0f);
 }

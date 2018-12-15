@@ -66,7 +66,6 @@ bool PhysicsWorld::CastRay(const PHYSICS_RAY& InRay, RAY_HIT_INFO& OutInfo)
 		double DistanceRhs = length(Rhs->Value.Bounds.GetCenter() - InRay.Position);
 		return DistanceLhs < DistanceRhs;
 	});
-	DebugRayCastIntersectedNodes = IntersectedNodes;
 	for (auto* Node : IntersectedNodes)
 	{
 		double LeastT = std::numeric_limits<double>::infinity();
@@ -89,6 +88,7 @@ bool PhysicsWorld::CastRay(const PHYSICS_RAY& InRay, RAY_HIT_INFO& OutInfo)
 				OutInfo.Body = GetBody(HandleOfClosestObj);
 				OutInfo.Position = InRay.Position + (InRay.Direction * LeastT);
 				OutInfo.Normal = Normal;
+				DebugRayCastIntersectedNodes = IntersectedNodes;
 				return true;
 			}
 		}
@@ -130,50 +130,54 @@ void PhysicsWorld::UpdatePhysics()
 
 		RegenerateOctTree();
 		m_bUnlockedForRead = false;
-		for (auto& Body : m_Bodies)
+		// Calculate gravity acceleration
 		{
-			for (auto& OtherBody : m_Bodies)
+			for (auto& Body : m_Bodies)
 			{
-				if (OtherBody.Handle == Body.Handle || OtherBody.Mass < 1e15)
+				for (auto& OtherBody : m_Bodies)
 				{
-					continue;
-				}
-				double3 ForceDir = OtherBody.Position - Body.Position;
-				double DistanceFromBody = length(ForceDir);
-				normalize(ForceDir);
-
-				if (DistanceFromBody < 1e-1)
-				{
-					continue;
-				}
-
-				double Force = M_GRAV_CONST * ((Body.Mass * OtherBody.Mass) / (DistanceFromBody * DistanceFromBody));
-				if (Force > 0.0)
-				{
-					ForceDir *= Force;
-					double3 AccelerationDir = ForceDir / Body.Mass;
-					Body.Velocity += (AccelerationDir * (1. / 60.));
-					if (!isNan(Body.Velocity))
+					// Small but important optimization
+					if (OtherBody.Handle == Body.Handle || OtherBody.Mass < 1e15)
 					{
-						Body.Position += Body.Velocity;
-						if (isNan(Body.Position))
+						continue;
+					}
+					double3 ForceDir = OtherBody.Position - Body.Position;
+					double DistanceFromBody = length(ForceDir);
+					normalize(ForceDir);
+
+					if (DistanceFromBody < 1e-1)
+					{
+						continue;
+					}
+
+					double Force = M_GRAV_CONST * ((Body.Mass * OtherBody.Mass) / (DistanceFromBody * DistanceFromBody));
+					if (Force > 0.0)
+					{
+						ForceDir *= Force;
+						double3 AccelerationDir = ForceDir / Body.Mass;
+						Body.Velocity += (AccelerationDir * (1. / 60.));
+						if (!isNan(Body.Velocity))
+						{
+							Body.Position += Body.Velocity;
+							if (isNan(Body.Position))
+							{
+								__debugbreak();
+							}
+						}
+						else
 						{
 							__debugbreak();
+						}
+						if (testSphereIntersection(Body.Position, Body.Sphere.Radius, OtherBody.Position, OtherBody.Sphere.Radius))
+						{
+							Body.Velocity = double3(0., 0., 0.);
+							OtherBody.Velocity = double3(0., 0., 0.);
 						}
 					}
 					else
 					{
-						__debugbreak();
+						continue;
 					}
-					if (testSphereIntersection(Body.Position, Body.Sphere.Radius, OtherBody.Position, OtherBody.Sphere.Radius))
-					{
-						Body.Velocity = double3(0., 0., 0.);
-						OtherBody.Velocity = double3(0., 0., 0.);
-					}
-				}
-				else
-				{
-					continue;
 				}
 			}
 		}
@@ -316,8 +320,6 @@ void PhysicsWorld::GenerateOctTreeImpl(OctTreeType::TNode* ParentNode, OctTreeTy
 
 	auto NewExtents = NewBounds.GetExtents();
 
-	//bool bStopShrinking;
-
 	if (ParentNode->Value.MeshesInBounds.size() > 0)
 	{
 		auto& MeshesInBounds = ParentNode->Value.MeshesInBounds;
@@ -330,10 +332,10 @@ void PhysicsWorld::GenerateOctTreeImpl(OctTreeType::TNode* ParentNode, OctTreeTy
 			}
 			else
 			{
-				if (AllComponentsBigger(MeshInBounds.Bounds.GetExtents(), NewBounds.GetExtents()))
-				{
-					InNode->Value.MeshesInBounds.push_back(MeshInBounds);
-				}
+ 				if (AllComponentsBigger(MeshInBounds.Bounds.GetExtents(), NewBounds.GetExtents()))
+ 				{
+ 					InNode->Value.MeshesInBounds.push_back(MeshInBounds);
+ 				}
 			}
 		}
 	}

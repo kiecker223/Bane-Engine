@@ -2,16 +2,23 @@
 #include <KieckerMath.h>
 #include <vector>
 #include "PhysicsMesh.h"
+#include "PhysicsCylinderShape.h"
 
 
 typedef enum EPHYSICS_BODY_TYPE {
 	PHYSICS_BODY_TYPE_SPHERE,
+	PHYSICS_BODY_TYPE_CYLINDER,
 	PHYSICS_BODY_TYPE_MESH
 } EPHYSICS_BODY_TYPE;
 
 typedef struct PHYSICS_SPHERE_INFO {
 	double Radius;
 } PHYSICS_SPHERE_INFO;
+
+typedef struct PHYSICS_CYLINDER_INFO {
+	double Height;
+	double Radius;
+} PHYSICS_CYLINDER_INFO;
 
 typedef struct PHYSICS_BODY_CREATE_INFO {
 	Quaternion Orientation;
@@ -22,6 +29,7 @@ typedef struct PHYSICS_BODY_CREATE_INFO {
 	EPHYSICS_BODY_TYPE BodyType;
 	PhysicsMesh PhysMesh;
 	PHYSICS_SPHERE_INFO Sphere;
+	PHYSICS_CYLINDER_INFO Cylinder;
 	uint32 Handle;
 	uint64 EntityHandle;
 } PHYSICS_BODY_CREATE_INFO;
@@ -45,6 +53,10 @@ public:
 		{
 			PhysMesh = Other.PhysMesh;
 		}
+		if (BodyType == PHYSICS_BODY_TYPE_CYLINDER)
+		{
+			Cylinder = Other.Cylinder;
+		}
 		else
 		{
 			Sphere = Other.Sphere;
@@ -60,13 +72,18 @@ public:
 		EntityHandle(CreateInfo.EntityHandle),
 		Handle(CreateInfo.Handle)
 	{
-		if (BodyType == PHYSICS_BODY_TYPE_MESH)
-		{
-			PhysMesh = CreateInfo.PhysMesh;
-		}
 		if (BodyType == PHYSICS_BODY_TYPE_SPHERE)
 		{
 			Sphere = CreateInfo.Sphere;
+		}
+		else if (BodyType == PHYSICS_BODY_TYPE_CYLINDER)
+		{
+			Cylinder.Height = CreateInfo.Cylinder.Height;
+			Cylinder.Radius = CreateInfo.Cylinder.Radius;
+		}
+		else if (BodyType == PHYSICS_BODY_TYPE_MESH)
+		{
+			PhysMesh = CreateInfo.PhysMesh;
 		}
 	}
 	~PhysicsBody() { }
@@ -82,7 +99,7 @@ public:
 	EPHYSICS_BODY_TYPE BodyType;
 	PhysicsMesh PhysMesh;
 	PHYSICS_SPHERE_INFO Sphere;
-
+	PhysicsCylinderShape Cylinder;
 
 	inline double HitSphere(const double3& RayPos, const double3& RayDir, double Radius)
 	{
@@ -109,6 +126,11 @@ public:
 		return -1.;
 	}
 
+// 	inline bool TestIntersection(const PhysicsBody& Rhs)
+// 	{
+// 
+// 	}
+
 	inline double TestRayHit(const double3& RayStart, const double3& RayDir, double3& OutNormal)
 	{
 		double Result = -1.;
@@ -117,7 +139,11 @@ public:
 			Result = HitSphere(RayStart, RayDir, Sphere.Radius);
 			OutNormal = (RayStart + (RayDir * Result)) - Position;
 		}
-		if (BodyType == PHYSICS_BODY_TYPE_MESH)
+		else if (BodyType == PHYSICS_BODY_TYPE_CYLINDER)
+		{
+			Result = Cylinder.TestRayHit(RayStart, RayDir, Orientation, OutNormal);
+		}
+		else if (BodyType == PHYSICS_BODY_TYPE_MESH)
 		{
 			for (uint32 i = 0; i < PhysMesh.Faces.size(); i++)
 			{
@@ -134,20 +160,26 @@ public:
 
 	inline BoundingBox GetBounds() const 
 	{
+		BoundingBox Result;
 		if (BodyType == PHYSICS_BODY_TYPE_SPHERE)
 		{
-			BoundingBox Result;
 			Result.Min = double3(-Sphere.Radius, -Sphere.Radius, -Sphere.Radius) + Position;
 			Result.Max = double3(Sphere.Radius, Sphere.Radius, Sphere.Radius) + Position;
-			return Result;
+		}
+		else if (BodyType == PHYSICS_BODY_TYPE_CYLINDER)
+		{
+			// H = half, C = cylinder, H = height
+			double HCH = Cylinder.Height / 2.;
+			Result.Min = Position - double3(HCH, HCH, HCH);
+			Result.Max = Position + double3(HCH, HCH, HCH);
 		}
 		else
 		{
-			BoundingBox Result = PhysMesh.Bounds;
+			Result = PhysMesh.Bounds;
 			Result.Min += Position;
 			Result.Max += Position;
-			return Result;
 		}
+		return Result;
 	}
 
 	uint64 EntityHandle;
