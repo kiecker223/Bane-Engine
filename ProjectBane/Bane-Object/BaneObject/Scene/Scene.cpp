@@ -25,6 +25,21 @@ Scene::Scene(const std::string& SceneName) :
 Entity* Scene::CreateEntity(const std::string& EntityName)
 {
 	Entity* pEntity = FindEntity(EntityName);
+	if (pEntity == nullptr)
+	{
+		auto Iter = std::find_if(m_EntityAddList.begin(), m_EntityAddList.end(), [EntityName](const EntityHashEntry& EntityToFind)
+		{
+			if (EntityToFind.pEntity->GetId().Name == EntityName)
+			{
+				return true;
+			}
+			return false;
+		});
+		if (Iter != m_EntityAddList.end())
+		{
+			pEntity = Iter->pEntity;
+		}
+	}
 	std::string FinalName;
 	// Slow
 	uint32 Index = 1;
@@ -130,7 +145,16 @@ void Scene::Tick(float DT)
 	}
 	if (m_World.IsReadyForRead())
 	{
-//		std::cout << "Max time for physics thread: " << 1.f / 60.f << "\nPhysics thread has taken: " << m_World.SecondsTakenForThread << std::endl;
+		for (auto& e : m_Entities)
+		{
+			e.pEntity->PhysicsTick();
+		}
+		std::lock_guard<std::mutex> ScopedLock(m_World.GenerateOctTreeMutex);
+		if (m_PhysOctree.Base)
+		{
+			m_PhysOctree.RecursivelyDelete();
+		}
+		m_PhysOctree = m_World.GetOctTree();
 	}
 }
 
@@ -157,26 +181,9 @@ void Scene::Render(RenderLoop& RL)
 	}
 	if (bDrawPhysicsDebugInfo)
 	{
-		if (m_World.IsReadyForRead())
-		{
-// 			std::lock_guard<std::mutex> ScopedLock(m_World.GenerateOctTreeMutex);
-// 			if (m_PhysOctree.Base)
-// 			{
-// 				m_PhysOctree.RecursivelyDelete();
-// 			}
-// 			m_PhysOctree = m_World.GetOctTree();
-//			uint32 CallDepth;
-//			DrawOctsImpl(m_PhysOctree.Base, RL, CallDepth);
-//			UNUSED(CallDepth);
-			m_NodesIntersected = m_World.DebugRayCastIntersectedNodes;
-		}
-		if (m_NodesIntersected.size() > 0)
-		{
-			for (uint32 i = 0; i < m_NodesIntersected.size(); i++)
-			{
-				RL.AddBoundingBox(m_NodesIntersected[i]->Value.Bounds);
-			}
-		}
+		uint32 CallDepth;
+		DrawOctsImpl(m_PhysOctree.Base, RL, CallDepth);
+		UNUSED(CallDepth);
 	}
 }
 

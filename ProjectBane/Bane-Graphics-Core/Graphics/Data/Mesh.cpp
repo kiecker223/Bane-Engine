@@ -270,7 +270,7 @@ void Mesh::GenerateUVSphere(uint32 SegmentCount)
 
 void Mesh::GenerateCylinder(uint32 RadialSegments, uint32 HeightSegments)
 {
-	float3 TopMost = float3(0.f, 0.5f, 0.f);
+	float3 TopMost = float3(0.f, 0.f, 0.5f);
 	float3 BottomMost = -TopMost;
 
 	std::vector<Vertex> Vertices;
@@ -286,10 +286,10 @@ void Mesh::GenerateCylinder(uint32 RadialSegments, uint32 HeightSegments)
 		for (uint32 i = 0; i < RadialSegments; i++)
 		{
 			float PercentAround = (float)i / (float)RadialSegments;
-			matrix RotateAround = matRotY(radians(PercentAround * 360));
-			float3 Point = float3(0.f, 0.5f, -0.5f);
+			matrix RotateAround = matRotZ(radians(PercentAround * 360));
+			float3 Point = float3(0.f, 0.5f, 0.5f);
 
-			float3 NewPoint = ((float3x3)RotateAround * Point) - float3(0.f, PercentDown, 0.f);
+			float3 NewPoint = ((float3x3)RotateAround * Point) - float3(0.f, 0.f, PercentDown);
 
 			Vertex Vert;
 			Vert.Position = NewPoint;

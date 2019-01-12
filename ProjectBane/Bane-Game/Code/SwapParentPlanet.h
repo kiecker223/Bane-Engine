@@ -53,10 +53,10 @@ public:
 			std::cout << "PlanetName: " << Planet->GetId().Name << std::endl;
 			GetTransform()->SetRotation(0.f, 0.f, 0.f);
 		}
-		if (GetInput()->Keyboard.GetKeyUp(KEY_R))
-		{
-			GetScene()->bDrawPhysicsDebugInfo = !GetScene()->bDrawPhysicsDebugInfo;
-		}
+		//if (GetInput()->Keyboard.GetKeyUp(KEY_R))
+		//{
+		//	GetScene()->bDrawPhysicsDebugInfo = !GetScene()->bDrawPhysicsDebugInfo;
+		//}
 		if (GetInput()->Keyboard.GetKeyDown(KEY_Q))
 		{
 			PHYSICS_RAY Ray;

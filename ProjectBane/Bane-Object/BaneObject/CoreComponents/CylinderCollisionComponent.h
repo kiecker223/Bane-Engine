@@ -13,6 +13,8 @@ public:
 
 	void Tick(float DT) override final;
 
+	void PhysicsTick() override final;
+
 	void SetPosition(const double3& NewPosition);
 
 	void SetVelocity(const double3& NewVelocity);

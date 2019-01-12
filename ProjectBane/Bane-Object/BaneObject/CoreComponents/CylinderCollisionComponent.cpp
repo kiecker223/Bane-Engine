@@ -7,16 +7,18 @@ void CylinderCollisionComponent::Awake()
 	PHYSICS_BODY_CREATE_INFO CreateInfo;
 	CreateInfo.BodyType = PHYSICS_BODY_TYPE_CYLINDER;
 	CreateInfo.EntityHandle = GetOwner()->GetId().HashedName;
+	CreateInfo.Cylinder.Height = 1.0;
 	m_BodyId = GetScene()->GetPhysicsWorld().AddBody(CreateInfo);
 }
 
-void CylinderCollisionComponent::Tick(float DT)
+void CylinderCollisionComponent::Tick(float DT) { UNUSED(DT); }
+
+void CylinderCollisionComponent::PhysicsTick()
 {
-	UNUSED(DT);
-	auto& WorldSim = GetScene()->GetPhysicsWorld();
-	if (WorldSim.IsReadyForRead())
+	auto& Sim = GetScene()->GetPhysicsWorld();
+	if (Sim.UpdateBuffer.Bodies.size() > m_BodyId)
 	{
-		PhysicsBody& Body = WorldSim.UpdateBuffer.Bodies[m_BodyId];
+		PhysicsBody& Body = GetScene()->GetPhysicsWorld().UpdateBuffer.Bodies[m_BodyId];
 		GetTransform()->SetPosition(Body.Position);
 		m_Velocity = Body.Velocity;
 		//GetTransform()->SetRotation(Body.Orientation);

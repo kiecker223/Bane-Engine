@@ -59,7 +59,13 @@ public:
 
 	inline bool IsReadyForRead()
 	{
-		return m_bUnlockedForRead;
+		bool bResult = m_bUnlockedForRead;
+		if (bResult)
+		{
+			m_bUnlockedForRead = false;
+			return true;
+		}
+		return false;
 	}
 
 

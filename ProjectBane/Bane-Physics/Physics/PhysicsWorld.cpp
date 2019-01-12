@@ -101,11 +101,41 @@ void PhysicsWorld::CastRayAtSpeedOfLight(const PHYSICS_RAY& InRay, std::function
 	UNUSED(InRay); UNUSED(HitFunc);
 }
 
+bool CheckSweepingCollision(PhysicsBody& Src, PhysicsBody& Other, double MotionDelta, double OtherMotionDelta, double TSrc, double TDst, double& OutPercentToCollision)
+{
+	double3 VelocityDir = normalized(Src.Velocity);
+	double3 OtherVelocityDir = normalized(Other.Velocity);
+
+	BANE_CHECK(TDst > TSrc);
+	double PercentCheck = TDst - TSrc;
+
+	if (testSphereIntersection(Src.Position + (VelocityDir * (MotionDelta * TSrc)), MotionDelta * PercentCheck, Other.Position + (OtherVelocityDir * (MotionDelta * TSrc)), Other.Sphere.Radius))
+	{
+		if (PercentCheck <= 0.05)
+		{
+			OutPercentToCollision = TSrc;
+			return true;
+		}
+		return CheckSweepingCollision(Src, Other, MotionDelta, OtherMotionDelta, TSrc, TDst * 0.5, OutPercentToCollision);
+	}
+	else if (testSphereIntersection(Src.Position + (VelocityDir * (MotionDelta * TDst)), MotionDelta * PercentCheck, Other.Position + (OtherVelocityDir * (MotionDelta * TDst)), Other.Sphere.Radius))
+	{
+		if (PercentCheck <= 0.05)
+		{
+			OutPercentToCollision = TDst;
+			return true;
+		}
+		return CheckSweepingCollision(Src, Other, MotionDelta, OtherMotionDelta, (TDst - TSrc) * 0.5, TDst, OutPercentToCollision);
+	}
+	return false;
+}
+
 void PhysicsWorld::UpdatePhysics()
 {
 	// At the start lock the physics buffer
 	while (bRunningPhysicsSim)
 	{
+		m_bUnlockedForRead = false;
 		using Clock = std::chrono::high_resolution_clock;
 		auto Start = Clock::now();
 		if (AddList.size() > 0)
@@ -129,15 +159,13 @@ void PhysicsWorld::UpdatePhysics()
 		}
 
 		RegenerateOctTree();
-		m_bUnlockedForRead = false;
 		// Calculate gravity acceleration
 		{
 			for (auto& Body : m_Bodies)
 			{
 				for (auto& OtherBody : m_Bodies)
 				{
-					// Small but important optimization
-					if (OtherBody.Handle == Body.Handle || OtherBody.Mass < 1e15)
+					if (OtherBody.Handle == Body.Handle)
 					{
 						continue;
 					}
@@ -145,42 +173,43 @@ void PhysicsWorld::UpdatePhysics()
 					double DistanceFromBody = length(ForceDir);
 					normalize(ForceDir);
 
-					if (DistanceFromBody < 1e-1)
-					{
-						continue;
-					}
-
 					double Force = M_GRAV_CONST * ((Body.Mass * OtherBody.Mass) / (DistanceFromBody * DistanceFromBody));
-					if (Force > 0.0)
+					if (Force > 0.0 && Force != std::numeric_limits<double>::infinity())
 					{
 						ForceDir *= Force;
 						double3 AccelerationDir = ForceDir / Body.Mass;
 						Body.Velocity += (AccelerationDir * (1. / 60.));
-						if (!isNan(Body.Velocity))
-						{
-							Body.Position += Body.Velocity;
-							if (isNan(Body.Position))
-							{
-								__debugbreak();
-							}
-						}
-						else
+						if (isNan(Body.Velocity))
 						{
 							__debugbreak();
 						}
-						if (testSphereIntersection(Body.Position, Body.Sphere.Radius, OtherBody.Position, OtherBody.Sphere.Radius))
+					}
+
+					double MotionDelta = length(Body.Velocity);
+					double3 ToObject = OtherBody.Position - Body.Position;
+					double ObjectDistance = length(ToObject);
+
+					if (MotionDelta + Body.Sphere.Radius > ObjectDistance)
+					{
+ 						double3 MotionDir = normalized(Body.Velocity);
+
+						double NumToSubdivideTest = std::ceil(MotionDelta / (Body.Sphere.Radius * 0.9));
+						uint32 NumToSubdivide = static_cast<uint32>(NumToSubdivideTest);
+
+						double OtherMotionDelta = length(OtherBody.Velocity);
+
+						double TimeToCollsion;
+						if (CheckSweepingCollision(Body, OtherBody, MotionDelta, OtherMotionDelta, 0., 1., TimeToCollsion))
 						{
-							Body.Velocity = double3(0., 0., 0.);
-							OtherBody.Velocity = double3(0., 0., 0.);
+							Body.Velocity = double3();
 						}
 					}
-					else
-					{
-						continue;
-					}
+
+					Body.Position += Body.Velocity;
 				}
 			}
 		}
+
 		UpdateBuffer.Bodies = m_Bodies;
 		m_bUnlockedForRead = true;
 		auto TimeTaken = Clock::now() - Start;
@@ -319,7 +348,6 @@ void PhysicsWorld::GenerateOctTreeImpl(OctTreeType::TNode* ParentNode, OctTreeTy
 	InNode->Value.Bounds = NewBounds;
 
 	auto NewExtents = NewBounds.GetExtents();
-
 	if (ParentNode->Value.MeshesInBounds.size() > 0)
 	{
 		auto& MeshesInBounds = ParentNode->Value.MeshesInBounds;
@@ -340,7 +368,7 @@ void PhysicsWorld::GenerateOctTreeImpl(OctTreeType::TNode* ParentNode, OctTreeTy
 		}
 	}
 	
-	if (InNode->Value.MeshesInBounds.size() <= 1)
+	if (AllComponentsBigger(double3(2377000, 2377000, 2377000), NewExtents) || InNode->Value.MeshesInBounds.size() <= 1)
 	{
 		return;
 	}
@@ -355,7 +383,6 @@ void PhysicsWorld::GenerateOctTreeImpl(OctTreeType::TNode* ParentNode, OctTreeTy
 		GenerateOctTreeImpl(InNode, InNode->Children[i], i, CallDepth);
 	}
 }
-
 
 BoundingBox PhysicsWorld::CalculateBoundsForMeshes(const std::vector<uint32>& MeshHandles)
 {

@@ -20,6 +20,8 @@ typedef struct PHYSICS_CYLINDER_INFO {
 	double Radius;
 } PHYSICS_CYLINDER_INFO;
 
+
+
 typedef struct PHYSICS_BODY_CREATE_INFO {
 	Quaternion Orientation;
 	double3 Position;
@@ -126,10 +128,8 @@ public:
 		return -1.;
 	}
 
-// 	inline bool TestIntersection(const PhysicsBody& Rhs)
-// 	{
-// 
-// 	}
+	double FindClosestApproach(const PhysicsBody& OtherBody, double& OutT) const;
+	void FindClosestTimeOfApproach(const PhysicsBody& OtherBody, double& OutT) const;
 
 	inline double TestRayHit(const double3& RayStart, const double3& RayDir, double3& OutNormal)
 	{

@@ -261,16 +261,67 @@ void InitApplication()
 	CameraEntity->AddComponent<CameraMovementComponent>()->Speed = 1.;
 	CameraEntity->AddComponent<RaycastTestComponent>();
 
-	// Not actually a cylinder mesh yet!
-	Entity* CylinderMeshTest = Level->CreateEntity("Collision test");
-	auto MCC = CylinderMeshTest->AddComponent<MeshRenderingComponent>();
-	MCC->RenderedMesh = Level->GetMeshCache().LoadMesh("Cylinder");
-	MCC->RenderedMaterial.InitializeMaterial("MainShader.gfx");
-	MCC->RenderedMaterial.SetDiffuseTexture("Resources/8k_moon.jpg");
-	auto CCC = CylinderMeshTest->AddComponent<CylinderCollisionComponent>();
-	CCC->SetMass(10.0);
-	CCC->SetPosition(double3());
-	
+	{
+		Entity* CylinderMeshTest = Level->CreateEntity("Collision test");
+		auto MCC = CylinderMeshTest->AddComponent<MeshRenderingComponent>();
+		MCC->RenderedMesh = Level->GetMeshCache().LoadMesh("Sphere");
+		MCC->RenderedMaterial.InitializeMaterial("MainShader.gfx");
+		MCC->RenderedMaterial.SetDiffuseTexture("Resources/8k_moon.jpg");
+		auto CCC = CylinderMeshTest->AddComponent<SphereCollisionComponent>();
+		CCC->SetMass(10.0);
+		CCC->SetPosition(double3(0., -10., 0.));
+		//CCC->SetVelocity(double3(0., 1. / 120., -1e-10));
+		CCC->SetRadius(1.0);
+	}
+	{
+		Entity* AnotherMeshTest = Level->CreateEntity("Another Collision Test");
+		auto MCC = AnotherMeshTest->AddComponent<MeshRenderingComponent>();
+		MCC->RenderedMesh = Level->GetMeshCache().LoadMesh("Sphere");
+		MCC->RenderedMaterial.InitializeMaterial("MainShader.gfx");
+		MCC->RenderedMaterial.SetDiffuseTexture("DefaultBlue");
+		auto CCC = AnotherMeshTest->AddComponent<SphereCollisionComponent>();
+		CCC->SetMass(10000000.0);
+		CCC->SetPosition(double3(-10., 0., 0.));
+		//CCC->SetVelocity(double3(1. / 120., 0., 0.));
+		CCC->SetRadius(1.0);
+	}
+	{
+		Entity* AnotherMeshTest = Level->CreateEntity("Another Collision Test1");
+		auto MCC = AnotherMeshTest->AddComponent<MeshRenderingComponent>();
+		MCC->RenderedMesh = Level->GetMeshCache().LoadMesh("Sphere");
+		MCC->RenderedMaterial.InitializeMaterial("MainShader.gfx");
+		MCC->RenderedMaterial.SetDiffuseTexture("DefaultBlue");
+		auto CCC = AnotherMeshTest->AddComponent<SphereCollisionComponent>();
+		CCC->SetMass(10000000.0);
+		CCC->SetPosition(double3(-10., 03., 0.));
+		//CCC->SetVelocity(double3(1. / 120., 0., 0.));
+		CCC->SetRadius(1.0);
+	}
+	{
+		Entity* AnotherMeshTest = Level->CreateEntity("Another Collision Test2");
+		auto MCC = AnotherMeshTest->AddComponent<MeshRenderingComponent>();
+		MCC->RenderedMesh = Level->GetMeshCache().LoadMesh("Sphere");
+		MCC->RenderedMaterial.InitializeMaterial("MainShader.gfx");
+		MCC->RenderedMaterial.SetDiffuseTexture("DefaultBlue");
+		auto CCC = AnotherMeshTest->AddComponent<SphereCollisionComponent>();
+		CCC->SetMass(10000000.0);
+		CCC->SetPosition(double3(-10., 0., 014.));
+		//CCC->SetVelocity(double3(1. / 120., 0., 0.));
+		CCC->SetRadius(1.0);
+	}
+	{
+		Entity* AnotherMeshTest = Level->CreateEntity("Another Collision Test3");
+		auto MCC = AnotherMeshTest->AddComponent<MeshRenderingComponent>();
+		MCC->RenderedMesh = Level->GetMeshCache().LoadMesh("Sphere");
+		MCC->RenderedMaterial.InitializeMaterial("MainShader.gfx");
+		MCC->RenderedMaterial.SetDiffuseTexture("DefaultBlue");
+		auto CCC = AnotherMeshTest->AddComponent<SphereCollisionComponent>();
+		CCC->SetMass(10000000.0);
+		CCC->SetPosition(double3(-17., 0., 0.));
+		//CCC->SetVelocity(double3(1. / 120., 0., 0.));
+		CCC->SetRadius(1.0);
+	}
+
 }
 
 void InitApplication2()

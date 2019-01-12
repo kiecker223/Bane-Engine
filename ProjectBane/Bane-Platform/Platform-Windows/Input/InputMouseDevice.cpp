@@ -93,7 +93,7 @@ bool InputMouseDevice::GetButtonDown(uint32 Button) const
 
 bool InputMouseDevice::GetButtonUp(uint32 Button) const
 {
-	return m_Impl->bLastButtons[Button];
+	return m_Impl->bLastButtons[Button] && !m_Impl->bButtons[Button];
 }
 
 bool InputMouseDevice::GetDragging() const

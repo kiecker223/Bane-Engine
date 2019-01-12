@@ -22,7 +22,7 @@ end
 workspace "ProjectBane"
     configurations { "Debug", "Release" }
     platforms { "x64" }
-    warnings "Extra"
+    warnings "Default"
 
     if _OPTIONS["ANDREW"] then
       location "Generated/"
@@ -104,3 +104,4 @@ include "Bane-Core-Components/core_components.lua"
 include "Bane-Game/game.lua"
 include "Bane-PE-Loader/peloader.lua"
 include "Bane-Physics/physics.lua"
+include "Bane-UI/ui.lua"

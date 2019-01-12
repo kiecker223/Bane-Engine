@@ -15,6 +15,8 @@ public:
 
 	void Tick(float DT) final override;
 
+	void PhysicsTick() final override;
+
 	void SetVelocity(const double3& NewVelocity);
 
 	void SetAngularVelocity(const double4& AngularVelocity);

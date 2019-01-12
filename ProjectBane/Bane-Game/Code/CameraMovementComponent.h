@@ -5,6 +5,7 @@
 #include <windows.h>
 #include <WinUser.h>
 #include <Platform/Input/InputSystem.h>
+#include <BaneObject/Scene/Scene.h>
 #include "KieckerMath.h"
 #include "BaneObject/Entity/Transform.h"
 #include "Common.h"
@@ -27,6 +28,11 @@ public:
 
 	void Tick(float DT) override final
 	{
+		if (GetInput()->Keyboard.GetKeyDown(KEY_R))
+		{
+			GetScene()->bDrawPhysicsDebugInfo = !GetScene()->bDrawPhysicsDebugInfo;
+		}
+
 		double Dt = static_cast<double>(DT);
 		float RotationSpeed = 1.0f;
 		Transform* ST = GetTransform();

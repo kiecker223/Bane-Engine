@@ -47,6 +47,7 @@ public:
 	virtual void Dispose() { }
 	virtual void FixedTick() { } // Maybe not do this
 	virtual bool IsRenderComponent() const { return false; }
+	virtual void PhysicsTick() { }
 
 	virtual uint32 GetTypeSize() const = 0; // Overridden by IMPLEMENT_COMPONENT(type)
 

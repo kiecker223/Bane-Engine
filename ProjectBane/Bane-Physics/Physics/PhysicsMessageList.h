@@ -16,12 +16,6 @@ public:
 	
 	ApplicationToPhysicsQueue()
 	{
-		UNUSED(1);
-		UNUSED(2);
-		int i = 0;
-		i += 1;
-		int b = i;
-		UNUSED(b);
 	}
 
 	void AddCallback(const PHYSICS_MESSAGE_CALLBACK& Callback)
