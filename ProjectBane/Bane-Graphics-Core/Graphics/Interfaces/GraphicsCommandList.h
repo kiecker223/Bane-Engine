@@ -23,6 +23,46 @@ typedef enum EPRIMITIVE_TOPOLOGY {
 	PRIMITIVE_TOPOLOGY_TRIANGLESTRIPS
 } EPRIMITIVE_TOPOLOGY;
 
+
+class IGraphicsCommandBuffer
+{
+public:
+
+	virtual void BeginPass(IRenderPassInfo* RenderPass) = 0;
+	virtual void EndPass() = 0;
+
+	virtual void CloseCommandBuffer() = 0;
+
+	virtual void Begin() { BeginPass(nullptr); }
+	virtual void End() { EndPass(); }
+
+	virtual void SetGraphicsPipelineState(const IGraphicsPipelineState* PipelineState) = 0;
+	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer, uint64 Offset) = 0;
+	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer) = 0;
+	virtual void SetIndexBuffer(const IIndexBuffer* IndexBuffer) = 0;
+	virtual void SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY Topology) = 0;
+
+	virtual void SetGraphicsResourceTable(const IShaderResourceTable* InTable) = 0;
+
+	virtual void CopyBufferLocations(IBuffer* Src, uint64 SrcOffset, IBuffer* Dst, uint64 DstOffset, uint64 NumBytes) = 0;
+	virtual void CopyBuffers(IBuffer* Src, IBuffer* Dst) = 0;
+	virtual void CopyBufferToTexture(IBuffer* Src, ITextureBase* Dst) = 0;
+	virtual void CopyTextures(ITextureBase* Src, uint32 SrcSubresource, ITextureBase* Dst, uint32 DstSubresource) = 0;
+	virtual void CopyTextures(ITextureBase* Src, int3 SrcLocation, ITextureBase* Dst, int3 DstLocation, int3 DstSize) = 0;
+
+	virtual void Draw(uint32 VertexCount, uint32 StartVertexLocation) = 0;
+	virtual void DrawIndexed(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation) = 0;
+	virtual void DrawInstanced(uint32 VertexCount, uint32 InstanceCount, uint32 StartVertexLocation) = 0;
+	virtual void DrawIndexedInstanced(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation, uint32 InstanceCount) = 0;
+
+	virtual void SetComputePipelineState(const IComputePipelineState* PipelineState) = 0;
+	virtual void SetComputeResourceTable(const IShaderResourceTable* InTable) = 0;
+
+	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) = 0;
+
+
+};
+
 class IGraphicsCommandContext
 {
 public:
@@ -37,12 +77,17 @@ public:
 	virtual void End() { EndPass(); }
 
 	virtual void SetGraphicsPipelineState(const IGraphicsPipelineState* PipelineState) = 0;
+	virtual void SetGraphicsResourceTable(const IShaderResourceTable* InTable) = 0;
+
+	virtual IGraphicsCommandBuffer* GetUnderlyingCommandBuffer() = 0;
+	virtual IGraphicsCommandBuffer* CreateCommandBuffer() = 0;
+	virtual void ExecuteCommandBuffer(IGraphicsCommandBuffer* InCommandBuffer) = 0;
+	virtual void ExecuteCommandBuffers(const std::vector<IGraphicsCommandBuffer*>& InCommandBuffers) = 0;
+
 	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer, uint64 Offset) = 0;
 	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer) = 0;
 	virtual void SetIndexBuffer(const IIndexBuffer* IndexBuffer) = 0;
 	virtual void SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY Topology) = 0;
-
-	virtual void SetGraphicsResourceTable(const IShaderResourceTable* InTable) = 0;
 
 	virtual void CopyBufferLocations(IBuffer* Src, uint64 SrcOffset, IBuffer* Dst, uint64 DstOffset, uint64 NumBytes) = 0;
 	virtual void CopyBuffers(IBuffer* Src, IBuffer* Dst) = 0;
@@ -86,7 +131,9 @@ public:
 	virtual void Execute(IGraphicsCommandContext* Context) = 0;
 };
 
-namespace InternalCommands
+
+
+namespace InternalGraphicsCommands
 {
 	class BeginPassCommand : public IGraphicsCommand
 	{
@@ -451,11 +498,11 @@ namespace InternalCommands
 }
 
 
-class GraphicsCommandBuffer : public IGraphicsCommand
+class DefaultGraphicsCommandBufferImpl : public IGraphicsCommand
 {
 public:
-	GraphicsCommandBuffer();
-	GraphicsCommandBuffer(const GraphicsCommandBuffer& Other) { UNUSED(Other); }
+	DefaultGraphicsCommandBufferImpl();
+	DefaultGraphicsCommandBufferImpl(const DefaultGraphicsCommandBufferImpl& Other) { UNUSED(Other); }
 
 	void Execute(IGraphicsCommandContext* Context) final override
 	{

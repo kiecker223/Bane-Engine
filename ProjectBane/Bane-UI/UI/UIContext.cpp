@@ -30,6 +30,9 @@ void UIContext::Initialize()
 
 void UIContext::BeginFrame(IGraphicsCommandContext* InCommandList, IComputeCommandContext* InComputeList)
 {
+	CommandList = InCommandList;
+	ComputeContext = InComputeList;
+
 
 }
 
@@ -39,11 +42,6 @@ void UIContext::EndFrame()
 }
 
 void UIContext::DestroyItem(IUIElement* ElementToDestroy)
-{
-
-}
-
-void UIContext::DrawText(Font* FontToDraw, const std::string& TextToDraw)
 {
 
 }

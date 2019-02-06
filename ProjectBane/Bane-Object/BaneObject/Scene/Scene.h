@@ -42,7 +42,7 @@ public:
 	bool EntityExists(const EntityIdentifier& Id);
 	bool EntityExists(uint64 Id);
 
-	void Tick(float DT);
+	void Tick(double DT);
 	//void PhysicsUpdate(const PhysicsUpdateBuffer& UpdateBuffer);
 	void Render(RenderLoop& RL);
 	void DumpScene();

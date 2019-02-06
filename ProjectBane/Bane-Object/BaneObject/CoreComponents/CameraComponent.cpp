@@ -39,7 +39,7 @@ void CameraComponent::Start()
 	GetSceneManager()->CurrentScene->SetCamera(GetOwner());
 }
 
-void CameraComponent::Tick(float DT)
+void CameraComponent::Tick(double DT)
 {
 	UNUSED(DT);
 }

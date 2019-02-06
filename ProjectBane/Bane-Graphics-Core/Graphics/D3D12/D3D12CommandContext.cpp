@@ -6,9 +6,10 @@
 #include <DirectXColors.h>
 
 
+
 void D3D12CommandList::FlushDestructionQueue()
 {
-	if (UploadResourcesToDestroy.empty())
+	if (UploadResourcesToDestroy.empty() || !GetParentDevice()->GetCopyQueue().IsFinished())
 	{
 		return;
 	}
@@ -17,51 +18,61 @@ void D3D12CommandList::FlushDestructionQueue()
 		auto& Resource = UploadResourcesToDestroy[i];
 		Resource.Destroy();
 	}
-
 	UploadResourcesToDestroy.clear();
 }
 
-void D3D12GraphicsCommandContext::BeginPass(IRenderPassInfo* InRenderPass)
+///--------- D3D12GraphicsCommandBuffer ---------///
+
+void D3D12GraphicsCommandBuffer::BeginPass(IRenderPassInfo* InRenderPass)
 {
-	CommandList = ParentDevice->GetCommandList(ContextType);
-	D3DCL = CommandList->GetGraphicsCommandList();
+	if (CommandList == nullptr)
+	{
+		FetchNewCommandList();
+	}
+	if (CommandList->bCanReset)
+	{
+		CommandList->Reset();
+	}
 	CurrentTable = nullptr;
 	if (InRenderPass)
 	{
 		D3D12RenderPassInfo* RenderPass = (D3D12RenderPassInfo*)InRenderPass;
 		RenderPass->TransitionResourcesToWrite(this);
+		ID3D12DescriptorHeap* ppHeaps[] = { ParentDevice->m_SrvAllocator.GetDescriptorHeap(), ParentDevice->m_SmpAllocator.GetDescriptorHeap() };
+		D3DCL->SetDescriptorHeaps(2, ppHeaps);
 		FlushResourceTransitions();
 		RenderPass->SetRenderTargets(D3DCL);
 		RenderPass->Clear(D3DCL);
-		ID3D12DescriptorHeap* ppHeaps[] = { ParentDevice->m_SrvAllocator.GetDescriptorHeap(), ParentDevice->m_SmpAllocator.GetDescriptorHeap() };
-		D3DCL->SetDescriptorHeaps(2, ppHeaps);
 		D3DCL->RSSetScissorRects(1, &ScissorRect);
 		D3DCL->RSSetViewports(1, &Viewport);
 		CurrentRenderPass = RenderPass;
 	}
 }
 
-void D3D12GraphicsCommandContext::EndPass()
+void D3D12GraphicsCommandBuffer::EndPass()
 {
 	if (CurrentRenderPass)
 	{
 		CurrentRenderPass->TransitionResourcesToRead(this);
 		FlushResourceTransitions();
 	}
-	PipelineState = nullptr;
-	RootSignature = nullptr;
-	CurrentTable = nullptr;
-	CommandList->Close();
-	ParentDevice->GetCommandQueue(ContextType).ExecuteImmediate(CommandList); // Execute immediate, hopefully multiple passes per frame will hide the scheduler latency
-	CommandList = nullptr;
+	//PipelineState = nullptr;
+	//RootSignature = nullptr;
+	//CurrentTable = nullptr;
+	//CommandList->Close();
+	//ParentDevice->GetCommandQueue(ContextType).ExecuteImmediate(CommandList); // Execute immediate, hopefully multiple passes per frame will hide the scheduler latency
+	//CommandList = nullptr;
 }
 
-void D3D12GraphicsCommandContext::Flush()
+void D3D12GraphicsCommandBuffer::CloseCommandBuffer()
 {
-	ParentDevice->GetCommandQueue(ContextType).StallForFinish();
+	if (CommandList->bCanClose)
+	{
+		CommandList->Close();
+	}
 }
 
-void D3D12GraphicsCommandContext::SetGraphicsPipelineState(const IGraphicsPipelineState* InPipelineState)
+void D3D12GraphicsCommandBuffer::SetGraphicsPipelineState(const IGraphicsPipelineState* InPipelineState)
 {
 	D3D12GraphicsPipelineState* NewPipelineState = (D3D12GraphicsPipelineState*)InPipelineState;
 	PipelineState = NewPipelineState;
@@ -70,7 +81,7 @@ void D3D12GraphicsCommandContext::SetGraphicsPipelineState(const IGraphicsPipeli
 	D3DCL->SetGraphicsRootSignature(PipelineState->ShaderSignature.RootSignature);
 }
 
-void D3D12GraphicsCommandContext::SetVertexBuffer(const IBuffer* InVertexBuffer, uint64 Offset)
+void D3D12GraphicsCommandBuffer::SetVertexBuffer(const IBuffer* InVertexBuffer, uint64 Offset)
 {
 	D3D12Buffer* Buffer = (D3D12Buffer*)InVertexBuffer;
 	Buffer->TransitionResource(this, D3D12_RESOURCE_STATE_GENERIC_READ);
@@ -83,7 +94,7 @@ void D3D12GraphicsCommandContext::SetVertexBuffer(const IBuffer* InVertexBuffer,
 	D3DCL->IASetVertexBuffers(0, 1, &VbView);
 }
 
-void D3D12GraphicsCommandContext::SetVertexBuffer(const IBuffer* InVertexBuffer)
+void D3D12GraphicsCommandBuffer::SetVertexBuffer(const IBuffer* InVertexBuffer)
 {
 	D3D12Buffer* Buffer = (D3D12Buffer*)InVertexBuffer;
 	Buffer->TransitionResource(this, D3D12_RESOURCE_STATE_GENERIC_READ);
@@ -93,7 +104,7 @@ void D3D12GraphicsCommandContext::SetVertexBuffer(const IBuffer* InVertexBuffer)
 	D3DCL->IASetVertexBuffers(0, 1, &VbView);
 }
 
-void D3D12GraphicsCommandContext::SetIndexBuffer(const IBuffer* InIndexBuffer)
+void D3D12GraphicsCommandBuffer::SetIndexBuffer(const IBuffer* InIndexBuffer)
 {
 	D3D12Buffer* Buffer = (D3D12Buffer*)InIndexBuffer;
 	Buffer->TransitionResource(this, D3D12_RESOURCE_STATE_GENERIC_READ);
@@ -103,12 +114,12 @@ void D3D12GraphicsCommandContext::SetIndexBuffer(const IBuffer* InIndexBuffer)
 	D3DCL->IASetIndexBuffer(&IbView);
 }
 
-void D3D12GraphicsCommandContext::SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY InTopology)
+void D3D12GraphicsCommandBuffer::SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY InTopology)
 {
 	D3DCL->IASetPrimitiveTopology(D3D12_TranslatePrimitiveTopology(InTopology));
 }
 
-void D3D12GraphicsCommandContext::SetGraphicsResourceTable(const IShaderResourceTable* InTable)
+void D3D12GraphicsCommandBuffer::SetGraphicsResourceTable(const IShaderResourceTable* InTable)
 {
 	D3D12ShaderResourceTable* Table = (D3D12ShaderResourceTable*)InTable;
 	CurrentTable = Table;
@@ -139,35 +150,39 @@ void D3D12GraphicsCommandContext::SetGraphicsResourceTable(const IShaderResource
 	}
 }
 
-void D3D12GraphicsCommandContext::Draw(uint32 VertexCount, uint32 StartVertexLocation)
+void D3D12GraphicsCommandBuffer::Draw(uint32 VertexCount, uint32 StartVertexLocation)
 {
 	FlushResourceTransitions();
 	CommitResources();
+	NumDrawCalls++;
 	D3DCL->DrawInstanced(VertexCount, 1, StartVertexLocation, 0);
 }
 
-void D3D12GraphicsCommandContext::DrawIndexed(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation)
+void D3D12GraphicsCommandBuffer::DrawIndexed(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation)
 {
 	FlushResourceTransitions();
 	CommitResources();
+	NumDrawCalls++;
 	D3DCL->DrawIndexedInstanced(IndexCount, 1, StartIndexLocation, BaseVertexLocation, 0);
 }
 
-void D3D12GraphicsCommandContext::DrawInstanced(uint32 VertexCount, uint32 InstanceCount, uint32 StartVertexLocation)
+void D3D12GraphicsCommandBuffer::DrawInstanced(uint32 VertexCount, uint32 InstanceCount, uint32 StartVertexLocation)
 {
 	FlushResourceTransitions();
 	CommitResources();
+	NumDrawCalls++;
 	D3DCL->DrawInstanced(VertexCount, InstanceCount, StartVertexLocation, 0);
 }
 
-void D3D12GraphicsCommandContext::DrawIndexedInstanced(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation, uint32 InstanceCount)
+void D3D12GraphicsCommandBuffer::DrawIndexedInstanced(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation, uint32 InstanceCount)
 {
 	FlushResourceTransitions();
 	CommitResources();
+	NumDrawCalls++;
 	D3DCL->DrawIndexedInstanced(IndexCount, InstanceCount, StartIndexLocation, BaseVertexLocation, 0);
 }
 
-void D3D12GraphicsCommandContext::CopyBufferLocations(IBuffer* Src, uint64 SrcOffset, IBuffer* Dst, uint64 DstOffset, uint64 NumBytes)
+void D3D12GraphicsCommandBuffer::CopyBufferLocations(IBuffer* Src, uint64 SrcOffset, IBuffer* Dst, uint64 DstOffset, uint64 NumBytes)
 {
 	D3D12Buffer* SrcBuffer = (D3D12Buffer*)Src;
 	D3D12Buffer* DstBuffer = (D3D12Buffer*)Dst;
@@ -176,10 +191,11 @@ void D3D12GraphicsCommandContext::CopyBufferLocations(IBuffer* Src, uint64 SrcOf
 	DstBuffer->TransitionResource(this, D3D12_RESOURCE_STATE_COMMON);
 	DstBuffer->PromotedState = D3D12_RESOURCE_STATE_COPY_DEST;
 	FlushResourceTransitions();
+	NumCopies++;
 	D3DCL->CopyBufferRegion(DstBuffer->Resource.D3DResource, DstOffset, SrcBuffer->Resource.D3DResource, SrcOffset, NumBytes);
 }
 
-void D3D12GraphicsCommandContext::CopyBuffers(IBuffer* Src, IBuffer* Dst)
+void D3D12GraphicsCommandBuffer::CopyBuffers(IBuffer* Src, IBuffer* Dst)
 {
 	D3D12Buffer* SrcBuffer = (D3D12Buffer*)Src;
 	D3D12Buffer* DstBuffer = (D3D12Buffer*)Dst;
@@ -188,10 +204,11 @@ void D3D12GraphicsCommandContext::CopyBuffers(IBuffer* Src, IBuffer* Dst)
 	DstBuffer->TransitionResource(this, D3D12_RESOURCE_STATE_COMMON);
 	DstBuffer->PromotedState = D3D12_RESOURCE_STATE_COPY_DEST;
 	FlushResourceTransitions();
+	NumCopies++;
 	D3DCL->CopyResource(DstBuffer->Resource.D3DResource, SrcBuffer->Resource.D3DResource);
 }
 
-void D3D12GraphicsCommandContext::CopyBufferToTexture(IBuffer* Src, ITextureBase* Dst)
+void D3D12GraphicsCommandBuffer::CopyBufferToTexture(IBuffer* Src, ITextureBase* Dst)
 {
 	D3D12TextureBase* D3DTex = (D3D12TextureBase*)Dst;
 	D3D12_TEXTURE_COPY_LOCATION TexCopyLocation = CD3DX12_TEXTURE_COPY_LOCATION(D3DTex->Resource.D3DResource, 0);
@@ -204,10 +221,11 @@ void D3D12GraphicsCommandContext::CopyBufferToTexture(IBuffer* Src, ITextureBase
 	D3DBuf->TransitionResource(this, D3D12_RESOURCE_STATE_GENERIC_READ);
 	D3DBuf->PromotedState = D3D12_RESOURCE_STATE_COPY_SOURCE;
 	FlushResourceTransitions();
+	NumCopies++;
 	D3DCL->CopyTextureRegion(&TexCopyLocation, D3DTex->Width, D3DTex->Height, D3DTex->Depth, &BufferSrcLocation, nullptr);
 }
 
-void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* InSrc, uint32 SrcSubresource, ITexture2D* InDst, uint32 DstSubresource)
+void D3D12GraphicsCommandBuffer::CopyTextures(ITextureBase* InSrc, uint32 SrcSubresource, ITexture2D* InDst, uint32 DstSubresource)
 {
 	D3D12TextureBase* Src = (D3D12TextureBase*)InSrc;
 	D3D12TextureBase* Dst = (D3D12TextureBase*)InDst;
@@ -220,10 +238,11 @@ void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* InSrc, uint32 SrcSu
 	Dst->TransitionResource(this, D3D12_RESOURCE_STATE_COMMON);
 	Dst->PromotedState = D3D12_RESOURCE_STATE_COPY_DEST;
 	FlushResourceTransitions();
+	NumCopies++;
 	D3DCL->CopyTextureRegion(&DstCopyLocation, 0, 0, 0, &SrcCopyLocation, nullptr);
 }
 
-void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* InSrc, int3 SrcLocation, ITextureBase* InDst, int3 DstLocation, int3 DstSize)
+void D3D12GraphicsCommandBuffer::CopyTextures(ITextureBase* InSrc, int3 SrcLocation, ITextureBase* InDst, int3 DstLocation, int3 DstSize)
 {
 	D3D12TextureBase* Src = (D3D12TextureBase*)InSrc;
 	D3D12TextureBase* Dst = (D3D12TextureBase*)InDst;
@@ -244,10 +263,11 @@ void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* InSrc, int3 SrcLoca
 	SrcBox.right = SrcLocation.x + DstSize.x;
 	SrcBox.bottom = SrcLocation.y + DstSize.y;
 	SrcBox.back = SrcLocation.z + DstSize.z;
+	NumCopies++;
 	D3DCL->CopyTextureRegion(&DstCopyLocation, DstLocation.x, DstLocation.y, DstLocation.z, &SrcCopyLocation, &SrcBox);
 }
 
-void D3D12GraphicsCommandContext::SetComputePipelineState(const IComputePipelineState* InState)
+void D3D12GraphicsCommandBuffer::SetComputePipelineState(const IComputePipelineState* InState)
 {
 	D3D12ComputePipelineState* Pipeline = (D3D12ComputePipelineState*)InState;
 	// Can't keep track of it here
@@ -257,7 +277,7 @@ void D3D12GraphicsCommandContext::SetComputePipelineState(const IComputePipeline
 	D3DCL->SetComputeRootSignature(RootSignature);
 }
 
-void D3D12GraphicsCommandContext::SetComputeResourceTable(const IShaderResourceTable* InTable)
+void D3D12GraphicsCommandBuffer::SetComputeResourceTable(const IShaderResourceTable* InTable)
 {
 	D3D12ShaderResourceTable* Table = (D3D12ShaderResourceTable*)InTable;
 	CurrentTable = Table;
@@ -278,6 +298,24 @@ void D3D12GraphicsCommandContext::SetComputeResourceTable(const IShaderResourceT
 		}
 	}
 
+	// Note: Remove this slow path right here
+//	for (uint32 i = 0; i < Table->GetNumTextures(); i++)
+//	{
+//		auto BaseSMPAlloc = Table->BaseSMPAllocation;
+//		auto* Resource = Table->ShaderResources[i];
+//		if (Resource && Resource->GetResourceType() == D3D12_RESOURCE_TYPE_TEXTURE)
+//		{
+//			auto* Texture = dynamic_cast<D3D12TextureBase*>(Resource);
+//			if (Texture->bSamplerStateDirty)
+//			{
+//				BANE_CHECK(Texture != nullptr);
+//				BANE_CHECK(Texture->D3DSampleDesc.MaxAnisotropy != 1065353216);
+//				ParentDevice->GetDevice()->CreateSampler(&Texture->D3DSampleDesc, BaseSMPAlloc.OffsetFromStart(i).CpuHandle);
+//				Texture->bSamplerStateDirty = false;
+//			}
+//		}
+//	}
+
 	if (Table->HasTextures())
 	{
 		D3DCL->SetComputeRootDescriptorTable(Table->GetSRVDescriptorTableIndex(), Table->BaseSRVAllocation.GpuHandle);
@@ -289,10 +327,11 @@ void D3D12GraphicsCommandContext::SetComputeResourceTable(const IShaderResourceT
 	}
 }
 
-void D3D12GraphicsCommandContext::Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ)
+void D3D12GraphicsCommandBuffer::Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ)
 {
 	FlushResourceTransitions();
 	CommitResources();
+	NumDispatches++;
 	D3DCL->Dispatch(ThreadX, ThreadY, ThreadZ);
 }
 
@@ -307,7 +346,7 @@ D3D12_RESOURCE_BARRIER TranslateResourceTransition(const D3D12_RESOURCE_TRANSITI
 	return Result;
 }
 
-void D3D12GraphicsCommandContext::FlushResourceTransitions()
+void D3D12GraphicsCommandBuffer::FlushResourceTransitions()
 {
 	ParentDevice->EnsureAllUploadsOccured();
 	if (PendingTransitions.GetNumElements() > 0)
@@ -322,7 +361,7 @@ void D3D12GraphicsCommandContext::FlushResourceTransitions()
 	}
 }
 
-void D3D12GraphicsCommandContext::CommitResources()
+void D3D12GraphicsCommandBuffer::CommitResources()
 {
 	if (bHasCheckedCurrentTable || CurrentTable == nullptr)
 	{
@@ -364,6 +403,173 @@ void D3D12GraphicsCommandContext::CommitResources()
 		}
 	}
 }
+
+void D3D12GraphicsCommandBuffer::FetchNewCommandList()
+{
+	CommandList = ParentDevice->GetCommandList(ContextType);
+	D3DCL = CommandList->GetGraphicsCommandList();
+}
+
+void D3D12GraphicsCommandBuffer::ReturnCommandList()
+{
+	CommandList = nullptr;
+	D3DCL = nullptr;
+}
+
+///--------- End D3D12GraphicsCommandBuffer ---------///
+
+void D3D12GraphicsCommandContext::BeginPass(IRenderPassInfo* InRenderPass)
+{
+	CurrentCommandBuffer->BeginPass(InRenderPass);
+}
+
+void D3D12GraphicsCommandContext::EndPass()
+{
+	CurrentCommandBuffer->EndPass();
+	CurrentCommandBuffer->CloseCommandBuffer();
+	ParentDevice->GetCommandQueue(ContextType).ExecuteImmediate(CurrentCommandBuffer->CommandList);
+	CurrentCommandBuffer->FetchNewCommandList();
+}
+
+void D3D12GraphicsCommandContext::Flush()
+{
+	ParentDevice->GetCommandQueue(ContextType).StallForFinish();
+}
+
+IGraphicsCommandBuffer* D3D12GraphicsCommandContext::GetUnderlyingCommandBuffer()
+{
+	return CurrentCommandBuffer;
+}
+
+IGraphicsCommandBuffer* D3D12GraphicsCommandContext::CreateCommandBuffer()
+{
+	D3D12GraphicsCommandBuffer* Result;
+	if (CommandPool.GetNumElements() == 0)
+	{
+		// Error?
+		// Needs to be handled when this is nullptr
+		return nullptr;
+	}
+	Result = CommandPool.Pop();
+	return Result;
+}
+
+void D3D12GraphicsCommandContext::ExecuteCommandBuffer(IGraphicsCommandBuffer* InCommandBuffer)
+{
+	D3D12GraphicsCommandBuffer* CmdBuff = (D3D12GraphicsCommandBuffer*)InCommandBuffer;
+	BANE_CHECK(CmdBuff->CommandList != nullptr);
+	BANE_CHECK(CmdBuff->CommandList->bCanReset);
+	ParentDevice->GetCommandQueue(ContextType).ExecuteImmediate(CmdBuff->CommandList);
+	CmdBuff->ReturnCommandList();
+	CommandPool.Push(CmdBuff);
+}
+
+void D3D12GraphicsCommandContext::ExecuteCommandBuffers(const std::vector<IGraphicsCommandBuffer*>& InCommandBuffers)
+{
+	auto& CmdQueue = ParentDevice->GetCommandQueue(ContextType);
+	for (IGraphicsCommandBuffer* ICmdBuff : InCommandBuffers)
+	{
+		D3D12GraphicsCommandBuffer* CmdBuff = (D3D12GraphicsCommandBuffer*)ICmdBuff;
+		BANE_CHECK(CmdBuff->CommandList != nullptr);
+		BANE_CHECK(CmdBuff->CommandList->bCanReset);
+		CmdQueue.ScheduleCommandList(CmdBuff->CommandList);
+		CmdBuff->ReturnCommandList();
+		CommandPool.Push(CmdBuff);
+	}
+	CmdQueue.ExecuteCommandLists();
+}
+
+void D3D12GraphicsCommandContext::SetGraphicsPipelineState(const IGraphicsPipelineState* InPipelineState)
+{
+	CurrentCommandBuffer->SetGraphicsPipelineState(InPipelineState);
+}
+
+void D3D12GraphicsCommandContext::SetGraphicsResourceTable(const IShaderResourceTable* InTable)
+{
+	CurrentCommandBuffer->SetGraphicsResourceTable(InTable);
+}
+
+void D3D12GraphicsCommandContext::SetVertexBuffer(const IBuffer* InBuffer, uint64 Offset)
+{
+	CurrentCommandBuffer->SetVertexBuffer(InBuffer, Offset);
+}
+
+void D3D12GraphicsCommandContext::SetVertexBuffer(const IBuffer* InVertexBuffer)
+{
+	CurrentCommandBuffer->SetVertexBuffer(InVertexBuffer);
+}
+
+void D3D12GraphicsCommandContext::SetIndexBuffer(const IBuffer* InIndexBuffer)
+{
+	CurrentCommandBuffer->SetIndexBuffer(InIndexBuffer);
+}
+
+void D3D12GraphicsCommandContext::SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY InTopology)
+{
+	CurrentCommandBuffer->SetPrimitiveTopology(InTopology);
+}
+
+void D3D12GraphicsCommandContext::Draw(uint32 VertexCount, uint32 StartVertexLocation)
+{
+	CurrentCommandBuffer->Draw(VertexCount, StartVertexLocation);
+}
+
+void D3D12GraphicsCommandContext::DrawIndexed(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation)									
+{
+	CurrentCommandBuffer->DrawIndexed(IndexCount, StartIndexLocation, BaseVertexLocation);
+}
+
+void D3D12GraphicsCommandContext::DrawInstanced(uint32 VertexCount, uint32 InstanceCount, uint32 StartVertexLocation)								
+{
+	CurrentCommandBuffer->DrawInstanced(VertexCount, InstanceCount, StartVertexLocation);
+}
+
+void D3D12GraphicsCommandContext::DrawIndexedInstanced(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation, uint32 InstanceCount)	
+{
+	CurrentCommandBuffer->DrawIndexedInstanced(IndexCount, StartIndexLocation, BaseVertexLocation, InstanceCount);
+}
+
+void D3D12GraphicsCommandContext::CopyBufferLocations(IBuffer* Src, uint64 SrcOffset, IBuffer* Dst, uint64 DstOffset, uint64 NumBytes)				
+{
+	CurrentCommandBuffer->CopyBufferLocations(Src, SrcOffset, Dst, DstOffset, NumBytes);
+}
+
+void D3D12GraphicsCommandContext::CopyBuffers(IBuffer* Src, IBuffer* Dst)															
+{
+	CurrentCommandBuffer->CopyBuffers(Src, Dst);
+}
+
+void D3D12GraphicsCommandContext::CopyBufferToTexture(IBuffer* Src, ITextureBase* Dst)																
+{
+	CurrentCommandBuffer->CopyBufferToTexture(Src, Dst);
+}
+
+void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* InSrc, uint32 SrcSubresource, ITexture2D* InDst, uint32 DstSubresource)				
+{
+	CurrentCommandBuffer->CopyTextures(InSrc, SrcSubresource, InDst, DstSubresource);
+}
+
+void D3D12GraphicsCommandContext::CopyTextures(ITextureBase* Src, int3 SrcLocation, ITextureBase* Dst, int3 DstLocation, int3 DstSize)				
+{
+	CurrentCommandBuffer->CopyTextures(Src, SrcLocation, Dst, DstLocation, DstSize);
+}
+
+void D3D12GraphicsCommandContext::SetComputePipelineState(const IComputePipelineState* InState)														
+{
+	CurrentCommandBuffer->SetComputePipelineState(InState);
+}
+
+void D3D12GraphicsCommandContext::SetComputeResourceTable(const IShaderResourceTable* InTable)														
+{
+	CurrentCommandBuffer->SetComputeResourceTable(InTable);
+}
+
+void D3D12GraphicsCommandContext::Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) 
+{
+	CurrentCommandBuffer->Dispatch(ThreadX, ThreadY, ThreadZ);
+}
+
+
 
 void D3D12ComputeCommandContext::Begin()
 {

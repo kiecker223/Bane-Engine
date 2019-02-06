@@ -31,7 +31,7 @@ public:
 	float4x4 GetLookAt() const;
 
 	void Start() override final;
-	void Tick(float DT) override final;
+	void Tick(double DT) override final;
 
 	void GraphicsUpdate(RenderLoop& Loop) final override;
 

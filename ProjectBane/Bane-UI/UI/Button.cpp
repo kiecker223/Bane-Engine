@@ -10,7 +10,7 @@ void UIButton::Update(UIContext& Context)
 {
 	if (Context.MouseState.GetButtonUp(0))
 	{
-		float2 MousePos = Context.MouseState.GetMousePosition();
+		double2 MousePos = Context.MouseState.GetMousePosition();
 
 		if (PointInside(MousePos))
 		{
@@ -31,7 +31,7 @@ void UIButton::Render(UIContext& Context)
 	
 }
 
-bool UIButton::PointInside(const float2& Val)
+bool UIButton::PointInside(const double2& Val)
 {
 	return Val.x > Min.x && Val.y > Min.y && Val.x < Max.x && Val.y < Max.y;
 }

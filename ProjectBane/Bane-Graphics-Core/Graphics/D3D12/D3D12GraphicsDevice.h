@@ -7,12 +7,14 @@
 #include "D3D12ShaderResourceViews.h"
 #include "D3D12DescriptorAllocator.h"
 #include <Platform/System/Window.h>
+#include <mutex>
 
 
 class D3D12GraphicsDevice : public IRuntimeGraphicsDevice
 {
 	friend class D3D12CommandQueue;
 	friend class D3D12GraphicsCommandContext;
+	friend class D3D12GraphicsCommandBuffer;
 	friend class D3D12ComputeCommandContext;
 
 public:
@@ -46,28 +48,27 @@ public:
 	virtual IVertexBuffer* CreateVertexBuffer(uint32 ByteCount, uint8* Buffer) final override;
 	virtual IIndexBuffer* CreateIndexBuffer(uint32 ByteCount, uint8* Buffer) final override;
 	virtual IConstantBuffer* CreateConstantBuffer(uint32 ByteCount) final override;
+	virtual IBuffer* CreateStructuredBuffer(uint32 ByteCount, uint8* Buffer) final override;
 	virtual IBuffer* CreateStagingBuffer(uint32 ByteCount) final override;
 
-	virtual ITexture2D* CreateTexture2D(uint32 Width, uint32 Height, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
-	virtual ITexture2DArray* CreateTexture2DArray(uint32 Width, uint32 Height, uint32 Count, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
-	virtual ITexture3D* CreateTexture3D(uint32 Width, uint32 Height, uint32 Depth, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
-	virtual ITextureCube* CreateTextureCube(uint32 CubeSize, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
+	virtual ITexture2D* CreateTexture2D(uint32 Width, uint32 Height, EFORMAT Format, const SAMPLER_DESC& InSamplerDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
+	virtual ITexture2DArray* CreateTexture2DArray(uint32 Width, uint32 Height, uint32 Count, EFORMAT Format, const SAMPLER_DESC& InSamplerDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
+	virtual ITexture3D* CreateTexture3D(uint32 Width, uint32 Height, uint32 Depth, EFORMAT Format, const SAMPLER_DESC& InSamplerDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
+	virtual ITextureCube* CreateTextureCube(uint32 CubeSize, EFORMAT Format, const SAMPLER_DESC& InSamplerDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
 
 	virtual void GenerateMips(ITextureBase* InTexture) final override;
 
-	virtual ISamplerState* CreateSamplerState(const SAMPLER_DESC& Desc) final override;
-	virtual ISamplerState* GetDefaultSamplerState() final override;
 	virtual IInputLayout* CreateInputLayout(const GFX_INPUT_LAYOUT_DESC& Desc) final override;
 
 	virtual IRenderPassInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint32 NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor) final override;
 	virtual IRenderPassInfo* GetBackBufferTargetPass() final override;
 	virtual IRenderTargetView* GetBackBuffer() final override;
 
-	virtual void CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* Buffer, uint32 Slot, uint64 Offset = 0) final override;
+	virtual void CreateConstantBufferView(IShaderResourceTable* InDestTable, IBuffer* Buffer, uint32 Slot, uint64 Offset = 0) final override;
+	virtual void CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* Buff, uint32 Slot, uint32 StructureByteStride, uint32 ElementCount, uint64 OffSet = 0) final override;
 	virtual void CreateUnorderedAccessView(IShaderResourceTable* InDestTable, IBuffer* Buffer, uint32 Slot, uint32 Subresource = 0) final override;
 	virtual void CreateShaderResourceView(IShaderResourceTable* InDestTable, ITextureBase* Texture, uint32 Slot, uint32 Subresource = 0) final override;
 	virtual void CreateUnorderedAccessView(IShaderResourceTable* InDestTable, ITextureBase* Texture, uint32 Slot, uint32 Subresource = 0) final override;
-	virtual void CreateSamplerView(IShaderResourceTable* DestTable, ISamplerState* SamplerState, uint32 Slot) final override;
 	virtual IShaderResourceTable* CreateShaderTable(IGraphicsPipelineState* pState) final override;
 	virtual IShaderResourceTable* CreateShaderTable(IComputePipelineState* pState) final override;
 
@@ -92,11 +93,11 @@ public:
 	// This queue controls all the upload operations
 	inline D3D12CommandQueue& GetCopyQueue() { return GetCommandQueue(COMMAND_CONTEXT_TYPE_COPY); }
 
-
 	D3D12CommandList* GetCommandList(ECOMMAND_CONTEXT_TYPE ContextType);
 
 	void UpdateCurrentFrameInfo();
 
+	// Not thread safe!!
 	void EnsureAllUploadsOccured();
 
 	static uint32 GetCurrentFrameIndex()
@@ -108,7 +109,7 @@ public:
 	{
 		return m_CommandQueues[ContextType];
 	}
-
+	
 private:
 
 	static uint32 GCurrentFrameIndex;
@@ -128,7 +129,6 @@ private:
 	D3D12_RECT m_Rect;
 	D3D12_VIEWPORT m_ViewPort;
 	EMULTISAMPLE_LEVEL m_MaxMultisampleLevel;
-	ISamplerState* m_DefaultSamplerState;
 	D3D12SwapChain* m_SwapChain;
 	D3D12RenderPassInfo* m_BasicRenderPass;
 	ID3D12Device1* m_Device;

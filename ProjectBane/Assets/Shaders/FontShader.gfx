@@ -1,0 +1,53 @@
+
+struct FontInformation
+{
+    float4 FontInfo[2]; // FontInfo[0].xy Min, FontInfo[0].zw Max.x, Min.y
+};
+
+Resources
+{
+    Texture2D FontTexture : register(t0);
+    SamplerState FontSampler : register(s0);
+    cbuffer ScreenConstants : register(b0)
+    {
+        matrix ScreenOrthoMatrix;
+    }
+    cbuffer FontPosiitonInfo : register(b1)
+    {
+        matrix PositionMatrix;
+    }
+}
+
+Pipeline
+{
+    RenderTarget_0 =  
+	{
+		Format = FORMAT_R8G8B8A8_UNORM;
+	};
+}
+
+
+struct VS_INPUT
+{
+    float2 Position : POSITION;
+    float2 UV : TEXCOORD;
+};
+
+struct PS_INPUT
+{
+    float4 Position : SV_POSITION;
+    float2 UV : TEXCOORD;
+};
+
+PS_INPUT VSMain(VS_INPUT Input)
+{
+    PS_INPUT Result;
+    Result.Position = float4(Input.Position, 0.f, 1.f);
+    Result.UV = Input.UV;
+    return Result;
+}
+
+float4 PSMain(PS_INPUT Input) : SV_TARGET0
+{
+    return float4(0, 0, 0, 0);
+}

@@ -11,7 +11,7 @@ void CylinderCollisionComponent::Awake()
 	m_BodyId = GetScene()->GetPhysicsWorld().AddBody(CreateInfo);
 }
 
-void CylinderCollisionComponent::Tick(float DT) { UNUSED(DT); }
+void CylinderCollisionComponent::Tick(double DT) { UNUSED(DT); }
 
 void CylinderCollisionComponent::PhysicsTick()
 {

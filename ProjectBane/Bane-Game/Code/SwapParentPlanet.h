@@ -43,7 +43,7 @@ public:
 		}
 	}
 
-	void Tick(float Dt) override 
+	void Tick(double Dt) override 
 	{
 		UNUSED(Dt);
 		if (GetInput()->Keyboard.GetKeyUp(KEY_F))

@@ -32,7 +32,6 @@ private:
 	IIndexBuffer* m_IndexBuffer;
 	uint32 m_IndexCount;
 	IShaderResourceTable* m_Table;
-	ISamplerState* m_Sampler;
 	IGraphicsPipelineState* m_Pipeline;
 
 };

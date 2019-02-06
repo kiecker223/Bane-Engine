@@ -1,7 +1,87 @@
 #include "Font.h"
+#include <JSON/JsonCPP.h>
+#include <fstream>
+#include <Il/devil_cpp_wrapper.hpp>
+#include <Graphics/IO/ShaderCache.h>
 
+using namespace nlohmann;
 
 void Font::LoadFont(const std::string& FontName)
 {
 	m_Name = FontName;
+	
+	m_Characters.reserve(128);
+	
+	ilImage SDFImage;
+
+	IB = ApiRuntime::Get()->QuadIB;
+	uint32 ImgWidth = 0;
+	uint32 ImgHeight = 0;
+	std::string ImageName;
+	{
+		std::ifstream FileReadStream("FontInfo.json");
+		json BaseJson = json::parse(FileReadStream);
+		json FontJson = BaseJson[FontName];
+		ImageName = BaseJson["TextureLocation"].get<std::string>();
+		SDFImage.Load(ImageName.c_str());
+		ImgWidth = SDFImage.Width();
+		ImgHeight = SDFImage.Height();
+		for (uint32 i = 0; i < 127; i++)
+		{
+			BANE_CHECK(FontJson.is_array());
+			json FontData = FontJson[i];
+			float StartX =		static_cast<float>(FontData["Location"]["x"].get<uint32>());
+			float StartY =		static_cast<float>(FontData["Location"]["y"].get<uint32>());
+			float FontAdvance = static_cast<float>(FontData["Advance"].get<uint32>());
+			float BearingX =	static_cast<float>(FontData["Bearing"]["x"].get<uint32>());
+			float BearingY =	static_cast<float>(FontData["Bearing"]["y"].get<uint32>());
+			float DimensionX =	static_cast<float>(FontData["Dimensions"]["x"].get<uint32>());
+			float DimensionY =	static_cast<float>(FontData["Dimensions"]["y"].get<uint32>());
+			float fImgW = static_cast<float>(ImgWidth);
+			float fImgH = static_cast<float>(ImgHeight);
+
+			float2 Start((StartX - BearingX) / fImgW, StartY / fImgH);
+			float2 End((StartX + (FontAdvance / 64.f)) / fImgW, (StartY - (DimensionY + BearingY)) / fImgH);
+			m_Characters[i].Data[0].Position = float2();
+			m_Characters[i].Data[0].UV = float2(Start.x, Start.y);
+			m_Characters[i].Data[1].Position = float2();
+			m_Characters[i].Data[1].UV = float2(End.x, Start.y);
+			m_Characters[i].Data[2].Position = float2();
+			m_Characters[i].Data[2].UV = float2(Start.x, End.y);
+			m_Characters[i].Data[3].Position = float2();
+			m_Characters[i].Data[3].UV = float2(End.x, End.y);
+		}
+	}
+
+	uint8* ImageData = new uint8[ImgWidth * ImgHeight];
+	struct Color
+	{
+		uint8 r, g, b, a;
+	};
+	Color* ImageColors = reinterpret_cast<Color*>(SDFImage.GetData());
+	for (uint32 y = 0; y < ImgHeight; y++)
+	{
+		for (uint32 x = 0; x < ImgWidth; x++)
+		{
+			ImageData[(y * ImgWidth) + x] = ImageColors[(y * ImgWidth) + x].r;
+		}
+	}
+	SDFImage.Delete();
+	auto* Device = GetApiRuntime()->GetGraphicsDevice();
+	SUBRESOURCE_DATA Data = { };
+	Data.Width = ImgWidth;
+	Data.Height = ImgHeight;
+	Data.Depth = 1;
+	Data.Step = 1;
+	Data.Pointer = reinterpret_cast<void*>(ImageData);
+	FontTexture = Device->CreateTexture2D(ImgWidth, ImgHeight, FORMAT_R8_UNORM, CreateDefaultSamplerDesc(), TEXTURE_USAGE_SHADER_RESOURCE, &Data);
+	FontDataStructuredBuff = Device->CreateStructuredBuffer(static_cast<uint32>(sizeof(float4) * 2 * m_Characters.size()), reinterpret_cast<uint8*>(m_Characters.data()));
+	FontShader = GetShaderCache()->LoadGraphicsPipeline("Fonts/FontShader.gfx");
+	ResourceTable = Device->CreateShaderTable(FontShader);
+	Device->CreateShaderResourceView(ResourceTable, FontDataStructuredBuff, 1, static_cast<uint32>(sizeof(float4) * 2), static_cast<uint32>(sizeof(float4) * 2 * m_Characters.size()));
 }
+
+//void Font::InitializeGPUMemory(CHARACTER_CBUFFER_DATA* pCbuffData)
+//{
+//
+//}

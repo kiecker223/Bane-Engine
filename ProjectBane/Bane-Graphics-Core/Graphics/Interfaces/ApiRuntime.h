@@ -31,6 +31,9 @@ public:
 	virtual IRuntimeGraphicsDevice* GetGraphicsDevice() = 0;
 	virtual IDeviceSwapChain* GetSwapChain() = 0;
 
+	IVertexBuffer* QuadVB;
+	IIndexBuffer* QuadIB;
+
 private:
 
 	static ApiRuntime* Runtime;

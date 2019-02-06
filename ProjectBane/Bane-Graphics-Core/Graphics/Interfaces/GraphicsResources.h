@@ -13,6 +13,13 @@ public:
 	virtual void SetDebugName(const std::string& DebugName) = 0;
 	virtual std::string GetDebugName() const = 0;
 	virtual void* Map() = 0;
+	
+	template<typename T>
+	inline T* MapT()
+	{
+		return reinterpret_cast<T*>(this->Map());
+	}
+
 	virtual void Unmap() = 0;
 };
 
@@ -27,27 +34,6 @@ public:
 typedef IBuffer IVertexBuffer;
 typedef IBuffer IIndexBuffer;
 typedef IBuffer IConstantBuffer;
-
-class ITextureBase : public IGPUResource
-{
-public:
-	virtual uint32 GetWidth() const = 0;
-	virtual uint32 GetHeight() const = 0;
-	virtual uint32 GetDepth() const = 0;
-	virtual uint32 GetArraySize() const = 0;
-	virtual ETEXTURE_USAGE GetUsage() const = 0;
-	virtual EFORMAT GetFormat() const = 0;
-	virtual uint32 GetMipCount() const = 0;
-	inline bool IsShaderResource() const { return GetUsage() & TEXTURE_USAGE_SHADER_RESOURCE; }
-	inline bool IsUnorderedAccess() const { return GetUsage() & TEXTURE_USAGE_UNORDERED_ACCESS; }
-	inline bool IsRenderTarget() const { return ((GetUsage() & TEXTURE_USAGE_RENDER_TARGET) == TEXTURE_USAGE_RENDER_TARGET); }
-	inline bool IsDepthStencil() const { return ((GetUsage() & TEXTURE_USAGE_DEPTH_STENCIL) == TEXTURE_USAGE_DEPTH_STENCIL); }
-};
-
-typedef ITextureBase ITexture2D;
-typedef ITextureBase ITexture2DArray;
-typedef ITextureBase ITexture3D;
-typedef ITextureBase ITextureCube;
 
 
 typedef enum EWRAP_MODE {
@@ -77,6 +63,7 @@ typedef enum EANISOTROPIC_FILTER_OVERRIDE {
 	ANISOTROPIC_FILTER_OVERRIDE_MAXIMUM_ANISOTROPIC
 } EANISOTROPIC_FILTER_OVERRIDE;
 
+
 typedef struct SAMPLER_DESC {
 	EWRAP_MODE UAddress;
 	EWRAP_MODE VAddress;
@@ -88,19 +75,36 @@ typedef struct SAMPLER_DESC {
 
 inline SAMPLER_DESC CreateDefaultSamplerDesc()
 {
-	return { 
-		WRAP_MODE_CLAMP, 
-		WRAP_MODE_CLAMP, 
+	return {
 		WRAP_MODE_CLAMP,
-		(EMAG_FILTERING)0, (EMIN_FILTERING)0, 
-		ANISOTROPIC_FILTER_OVERRIDE_ANISOTROPIC 
+		WRAP_MODE_CLAMP,
+		WRAP_MODE_CLAMP,
+		(EMAG_FILTERING)0, (EMIN_FILTERING)0,
+		ANISOTROPIC_FILTER_OVERRIDE_MAXIMUM_ANISOTROPIC
 	};
 }
 
-class ISamplerState
+class ITextureBase : public IGPUResource
 {
 public:
-	virtual	~ISamplerState() { }
-	virtual SAMPLER_DESC GetDesc() const = 0;
+	virtual uint32 GetWidth() const = 0;
+	virtual uint32 GetHeight() const = 0;
+	virtual uint32 GetDepth() const = 0;
+	virtual uint32 GetArraySize() const = 0;
+	virtual ETEXTURE_USAGE GetUsage() const = 0;
+	virtual EFORMAT GetFormat() const = 0;
+	virtual uint32 GetMipCount() const = 0;
+	virtual void SetSamplerDesc(const SAMPLER_DESC& SampleDesc) = 0;
+	inline bool IsShaderResource() const { return GetUsage() & TEXTURE_USAGE_SHADER_RESOURCE; }
+	inline bool IsUnorderedAccess() const { return GetUsage() & TEXTURE_USAGE_UNORDERED_ACCESS; }
+	inline bool IsRenderTarget() const { return ((GetUsage() & TEXTURE_USAGE_RENDER_TARGET) == TEXTURE_USAGE_RENDER_TARGET); }
+	inline bool IsDepthStencil() const { return ((GetUsage() & TEXTURE_USAGE_DEPTH_STENCIL) == TEXTURE_USAGE_DEPTH_STENCIL); }
 };
+
+typedef ITextureBase ITexture2D;
+typedef ITextureBase ITexture2DArray;
+typedef ITextureBase ITexture3D;
+typedef ITextureBase ITextureCube;
+
+
 

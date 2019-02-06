@@ -44,6 +44,5 @@ D3D12ShaderResourceTable::D3D12ShaderResourceTable(
 	AssociatedSignature = GetD3D12ShaderSignatureLibrary()->GetSignature(ShaderData);
 	ConstantBuffers.resize(InNumCBVs, { nullptr, 0 });
 	ShaderResources.resize(InNumSRVs, nullptr);
-	Samplers.resize(InNumSMPs, nullptr);
 	UnorderedAccessResources.resize(InNumUAVs, nullptr);
 }

@@ -9,15 +9,30 @@ void D3D12CommandQueue::CompleteExecution()
 	{
 		if (!m_ExecutionQueue[i]->UploadResourcesToDestroy.empty())
 		{
-			m_ExecutionQueue[i]->FlushDestructionQueue();
-			m_ExecutionQueue[i]->FlushCommitQueue();
+			if (m_ExecutionQueue[i]->DeletionQueueLock.try_lock())
+			{
+				m_ExecutionQueue[i]->FlushDestructionQueue();
+				m_ExecutionQueue[i]->DeletionQueueLock.unlock();
+			}
+			if (m_ExecutionQueue[i]->CommitQueueLock.try_lock())
+			{
+				m_ExecutionQueue[i]->FlushCommitQueue();
+				m_ExecutionQueue[i]->CommitQueueLock.unlock();
+			}
 		}
-		m_ExecutionQueue[i]->Reset();
+		if (m_ExecutionQueue[i]->ResetLock.try_lock())
+		{
+			m_ExecutionQueue[i]->Reset();
+			m_ExecutionQueue[i]->ResetLock.unlock();
+		}
 	}
 
 	// Push all the finished command lists to the device and reset
-	m_ExecutionQueue.AppendToOther(m_GraphicsDevice->m_AvailableCLs[m_ContextType]);
-	m_ExecutionQueue.Reset();
+	if (m_ExecutionQueue.NumUsed > 0)
+	{
+		m_ExecutionQueue.AppendToOther(m_GraphicsDevice->m_AvailableCLs[m_ContextType]);
+		m_ExecutionQueue.Reset();
+	}
 }
 
 void D3D12CommandQueue::InsertWaitForGraphicsQueue()

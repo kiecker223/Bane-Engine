@@ -7,7 +7,7 @@
 #define USE_WARP 0
 #define USE_DEBUG_INTERFACE 0
 
-#define PLEASE_HELP_I_BROKE_THE_THING_AGAIN 0
+#define PLEASE_HELP_I_BROKE_THE_THING_AGAIN 1
 
 void D3D12Runtime::Initialize(const Window* pWindow)
 {
@@ -46,6 +46,28 @@ void D3D12Runtime::Initialize(const Window* pWindow)
 
 	m_SwapChain->Initialize(DxgiFactory, Adapter, CommandQueue, pWindow);
 	m_Device = new D3D12GraphicsDevice(m_SwapChain, pWindow, Device, CommandQueue);
+
+	struct Vertex
+	{
+		struct { float x, y, z; };
+		struct { float u, v; };
+	};
+
+	Vertex vertices[4] = {
+		{ { -1.0f, -1.0f,  0.1f },{ 0.0f, 1.0f } },
+		{ { 1.0f, -1.0f,  0.1f },{ 1.0f, 1.0f } },
+		{ { 1.0f,  1.0f,  0.1f },{ 1.0f, 0.0f } },
+		{ { -1.0f,  1.0f,  0.1f },{ 0.0f, 0.0f } }
+	};
+
+	uint32 indices[6] = {
+		0, 3, 2,
+		2, 1, 0
+	};
+
+	ApiRuntime::Get()->QuadVB = m_Device->CreateVertexBuffer(sizeof(vertices), (uint8*)vertices);
+	ApiRuntime::Get()->QuadIB = m_Device->CreateIndexBuffer(sizeof(indices), (uint8*)indices);
+
 }
 
 void D3D12Runtime::Destroy()

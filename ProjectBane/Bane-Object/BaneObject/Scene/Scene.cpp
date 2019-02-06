@@ -112,7 +112,7 @@ bool Scene::EntityExists(uint64 Id)
 	) != m_Entities.end();
 }
 
-void Scene::Tick(float DT)
+void Scene::Tick(double DT)
 {
 	for (auto& e : m_Entities)
 	{

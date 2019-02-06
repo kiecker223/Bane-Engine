@@ -46,6 +46,16 @@ public:
 		Translate(double3(X, Y, Z));
 	}
 
+	inline void Rotate(const double3& Euler)
+	{
+		Rotate(fromDouble3(Euler));
+	}
+
+	inline void Rotate(double X, double Y, double Z)
+	{
+		Rotate(double3(X, Y, Z));
+	}
+
 	inline void Rotate(const float3& Euler)
 	{
 		m_Rotation *= Quaternion(Euler);

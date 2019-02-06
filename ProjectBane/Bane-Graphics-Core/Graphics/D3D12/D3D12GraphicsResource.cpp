@@ -6,7 +6,7 @@
 
 
 
-void D3D12GPUResource::TransitionResource(D3D12GraphicsCommandContext* Ctx, D3D12_RESOURCE_STATES NewState)
+void D3D12GPUResource::TransitionResource(D3D12GraphicsCommandBuffer* Ctx, D3D12_RESOURCE_STATES NewState)
 {
 	if (CheckResourceTransitionValid(NewState))
 	{
@@ -38,7 +38,7 @@ void D3D12GPUResource::TransitionResource(D3D12ComputeCommandContext* Ctx, D3D12
 	}
 }
 
-void D3D12GPUResource::PushUAVBarrier(D3D12GraphicsCommandContext* Ctx)
+void D3D12GPUResource::PushUAVBarrier(D3D12GraphicsCommandBuffer* Ctx)
 {
 	D3D12_RESOURCE_BARRIER Transition = { };
 	Transition.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
@@ -118,7 +118,7 @@ void D3D12Buffer::UploadDataToGPU(D3D12GraphicsCommandContext* Ctx, uint8* Buffe
 
 	memcpy(UploadBuffer->MappedPointer, Buffer, SizeInBytes);
 	Ctx->CopyBuffers(UploadBuffer, this);
-	Ctx->CommandList->EnqueueUploadResourceToDestroy(dynamic_cast<D3D12GPUResource*>(UploadBuffer));
+	Ctx->CurrentCommandBuffer->CommandList->EnqueueUploadResourceToDestroy(dynamic_cast<D3D12GPUResource*>(UploadBuffer));
 }
 
 void* D3D12Buffer::Map()
@@ -156,12 +156,15 @@ bool D3D12Buffer::CheckResourceTransitionValid(D3D12_RESOURCE_STATES NewState)
 }
 
 
-D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth, uint32 InHeight, uint32 InDepth, uint32 InCount, EFORMAT InFormat, ETEXTURE_USAGE InUsage) :
+D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth, uint32 InHeight, uint32 InDepth, uint32 InCount, 
+									EFORMAT InFormat, const SAMPLER_DESC& InSampleDesc, const D3D12_SAMPLER_DESC& InD3DSampler, ETEXTURE_USAGE InUsage) :
 	Width(InWidth),
 	Height(InHeight),
 	Depth(InDepth),
 	ArrayCount(InCount),
 	Format(InFormat),
+	SamplerDesc(InSampleDesc),
+	D3DSampleDesc(InD3DSampler),
 	Usage(InUsage)
 {
 	Resource.SetParentDevice(InDevice);
@@ -238,6 +241,12 @@ D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth
 
 static uint32 UploadResourceId = 0;
 
+void D3D12TextureBase::SetSamplerDesc(const SAMPLER_DESC& InSampleDesc)
+{
+	SamplerDesc = InSampleDesc;
+	D3DSampleDesc = D3D12_TranslateSamplerDesc(InSampleDesc);
+}
+
 void D3D12TextureBase::UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void* Pointer, const uint32 InWidth, const uint32 InHeight, const uint32 InDepth, const uint32 StepSize)
 {
 	// Special treatment of arrays
@@ -255,10 +264,10 @@ void D3D12TextureBase::UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void*
 			ResourceData.pData = (const void*)&Ptr[ImgSize * i];
 			ResourceData.RowPitch = Width * StepSize;
 			ResourceData.SlicePitch = ImgSize;
-			UpdateSubresources<1>(Ctx->D3DCL, Resource.D3DResource, UploadBuffer->Resource.D3DResource, ImgSize * i, Desc.MipLevels * i, 1, &ResourceData);
+			UpdateSubresources<1>(Ctx->CurrentCommandBuffer->D3DCL, Resource.D3DResource, UploadBuffer->Resource.D3DResource, ImgSize * i, Desc.MipLevels * i, 1, &ResourceData);
 		}
 		PromotedState = D3D12_RESOURCE_STATE_COPY_DEST;
-		Ctx->CommandList->EnqueueUploadResourceToDestroy(dynamic_cast<D3D12GPUResource*>(UploadBuffer));
+		Ctx->CurrentCommandBuffer->CommandList->EnqueueUploadResourceToDestroy(dynamic_cast<D3D12GPUResource*>(UploadBuffer));
 	}
 	else
 	{
@@ -269,9 +278,9 @@ void D3D12TextureBase::UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void*
 		ResourceData.pData = Pointer;
 		ResourceData.RowPitch = Width * StepSize;
 		ResourceData.SlicePitch = (Width * Height) * StepSize;
-		UpdateSubresources<1>(Ctx->CommandList->GetGraphicsCommandList(), Resource.D3DResource, UploadBuffer->Resource.D3DResource, 0, 0, 1, &ResourceData);
+		UpdateSubresources<1>(Ctx->CurrentCommandBuffer->CommandList->GetGraphicsCommandList(), Resource.D3DResource, UploadBuffer->Resource.D3DResource, 0, 0, 1, &ResourceData);
 		PromotedState = D3D12_RESOURCE_STATE_COPY_DEST;
-		Ctx->CommandList->EnqueueUploadResourceToDestroy(dynamic_cast<D3D12GPUResource*>(UploadBuffer));
+		Ctx->CurrentCommandBuffer->CommandList->EnqueueUploadResourceToDestroy(dynamic_cast<D3D12GPUResource*>(UploadBuffer));
 	}
 }
 

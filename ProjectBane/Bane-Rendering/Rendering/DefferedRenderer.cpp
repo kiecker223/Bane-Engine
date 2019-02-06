@@ -20,11 +20,11 @@ void DefferedRenderer::Initialize(const Window* pWindow)
 	m_Device = GetApiRuntime()->GetGraphicsDevice();
 	uint32 Height = pWindow->GetHeight();
 	uint32 Width =  pWindow->GetWidth();
-
-	m_AlbedoBuffer		= m_Device->CreateTexture2D(Width, Height, FORMAT_R8G8B8A8_UNORM, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
-	m_NormalBuffer		= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
-	m_PositionBuffer	= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
-	m_ParameterBuffer	= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
+	SAMPLER_DESC DefaultSampler = CreateDefaultSamplerDesc();
+	m_AlbedoBuffer		= m_Device->CreateTexture2D(Width, Height, FORMAT_R8G8B8A8_UNORM, DefaultSampler, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
+	m_NormalBuffer		= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, DefaultSampler, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
+	m_PositionBuffer	= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, DefaultSampler, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
+	m_ParameterBuffer	= m_Device->CreateTexture2D(Width, Height, FORMAT_R32G32B32A32_FLOAT, DefaultSampler, (TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET), nullptr);
 
 	m_MeshDataBuffer = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
 	m_MaterialBuffer = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
@@ -64,18 +64,13 @@ void DefferedRenderer::Initialize(const Window* pWindow)
 		m_OnScreenQuad.IB = m_Device->CreateIndexBuffer(sizeof(indices), (uint8*)indices);
 		m_OnScreenQuad.Pipeline = GetShaderCache()->LoadGraphicsPipeline("DefferredLighting.gfx");
 		m_OnScreenQuad.Table = m_Device->CreateShaderTable(m_OnScreenQuad.Pipeline);
-		m_OnScreenQuad.PointSampler = m_Device->GetDefaultSamplerState();
-		SAMPLER_DESC SamplerDesc = CreateDefaultSamplerDesc();
-		m_OnScreenQuad.SkySampler = m_Device->CreateSamplerState(SamplerDesc);
 	}
 	
 	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_AlbedoBuffer, 0);
 	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_NormalBuffer, 1);
 	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_PositionBuffer, 2);
 	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_ParameterBuffer, 3);
-
-	m_Device->CreateShaderResourceView(m_OnScreenQuad.Table, m_LightBuffer, 0);
-	m_Device->CreateSamplerView(m_OnScreenQuad.Table, m_OnScreenQuad.SkySampler, 1);
+	m_Device->CreateConstantBufferView(m_OnScreenQuad.Table, m_LightBuffer, 0);
 }
 
 void DefferedRenderer::Render()
@@ -94,8 +89,8 @@ void DefferedRenderer::Render()
 			auto& DrawMesh = Commit.Meshes[b];
 			ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);
 			ctx->SetGraphicsResourceTable(DrawMesh.Table);
-			m_Device->CreateShaderResourceView(DrawMesh.Table, m_CameraBuffer, 0, Commit.CameraIdxOffset * sizeof(CAMERA_CONSTANT_BUFFER_DATA));
-			m_Device->CreateShaderResourceView(DrawMesh.Table, m_MeshDataBuffer, 1, b * sizeof(MESH_RENDER_DATA));
+			m_Device->CreateConstantBufferView(DrawMesh.Table, m_CameraBuffer, 0, Commit.CameraIdxOffset * sizeof(CAMERA_CONSTANT_BUFFER_DATA));
+			m_Device->CreateConstantBufferView(DrawMesh.Table, m_MeshDataBuffer, 1, b * sizeof(MESH_RENDER_DATA));
 			ctx->SetVertexBuffer(DrawMesh.VertexBuffer);
 			ctx->SetIndexBuffer(DrawMesh.IndexBuffer);
 			ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -136,8 +131,6 @@ void DefferedRenderer::Shutdown()
 	delete m_OnScreenQuad.VB;
 	delete m_OnScreenQuad.IB;
 	delete m_OnScreenQuad.Table;
-	delete m_OnScreenQuad.PointSampler;
-	delete m_OnScreenQuad.SkySampler;
 	delete m_MaterialBuffer;
 	delete m_CameraBuffer;
 	delete m_LightBuffer;

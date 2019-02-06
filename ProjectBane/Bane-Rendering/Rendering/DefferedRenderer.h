@@ -38,8 +38,6 @@ private:
 		IIndexBuffer* IB;
 		IGraphicsPipelineState* Pipeline;
 		IShaderResourceTable* Table;
-		ISamplerState* PointSampler;
-		ISamplerState* SkySampler;
 	} m_OnScreenQuad;
 
 	std::vector<RENDER_LOOP_DRAW_COMMIT> m_DrawCommits;

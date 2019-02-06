@@ -43,7 +43,7 @@ public:
 	
 	virtual void Awake() { }
 	virtual void Start() { }
-	virtual void Tick(float DT) { UNUSED(DT); }
+	virtual void Tick(double DT) { UNUSED(DT); }
 	virtual void Dispose() { }
 	virtual void FixedTick() { } // Maybe not do this
 	virtual bool IsRenderComponent() const { return false; }

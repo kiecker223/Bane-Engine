@@ -105,26 +105,31 @@ void Application::InitSystems()
 void Application::Run()
 {
 	Timer FrameTime;
-	float DT = 0.f;
+	bool bLimitFrames = false;
+	double DT = 0.;
 	while (!m_Window->QuitRequested())
 	{
 		FrameTime.StartTimer();
 		Scene* pCurrentScene = GetSceneManager()->CurrentScene;
 		
 		UpdateInput();
+		if (GetInput()->Keyboard.GetKeyDown(KEY_Z))
+		{
+			bLimitFrames = !bLimitFrames;
+			if (bLimitFrames) GetSceneRenderer()->GetSwapChain()->SetSwapInterval(2);
+			else GetSceneRenderer()->GetSwapChain()->SetSwapInterval(0);
+		}
+		pCurrentScene->Tick(DT);
 		RenderLoop RL;
 		RL.SetSkybox({ pCurrentScene->GetSkybox(), float3(0.f, 0.f, 0.f) });
 		pCurrentScene->Render(RL);
 		RL.Draw();
 		m_SceneRenderer->Submit(RL);
 		m_SceneRenderer->Render();
-
-		pCurrentScene->Tick(DT);
 		m_SceneRenderer->Present();
 		FrameTime.EndTimer();
 		DT = FrameTime.GetTimerElapsedSeconds();
 	}
-
 	GetSceneManager()->CurrentScene->DumpScene();
 }
 

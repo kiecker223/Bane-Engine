@@ -11,7 +11,7 @@ public:
 
 	void Awake() override final;
 
-	void Tick(float DT) override final;
+	void Tick(double DT) override final;
 
 	void PhysicsTick() override final;
 

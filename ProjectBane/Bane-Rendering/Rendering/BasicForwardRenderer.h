@@ -2,6 +2,7 @@
 
 #include "RendererInterface.h"
 #include "Graphics/Interfaces/ApiRuntime.h"
+#include <mutex>
 #include <Graphics/Data/Mesh.h>
 #include <Graphics/Data/Material.h>
 
@@ -11,6 +12,8 @@ class BasicForwardRenderer : public ISceneRenderer
 public:
 
 	virtual void Initialize(const Window* pWindow) override;
+
+	virtual void StartRenderThread() override;
 
 	virtual void Render() override final;
 
@@ -28,6 +31,8 @@ private:
 
 	void GatherSceneData();
 
+	bool m_bIsRendering;
+	//std::mutex m_RenderSubmitLock;
 	IRuntimeGraphicsDevice* m_Device;
 	IConstantBuffer* m_CameraConstants;
 	IConstantBuffer* m_MaterialConstants;

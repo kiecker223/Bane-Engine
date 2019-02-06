@@ -49,7 +49,7 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 	m_SrvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 256, true);
 	m_RtvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 48);
 	m_DsvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 9);
-	m_SmpAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 20, true);
+	m_SmpAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 48, true);
 	
 
 	m_ViewPort = { 0 };
@@ -64,8 +64,6 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 	m_Rect.top = 0;
 	m_Rect.right = RenderingWindow->GetWidth();
 	m_Rect.bottom = RenderingWindow->GetHeight();
-
-	m_DefaultSamplerState = CreateSamplerState(CreateDefaultSamplerDesc());
 
 	{
 		ID3D12Resource* BackBuffers[3] = { };
@@ -91,7 +89,7 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 
 		m_BackBuffer = CreateRenderTargetView(Bases);
 
-		ITexture2D* DepthTexture = CreateTexture2D(RenderingWindow->GetWidth(), RenderingWindow->GetHeight(), FORMAT_UNKNOWN, TEXTURE_USAGE_DEPTH_STENCIL, nullptr);
+		ITexture2D* DepthTexture = CreateTexture2D(RenderingWindow->GetWidth(), RenderingWindow->GetHeight(), FORMAT_UNKNOWN, CreateDefaultSamplerDesc(), TEXTURE_USAGE_DEPTH_STENCIL, nullptr);
 		IDepthStencilView* DepthStencil = CreateDepthStencilView(DepthTexture);
 
 		m_BasicRenderPass = (D3D12RenderPassInfo*)IRuntimeGraphicsDevice::CreateRenderPass(m_BackBuffer, DepthStencil, float4(0.1f, 0.1f, 0.1f, 0.f));
@@ -99,7 +97,14 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 	
 	for (uint32 i = 0; i < COMMAND_CONTEXT_TYPE_NUM_TYPES; i++)
 	{	
-		for (uint32 b = 0; b < 4; b++)
+		uint32 NumCommandListsAllowed;
+		switch (i)
+		{
+			case COMMAND_CONTEXT_TYPE_GRAPHICS: NumCommandListsAllowed = min(AvailableThreadCount - 1, 6); break;
+			case COMMAND_CONTEXT_TYPE_COMPUTE: NumCommandListsAllowed = 2; break;
+			case COMMAND_CONTEXT_TYPE_COPY: NumCommandListsAllowed = 4; break;
+		}
+		for (uint32 b = 0; b < NumCommandListsAllowed; b++)
 		{
 			ID3D12CommandAllocator* CommandAllocator;
 			ID3D12GraphicsCommandList* CommandList;
@@ -113,7 +118,7 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 				Device->CreateCommandList(1, ListType, CommandAllocator, nullptr, IID_PPV_ARGS(&CommandList))
 			);
 
-			m_AvailableCLs[i].Push(new D3D12CommandList(CommandAllocator, CommandList));
+			m_AvailableCLs[i].Push(new D3D12CommandList(CommandAllocator, CommandList, this));
 		}
 	}
 
@@ -448,21 +453,33 @@ IConstantBuffer* D3D12GraphicsDevice::CreateConstantBuffer(uint32 ByteCount)
 	return new D3D12Buffer(this, ByteCount, BUFFER_USAGE_CPU);
 }
 
+IBuffer* D3D12GraphicsDevice::CreateStructuredBuffer(uint32 ByteCount, uint8* Buffer)
+{
+	if (!m_UploadList->HasBegun())
+	{
+		m_UploadList->Begin();
+	}
+	D3D12Buffer* Result = new D3D12Buffer(this, ByteCount, BUFFER_USAGE_GPU);
+	Result->UploadDataToGPU(m_UploadList, Buffer);
+	return Result;
+}
+
 IBuffer* D3D12GraphicsDevice::CreateStagingBuffer(uint32 ByteCount)
 {
 	return new D3D12Buffer(this, ByteCount, BUFFER_USAGE_UPLOAD);
 }
 
-ITexture2D* D3D12GraphicsDevice::CreateTexture2D(uint32 Width, uint32 Height, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
+ITexture2D* D3D12GraphicsDevice::CreateTexture2D(uint32 Width, uint32 Height, EFORMAT Format, const SAMPLER_DESC& InSamplerDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
 {
 	D3D12TextureBase* Result; 
+	D3D12_SAMPLER_DESC D3DSamplerDesc = D3D12_TranslateSamplerDesc(InSamplerDesc);
 	bool bDoNoUpload = false; // Never start off with initial contents, only allow texture to texture copies or writes
 	if ((Usage & TEXTURE_USAGE_RENDER_TARGET) == TEXTURE_USAGE_RENDER_TARGET)
 	{
 		Result = new D3D12TextureBase[3]{
-			D3D12TextureBase(this, Width, Height, 1U, 1U, Format, Usage),
-			D3D12TextureBase(this, Width, Height, 1U, 1U, Format, Usage),
-			D3D12TextureBase(this, Width, Height, 1U, 1U, Format, Usage)
+			D3D12TextureBase(this, Width, Height, 1U, 1U, Format, InSamplerDesc, D3DSamplerDesc, Usage),
+			D3D12TextureBase(this, Width, Height, 1U, 1U, Format, InSamplerDesc, D3DSamplerDesc, Usage),
+			D3D12TextureBase(this, Width, Height, 1U, 1U, Format, InSamplerDesc, D3DSamplerDesc, Usage)
 		};
 
 		for (uint32 i = 0; i < 3; i++)
@@ -476,9 +493,9 @@ ITexture2D* D3D12GraphicsDevice::CreateTexture2D(uint32 Width, uint32 Height, EF
 	else if ((Usage & TEXTURE_USAGE_DEPTH_STENCIL) == TEXTURE_USAGE_DEPTH_STENCIL) // We do an explicit check because there is a specific format to be enforced here
 	{
 		Result = new D3D12TextureBase[3]{
-			D3D12TextureBase(this, Width, Height, 1U, 1U, FORMAT_D24_UNORM_S8_UINT, Usage),
-			D3D12TextureBase(this, Width, Height, 1U, 1U, FORMAT_D24_UNORM_S8_UINT, Usage),
-			D3D12TextureBase(this, Width, Height, 1U, 1U, FORMAT_D24_UNORM_S8_UINT, Usage),
+			D3D12TextureBase(this, Width, Height, 1U, 1U, FORMAT_D24_UNORM_S8_UINT, InSamplerDesc, D3DSamplerDesc, Usage),
+			D3D12TextureBase(this, Width, Height, 1U, 1U, FORMAT_D24_UNORM_S8_UINT, InSamplerDesc, D3DSamplerDesc, Usage),
+			D3D12TextureBase(this, Width, Height, 1U, 1U, FORMAT_D24_UNORM_S8_UINT, InSamplerDesc, D3DSamplerDesc, Usage),
 		};
 
 		for (uint32 i = 0; i < 3; i++)
@@ -491,7 +508,7 @@ ITexture2D* D3D12GraphicsDevice::CreateTexture2D(uint32 Width, uint32 Height, EF
 	}
 	else
 	{
-		Result = new D3D12TextureBase(this, Width, Height, 1U, 1U, Format, Usage);
+		Result = new D3D12TextureBase(this, Width, Height, 1U, 1U, Format, InSamplerDesc, D3DSamplerDesc, Usage);
 	}
 	if (Data && !bDoNoUpload)
 	{
@@ -507,9 +524,10 @@ ITexture2D* D3D12GraphicsDevice::CreateTexture2D(uint32 Width, uint32 Height, EF
 	return Result;
 }
 
-ITexture2DArray* D3D12GraphicsDevice::CreateTexture2DArray(uint32 Width, uint32 Height, uint32 Count, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
+ITexture2DArray* D3D12GraphicsDevice::CreateTexture2DArray(uint32 Width, uint32 Height, uint32 Count, EFORMAT Format, const SAMPLER_DESC& InSampleDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
 {
-	D3D12TextureBase* Result = new D3D12TextureBase(this, Width, Height, 1, Count, Format, Usage);
+	D3D12_SAMPLER_DESC D3DSampleDesc = D3D12_TranslateSamplerDesc(InSampleDesc);
+	D3D12TextureBase* Result = new D3D12TextureBase(this, Width, Height, 1, Count, Format, InSampleDesc, D3DSampleDesc, Usage);
 
 	if (Data)
 	{
@@ -522,11 +540,12 @@ ITexture2DArray* D3D12GraphicsDevice::CreateTexture2DArray(uint32 Width, uint32 
 	return Result;
 }
 
-ITexture3D* D3D12GraphicsDevice::CreateTexture3D(uint32 Width, uint32 Height, uint32 Depth, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
+ITexture3D* D3D12GraphicsDevice::CreateTexture3D(uint32 Width, uint32 Height, uint32 Depth, EFORMAT Format, const SAMPLER_DESC& InSampleDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
 {
 	D3D12TextureBase* Result = nullptr;
-
-	Result = new D3D12TextureBase(this, Width, Height, Depth, 1, Format, Usage);
+	
+	D3D12_SAMPLER_DESC D3DSampleDesc = D3D12_TranslateSamplerDesc(InSampleDesc);
+	Result = new D3D12TextureBase(this, Width, Height, Depth, 1, Format, InSampleDesc, D3DSampleDesc, Usage);
 
 	if (Data)
 	{
@@ -538,9 +557,9 @@ ITexture3D* D3D12GraphicsDevice::CreateTexture3D(uint32 Width, uint32 Height, ui
 	return Result;
 }
 
-ITextureCube* D3D12GraphicsDevice::CreateTextureCube(uint32 CubeSize, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
+ITextureCube* D3D12GraphicsDevice::CreateTextureCube(uint32 CubeSize, EFORMAT Format, const SAMPLER_DESC& InSampleDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
 {
-	D3D12TextureBase* TextureArray = (D3D12TextureBase*)CreateTexture2DArray(CubeSize, CubeSize, 6, Format, Usage, Data);
+	D3D12TextureBase* TextureArray = (D3D12TextureBase*)CreateTexture2DArray(CubeSize, CubeSize, 6, Format, InSampleDesc, Usage, Data);
 	TextureArray->Resource.SRVDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
 	TextureArray->Resource.UAVDimension = D3D12_UAV_DIMENSION_TEXTURE2DARRAY;
 	return TextureArray;
@@ -570,7 +589,7 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 	}
 	EnsureAllUploadsOccured();
 
-	ID3D12GraphicsCommandList* DirectCL = DirectContext->CommandList->GetGraphicsCommandList();
+	ID3D12GraphicsCommandList* DirectCL = DirectContext->CurrentCommandBuffer->CommandList->GetGraphicsCommandList();
 	ID3D12Resource* Res = Texture->Resource.D3DResource;
 
 	if (m_GenerateMipsPipeline2D == nullptr)
@@ -579,18 +598,14 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 		m_GenerateMipsTable2D = (D3D12ShaderResourceTable*)CreateShaderTable((IComputePipelineState*)m_GenerateMipsPipeline2D);
 	}
 
+	/*CreateShaderResourceView(m_GenerateMipsTable2D, Texture, 0);*/
 	ID3D12Resource* CopyRes = nullptr;
 
 	if (Texture->Depth == 1)
 	{
 		{
 			D3D12_HEAP_PROPERTIES HeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-			D3D12_RESOURCE_DESC ResourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-							D3D_TranslateFormat(Texture->Format), 
-							Texture->Width, Texture->Height, 
-							static_cast<uint16>(Texture->ArrayCount), 
-							static_cast<uint16>(Texture->MipCount)
-			);
+			D3D12_RESOURCE_DESC ResourceDesc = Res->GetDesc();
 			ResourceDesc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 			D3D12ERRORCHECK(
 				m_Device->CreateCommittedResource(
@@ -631,6 +646,7 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 					if (Texture->ArrayCount == 1)
 					{
 						UavDesc.Texture2D.MipSlice = i + 1;
+						UavDesc.Texture2D.PlaneSlice = 0;
 					}
 					else
 					{
@@ -693,6 +709,7 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 					float2* pParams = (float2*)ConstBuff->MappedPointer;
 					pParams->x = (1.0f / DstWidth);
 					pParams->y = (1.0f / DstHeight);
+					UNUSED(pParams);
 				}
 				DirectCL->SetPipelineState(m_GenerateMipsPipeline2D->PipelineState);
 				DirectCL->SetComputeRootSignature(m_GenerateMipsTable2D->AssociatedSignature.RootSignature);
@@ -723,7 +740,7 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 				DirectContext->End();
 				DirectContext->Flush();
 				DirectContext->Begin();
-				DirectCL = DirectContext->CommandList->GetGraphicsCommandList();
+				DirectCL = DirectContext->CurrentCommandBuffer->CommandList->GetGraphicsCommandList();
 			}
 		}
 		D3D12_RESOURCE_STATES PreviousTextureState = Texture->CurrentState;
@@ -756,19 +773,6 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 	while (CopyRes->Release() > 0) { }
 }
 
-
-ISamplerState* D3D12GraphicsDevice::CreateSamplerState(const SAMPLER_DESC& Desc)
-{
-	D3D12_SAMPLER_DESC CreationDesc = D3D12_TranslateSamplerDesc(Desc);
-
-	return new D3D12SamplerState(CreationDesc, Desc);
-}
-
-ISamplerState* D3D12GraphicsDevice::GetDefaultSamplerState()
-{
-	return m_DefaultSamplerState;
-}
-
 IInputLayout* D3D12GraphicsDevice::CreateInputLayout(const GFX_INPUT_LAYOUT_DESC& Desc)
 {
 	D3D12_INPUT_LAYOUT_DESC CreationDesc = D3D12_TranslateInputLayout(Desc);
@@ -792,11 +796,30 @@ IRenderTargetView* D3D12GraphicsDevice::GetBackBuffer()
 	return m_BackBuffer;
 }
 
-void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint32 InSlot, uint64 InOffset)
+void D3D12GraphicsDevice::CreateConstantBufferView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint32 InSlot, uint64 InOffset)
 {
 	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
 	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
 	DestTable->ConstantBuffers[InSlot] = { Buffer, InOffset };
+}
+
+void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint32 InSlot, uint32 StructureByteStride, uint32 NumElements, uint64 InOffset)
+{
+	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
+	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
+	D3D12DescriptorAllocation SlotAlloc = DestTable->BaseSRVAllocation;
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = { };
+	SRVDesc.Buffer.StructureByteStride = static_cast<uint64>(StructureByteStride);
+	SRVDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+	SRVDesc.Buffer.NumElements = NumElements;
+	SRVDesc.Buffer.FirstElement = InOffset;
+	SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
+
+	m_Device->CreateShaderResourceView(Buffer->Resource.D3DResource, &SRVDesc, SlotAlloc.OffsetFromStart(InSlot).CpuHandle);
+
+	DestTable->ShaderResources[InSlot] = Buffer;
 }
 
 void D3D12GraphicsDevice::CreateUnorderedAccessView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint32 InSlot, uint32 InSubresource)
@@ -825,6 +848,7 @@ void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestT
 	DestTable->ShaderResources[Slot] = Texture;
 	
 	D3D12DescriptorAllocation SlotAlloc = DestTable->BaseSRVAllocation.OffsetFromStart(Slot);
+	D3D12DescriptorAllocation SampleAlloc = DestTable->BaseSMPAllocation.OffsetFromStart(Slot);
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC SrvDesc = { };
 	SrvDesc.Format = D3D_TranslateFormat(Texture->Format);
@@ -859,6 +883,7 @@ void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestT
 	}
 
 	m_Device->CreateShaderResourceView(Texture->Resource.D3DResource, &SrvDesc, SlotAlloc.CpuHandle);
+	m_Device->CreateSampler(&Texture->D3DSampleDesc, SampleAlloc.CpuHandle);
 }
 
 void D3D12GraphicsDevice::CreateUnorderedAccessView(IShaderResourceTable* InDestTable, ITextureBase* InTexture, uint32 Slot, uint32 InSubresource)
@@ -890,18 +915,6 @@ void D3D12GraphicsDevice::CreateUnorderedAccessView(IShaderResourceTable* InDest
 	}
 
 	m_Device->CreateUnorderedAccessView(Texture->Resource.D3DResource, nullptr, &UavDesc, SlotAlloc.CpuHandle);
-}
-
-void D3D12GraphicsDevice::CreateSamplerView(IShaderResourceTable* InDestTable, ISamplerState* InSamplerState, uint32 Slot)
-{
-	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
-	D3D12SamplerState* SamplerState = (D3D12SamplerState*)InSamplerState;
-
-	DestTable->Samplers[Slot] = SamplerState;
-
-	D3D12DescriptorAllocation SlotAlloc = DestTable->BaseSMPAllocation.OffsetFromStart(Slot);
-
-	m_Device->CreateSampler(&SamplerState->CreationDesc, SlotAlloc.CpuHandle);
 }
 
 D3D12ShaderItemData GetShaderRequirements(IGraphicsPipelineState* pState)
@@ -1029,8 +1042,15 @@ void D3D12GraphicsDevice::EnsureAllUploadsOccured()
 {
 	if (m_UploadList->HasBegun()) // If there is work for it to do
 	{
+		if (!GetCopyQueue().IsFinished())
+		{
+			GetCopyQueue().StallForFinish();
+		}
+		else
+		{
+			GetCopyQueue().CompleteExecution();
+		}
 		m_UploadList->End(); // End it, Begin will be called again when someone wants to upload
-		GetCopyQueue().StallForFinish();
 		m_UploadList->Begin();
 	}
 }

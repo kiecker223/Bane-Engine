@@ -112,7 +112,7 @@ public:
 		}
 	}
 
-	inline void TransitionResourcesToWrite(D3D12GraphicsCommandContext* Context)
+	inline void TransitionResourcesToWrite(D3D12GraphicsCommandBuffer* Context)
 	{
 		for (uint32 i = 0; i < NumRenderTargets; i++)
 		{
@@ -128,7 +128,7 @@ public:
 		}
 	}
 
-	inline void TransitionResourcesToRead(D3D12GraphicsCommandContext* Context)
+	inline void TransitionResourcesToRead(D3D12GraphicsCommandBuffer* Context)
 	{
 		for (uint32 i = 0; i < NumRenderTargets; i++)
 		{
@@ -200,7 +200,6 @@ public:
 	}
 
 	std::vector<D3D12_CONSTANT_BUFFER_OFFSET_PAIR> ConstantBuffers; 
-	std::vector<D3D12SamplerState*> Samplers;
 	std::vector<D3D12GPUResource*> ShaderResources;
 	std::vector<D3D12GPUResource*> UnorderedAccessResources;
 	D3D12DescriptorAllocation BaseSMPAllocation;

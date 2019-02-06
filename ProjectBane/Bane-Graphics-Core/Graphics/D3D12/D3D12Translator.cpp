@@ -443,27 +443,28 @@ D3D12_SAMPLER_DESC D3D12_TranslateSamplerDesc(const SAMPLER_DESC& InDesc)
 	Result.MaxAnisotropy = 16;
 	Result.MinLOD = 0.0f;
 	Result.MaxLOD = D3D12_FLOAT32_MAX;
+	Result.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 
-	if (InDesc.AnisotropicFiltering)
-	{
-		switch (InDesc.AnisotropicFiltering)
-		{
-			case ANISOTROPIC_FILTER_OVERRIDE_ANISOTROPIC:
-			{
-				Result.Filter = D3D12_FILTER_ANISOTROPIC;
-			} break;
-			case ANISOTROPIC_FILTER_OVERRIDE_MINIMUM_ANISOTROPIC:
-			{
-				Result.Filter = D3D12_FILTER_MINIMUM_ANISOTROPIC;
-			} break;
-			case ANISOTROPIC_FILTER_OVERRIDE_MAXIMUM_ANISOTROPIC:
-			{
-				Result.Filter = D3D12_FILTER_MAXIMUM_ANISOTROPIC;
-			} break;
-		}
-		return Result;
-	}
-	
-	assert(false); // NOT IMPLEMENTED
-	return { };
+//	if (InDesc.AnisotropicFiltering)
+//	{
+//		switch (InDesc.AnisotropicFiltering)
+//		{
+//			case ANISOTROPIC_FILTER_OVERRIDE_ANISOTROPIC:
+//			{
+//				Result.Filter = D3D12_FILTER_ANISOTROPIC;
+//			} break;
+//			case ANISOTROPIC_FILTER_OVERRIDE_MINIMUM_ANISOTROPIC:
+//			{
+//				Result.Filter = D3D12_FILTER_MINIMUM_ANISOTROPIC;
+//			} break;
+//			case ANISOTROPIC_FILTER_OVERRIDE_MAXIMUM_ANISOTROPIC:
+//			{
+//				Result.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+//			} break;
+//		}
+//		return Result;
+//	}
+//	
+//	assert(false); // NOT IMPLEMENTED
+	return Result;
 }

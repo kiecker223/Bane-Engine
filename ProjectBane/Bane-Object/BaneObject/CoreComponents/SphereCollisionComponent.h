@@ -13,7 +13,7 @@ public:
 
 	void Start() final override;
 
-	void Tick(float DT) final override;
+	void Tick(double DT) final override;
 
 	void PhysicsTick() final override;
 

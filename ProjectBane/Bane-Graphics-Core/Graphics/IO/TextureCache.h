@@ -13,8 +13,8 @@ public:
 	void InitCache();
 	void DestroyCache();
 
-	ITexture2D* LoadTexture(const std::string& TextureName);
-	ITextureCube* LoadCubemap(const std::string& TextureName);
+	ITexture2D* LoadTexture(const std::string& TextureName, const SAMPLER_DESC* pSampler = nullptr);
+	ITextureCube* LoadCubemap(const std::string& TextureName, const SAMPLER_DESC* pSampler = nullptr);
 	ITextureCube* LoadCubemap(
 		const std::string& Name, 
 		const std::string& NX,
@@ -22,7 +22,8 @@ public:
 		const std::string& NZ,
 		const std::string& PX,
 		const std::string& PY,
-		const std::string& PZ 
+		const std::string& PZ,
+		const SAMPLER_DESC* pSampler = nullptr
 	);
 
 	void AddTexture(const std::string& TextureName, ITextureBase* Texture);

@@ -269,7 +269,7 @@ public:
 			reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(m_Allocator.GetAllocatedObjects()[i]) + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin))->Start();
 	}
 
-	inline void Tick(float DT)
+	inline void Tick(double DT)
 	{
 		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
 			reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(m_Allocator.GetAllocatedObjects()[i]) + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin))->Tick(DT);

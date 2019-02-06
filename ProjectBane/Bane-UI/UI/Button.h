@@ -15,10 +15,10 @@ public:
 	void Update(UIContext& Context) override final;
 	void Render(UIContext& Context) override final;
 
-	float2 Min, Max;
+	double2 Min, Max;
 
 private:
 
-	bool PointInside(const float2& Val);
+	bool PointInside(const double2& Val);
 
 };

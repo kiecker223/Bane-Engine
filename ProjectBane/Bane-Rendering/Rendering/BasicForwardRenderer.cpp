@@ -14,58 +14,71 @@ void BasicForwardRenderer::Initialize(const Window* pWindow)
 	m_LightBuffer = m_Device->CreateConstantBuffer(sizeof(RenderLoop::GRenderGlobals.LightData));
 }
 
+void BasicForwardRenderer::StartRenderThread()
+{
+	RenderThreadHandle = std::move(std::thread([this]()
+	{
+		m_bIsRendering = true;
+		Render();
+	}));
+}
+
 void BasicForwardRenderer::Render()
 {
+	//std::lock_guard<std::mutex> RenderLock(m_RenderSubmitLock);
 	IGraphicsCommandContext* ctx = m_Device->GetGraphicsContext();
-
 	ctx->BeginPass(m_Device->GetBackBufferTargetPass());
 	GatherSceneData();
-	for (uint32 i = 0; i < m_Commits.size(); i++)
+	if (!m_Commits.empty())
 	{
-		auto& Commit = m_Commits[i];
-		for (uint32 y = 0; y < Commit.Meshes.size(); y++)
+		for (uint32 i = 0; i < m_Commits.size(); i++)
 		{
-			auto& DrawMesh = Commit.Meshes[y];
-			ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);
-			m_Device->CreateShaderResourceView(DrawMesh.Table, m_CameraConstants, 0, Commit.CameraIdxOffset * sizeof(CAMERA_CONSTANT_BUFFER_DATA));
-			m_Device->CreateShaderResourceView(DrawMesh.Table, m_MeshDataBuffer, 1, y * sizeof(MESH_RENDER_DATA));
-			m_Device->CreateShaderResourceView(DrawMesh.Table, m_LightBuffer, 2);
-			ctx->SetGraphicsResourceTable(DrawMesh.Table);
-			ctx->SetVertexBuffer(DrawMesh.VertexBuffer);
-			ctx->SetIndexBuffer(DrawMesh.IndexBuffer);
-			ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			ctx->DrawIndexed(DrawMesh.IndexCount, 0, 0);
-		}
-	}
-	{
-		auto& IG = RenderLoop::GRenderGlobals.ImmediateGeometry;
-		auto& DrawArgs = IG.DrawArgs;
-		if (IG.CurrentCount)
-		{
-			uint64 ByteOffsetForVertexBuffer = 0;
-			for (uint32 i = 0; i < DrawArgs.size(); i++)
+			auto& Commit = m_Commits[i];
+			for (uint32 y = 0; y < Commit.Meshes.size(); y++)
 			{
-				uint64 SizeInBytes = static_cast<uint64>(DrawArgs[i].UploadBuffer->GetSizeInBytes());
-				ctx->CopyBufferLocations(DrawArgs[i].UploadBuffer, 0, IG.VertexBuffer, ByteOffsetForVertexBuffer, SizeInBytes);
-				ByteOffsetForVertexBuffer += SizeInBytes;
+				auto& DrawMesh = Commit.Meshes[y];
+				ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);
+				m_Device->CreateConstantBufferView(DrawMesh.Table, m_CameraConstants, 0, Commit.CameraIdxOffset * sizeof(CAMERA_CONSTANT_BUFFER_DATA));
+				m_Device->CreateConstantBufferView(DrawMesh.Table, m_MeshDataBuffer, 1, y * sizeof(MESH_RENDER_DATA));
+				m_Device->CreateConstantBufferView(DrawMesh.Table, m_LightBuffer, 2);
+				ctx->SetGraphicsResourceTable(DrawMesh.Table);
+				ctx->SetVertexBuffer(DrawMesh.VertexBuffer);
+				ctx->SetIndexBuffer(DrawMesh.IndexBuffer);
+				ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				ctx->DrawIndexed(DrawMesh.IndexCount, 0, 0);
 			}
-			ByteOffsetForVertexBuffer = 0;
-			for (uint32 i = 0; i < IG.CurrentCount; i++)
+		}
+		{
+			auto& IG = RenderLoop::GRenderGlobals.ImmediateGeometry;
+			auto& DrawArgs = IG.DrawArgs;
+			if (IG.CurrentCount)
 			{
-				auto& Obj = DrawArgs[i];
-				ctx->SetGraphicsPipelineState(m_ImmediateGeometryPS);
-				m_Device->CreateShaderResourceView(m_ImmediateGeometryTable, m_CameraConstants, 0);
-				ctx->SetGraphicsResourceTable(m_ImmediateGeometryTable);
-				ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_LINES);
-				ctx->SetVertexBuffer(IG.VertexBuffer, ByteOffsetForVertexBuffer);
-				ctx->Draw(Obj.VertexCount, 0);
-				ByteOffsetForVertexBuffer += Obj.UploadBuffer->GetSizeInBytes();
+				uint64 ByteOffsetForVertexBuffer = 0;
+				for (uint32 i = 0; i < DrawArgs.size(); i++)
+				{
+					uint64 SizeInBytes = static_cast<uint64>(DrawArgs[i].UploadBuffer->GetSizeInBytes());
+					ctx->CopyBufferLocations(DrawArgs[i].UploadBuffer, 0, IG.VertexBuffer, ByteOffsetForVertexBuffer, SizeInBytes);
+					ByteOffsetForVertexBuffer += SizeInBytes;
+				}
+				ByteOffsetForVertexBuffer = 0;
+				for (uint32 i = 0; i < IG.CurrentCount; i++)
+				{
+					auto& Obj = DrawArgs[i];
+					ctx->SetGraphicsPipelineState(m_ImmediateGeometryPS);
+					m_Device->CreateConstantBufferView(m_ImmediateGeometryTable, m_CameraConstants, 0);
+					ctx->SetGraphicsResourceTable(m_ImmediateGeometryTable);
+					ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_LINES);
+					ctx->SetVertexBuffer(IG.VertexBuffer, ByteOffsetForVertexBuffer);
+					ctx->Draw(Obj.VertexCount, 0);
+					ByteOffsetForVertexBuffer += Obj.UploadBuffer->GetSizeInBytes();
+				}
 			}
 		}
 	}
 	ctx->EndPass();
 	RenderLoop::ResetForNextFrame();
-	m_Commits.clear();
+
+	//ApiRuntime::Shutdown();
 }
 
 void BasicForwardRenderer::Present()
@@ -75,11 +88,13 @@ void BasicForwardRenderer::Present()
 
 void BasicForwardRenderer::Shutdown()
 {
-	ApiRuntime::Shutdown();
+	m_bIsRendering = false;
 }
 
 void BasicForwardRenderer::Submit(const RenderLoop& pRenderLoop)
 {
+	//std::lock_guard<std::mutex> RenderLock(m_RenderSubmitLock);
+	m_Commits.clear();
 	for (auto& Commit : pRenderLoop.GetCommitedData())
 		m_Commits.push_back(Commit);
 }

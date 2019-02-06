@@ -27,7 +27,7 @@ public:
 		CamComp = GetOwner()->GetComponent<CameraComponent>();
 	}
 
-	void Tick(float Dt) override
+	void Tick(double Dt) override
 	{
 		UNUSED(Dt);
 		double3 PlanetPos = ParentPlanet->GetTransform()->GetPosition();
@@ -41,7 +41,7 @@ class PrintVelocityFromPhysicsComponent : public Component
 	IMPLEMENT_COMPONENT(PrintVelocityFromPhysicsComponent)
 public:
 
-	void Tick(float Dt) override 
+	void Tick(double Dt) override 
 	{
 		UNUSED(Dt);
 	}
@@ -52,9 +52,9 @@ class RotateEarthComponent : public Component
 	IMPLEMENT_COMPONENT(RotateEarthComponent)
 public:
 
-	void Tick(float Dt) override
+	void Tick(double Dt) override
 	{
-		GetTransform()->Rotate(float3(0.f, 1.f * Dt, 0.f));
+		GetTransform()->Rotate(double3(0., 1. * Dt, 0.));
 	}
 };
 
@@ -292,7 +292,7 @@ void InitApplication()
 		MCC->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		MCC->RenderedMaterial.SetDiffuseTexture("DefaultBlue");
 		auto CCC = AnotherMeshTest->AddComponent<SphereCollisionComponent>();
-		CCC->SetMass(10000000.0);
+		CCC->SetMass(1000000000.0);
 		CCC->SetPosition(double3(-10., 03., 0.));
 		//CCC->SetVelocity(double3(1. / 120., 0., 0.));
 		CCC->SetRadius(1.0);
@@ -304,9 +304,9 @@ void InitApplication()
 		MCC->RenderedMaterial.InitializeMaterial("MainShader.gfx");
 		MCC->RenderedMaterial.SetDiffuseTexture("DefaultBlue");
 		auto CCC = AnotherMeshTest->AddComponent<SphereCollisionComponent>();
-		CCC->SetMass(10000000.0);
+		CCC->SetMass(1000000000.0);
 		CCC->SetPosition(double3(-10., 0., 014.));
-		//CCC->SetVelocity(double3(1. / 120., 0., 0.));
+		CCC->SetVelocity(-double3(1. / 120., 0., 0.));
 		CCC->SetRadius(1.0);
 	}
 	{
@@ -318,7 +318,7 @@ void InitApplication()
 		auto CCC = AnotherMeshTest->AddComponent<SphereCollisionComponent>();
 		CCC->SetMass(10000000.0);
 		CCC->SetPosition(double3(-17., 0., 0.));
-		//CCC->SetVelocity(double3(1. / 120., 0., 0.));
+		CCC->SetVelocity(double3(1. / 120., 0., 0.));
 		CCC->SetRadius(1.0);
 	}
 

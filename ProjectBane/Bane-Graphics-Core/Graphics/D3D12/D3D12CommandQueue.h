@@ -6,6 +6,7 @@
 #include "../D3DCommon/D3DCommon.h"
 #include "D3D12CommandContext.h"
 #include "Core/Containers/StackQueue.h"
+#include <mutex>
 
 
 
@@ -88,7 +89,7 @@ public:
 			CommandLists[i] = (ID3D12CommandList*)m_WaitQueue[i]->CommandList;
 		}
 		InternalExecuteCommandLists(CommandLists, m_WaitQueue.GetNumElements());
-		m_ExecutionQueue.CopyFrom(m_WaitQueue);
+		m_ExecutionQueue.AppendOther(m_WaitQueue);
 		m_WaitQueue.Reset();
 
 		if (bWaitForFinish)

@@ -5,6 +5,7 @@
 #include "Graphics/Data/RenderLoop.h"
 #include <Platform/System/Window.h>
 #include <vector>
+#include <thread>
 
 class Scene;
 class Mesh;
@@ -23,6 +24,8 @@ public:
 
 	virtual void Submit(const RenderLoop& pRenderLoop) = 0;
 
+	virtual void StartRenderThread() = 0;
+
 	virtual void Render() = 0;
 
 	virtual void Initialize(const Window* pWindow) = 0;
@@ -34,4 +37,8 @@ public:
 	virtual IDeviceSwapChain* GetSwapChain() = 0;
 
 	virtual bool SupportsAsyncContexts() { return false; }
+
+protected:
+
+	std::thread RenderThreadHandle;
 };

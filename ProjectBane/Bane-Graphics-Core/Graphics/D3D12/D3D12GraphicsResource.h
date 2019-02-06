@@ -73,6 +73,7 @@ inline bool D3D12ResourceStateIsReadWrite(D3D12_RESOURCE_STATES ResourceStates)
 
 class D3D12GraphicsDevice;
 class D3D12GraphicsCommandContext;
+class D3D12GraphicsCommandBuffer;
 class D3D12ComputeCommandContext;
 class D3D12GPUResource;
 
@@ -133,6 +134,7 @@ public:
 				std::cout << "RefCount: " << RefCount << std::endl; 
 				RefCount = D3DResource->Release();
 			}
+			D3DResource = nullptr;
 			std::cout << "Destroying" << std::endl;
 		}
 	}
@@ -166,6 +168,11 @@ public:
 };
 
 #define D3D12_RESOURCE_STATE_INVALID_STATE (D3D12_RESOURCE_STATES)-1
+
+typedef enum ED3D12_RESOURCE_TYPE {
+	D3D12_RESOURCE_TYPE_BUFFER,
+	D3D12_RESOURCE_TYPE_TEXTURE
+} ED3D12_RESOURCE_TYPE;
 
 class NO_VTABLE D3D12GPUResource : public IGPUResource
 {
@@ -205,7 +212,8 @@ public:
 		return ResourceOwnership == COMMAND_CONTEXT_TYPE_COMPUTE;
 	}
 
-
+	virtual ED3D12_RESOURCE_TYPE GetResourceType() const = 0;
+	
 	// Returns true if there was already a dependency
 	// Returns false otherwise
 	// Essentially:  if(RegisterDependency(...)) { IsADependencyAndNeedsWaitCommand = true; }
@@ -234,9 +242,9 @@ public:
 		ResourceOwnership = COMMAND_CONTEXT_TYPE_INVALID;
 	}
 
-	void TransitionResource(D3D12GraphicsCommandContext* Ctx, D3D12_RESOURCE_STATES NewState);
+	void TransitionResource(D3D12GraphicsCommandBuffer* Ctx, D3D12_RESOURCE_STATES NewState);
 	void TransitionResource(D3D12ComputeCommandContext* Ctx, D3D12_RESOURCE_STATES NewState);
-	void PushUAVBarrier(D3D12GraphicsCommandContext* Ctx);
+	void PushUAVBarrier(D3D12GraphicsCommandBuffer* Ctx);
 	void PushUAVBarrier(D3D12ComputeCommandContext* Ctx);
 
 protected:
@@ -264,6 +272,11 @@ public:
 	}
 
 	bool CheckResourceTransitionValid(D3D12_RESOURCE_STATES NewState) override final;
+
+	virtual ED3D12_RESOURCE_TYPE GetResourceType() const
+	{
+		return D3D12_RESOURCE_TYPE_BUFFER;
+	}
 
 	std::string GetDebugName() const override
 	{
@@ -303,11 +316,14 @@ class D3D12TextureBase : public ITextureBase, public D3D12GPUResource
 {
 	friend class D3D12GraphicsDevice;
 
-	D3D12TextureBase() { }
+	D3D12TextureBase() 
+	{
+	}
 
 public:
 	
-	D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth, uint32 InHeight, uint32 InDepth, uint32 InCount, EFORMAT InFormat, ETEXTURE_USAGE InUsage);
+	D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth, uint32 InHeight, uint32 InDepth, uint32 InCount, 
+					 EFORMAT InFormat, const SAMPLER_DESC& InSamplerDesc, const D3D12_SAMPLER_DESC& InD3DSampler, ETEXTURE_USAGE InUsage);
 
 	void UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void* Pointer, const uint32 Width, const uint32 Height, const uint32 Depth, const uint32 StepSize);
 
@@ -322,6 +338,12 @@ public:
 	virtual ETEXTURE_USAGE GetUsage() const final override { return Usage; }
 	virtual EFORMAT GetFormat() const final override { return Format; }
 	virtual uint32 GetMipCount() const final override { return MipCount; }
+	virtual void SetSamplerDesc(const SAMPLER_DESC& InSampleDesc) final override;
+
+	virtual ED3D12_RESOURCE_TYPE GetResourceType() const
+	{
+		return D3D12_RESOURCE_TYPE_TEXTURE;
+	}
 
 	void SetDebugName(const std::string& DebugName) override
 	{
@@ -345,22 +367,6 @@ public:
 	uint32 MipCount;
 	EFORMAT Format;
 	ETEXTURE_USAGE Usage;
+	SAMPLER_DESC SamplerDesc;
+	D3D12_SAMPLER_DESC D3DSampleDesc;
 };
-
-
-class D3D12SamplerState : public ISamplerState
-{
-public:
-
-	D3D12SamplerState(D3D12_SAMPLER_DESC InCreationDesc, SAMPLER_DESC InDesc) :
-		Desc(InDesc),
-		CreationDesc(InCreationDesc)
-	{
-	}
-
-	virtual SAMPLER_DESC GetDesc() const final override { return Desc; }
-
-	SAMPLER_DESC Desc;
-	D3D12_SAMPLER_DESC CreationDesc;
-};
-

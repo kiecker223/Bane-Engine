@@ -26,35 +26,34 @@ public:
 	{
 	}
 
-	void Tick(float DT) override final
+	void Tick(double DT) override final
 	{
 		if (GetInput()->Keyboard.GetKeyDown(KEY_R))
 		{
 			GetScene()->bDrawPhysicsDebugInfo = !GetScene()->bDrawPhysicsDebugInfo;
 		}
 
-		double Dt = static_cast<double>(DT);
-		float RotationSpeed = 1.0f;
+		double RotationSpeed = 1.0f;
 		Transform* ST = GetTransform();
 		static const double3 Up(0.0, 1.0, 0.0);
-		float2 MouseDelta = GetInput()->Mouse.GetMouseDelta();
+		double2 MouseDelta = GetInput()->Mouse.GetMouseDelta();
 		double3 Forward = ST->GetForward();
 		double3 Right = ST->GetRightVector();
 		if (GetInput()->Keyboard.GetKey(KEY_W))
 		{
-			ST->Translate((ST->GetForward() * Speed) * Dt);
+			ST->Translate((ST->GetForward() * Speed) * DT);
 		}
 		if (GetInput()->Keyboard.GetKey(KEY_S))
 		{
-			ST->Translate((-ST->GetForward() * Speed) * Dt);
+			ST->Translate((-ST->GetForward() * Speed) * DT);
 		}
 		if (GetInput()->Keyboard.GetKey(KEY_D))
 		{
-			ST->Translate((Right * Speed) * Dt);
+			ST->Translate((Right * Speed) * DT);
 		}
 		if (GetInput()->Keyboard.GetKey(KEY_A))
 		{
-			ST->Translate((-Right * Speed) * Dt);
+			ST->Translate((-Right * Speed) * DT);
 		}
 		if (GetInput()->Mouse.GetScrollWheel() > 0.f)
 		{
@@ -71,7 +70,7 @@ public:
 		}
  		if (abs(MouseDelta.x) > 0.f)
  		{
-			ST->GetRotation() *= Quaternion::FromAxisAngle(float3(0.f, 1.f, 0.f), MouseDelta.x * RotationSpeed * DT);
+			ST->GetRotation() *= Quaternion::FromAxisAngle(double3(0., 1., 0.), MouseDelta.x * RotationSpeed * DT);
  			ST->GetRotation().Normalize();
 		}
 	}

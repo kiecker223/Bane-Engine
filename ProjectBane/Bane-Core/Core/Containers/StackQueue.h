@@ -64,7 +64,7 @@ public:
 
 	inline const TType& operator [] (uint32 Position) const
 	{
-		assert(Position < NumUsed);
+		BANE_CHECK(Position < NumUsed);
 		return Data[Position];
 	}
 

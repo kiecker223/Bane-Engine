@@ -19,9 +19,9 @@ public:
 		End = Clock::now();
 	}
 
-	inline float GetTimerElapsedSeconds()
+	inline double GetTimerElapsedSeconds()
 	{
-		return static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(End - Start).count()) / 1E+9f;
+		return static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(End - Start).count()) / 1E+9;
 	}
 
 	inline uint64 GetTimerElapsedNanoseconds()

@@ -35,11 +35,11 @@ public:
 	virtual IComputeShader* CreateComputeShader(const std::string& ByteCode) = 0;
 
 	virtual bool SupportsPrecompiledShaders() const = 0;
-	virtual IVertexShader*		CreateVertexShaderFromBytecode(const std::vector<uint8>& ByteCode) {	UNUSED(ByteCode); return nullptr; };
-	virtual IPixelShader*		CreatePixelShaderFromBytecode(const std::vector<uint8>& ByteCode) {		UNUSED(ByteCode); return nullptr; };
-	virtual IGeometryShader*	CreateGeometryShaderFromBytecode(const std::vector<uint8>& ByteCode) {	UNUSED(ByteCode); return nullptr; };
-	virtual IHullShader*		CreateHullShaderFromBytecode(const std::vector<uint8>& ByteCode) {		UNUSED(ByteCode); return nullptr; };
-	virtual IComputeShader*		CreateComputeShaderFromBytecode(const std::vector<uint8>& ByteCode) {	UNUSED(ByteCode); return nullptr; };
+	virtual IVertexShader*		CreateVertexShaderFromBytecode(const std::vector<uint8>& ByteCode)		{ UNUSED(ByteCode); return nullptr; };
+	virtual IPixelShader*		CreatePixelShaderFromBytecode(const std::vector<uint8>& ByteCode)		{ UNUSED(ByteCode); return nullptr; };
+	virtual IGeometryShader*	CreateGeometryShaderFromBytecode(const std::vector<uint8>& ByteCode)	{ UNUSED(ByteCode); return nullptr; };
+	virtual IHullShader*		CreateHullShaderFromBytecode(const std::vector<uint8>& ByteCode)		{ UNUSED(ByteCode); return nullptr; };
+	virtual IComputeShader*		CreateComputeShaderFromBytecode(const std::vector<uint8>& ByteCode)		{ UNUSED(ByteCode); return nullptr; };
 
 	virtual IGraphicsPipelineState* CreatePipelineState(const GFX_PIPELINE_STATE_DESC* Desc) = 0;
 	virtual IComputePipelineState* CreatePipelineState(const COMPUTE_PIPELINE_STATE_DESC* Desc) = 0;
@@ -50,6 +50,7 @@ public:
 	virtual IVertexBuffer* CreateVertexBuffer(uint32 ByteCount, uint8* Buffer) = 0;
 	virtual IIndexBuffer* CreateIndexBuffer(uint32 ByteCount, uint8* Buffer) = 0;
 	virtual IConstantBuffer* CreateConstantBuffer(uint32 ByteCount) = 0;
+	virtual IBuffer* CreateStructuredBuffer(uint32 ByteCount, uint8* Buffer) = 0;
 	virtual IBuffer* CreateStagingBuffer(uint32 ByteCount) = 0;
 	
 	template<typename T>
@@ -63,15 +64,11 @@ public:
 		return GetBackBufferTargetPass()->GetDepthStencil();
 	}
 	
-	virtual ITexture2D* CreateTexture2D(uint32 Width, uint32 Height, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
-	virtual ITexture2DArray* CreateTexture2DArray(uint32 Width, uint32 Height, uint32 Count, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
-	virtual ITexture3D* CreateTexture3D(uint32 Width, uint32 Height, uint32 Depth, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
-	virtual ITextureCube* CreateTextureCube(uint32 CubeSize, EFORMAT Format, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
+	virtual ITexture2D* CreateTexture2D(uint32 Width, uint32 Height, EFORMAT Format, const SAMPLER_DESC& SampleDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
+	virtual ITexture2DArray* CreateTexture2DArray(uint32 Width, uint32 Height, uint32 Count, EFORMAT Format, const SAMPLER_DESC& SampleDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
+	virtual ITexture3D* CreateTexture3D(uint32 Width, uint32 Height, uint32 Depth, EFORMAT Format, const SAMPLER_DESC& SampleDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
+	virtual ITextureCube* CreateTextureCube(uint32 CubeSize, EFORMAT Format, const SAMPLER_DESC& SampleDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
 
-	// @Warn! This is an extremely slow function in directx 12!!
-	virtual ISamplerState* CreateSamplerState(const SAMPLER_DESC& Desc) = 0;
-	virtual ISamplerState* GetDefaultSamplerState() = 0;
-	
 	virtual IInputLayout* CreateInputLayout(const GFX_INPUT_LAYOUT_DESC& Desc) = 0;
 
 	virtual IRenderPassInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint32 NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor) = 0;
@@ -87,12 +84,12 @@ public:
 	virtual IRenderPassInfo* GetBackBufferTargetPass() = 0; // This just returns the screen target
 	virtual IRenderTargetView* GetBackBuffer() = 0;
 
-	virtual void CreateShaderResourceView(IShaderResourceTable* DestTable, IBuffer* Buffer, uint32 Slot, uint64 Offset = 0) = 0;
+	virtual void CreateConstantBufferView(IShaderResourceTable* DestTable, IBuffer* Buffer, uint32 Slot, uint64 Offset = 0) = 0;
+	virtual void CreateShaderResourceView(IShaderResourceTable* DestTable, IBuffer* Buffer, uint32 Slot, uint32 StructuredByteStride, uint32 ElementCount, uint64 Offset = 0) = 0;
 	virtual void CreateUnorderedAccessView(IShaderResourceTable* DestTable, IBuffer* Buffer, uint32 Slot, uint32 Subresource = 0) = 0;
 	virtual void CreateShaderResourceView(IShaderResourceTable* DestTable, ITextureBase* Texture, uint32 Slot, uint32 Subresource = 0) = 0;
 	virtual void CreateUnorderedAccessView(IShaderResourceTable* DestTable, ITextureBase* Texture, uint32 Slot, uint32 Subresource = 0) = 0;
-	virtual void CreateSamplerView(IShaderResourceTable* DestTable, ISamplerState* SamplerState, uint32 Slot) = 0;
-	
+
 	virtual IShaderResourceTable* CreateShaderTable(IGraphicsPipelineState* Pipeline) = 0;
 	virtual IShaderResourceTable* CreateShaderTable(IComputePipelineState* Pipeline) = 0;
 

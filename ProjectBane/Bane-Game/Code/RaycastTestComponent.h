@@ -10,7 +10,7 @@ class RaycastTestComponent : public Component
 	IMPLEMENT_COMPONENT(RaycastTestComponent)
 public:
 
-	void Tick(float Dt) override final
+	void Tick(double Dt) override final
 	{
 		UNUSED(Dt);
 		if (GetInput()->Keyboard.GetKeyDown(KEY_R))

@@ -14,7 +14,7 @@ void SphereCollisionComponent::Start()
 {
 }
 
-void SphereCollisionComponent::Tick(float DT)
+void SphereCollisionComponent::Tick(double DT)
 {
 	UNUSED(DT);
 }

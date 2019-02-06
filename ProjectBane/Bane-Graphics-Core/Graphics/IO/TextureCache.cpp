@@ -22,11 +22,12 @@ void TextureCache::InitCache()
 	Data.Step = 4;
 	Data.Subresource = 0;
 	Data.Pointer = &ImgData[0];
-	m_DefaultWhite = Device->CreateTexture2D(64, 64, FORMAT_R8G8B8A8_UNORM, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
+	SAMPLER_DESC DefaultSampler = CreateDefaultSamplerDesc();
+	m_DefaultWhite = Device->CreateTexture2D(64, 64, FORMAT_R8G8B8A8_UNORM, DefaultSampler, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
 
 	memset(ImgData, 0, 64 * 64 * 4);
 	Data.Pointer = &ImgData[0];
-	m_DefaultBlack = Device->CreateTexture2D(64, 64, FORMAT_R8G8B8A8_UNORM, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
+	m_DefaultBlack = Device->CreateTexture2D(64, 64, FORMAT_R8G8B8A8_UNORM, DefaultSampler, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
 
 	for (uint32 y = 0; y < 64; y++)
 	{
@@ -35,7 +36,7 @@ void TextureCache::InitCache()
 			ImgData[x + (y * 64)] = { 0, 0, 255, 0 };
 		}
 	}
-	m_DefaultBlue = Device->CreateTexture2D(64, 64, FORMAT_R8G8B8A8_UNORM, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
+	m_DefaultBlue = Device->CreateTexture2D(64, 64, FORMAT_R8G8B8A8_UNORM, DefaultSampler, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
 
 	for (uint32 y = 0; y < 64; y++)
 	{
@@ -44,7 +45,7 @@ void TextureCache::InitCache()
 			ImgData[x + (y * 64)] = { 128, 128, 255, 0 };
 		}
 	}
-	m_DefaultNormal = Device->CreateTexture2D(64, 64, FORMAT_R8G8B8A8_UNORM, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
+	m_DefaultNormal = Device->CreateTexture2D(64, 64, FORMAT_R8G8B8A8_UNORM, DefaultSampler, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
 	Device->GenerateMips(m_DefaultWhite);
 	Device->GenerateMips(m_DefaultBlack);
 	Device->GenerateMips(m_DefaultBlue);
@@ -63,10 +64,12 @@ void TextureCache::DestroyCache()
 	}
 }
 
-ITexture2D* TextureCache::LoadTexture(const std::string& TextureName)
+ITexture2D* TextureCache::LoadTexture(const std::string& TextureName, const SAMPLER_DESC* pSampler)
 {
 	ITexture2D* Result = nullptr;
 	auto FoundIter = m_Textures.find(TextureName);
+
+	SAMPLER_DESC SamplerToUse = pSampler ? *pSampler : CreateDefaultSamplerDesc();
 
 	if (FoundIter == m_Textures.end())
 	{
@@ -78,7 +81,7 @@ ITexture2D* TextureCache::LoadTexture(const std::string& TextureName)
 		Data.Height = Height;
 		Data.Pointer = Buffer;
 		Data.Step = Step;
-		Result = GetApiRuntime()->GetGraphicsDevice()->CreateTexture2D(Width, Height, FORMAT_R8G8B8A8_UNORM, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
+		Result = GetApiRuntime()->GetGraphicsDevice()->CreateTexture2D(Width, Height, FORMAT_R8G8B8A8_UNORM, SamplerToUse, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
 		Result->SetDebugName(TextureName);
 		GetApiRuntime()->GetGraphicsDevice()->GenerateMips(Result);
 		AddTexture(TextureName, Result);
@@ -101,7 +104,7 @@ enum TexCubeFace
 	Back,
 };
 
-ITextureCube* TextureCache::LoadCubemap(const std::string& Tex)
+ITextureCube* TextureCache::LoadCubemap(const std::string& Tex, const SAMPLER_DESC* pSampler)
 {
 	return LoadCubemap(Tex, Tex + "_Left", Tex + "_Up", Tex + "_Back", Tex + "_Right", Tex + "_Up", Tex + "_Front");
 }
@@ -130,10 +133,13 @@ ITextureCube* TextureCache::LoadCubemap(
 	const std::string& NZ,
 	const std::string& PX,
 	const std::string& PY,
-	const std::string& PZ)
+	const std::string& PZ,
+	const SAMPLER_DESC* pSampler)
 {
 	auto FoundIter = m_Textures.find(Name);
 	ITexture3D* Result;
+
+	SAMPLER_DESC SamplerToUse = pSampler ? *pSampler : CreateDefaultSamplerDesc();
 
 	if (FoundIter == m_Textures.end())
 	{
@@ -142,7 +148,7 @@ ITextureCube* TextureCache::LoadCubemap(
 
 		uint32 Width, Height, Depth;
 		SUBRESOURCE_DATA Data = CreateTexData(&Images[0], Width, Height, Depth);
-		Result = GetApiRuntime()->GetGraphicsDevice()->CreateTextureCube(Width, FORMAT_R8G8B8A8_UNORM, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
+		Result = GetApiRuntime()->GetGraphicsDevice()->CreateTextureCube(Width, FORMAT_R8G8B8A8_UNORM, SamplerToUse, TEXTURE_USAGE_SHADER_RESOURCE, &Data);
 		GetApiRuntime()->GetGraphicsDevice()->GenerateMips(Result);
 		delete[] (uint8*)Data.Pointer;
 	}
