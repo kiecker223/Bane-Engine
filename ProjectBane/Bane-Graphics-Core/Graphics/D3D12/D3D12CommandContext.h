@@ -3,6 +3,7 @@
 #include "../Interfaces/GraphicsCommandList.h"
 #include "Core/Containers/StackQueue.h"
 #include "D3D12GraphicsResource.h"
+#include "D3D12ResourceCache.h"
 #include <mutex>
 
 class D3D12ResourceLocation;
@@ -13,9 +14,6 @@ class D3D12RenderPassInfo;
 class D3D12CommandList : D3D12DeviceChild
 {
 public:
-
-	ID3D12CommandAllocator* CommandAllocator;
-	ID3D12CommandList* CommandList;
 
 	struct UploadResource
 	{
@@ -36,22 +34,14 @@ public:
 		}
 	};
 
-	std::vector<UploadResource> UploadResourcesToDestroy;
-	std::vector<DedicatedResource> CommitedResources;
-	std::mutex DeletionQueueLock;
-	std::mutex CommitQueueLock;
-	std::mutex ResetLock;
-	bool bCanReset = false;
-	bool bCanClose = true;
-	bool bNeedsWaitForComputeQueue = false;
-	bool bNeedsWaitForGraphicsQueue = false;
-
 	D3D12CommandList(ID3D12CommandAllocator* InCommandAllocator, ID3D12CommandList* InCommandList, D3D12GraphicsDevice* ParentDevice) :
 		CommandAllocator(InCommandAllocator),
 		CommandList(InCommandList)
 	{
 		SetParentDevice(ParentDevice);
 	}
+
+
 
 	inline void EnqueueUploadResourceToDestroy(D3D12GPUResource* Resource)
 	{
@@ -117,6 +107,18 @@ public:
 		return (ID3D12GraphicsCommandList*)CommandList;
 	}
 
+	ID3D12CommandAllocator* CommandAllocator;
+	ID3D12CommandList* CommandList;
+
+	std::vector<UploadResource> UploadResourcesToDestroy;
+	std::vector<DedicatedResource> CommitedResources;
+	std::mutex DeletionQueueLock;
+	std::mutex CommitQueueLock;
+	std::mutex ResetLock;
+	bool bCanReset = false;
+	bool bCanClose = true;
+	bool bNeedsWaitForComputeQueue = false;
+	bool bNeedsWaitForGraphicsQueue = false;
 };
 
 class D3D12GraphicsCommandBuffer : public IGraphicsCommandBuffer
@@ -129,7 +131,10 @@ public:
 		ContextType(InContextType),
 		CurrentRenderPass(nullptr),
 		ScissorRect(InRect),
-		Viewport(InViewport)
+		Viewport(InViewport),
+		NumDrawCalls(0),
+		NumDispatches(0),
+		NumCopies(0)
 	{
 		//FetchNewCommandList();
 	}
@@ -141,7 +146,12 @@ public:
 	virtual void CloseCommandBuffer() override final;
 
 	virtual void SetGraphicsPipelineState(const IGraphicsPipelineState* InPipelineState) final override;
-	virtual void SetGraphicsResourceTable(const IShaderResourceTable* InTable) final override;
+
+	virtual void SetTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource) override final;
+	virtual void SetStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) override final;
+	virtual void SetUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset) override final;
 
 	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer, uint64 Offset) final override;
 	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer) final override;
@@ -160,12 +170,19 @@ public:
 	virtual void CopyTextures(ITextureBase* Src, int3 SrcLocation, ITextureBase* Dst, int3 DstLocation, int3 DstSize) final override;
 
 	virtual void SetComputePipelineState(const IComputePipelineState* InState) final override;
-	virtual void SetComputeResourceTable(const IShaderResourceTable* InTable) final override;
+
+	virtual void SetComputeTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource) override final;
+	virtual void SetComputeStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) override final;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetComputeConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset) override final;
 
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) final override;
 
 	void FlushResourceTransitions();
 
+	void CommitGraphicsResourcesToExecution();
+	void CommitComputeResourcesToExecution();
 	void CommitResources();
 
 	void FetchNewCommandList();
@@ -179,16 +196,25 @@ public:
 	inline uint32 GetTotalWorkDone() const { return (NumDrawCalls + NumDispatches + NumCopies); }
 
 	bool bHasCheckedCurrentTable = false;
+	
 	ECOMMAND_CONTEXT_TYPE ContextType;
 	D3D12CommandList* CommandList;
-	D3D12GraphicsPipelineState* PipelineState;
+	
+	D3D12GraphicsPipelineState* GraphicsPipelineState;
+	D3D12ComputePipelineState* ComputePipelineState;
+	
 	D3D12RenderPassInfo* CurrentRenderPass;
 	ID3D12GraphicsCommandList* D3DCL;
-	D3D12ShaderResourceTable* CurrentTable;
-	ID3D12RootSignature* RootSignature;
+	
+	D3D12ShaderSignature RootSignature;
+	
+	D3D12ResourceCache GraphicsResources;
+	D3D12ResourceCache ComputeResources;
 	D3D12GraphicsDevice* ParentDevice;
+
 	TStack<D3D12_RESOURCE_BARRIER, 32> PendingTransitions;
 	TStack<D3D12GPUResource*, 32> TransitionedResources;
+	
 	D3D12_RECT ScissorRect;
 	D3D12_VIEWPORT Viewport;
 
@@ -207,9 +233,9 @@ public:
 		uint32 NumCommandListsAllowed;
 		switch (ContextType)
 		{
-		case COMMAND_CONTEXT_TYPE_GRAPHICS: NumCommandListsAllowed = min(std::thread::hardware_concurrency() - 1, 6); break;
-		case COMMAND_CONTEXT_TYPE_COMPUTE: NumCommandListsAllowed = 2; break;
-		case COMMAND_CONTEXT_TYPE_COPY: NumCommandListsAllowed = 4; break;
+		case COMMAND_CONTEXT_TYPE_GRAPHICS: NumCommandListsAllowed = max(std::thread::hardware_concurrency() - 1, 6); break;
+		case COMMAND_CONTEXT_TYPE_COMPUTE: NumCommandListsAllowed = 3; break;
+		case COMMAND_CONTEXT_TYPE_COPY: NumCommandListsAllowed = 5; break;
 		}
 		for (uint32 i = 0; i < NumCommandListsAllowed; i++)
 		{
@@ -238,7 +264,12 @@ public:
 	virtual void ExecuteCommandBuffers(const std::vector<IGraphicsCommandBuffer*>& InCommandBuffers) final override;
 
 	virtual void SetGraphicsPipelineState(const IGraphicsPipelineState* InPipelineState) final override;
-	virtual void SetGraphicsResourceTable(const IShaderResourceTable* InTable) final override;
+
+	virtual void SetTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource) override final;
+	virtual void SetStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) override final;
+	virtual void SetUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset) override final;
 
 	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer, uint64 Offset) final override;
 	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer) final override;
@@ -257,7 +288,12 @@ public:
 	virtual void CopyTextures(ITextureBase* Src, int3 SrcLocation, ITextureBase* Dst, int3 DstLocation, int3 DstSize) final override;
 
 	virtual void SetComputePipelineState(const IComputePipelineState* InState) final override;
-	virtual void SetComputeResourceTable(const IShaderResourceTable* InTable) final override;
+
+	virtual void SetComputeTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource) override final;
+	virtual void SetComputeStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) override final;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetComputeConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset) override final;
 
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) final override;
 
@@ -265,7 +301,6 @@ public:
 	D3D12_VIEWPORT Viewport;
 	ECOMMAND_CONTEXT_TYPE ContextType;
 	D3D12GraphicsDevice* ParentDevice;
-
 	D3D12GraphicsCommandBuffer* CurrentCommandBuffer;
 	TStack<D3D12GraphicsCommandBuffer*, 16> CommandPool;
 };
@@ -289,7 +324,6 @@ public:
 	virtual void Flush() final override { StallToEnd(); }
 
 	virtual void SetComputePipelineState(const IComputePipelineState* InState) final override;
-	virtual void SetComputeResourceTable(const IShaderResourceTable* InTable) final override;
 
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) final override;
 

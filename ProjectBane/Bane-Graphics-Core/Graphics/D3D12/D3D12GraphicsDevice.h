@@ -64,14 +64,6 @@ public:
 	virtual IRenderPassInfo* GetBackBufferTargetPass() final override;
 	virtual IRenderTargetView* GetBackBuffer() final override;
 
-	virtual void CreateConstantBufferView(IShaderResourceTable* InDestTable, IBuffer* Buffer, uint32 Slot, uint64 Offset = 0) final override;
-	virtual void CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* Buff, uint32 Slot, uint32 StructureByteStride, uint32 ElementCount, uint64 OffSet = 0) final override;
-	virtual void CreateUnorderedAccessView(IShaderResourceTable* InDestTable, IBuffer* Buffer, uint32 Slot, uint32 Subresource = 0) final override;
-	virtual void CreateShaderResourceView(IShaderResourceTable* InDestTable, ITextureBase* Texture, uint32 Slot, uint32 Subresource = 0) final override;
-	virtual void CreateUnorderedAccessView(IShaderResourceTable* InDestTable, ITextureBase* Texture, uint32 Slot, uint32 Subresource = 0) final override;
-	virtual IShaderResourceTable* CreateShaderTable(IGraphicsPipelineState* pState) final override;
-	virtual IShaderResourceTable* CreateShaderTable(IComputePipelineState* pState) final override;
-
 	virtual IRenderTargetView* CreateRenderTargetView(ITexture2D* InTexture) final override;
 	virtual IDepthStencilView* CreateDepthStencilView(ITexture2D* InTexture) final override;
 	virtual IDepthStencilState* CreateDepthStencilState(const GFX_DEPTH_STENCIL_DESC& InDesc) final override;
@@ -100,6 +92,16 @@ public:
 	// Not thread safe!!
 	void EnsureAllUploadsOccured();
 
+	inline D3D12LinearDescriptorAllocator& GetSrvAllocator()
+	{
+		return m_SrvAllocator;
+	}
+
+	inline D3D12LinearDescriptorAllocator& GetSmpAllocator()
+	{
+		return m_SmpAllocator;
+	}
+
 	static uint32 GetCurrentFrameIndex()
 	{
 		return GCurrentFrameIndex;
@@ -121,10 +123,15 @@ private:
 	D3D12ShaderResourceTable* m_GenerateMipsTable2D;
 	D3D12GraphicsCommandContext* m_UploadList;
 	D3D12CommandQueue m_CommandQueues[COMMAND_CONTEXT_TYPE_NUM_TYPES];
-	D3D12DescriptorAllocator m_SrvAllocator;
-	D3D12DescriptorAllocator m_DsvAllocator;
-	D3D12DescriptorAllocator m_RtvAllocator;
-	D3D12DescriptorAllocator m_SmpAllocator;
+	
+	// Perhaps these keep the same behaviour
+	D3D12LinearDescriptorAllocator m_RtvAllocator;
+	D3D12LinearDescriptorAllocator m_DsvAllocator;
+	
+	// The resource ring buffer
+	D3D12LinearDescriptorAllocator m_SrvAllocator;
+	D3D12LinearDescriptorAllocator m_SmpAllocator;
+
 	IRenderTargetView* m_BackBuffer;
 	D3D12_RECT m_Rect;
 	D3D12_VIEWPORT m_ViewPort;

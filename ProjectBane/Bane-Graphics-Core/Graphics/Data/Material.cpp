@@ -5,7 +5,6 @@
 
 
 Material::Material() :
-	m_Table(nullptr),
 	m_Pipeline(nullptr)
 {
 	m_Parameters.Color = float3(1.0f, 1.0f, 1.0f);
@@ -15,13 +14,11 @@ Material::Material() :
 
 Material::~Material()
 {
-	if (m_Table)
-		delete m_Table;
 }
 
 void Material::SetDiffuseTexture(const std::string& FileName)
 {
-	SetTexture(GetTextureCache()->LoadTexture(FileName), 0, 0);
+	Diffuse = GetTextureCache()->LoadTexture(FileName);
 }
 
 void Material::SetNormalTexture(const std::string& FileName)
@@ -36,8 +33,6 @@ void Material::SetSpecularTexture(const std::string& FileName)
 
 void Material::SetTexture(ITextureBase* Texture, uint32 TextureRegister, uint32 SamplerRegister)
 {
-	IRuntimeGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
-	Device->CreateShaderResourceView(m_Table, Texture, TextureRegister);
 }
 
 void Material::SetTexture(ITextureBase* Texture, uint32 TextureRegister)
@@ -52,7 +47,6 @@ void Material::SetTexture(const std::string& Texture, uint32 Register)
 
 void Material::SetConstantBuffer(IConstantBuffer* ConstantBuffer, uint32 Register)
 {
-	GetApiRuntime()->GetGraphicsDevice()->CreateConstantBufferView(m_Table, ConstantBuffer, Register);
 }
 
 void Material::SetMaterialParameters(const MATERIAL_PARAMETERS& Params)
@@ -65,5 +59,4 @@ void Material::InitializeMaterial(const std::string& ShaderName)
 	IRuntimeGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
 	m_MaterialName = ShaderName;
 	m_Pipeline = GetShaderCache()->LoadGraphicsPipeline(ShaderName);
-	m_Table = Device->CreateShaderTable(m_Pipeline);
 }

@@ -1,5 +1,6 @@
 #include "BasicForwardRenderer.h"
 #include <Graphics/IO/ShaderCache.h>
+#include <Graphics/IO/TextureCache.h>
 
 void BasicForwardRenderer::Initialize(const Window* pWindow)
 {
@@ -7,7 +8,6 @@ void BasicForwardRenderer::Initialize(const Window* pWindow)
 	m_Commits.reserve(100);
 	m_Device = GetApiRuntime()->GetGraphicsDevice();
 	m_ImmediateGeometryPS = GetShaderCache()->LoadGraphicsPipeline("ImmediateModeGeometry.gfx");
-	m_ImmediateGeometryTable = m_Device->CreateShaderTable(m_ImmediateGeometryPS);
 	m_LightBuffer = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
 	m_CameraConstants = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
 	m_MeshDataBuffer = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
@@ -38,10 +38,10 @@ void BasicForwardRenderer::Render()
 			{
 				auto& DrawMesh = Commit.Meshes[y];
 				ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);
-				m_Device->CreateConstantBufferView(DrawMesh.Table, m_CameraConstants, 0, Commit.CameraIdxOffset * sizeof(CAMERA_CONSTANT_BUFFER_DATA));
-				m_Device->CreateConstantBufferView(DrawMesh.Table, m_MeshDataBuffer, 1, y * sizeof(MESH_RENDER_DATA));
-				m_Device->CreateConstantBufferView(DrawMesh.Table, m_LightBuffer, 2);
-				ctx->SetGraphicsResourceTable(DrawMesh.Table);
+				ctx->SetConstantBuffer(0, m_CameraConstants, Commit.CameraIdxOffset * sizeof(CAMERA_CONSTANT_BUFFER_DATA));
+				ctx->SetConstantBuffer(1, m_MeshDataBuffer, y * sizeof(MESH_RENDER_DATA));
+				ctx->SetConstantBuffer(2, m_LightBuffer);
+				ctx->SetTexture(0, DrawMesh.Diffuse);
 				ctx->SetVertexBuffer(DrawMesh.VertexBuffer);
 				ctx->SetIndexBuffer(DrawMesh.IndexBuffer);
 				ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -65,8 +65,7 @@ void BasicForwardRenderer::Render()
 				{
 					auto& Obj = DrawArgs[i];
 					ctx->SetGraphicsPipelineState(m_ImmediateGeometryPS);
-					m_Device->CreateConstantBufferView(m_ImmediateGeometryTable, m_CameraConstants, 0);
-					ctx->SetGraphicsResourceTable(m_ImmediateGeometryTable);
+					ctx->SetConstantBuffer(0, m_CameraConstants);
 					ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_LINES);
 					ctx->SetVertexBuffer(IG.VertexBuffer, ByteOffsetForVertexBuffer);
 					ctx->Draw(Obj.VertexCount, 0);
@@ -77,8 +76,6 @@ void BasicForwardRenderer::Render()
 	}
 	ctx->EndPass();
 	RenderLoop::ResetForNextFrame();
-
-	//ApiRuntime::Shutdown();
 }
 
 void BasicForwardRenderer::Present()

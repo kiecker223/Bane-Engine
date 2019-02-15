@@ -1,5 +1,6 @@
 #include "GraphicsCommandList.h"
 
+/*
 using namespace InternalGraphicsCommands;
 
 DefaultGraphicsCommandBufferImpl::DefaultGraphicsCommandBufferImpl()
@@ -24,7 +25,8 @@ void DefaultGraphicsCommandBufferImpl::Flush()
 
 void DefaultGraphicsCommandBufferImpl::Reset()
 {
-
+	PtrCurrent = PtrStart;
+	Commands.clear();
 }
 
 void DefaultGraphicsCommandBufferImpl::SetGraphicsPipelineState(const IGraphicsPipelineState* PipelineState)
@@ -47,9 +49,29 @@ void DefaultGraphicsCommandBufferImpl::SetPrimitiveTopology(const EPRIMITIVE_TOP
 	AllocateCommand<SetPrimitiveTopologyCommand>(Topology);
 }
 
-void DefaultGraphicsCommandBufferImpl::SetGraphicsResourceTable(const IShaderResourceTable* InTable)
+void DefaultGraphicsCommandBufferImpl::SetTexture(uint32 Slot, ITextureBase * InTexture)
 {
-	AllocateCommand<SetGraphicsResourceTableCommand>(InTable);
+	AllocateCommand<SetTextureCommand>(Slot, InTexture);
+}
+
+void DefaultGraphicsCommandBufferImpl::SetStructuredBuffer(uint32 Slot, IBuffer * InBuffer)
+{
+	AllocateCommand<SetStructuredBufferCommand>(Slot, InBuffer);
+}
+
+void DefaultGraphicsCommandBufferImpl::SetUnorderedAccessView(uint32 Slot, ITextureBase * InResource)
+{
+	AllocateCommand<SetUnorderedAccessView1Command>(Slot, InResource);
+}
+
+void DefaultGraphicsCommandBufferImpl::SetUnorderedAccessView(uint32 Slot, IBuffer * InResource)
+{
+	AllocateCommand<SetUnorderedAccessView2Commmand>(Slot, InResource);
+}
+
+void DefaultGraphicsCommandBufferImpl::SetConstantBuffer(uint32 Slot, IBuffer * InBuffer)
+{
+	AllocateCommand<SetConstantBufferCommand>(Slot, InBuffer);
 }
 
 void DefaultGraphicsCommandBufferImpl::CopyBuffers(IBuffer* Src, IBuffer* Dst)
@@ -97,9 +119,29 @@ void DefaultGraphicsCommandBufferImpl::SetComputePipelineState(const IComputePip
 	AllocateCommand<SetComputePipelineStateCommand>(PipelineState);
 }
 
-void DefaultGraphicsCommandBufferImpl::SetComputeResourceTable(const IShaderResourceTable* InTable)
+void DefaultGraphicsCommandBufferImpl::SetComputeTexture(uint32 Slot, ITextureBase * InTexture)
 {
-	AllocateCommand<SetComputeResourceTableCommand>(InTable);
+	AllocateCommand<SetComputeTextureCommand>(Slot, InTexture);
+}
+
+void DefaultGraphicsCommandBufferImpl::SetComputeStructuredBuffer(uint32 Slot, IBuffer * InBuffer)
+{
+	AllocateCommand<SetStructuredBufferCommand>(Slot, InBuffer);
+}
+
+void DefaultGraphicsCommandBufferImpl::SetComputeUnorderedAccessView(uint32 Slot, ITextureBase * InResource)
+{
+	AllocateCommand<SetComputeUnorderedAccessView1Command>(Slot, InResource);
+}
+
+void DefaultGraphicsCommandBufferImpl::SetComputeUnorderedAccessView(uint32 Slot, IBuffer * InResource)
+{
+	AllocateCommand<SetComputeUnorderedAccessView2Commmand>(Slot, InResource);
+}
+
+void DefaultGraphicsCommandBufferImpl::SetComputeConstantBuffer(uint32 Slot, IBuffer * InBuffer)
+{
+	AllocateCommand<SetComputeConstantBufferCommand>(Slot, InBuffer);
 }
 
 void DefaultGraphicsCommandBufferImpl::Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ)
@@ -134,3 +176,4 @@ void DefaultGraphicsCommandBufferImpl::Reallocate(size_t NewSize)
 	PtrCurrent = PtrStart;
 	PtrEnd = PtrStart + NewSize;
 }
+*/

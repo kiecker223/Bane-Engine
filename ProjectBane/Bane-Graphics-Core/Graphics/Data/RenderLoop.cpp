@@ -41,7 +41,7 @@ void RenderLoop::AddDrawable(const Mesh* pMesh, const Material& Mat, const float
 		pMesh->GetVertexBuffer(),
 		pMesh->GetIndexBuffer(),
 		Mat.GetShaderConfiguration(),
-		Mat.GetTable(),
+		Mat.Diffuse,
 		pMesh->GetIndexCount() 
 	});
 	m_Current.MeshData_NumUsed++;

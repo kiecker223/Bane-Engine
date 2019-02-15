@@ -36,7 +36,7 @@ typedef struct DRAWABLE_MESH {
 	IVertexBuffer* VertexBuffer;
 	IIndexBuffer* IndexBuffer;
 	IGraphicsPipelineState* Pipeline;
-	IShaderResourceTable* Table;
+	ITexture2D* Diffuse;
 	uint32 IndexCount;
 } DRAWABLE_MESH;
 

@@ -23,11 +23,15 @@ public:
 		return m_Characters[static_cast<uint32>(Character)];
 	}
 
+	inline uint64 GetVertexBufferOffset(char Character)
+	{
+		return sizeof(FONT_VERTEX) * static_cast<uint64>(Character);
+	}
+
 	ITexture2D* FontTexture;
 	IBuffer* FontDataStructuredBuff;
 	IConstantBuffer* FontParameters;
 	IGraphicsPipelineState* FontShader;
-	IShaderResourceTable* ResourceTable;
 	IVertexBuffer* VB;
 	IIndexBuffer* IB;
 

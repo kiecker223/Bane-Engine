@@ -39,7 +39,6 @@ private:
 	IConstantBuffer* m_MeshDataBuffer;
 	IConstantBuffer* m_LightBuffer;
 	IGraphicsPipelineState* m_ImmediateGeometryPS;
-	IShaderResourceTable* m_ImmediateGeometryTable;
 	std::vector<IVertexBuffer*> m_ImmediateGeometry;
 	std::vector<RENDER_LOOP_DRAW_COMMIT> m_Commits;
 

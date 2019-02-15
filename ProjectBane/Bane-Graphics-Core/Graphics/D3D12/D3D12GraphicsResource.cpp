@@ -99,7 +99,8 @@ D3D12Buffer::D3D12Buffer(D3D12GraphicsDevice* InDevice, uint64 InSize, EBUFFER_U
 		)
 	);
 	Resource.Location = Resource.D3DResource->GetGPUVirtualAddress();
-	
+	Resource.SRVDimension = D3D12_SRV_DIMENSION_BUFFER;
+	Resource.UAVDimension = D3D12_UAV_DIMENSION_BUFFER;
 	if (HeapProps.Type == D3D12_HEAP_TYPE_UPLOAD)
 	{
 		Resource.D3DResource->Map(0, nullptr, &MappedPointer);
@@ -265,6 +266,7 @@ void D3D12TextureBase::UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void*
 			ResourceData.RowPitch = Width * StepSize;
 			ResourceData.SlicePitch = ImgSize;
 			UpdateSubresources<1>(Ctx->CurrentCommandBuffer->D3DCL, Resource.D3DResource, UploadBuffer->Resource.D3DResource, ImgSize * i, Desc.MipLevels * i, 1, &ResourceData);
+			Ctx->CurrentCommandBuffer->NumCopies++;
 		}
 		PromotedState = D3D12_RESOURCE_STATE_COPY_DEST;
 		Ctx->CurrentCommandBuffer->CommandList->EnqueueUploadResourceToDestroy(dynamic_cast<D3D12GPUResource*>(UploadBuffer));
@@ -279,6 +281,7 @@ void D3D12TextureBase::UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void*
 		ResourceData.RowPitch = Width * StepSize;
 		ResourceData.SlicePitch = (Width * Height) * StepSize;
 		UpdateSubresources<1>(Ctx->CurrentCommandBuffer->CommandList->GetGraphicsCommandList(), Resource.D3DResource, UploadBuffer->Resource.D3DResource, 0, 0, 1, &ResourceData);
+		Ctx->CurrentCommandBuffer->NumCopies++;
 		PromotedState = D3D12_RESOURCE_STATE_COPY_DEST;
 		Ctx->CurrentCommandBuffer->CommandList->EnqueueUploadResourceToDestroy(dynamic_cast<D3D12GPUResource*>(UploadBuffer));
 	}

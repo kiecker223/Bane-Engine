@@ -6,6 +6,7 @@
 #include "BaneObject/CoreComponents/SphereCollisionComponent.h"
 #include "BaneObject/CoreComponents/CameraComponent.h"
 #include "SwapParentPlanet.h"
+#include "UI/Button.h"
 #include "CameraMovementComponent.h"
 #include "BaneObject/CoreComponents/CylinderCollisionComponent.h"
 #include "RaycastTestComponent.h"
@@ -239,6 +240,18 @@ PLANET_START_INFO PlacePlanet(PLANET_ORBIT_INFO OrbitInfo, double Time)
 	}
 	return Result;
 }
+
+class TestUIComponent : public RenderComponent
+{
+	IMPLEMENT_COMPONENT(TestUIComponent)
+
+public:
+
+
+
+	UIButton Button;
+	UIContext Context;
+};
 
 void InitApplication()
 {

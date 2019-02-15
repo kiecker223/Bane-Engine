@@ -7,8 +7,6 @@ SkyboxComponent::~SkyboxComponent()
 {
 	delete m_Skybox;
 	delete m_VertexBuffer;
-	delete m_Table;
-	delete m_Pipeline;
 }
 
 void SkyboxComponent::GraphicsUpdate(RenderLoop& Loop)
@@ -70,7 +68,7 @@ void SkyboxComponent::SetSkybox(const std::string& Skybox)
 	m_Skybox = GetTextureCache()->LoadCubemap(Skybox);
 	m_SkyboxName = Skybox;
 	
-	GetApiRuntime()->GetGraphicsDevice()->CreateShaderResourceView(m_Table, m_Skybox, 0);
+	
 }
 
 void SkyboxComponent::SetSkybox(
@@ -87,7 +85,6 @@ void SkyboxComponent::SetSkybox(
 
 void SkyboxComponent::SetSkyboxShader(const std::string& ShaderName)
 {
-	m_Pipeline = GetShaderCache()->LoadGraphicsPipeline(ShaderName);
-	m_Table = GetApiRuntime()->GetGraphicsDevice()->CreateShaderTable(m_Pipeline);
+	UNUSED(ShaderName);
 }
 

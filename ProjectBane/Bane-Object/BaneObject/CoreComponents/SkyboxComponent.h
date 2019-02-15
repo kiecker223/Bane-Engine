@@ -31,7 +31,6 @@ private:
 	IVertexBuffer* m_VertexBuffer;
 	IIndexBuffer* m_IndexBuffer;
 	uint32 m_IndexCount;
-	IShaderResourceTable* m_Table;
 	IGraphicsPipelineState* m_Pipeline;
 
 };

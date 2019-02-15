@@ -3,19 +3,6 @@
 
 class IGPUResource;
 
-
-class IShaderResourceTable
-{
-public:
-	virtual ~IShaderResourceTable() { }
-	
-	virtual uint32 GetNumConstantBuffers() const = 0;
-	virtual uint32 GetNumTextures() const = 0;
-	virtual uint32 GetNumSamplers() const = 0;
-	virtual uint32 GetNumUnorderedAccessViews() const = 0;
-
-};
-
 class IRenderTargetView
 {
 public:
@@ -26,6 +13,18 @@ class IDepthStencilView
 {
 public:
 	virtual ~IDepthStencilView() { }
+};
+
+class IConstantBufferView
+{
+public:
+	virtual ~IConstantBufferView() { }
+};
+
+class IShaderResourceView
+{
+public:
+	virtual ~IShaderResourceView() { }
 };
 
 class IRenderPassInfo

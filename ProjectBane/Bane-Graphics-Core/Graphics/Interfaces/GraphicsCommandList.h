@@ -37,12 +37,17 @@ public:
 	virtual void End() { EndPass(); }
 
 	virtual void SetGraphicsPipelineState(const IGraphicsPipelineState* PipelineState) = 0;
+
+	virtual void SetTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource = 0) = 0;
+	virtual void SetStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource = 0) = 0;
+	virtual void SetUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset) = 0;
+
 	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer, uint64 Offset) = 0;
 	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer) = 0;
 	virtual void SetIndexBuffer(const IIndexBuffer* IndexBuffer) = 0;
 	virtual void SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY Topology) = 0;
-
-	virtual void SetGraphicsResourceTable(const IShaderResourceTable* InTable) = 0;
 
 	virtual void CopyBufferLocations(IBuffer* Src, uint64 SrcOffset, IBuffer* Dst, uint64 DstOffset, uint64 NumBytes) = 0;
 	virtual void CopyBuffers(IBuffer* Src, IBuffer* Dst) = 0;
@@ -56,11 +61,14 @@ public:
 	virtual void DrawIndexedInstanced(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation, uint32 InstanceCount) = 0;
 
 	virtual void SetComputePipelineState(const IComputePipelineState* PipelineState) = 0;
-	virtual void SetComputeResourceTable(const IShaderResourceTable* InTable) = 0;
+
+	virtual void SetComputeTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource = 0) = 0;
+	virtual void SetComputeStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) = 0;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetComputeConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset) = 0;
 
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) = 0;
-
-
 };
 
 class IGraphicsCommandContext
@@ -76,12 +84,25 @@ public:
 	virtual void Begin() { BeginPass(nullptr); } // No graphics tasks are allowed to be done
 	virtual void End() { EndPass(); }
 
-	virtual void SetGraphicsPipelineState(const IGraphicsPipelineState* PipelineState) = 0;
-	virtual void SetGraphicsResourceTable(const IShaderResourceTable* InTable) = 0;
+	virtual void SetTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource = 0) = 0;
+	virtual void SetStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) = 0;
+	virtual void SetUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset = 0) = 0;
 
+	virtual void SetGraphicsPipelineState(const IGraphicsPipelineState* PipelineState) = 0;
+
+	// On directx 11 this will effectively be the same as CreateCommandBuffer(), for vulkan and directx 12 this will return the command buffer being recorded on
 	virtual IGraphicsCommandBuffer* GetUnderlyingCommandBuffer() = 0;
+
+	// There ARE situations where this will return null and they MUST be handled,
+	// Returns a DefaultCommandBufferImpl on directx 11 and opengl
 	virtual IGraphicsCommandBuffer* CreateCommandBuffer() = 0;
+
+	// Immediately executes the commands on the command buffer
 	virtual void ExecuteCommandBuffer(IGraphicsCommandBuffer* InCommandBuffer) = 0;
+
+	// Prefer this because its faster
 	virtual void ExecuteCommandBuffers(const std::vector<IGraphicsCommandBuffer*>& InCommandBuffers) = 0;
 
 	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer, uint64 Offset) = 0;
@@ -101,7 +122,12 @@ public:
 	virtual void DrawIndexedInstanced(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation, uint32 InstanceCount) = 0;
 
 	virtual void SetComputePipelineState(const IComputePipelineState* PipelineState) = 0;
-	virtual void SetComputeResourceTable(const IShaderResourceTable* InTable) = 0;
+
+	virtual void SetComputeTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource = 0) = 0;
+	virtual void SetComputeStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) = 0;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetComputeConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset = 0) = 0;
 
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) = 0;
 };
@@ -119,7 +145,12 @@ public:
 	virtual void Flush() = 0;
 
 	virtual void SetComputePipelineState(const IComputePipelineState* PipelineState) = 0;
-	virtual void SetComputeResourceTable(const IShaderResourceTable* InTable) = 0;
+
+	virtual void SetComputeTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource = 0) { }
+	virtual void SetComputeStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint64 NumElements, uint64 StructureByteStride) { }
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) { }
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint64 NumElements, uint64 StructureByteStride) { }
+	virtual void SetComputeConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset = 0) { }
 
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) = 0;
 };
@@ -132,7 +163,7 @@ public:
 };
 
 
-
+/*
 namespace InternalGraphicsCommands
 {
 	class BeginPassCommand : public IGraphicsCommand
@@ -256,22 +287,79 @@ namespace InternalGraphicsCommands
 
 		EPRIMITIVE_TOPOLOGY Topology;
 	};
-	class SetGraphicsResourceTableCommand : public IGraphicsCommand
+	class SetTextureCommand : public IGraphicsCommand
+	{
+	public:
+		SetTextureCommand() {}
+		SetTextureCommand(uint32 InSlot, ITextureBase* InTexture) : Slot(InSlot), Texture(InTexture) { }
+
+		void Execute(IGraphicsCommandContext* Context) override final
+		{
+			Context->SetTexture(Slot, Texture);
+		}
+
+		uint32 Slot;
+		ITextureBase* Texture;
+	};
+	class SetStructuredBufferCommand : public IGraphicsCommand
+	{
+	public:
+		SetStructuredBufferCommand() { }
+		SetStructuredBufferCommand(uint32 InSlot, IBuffer* InBuffer) : Slot(InSlot), Buffer(InBuffer) { }
+
+		void Execute(IGraphicsCommandContext* Context)
+		{
+			Context->SetStructuredBuffer(Slot, Buffer);
+		}
+
+		uint32 Slot;
+		IBuffer* Buffer;
+		uint32 IndexToStart;
+		uint64 NumElements;
+		uint64 StructureByteStride;
+	};
+	class SetUnorderedAccessView1Command : public IGraphicsCommand
 	{
 	public:
 
-		SetGraphicsResourceTableCommand() { }
+		SetUnorderedAccessView1Command() { }
+		SetUnorderedAccessView1Command(uint32 InSlot, ITextureBase* InTexture) : Slot(InSlot), Texture(InTexture) { }
 
-		SetGraphicsResourceTableCommand(const IShaderResourceTable* InTable) : Table(InTable)
+		void Execute(IGraphicsCommandContext* Context) override final
 		{
+			Context->SetUnorderedAccessView(Slot, Texture);
 		}
 
-		void Execute(IGraphicsCommandContext* Context) final override
+		uint32 Slot;
+		ITextureBase* Texture;
+	};
+	class SetUnorderedAccessView2Commmand : public IGraphicsCommand
+	{
+	public:
+		SetUnorderedAccessView2Commmand() { }
+		SetUnorderedAccessView2Commmand(uint32 InSlot, IBuffer* InBuffer) : Slot(InSlot), Buffer(InBuffer) { }
+
+		void Execute(IGraphicsCommandContext* Context) override final
 		{
-			Context->SetGraphicsResourceTable(Table);
+			Context->SetUnorderedAccessView(Slot, Buffer);
 		}
 
-		const IShaderResourceTable* Table;
+		uint32 Slot;
+		IBuffer* Buffer;
+	};
+	class SetConstantBufferCommand : public IGraphicsCommand
+	{
+	public:
+		SetConstantBufferCommand() { }
+		SetConstantBufferCommand(uint32 InSlot, IBuffer* InBuffer) : Slot(InSlot), Buffer(InBuffer) { }
+
+		void Execute(IGraphicsCommandContext* Context) override final
+		{
+			Context->SetConstantBuffer(Slot, Buffer);
+		}
+
+		uint32 Slot;
+		IBuffer* Buffer;
 	};
 	class CopyBuffersCommand : public IGraphicsCommand
 	{
@@ -456,23 +544,78 @@ namespace InternalGraphicsCommands
 		const IComputePipelineState* PipelineState;
 
 	};
-	class SetComputeResourceTableCommand : public IGraphicsCommand
+	class SetComputeTextureCommand : public IGraphicsCommand
 	{
 	public:
-
-		SetComputeResourceTableCommand() { }
-
-		SetComputeResourceTableCommand(const IShaderResourceTable* InTable) : Table(InTable)
-		{
-		}
+		SetComputeTextureCommand() {}
+		SetComputeTextureCommand(uint32 InSlot, ITextureBase* InTexture) : Slot(InSlot), Texture(InTexture) { }
 
 		void Execute(IGraphicsCommandContext* Context) override final
 		{
-			Context->SetComputeResourceTable(Table);
+			Context->SetComputeTexture(Slot, Texture);
 		}
 
-		const IShaderResourceTable* Table;
+		uint32 Slot;
+		ITextureBase* Texture;
 	};
+	class SetComputeStructuredBufferCommand : public IGraphicsCommand
+	{
+	public:
+		SetComputeStructuredBufferCommand() { }
+		SetComputeStructuredBufferCommand(uint32 InSlot, IBuffer* InBuffer) : Slot(InSlot), Buffer(InBuffer) { }
+
+		void Execute(IGraphicsCommandContext* Context)
+		{
+			Context->SetComputeStructuredBuffer(Slot, Buffer);
+		}
+
+		uint32 Slot;
+		IBuffer* Buffer;
+	};
+	class SetComputeUnorderedAccessView1Command : public IGraphicsCommand
+	{
+	public:
+
+		SetComputeUnorderedAccessView1Command() { }
+		SetComputeUnorderedAccessView1Command(uint32 InSlot, ITextureBase* InTexture) : Slot(InSlot), Texture(InTexture) { }
+
+		void Execute(IGraphicsCommandContext* Context) override final
+		{
+			Context->SetComputeUnorderedAccessView(Slot, Texture);
+		}
+
+		uint32 Slot;
+		ITextureBase* Texture;
+	};
+	class SetComputeUnorderedAccessView2Commmand : public IGraphicsCommand
+	{
+	public:
+		SetComputeUnorderedAccessView2Commmand() { }
+		SetComputeUnorderedAccessView2Commmand(uint32 InSlot, IBuffer* InBuffer) : Slot(InSlot), Buffer(InBuffer) { }
+
+		void Execute(IGraphicsCommandContext* Context) override final
+		{
+			Context->SetComputeUnorderedAccessView(Slot, Buffer);
+		}
+
+		uint32 Slot;
+		IBuffer* Buffer;
+	};
+	class SetComputeConstantBufferCommand : public IGraphicsCommand
+	{
+	public:
+		SetComputeConstantBufferCommand() { }
+		SetComputeConstantBufferCommand(uint32 InSlot, IBuffer* InBuffer) : Slot(InSlot), Buffer(InBuffer) { }
+
+		void Execute(IGraphicsCommandContext* Context) override final
+		{
+			Context->SetComputeConstantBuffer(Slot, Buffer);
+		}
+
+		uint32 Slot;
+		IBuffer* Buffer;
+	};
+
 	class DispatchCommand : public IGraphicsCommand
 	{
 	public:
@@ -498,7 +641,7 @@ namespace InternalGraphicsCommands
 }
 
 
-class DefaultGraphicsCommandBufferImpl : public IGraphicsCommand
+class DefaultGraphicsCommandBufferImpl : public IGraphicsCommandBuffer, public IGraphicsCommand
 {
 public:
 	DefaultGraphicsCommandBufferImpl();
@@ -526,8 +669,12 @@ public:
 	void SetIndexBuffer(const IIndexBuffer* IndexBuffer);
 	void SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY Topology);
 
-	void SetGraphicsResourceTable(const IShaderResourceTable* InTable);
-
+	void SetTexture(uint32 Slot, ITextureBase* InTexture);
+	void SetStructuredBuffer(uint32 Slot, IBuffer* InBuffer);
+	void SetUnorderedAccessView(uint32 Slot, ITextureBase* InResource);
+	void SetUnorderedAccessView(uint32 Slot, IBuffer* InResource);
+	void SetConstantBuffer(uint32 Slot, IBuffer* InBuffer);
+	
 	void CopyBuffers(IBuffer* Src, IBuffer* Dst);
 	void CopyBufferToTexture(IBuffer* Src, ITextureBase* Dst);
 	void CopyTextures(ITextureBase* Src, uint32 SrcSubresource, ITextureBase* Dst, uint32 DstSubresource);
@@ -539,7 +686,12 @@ public:
 	void DrawIndexedInstanced(uint32 IndexCount, uint32 StartIndexLocation, int BaseVertexLocation, uint32 InstanceCount);
 
 	void SetComputePipelineState(const IComputePipelineState* PipelineState);
-	void SetComputeResourceTable(const IShaderResourceTable* InTable);
+
+	void SetComputeTexture(uint32 Slot, ITextureBase* InTexture);
+	void SetComputeStructuredBuffer(uint32 Slot, IBuffer* InBuffer);
+	void SetComputeUnorderedAccessView(uint32 Slot, ITextureBase* InResource);
+	void SetComputeUnorderedAccessView(uint32 Slot, IBuffer* InResource);
+	void SetComputeConstantBuffer(uint32 Slot, IBuffer* InBuffer);
 
 	void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ);
 
@@ -562,3 +714,4 @@ public:
 private:
 	void Reallocate(size_t NewSize);
 };
+*/

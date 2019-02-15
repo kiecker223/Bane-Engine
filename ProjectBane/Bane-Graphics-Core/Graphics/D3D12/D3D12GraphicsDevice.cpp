@@ -46,12 +46,11 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 	BANE_CHECK(AvailableThreadCount != 0);
 	m_AvailableContexts.resize(AvailableThreadCount);
 
-	m_SrvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 256, true);
-	m_RtvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 48);
-	m_DsvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 9);
-	m_SmpAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 48, true);
+	m_SrvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1024, true);
+	m_RtvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 256, false);
+	m_DsvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 48, false);
+	m_SmpAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 128, true);
 	
-
 	m_ViewPort = { 0 };
 	m_ViewPort.TopLeftX = 0.f;
 	m_ViewPort.TopLeftY = 0.f;
@@ -100,9 +99,9 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 		uint32 NumCommandListsAllowed;
 		switch (i)
 		{
-			case COMMAND_CONTEXT_TYPE_GRAPHICS: NumCommandListsAllowed = min(AvailableThreadCount - 1, 6); break;
-			case COMMAND_CONTEXT_TYPE_COMPUTE: NumCommandListsAllowed = 2; break;
-			case COMMAND_CONTEXT_TYPE_COPY: NumCommandListsAllowed = 4; break;
+			case COMMAND_CONTEXT_TYPE_GRAPHICS: NumCommandListsAllowed = max(AvailableThreadCount - 1, 6); break;
+			case COMMAND_CONTEXT_TYPE_COMPUTE: NumCommandListsAllowed = 3; break;
+			case COMMAND_CONTEXT_TYPE_COPY: NumCommandListsAllowed = 5; break;
 		}
 		for (uint32 b = 0; b < NumCommandListsAllowed; b++)
 		{
@@ -122,7 +121,7 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 		}
 	}
 
-	for (uint32 i = 0; i < AvailableThreadCount; i++)
+	for (uint32 i = 0; i < 2; i++)
 	{
 		m_AvailableContexts[i] = new D3D12GraphicsCommandContext(this, COMMAND_CONTEXT_TYPE_GRAPHICS, m_Rect, m_ViewPort);
 	}
@@ -577,12 +576,14 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 
 	D3D12GraphicsCommandContext* DirectContext = m_AvailableContexts[0];
 	bool bDirectContextHasBegun = DirectContext->HasBegun();
+	D3D12RenderPassInfo* PreviousRenderPass = nullptr;
 	if (!bDirectContextHasBegun)
 	{
 		DirectContext->Begin();
 	}
 	else
 	{
+		PreviousRenderPass = DirectContext->CurrentCommandBuffer->CurrentRenderPass;
 		DirectContext->EndPass();
 		DirectContext->Flush();
 		DirectContext->Begin();
@@ -595,14 +596,16 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 	if (m_GenerateMipsPipeline2D == nullptr)
 	{
 		m_GenerateMipsPipeline2D = (D3D12ComputePipelineState*)GetShaderCache()->LoadComputePipeline("GenerateMips.cmpt");
-		m_GenerateMipsTable2D = (D3D12ShaderResourceTable*)CreateShaderTable((IComputePipelineState*)m_GenerateMipsPipeline2D);
 	}
 
-	/*CreateShaderResourceView(m_GenerateMipsTable2D, Texture, 0);*/
 	ID3D12Resource* CopyRes = nullptr;
+
 
 	if (Texture->Depth == 1)
 	{
+		auto SrvAllocator = m_SrvAllocator.AllocateMultiple(Texture->MipCount * 2);
+		auto SmpAllocator = m_SmpAllocator.AllocateMultiple(1);
+		
 		{
 			D3D12_HEAP_PROPERTIES HeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 			D3D12_RESOURCE_DESC ResourceDesc = Res->GetDesc();
@@ -618,27 +621,28 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 				);
 			);
 		}
+		{
+			D3D12_RESOURCE_BARRIER Barrier = CD3DX12_RESOURCE_BARRIER::Transition(Res, Texture->PromotedState, D3D12_RESOURCE_STATE_COPY_SOURCE);
+			DirectCL->ResourceBarrier(1, &Barrier);
+		}
 		DirectCL->CopyResource(CopyRes, Res);
 		{
 			D3D12_RESOURCE_BARRIER Barrier = CD3DX12_RESOURCE_BARRIER::Transition(CopyRes, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 			DirectCL->ResourceBarrier(1, &Barrier);
 		}
-		DirectContext->End();
-		DirectContext->Flush();
-		DirectContext->Begin();
-		D3D12Buffer* ConstBuff = (D3D12Buffer*)CreateConstBuffer<float4>();
+		ID3D12DescriptorHeap* ppHeaps[2] = { m_SrvAllocator.DescriptorHeap, m_SmpAllocator.DescriptorHeap };
+		DirectCL->SetDescriptorHeaps(2, ppHeaps);
+		D3D12Buffer* ConstBuff = (D3D12Buffer*)CreateConstantBuffer(Texture->ArrayCount * (Texture->MipCount - 1) * 256);
 		for (uint32 b = 0; b < Texture->ArrayCount; b++)
 		{
 			for (uint32 i = 0; i < Texture->MipCount - 1; i++)
 			{
-				ID3D12DescriptorHeap* ppHeaps[2] = { m_SrvAllocator.GetDescriptorHeap(), m_SmpAllocator.GetDescriptorHeap() };
-				DirectCL->SetDescriptorHeaps(2, ppHeaps);
 				uint32 DstWidth = max(Texture->Width >> (i + 1), 1);
 				uint32 DstHeight = max(Texture->Height >> (i + 1), 1);
 
-				D3D12DescriptorAllocation UavAllocation = m_GenerateMipsTable2D->BaseUAVAllocation;
-				D3D12DescriptorAllocation SrvAllocation = m_GenerateMipsTable2D->BaseSRVAllocation;
-				D3D12DescriptorAllocation SmpAllocation = m_GenerateMipsTable2D->BaseSMPAllocation;
+				D3D12DescriptorAllocation UavAllocation = m_SrvAllocator.AllocateDescriptor();
+				D3D12DescriptorAllocation SrvAllocation = m_SrvAllocator.AllocateDescriptor();
+				D3D12DescriptorAllocation SmpAllocation = m_SmpAllocator.AllocateDescriptor();
 				{
 					D3D12_UNORDERED_ACCESS_VIEW_DESC UavDesc = { };
 					UavDesc.Format = D3D_TranslateFormat(Texture->Format);
@@ -650,7 +654,7 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 					}
 					else
 					{
-						UavDesc.Texture2DArray.MipSlice = i + 1;					
+						UavDesc.Texture2DArray.MipSlice = i + 1;
 						if (b == 0)
 						{
 							UavDesc.Texture2DArray.FirstArraySlice = b;
@@ -678,7 +682,7 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 					if (Texture->ArrayCount == 1)
 					{
 						SrvDesc.Texture2D.MipLevels = 1;
-						SrvDesc.Texture2D.MostDetailedMip = i;
+						SrvDesc.Texture2D.MostDetailedMip = 0;
 					}
 					else
 					{
@@ -705,19 +709,20 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 					}
 					m_Device->CreateShaderResourceView(CopyRes, &SrvDesc, SrvAllocation.CpuHandle);
 				}
+				uint64 Offset = i * 256;
 				{
-					float2* pParams = (float2*)ConstBuff->MappedPointer;
+					float2* pParams = (float2*)(reinterpret_cast<uint64>(ConstBuff->MappedPointer) + Offset);
 					pParams->x = (1.0f / DstWidth);
 					pParams->y = (1.0f / DstHeight);
 					UNUSED(pParams);
 				}
 				DirectCL->SetPipelineState(m_GenerateMipsPipeline2D->PipelineState);
-				DirectCL->SetComputeRootSignature(m_GenerateMipsTable2D->AssociatedSignature.RootSignature);
+				DirectCL->SetComputeRootSignature(m_GenerateMipsPipeline2D->ShaderSignature.RootSignature);
 
-				DirectCL->SetComputeRootConstantBufferView(0, ConstBuff->Resource.Location);
-				DirectCL->SetComputeRootDescriptorTable(1, m_GenerateMipsTable2D->BaseSRVAllocation.GpuHandle);
-				DirectCL->SetComputeRootDescriptorTable(2, m_GenerateMipsTable2D->BaseSMPAllocation.GpuHandle);
-				DirectCL->SetComputeRootDescriptorTable(3, m_GenerateMipsTable2D->BaseUAVAllocation.GpuHandle);
+				DirectCL->SetComputeRootConstantBufferView(0, ConstBuff->Resource.Location + Offset);
+				DirectCL->SetComputeRootDescriptorTable(1, SrvAllocation.GpuHandle);
+				DirectCL->SetComputeRootDescriptorTable(2, SmpAllocation.GpuHandle);
+				DirectCL->SetComputeRootDescriptorTable(3, UavAllocation.GpuHandle);
 				{
 					D3D12_RESOURCE_BARRIER Barrier =
 					{
@@ -737,22 +742,19 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 					};
 					DirectCL->ResourceBarrier(2, Barriers);
 				}
-				DirectContext->End();
-				DirectContext->Flush();
-				DirectContext->Begin();
-				DirectCL = DirectContext->CurrentCommandBuffer->CommandList->GetGraphicsCommandList();
 			}
 		}
-		D3D12_RESOURCE_STATES PreviousTextureState = Texture->CurrentState;
+		D3D12_RESOURCE_STATES PreviousTextureState = Texture->PromotedState;
 		{
 			D3D12_RESOURCE_BARRIER Barriers[2] =
 			{
 				CD3DX12_RESOURCE_BARRIER::Transition(CopyRes, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_SOURCE),
-				CD3DX12_RESOURCE_BARRIER::Transition(Res, Texture->CurrentState, D3D12_RESOURCE_STATE_COPY_DEST)
+				CD3DX12_RESOURCE_BARRIER::Transition(Res, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COPY_DEST)
 			};
 			DirectCL->ResourceBarrier(2, Barriers);
 			DirectCL->CopyResource(Res, CopyRes);
 		}
+		if (PreviousTextureState != D3D12_RESOURCE_STATE_COPY_DEST)
 		{
 			D3D12_RESOURCE_BARRIER Barriers[] =
 			{
@@ -767,7 +769,7 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 	}
 	if (bDirectContextHasBegun)
 	{
-		DirectContext->Begin();
+		DirectContext->BeginPass(PreviousRenderPass);
 	}
 
 	while (CopyRes->Release() > 0) { }
@@ -795,127 +797,127 @@ IRenderTargetView* D3D12GraphicsDevice::GetBackBuffer()
 {
 	return m_BackBuffer;
 }
-
-void D3D12GraphicsDevice::CreateConstantBufferView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint32 InSlot, uint64 InOffset)
-{
-	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
-	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
-	DestTable->ConstantBuffers[InSlot] = { Buffer, InOffset };
-}
-
-void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint32 InSlot, uint32 StructureByteStride, uint32 NumElements, uint64 InOffset)
-{
-	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
-	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
-	D3D12DescriptorAllocation SlotAlloc = DestTable->BaseSRVAllocation;
-
-	D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = { };
-	SRVDesc.Buffer.StructureByteStride = static_cast<uint64>(StructureByteStride);
-	SRVDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	SRVDesc.Buffer.NumElements = NumElements;
-	SRVDesc.Buffer.FirstElement = InOffset;
-	SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
-
-	m_Device->CreateShaderResourceView(Buffer->Resource.D3DResource, &SRVDesc, SlotAlloc.OffsetFromStart(InSlot).CpuHandle);
-
-	DestTable->ShaderResources[InSlot] = Buffer;
-}
-
-void D3D12GraphicsDevice::CreateUnorderedAccessView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint32 InSlot, uint32 InSubresource)
-{
-	UNUSED(InDestTable);
-	UNUSED(InBuffer);
-	UNUSED(InSlot);
-	UNUSED(InSubresource);
-	// Why the actual fuck did I write this function
-	__debugbreak();
-//#ifdef _DEBUG
-//	if (InSubresource != 0)
-//	{
-//		BaneLog() << "[WARN] D3D12 : Subresources not supported on buffer type views" << END_LINE;
-//	}
-//#endif
-//	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
-//	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
-//	DestTable->ConstantBuffers[InSlot] = Buffer;
-}
-
-void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestTable, ITextureBase* InTexture, uint32 Slot, uint32 InSubresource)
-{
-	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
-	D3D12TextureBase* Texture = (D3D12TextureBase*)InTexture;
-	DestTable->ShaderResources[Slot] = Texture;
-	
-	D3D12DescriptorAllocation SlotAlloc = DestTable->BaseSRVAllocation.OffsetFromStart(Slot);
-	D3D12DescriptorAllocation SampleAlloc = DestTable->BaseSMPAllocation.OffsetFromStart(Slot);
-
-	D3D12_SHADER_RESOURCE_VIEW_DESC SrvDesc = { };
-	SrvDesc.Format = D3D_TranslateFormat(Texture->Format);
-	SrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	SrvDesc.ViewDimension = Texture->Resource.SRVDimension;
-	if (InSubresource == 0)
-	{
-		SrvDesc.Texture2D.MipLevels = Texture->MipCount;
-	}
-	else
-	{
-		if (SrvDesc.ViewDimension == D3D12_SRV_DIMENSION_TEXTURE2D)
-		{
-			SrvDesc.Texture2D.MipLevels = 1;
-			SrvDesc.Texture2D.MostDetailedMip = InSubresource;
-		}
-		if (SrvDesc.ViewDimension == D3D12_SRV_DIMENSION_TEXTURE2DARRAY)
-		{
-			SrvDesc.Texture2DArray.MipLevels = 1;
-			SrvDesc.Texture2DArray.MostDetailedMip = InSubresource;
-		}
-	}
-
-	if (SrvDesc.ViewDimension == D3D12_SRV_DIMENSION_TEXTURE2DARRAY)
-	{
-		SrvDesc.Texture2DArray.ArraySize = Texture->ArrayCount;
-	}
-	if (SrvDesc.ViewDimension == D3D12_SRV_DIMENSION_TEXTURECUBE)
-	{
-		SrvDesc.TextureCube.MipLevels = Texture->MipCount;
-		SrvDesc.TextureCube.MostDetailedMip = 0;
-	}
-
-	m_Device->CreateShaderResourceView(Texture->Resource.D3DResource, &SrvDesc, SlotAlloc.CpuHandle);
-	m_Device->CreateSampler(&Texture->D3DSampleDesc, SampleAlloc.CpuHandle);
-}
-
-void D3D12GraphicsDevice::CreateUnorderedAccessView(IShaderResourceTable* InDestTable, ITextureBase* InTexture, uint32 Slot, uint32 InSubresource)
-{
-	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
-	D3D12TextureBase* Texture = (D3D12TextureBase*)InTexture;
-	DestTable->UnorderedAccessResources[Slot] = Texture;
-
-	D3D12DescriptorAllocation SlotAlloc = DestTable->BaseUAVAllocation.OffsetFromStart(Slot);
-
-	D3D12_UNORDERED_ACCESS_VIEW_DESC UavDesc = { };
-	UavDesc.Format = D3D_TranslateFormat(Texture->Format);
-	UavDesc.ViewDimension = Texture->Resource.UAVDimension;
-	if (InSubresource == 0)
-	{
-		UavDesc.Texture2D.MipSlice = 0;
-		UavDesc.Texture2D.PlaneSlice = 0;
-	}
-	else
-	{
-		if (InSubresource <= Texture->MipCount)
-		{
-			UavDesc.Texture2D.MipSlice = InSubresource;
-		}
-		else
-		{
-			__debugbreak();
-		}
-	}
-
-	m_Device->CreateUnorderedAccessView(Texture->Resource.D3DResource, nullptr, &UavDesc, SlotAlloc.CpuHandle);
-}
+// 
+// void D3D12GraphicsDevice::CreateConstantBufferView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint32 InSlot, uint64 InOffset)
+// {
+// 	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
+// 	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
+// 	DestTable->ConstantBuffers[InSlot] = { Buffer, InOffset };
+// }
+// 
+// void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint32 InSlot, uint32 StructureByteStride, uint32 NumElements, uint64 InOffset)
+// {
+// 	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
+// 	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
+// 	D3D12DescriptorAllocation SlotAlloc = DestTable->BaseSRVAllocation;
+// 
+// 	D3D12_SHADER_RESOURCE_VIEW_DESC SRVDesc = { };
+// 	SRVDesc.Buffer.StructureByteStride = static_cast<uint64>(StructureByteStride);
+// 	SRVDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+// 	SRVDesc.Buffer.NumElements = NumElements;
+// 	SRVDesc.Buffer.FirstElement = InOffset;
+// 	SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+// 	SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
+// 
+// 	m_Device->CreateShaderResourceView(Buffer->Resource.D3DResource, &SRVDesc, SlotAlloc.OffsetFromStart(InSlot).CpuHandle);
+// 
+// 	DestTable->ShaderResources[InSlot] = Buffer;
+// }
+// 
+// void D3D12GraphicsDevice::CreateUnorderedAccessView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint32 InSlot, uint32 InSubresource)
+// {
+// 	UNUSED(InDestTable);
+// 	UNUSED(InBuffer);
+// 	UNUSED(InSlot);
+// 	UNUSED(InSubresource);
+// 	// Why the actual fuck did I write this function
+// 	__debugbreak();
+// //#ifdef _DEBUG
+// //	if (InSubresource != 0)
+// //	{
+// //		BaneLog() << "[WARN] D3D12 : Subresources not supported on buffer type views" << END_LINE;
+// //	}
+// //#endif
+// //	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
+// //	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
+// //	DestTable->ConstantBuffers[InSlot] = Buffer;
+// }
+// 
+// void D3D12GraphicsDevice::CreateShaderResourceView(IShaderResourceTable* InDestTable, ITextureBase* InTexture, uint32 Slot, uint32 InSubresource)
+// {
+// 	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
+// 	D3D12TextureBase* Texture = (D3D12TextureBase*)InTexture;
+// 	DestTable->ShaderResources[Slot] = Texture;
+// 	
+// 	D3D12DescriptorAllocation SlotAlloc = DestTable->BaseSRVAllocation.OffsetFromStart(Slot);
+// 	D3D12DescriptorAllocation SampleAlloc = DestTable->BaseSMPAllocation.OffsetFromStart(Slot);
+// 
+// 	D3D12_SHADER_RESOURCE_VIEW_DESC SrvDesc = { };
+// 	SrvDesc.Format = D3D_TranslateFormat(Texture->Format);
+// 	SrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+// 	SrvDesc.ViewDimension = Texture->Resource.SRVDimension;
+// 	if (InSubresource == 0)
+// 	{
+// 		SrvDesc.Texture2D.MipLevels = Texture->MipCount;
+// 	}
+// 	else
+// 	{
+// 		if (SrvDesc.ViewDimension == D3D12_SRV_DIMENSION_TEXTURE2D)
+// 		{
+// 			SrvDesc.Texture2D.MipLevels = 1;
+// 			SrvDesc.Texture2D.MostDetailedMip = InSubresource;
+// 		}
+// 		if (SrvDesc.ViewDimension == D3D12_SRV_DIMENSION_TEXTURE2DARRAY)
+// 		{
+// 			SrvDesc.Texture2DArray.MipLevels = 1;
+// 			SrvDesc.Texture2DArray.MostDetailedMip = InSubresource;
+// 		}
+// 	}
+// 
+// 	if (SrvDesc.ViewDimension == D3D12_SRV_DIMENSION_TEXTURE2DARRAY)
+// 	{
+// 		SrvDesc.Texture2DArray.ArraySize = Texture->ArrayCount;
+// 	}
+// 	if (SrvDesc.ViewDimension == D3D12_SRV_DIMENSION_TEXTURECUBE)
+// 	{
+// 		SrvDesc.TextureCube.MipLevels = Texture->MipCount;
+// 		SrvDesc.TextureCube.MostDetailedMip = 0;
+// 	}
+// 
+// 	m_Device->CreateShaderResourceView(Texture->Resource.D3DResource, &SrvDesc, SlotAlloc.CpuHandle);
+// 	m_Device->CreateSampler(&Texture->D3DSampleDesc, SampleAlloc.CpuHandle);
+// }
+// 
+// void D3D12GraphicsDevice::CreateUnorderedAccessView(IShaderResourceTable* InDestTable, ITextureBase* InTexture, uint32 Slot, uint32 InSubresource)
+// {
+// 	D3D12ShaderResourceTable* DestTable = (D3D12ShaderResourceTable*)InDestTable;
+// 	D3D12TextureBase* Texture = (D3D12TextureBase*)InTexture;
+// 	DestTable->UnorderedAccessResources[Slot] = Texture;
+// 
+// 	D3D12DescriptorAllocation SlotAlloc = DestTable->BaseUAVAllocation.OffsetFromStart(Slot);
+// 
+// 	D3D12_UNORDERED_ACCESS_VIEW_DESC UavDesc = { };
+// 	UavDesc.Format = D3D_TranslateFormat(Texture->Format);
+// 	UavDesc.ViewDimension = Texture->Resource.UAVDimension;
+// 	if (InSubresource == 0)
+// 	{
+// 		UavDesc.Texture2D.MipSlice = 0;
+// 		UavDesc.Texture2D.PlaneSlice = 0;
+// 	}
+// 	else
+// 	{
+// 		if (InSubresource <= Texture->MipCount)
+// 		{
+// 			UavDesc.Texture2D.MipSlice = InSubresource;
+// 		}
+// 		else
+// 		{
+// 			__debugbreak();
+// 		}
+// 	}
+// 
+// 	m_Device->CreateUnorderedAccessView(Texture->Resource.D3DResource, nullptr, &UavDesc, SlotAlloc.CpuHandle);
+// }
 
 D3D12ShaderItemData GetShaderRequirements(IGraphicsPipelineState* pState)
 {
@@ -944,34 +946,6 @@ D3D12ShaderItemData GetShaderRequirements(IComputePipelineState* pState)
 	ParameterList.NumUAVs = Counts.NumUnorderedAccessViews;
 	ParameterList.NumSMPs = Counts.NumSamplers;
 	return ParameterList;
-}
-
-IShaderResourceTable* D3D12GraphicsDevice::CreateShaderTable(IGraphicsPipelineState* pState)
-{
-	D3D12ShaderItemData Reqs = GetShaderRequirements(pState);
-	D3D12DescriptorAllocation BaseSrvAllocation = m_SrvAllocator.AllocateMultiple(Reqs.NumSRVs); // Just allocate this many so we aren't overusing descriptors
-	D3D12DescriptorAllocation BaseSmpAllocation = m_SmpAllocator.AllocateMultiple(Reqs.NumSMPs);
-	D3D12DescriptorAllocation BaseUavAllocation = { }; // We can just leave an empty one here as, if there aren't any UAVs we won't be expected to use any
-	if (Reqs.NumUAVs > 0)
-	{
-		BaseUavAllocation = m_SrvAllocator.AllocateMultiple(Reqs.NumUAVs);
-	}
-	D3D12ShaderResourceTable* Result = new D3D12ShaderResourceTable(Reqs.NumCBVs, Reqs.NumSRVs, Reqs.NumSMPs, Reqs.NumUAVs, BaseSrvAllocation, BaseSmpAllocation, BaseUavAllocation);
-	return Result;
-}
-
-IShaderResourceTable* D3D12GraphicsDevice::CreateShaderTable(IComputePipelineState* pState)
-{
-	D3D12ShaderItemData Reqs = GetShaderRequirements(pState);
-	D3D12DescriptorAllocation BaseSrvAllocation = m_SrvAllocator.AllocateMultiple(Reqs.NumSRVs); // Just allocate this many so we aren't overusing descriptors
-	D3D12DescriptorAllocation BaseSmpAllocation = m_SmpAllocator.AllocateMultiple(Reqs.NumSMPs);
-	D3D12DescriptorAllocation BaseUavAllocation = { }; // We can just leave an empty one here as, if there aren't any UAVs we won't be expected to use any
-	if (Reqs.NumUAVs > 0)
-	{
-		BaseUavAllocation = m_SrvAllocator.AllocateMultiple(Reqs.NumUAVs);
-	}
-	D3D12ShaderResourceTable* Result = new D3D12ShaderResourceTable(Reqs.NumCBVs, Reqs.NumSRVs, Reqs.NumSMPs, Reqs.NumUAVs, BaseSrvAllocation, BaseSmpAllocation, BaseUavAllocation);
-	return Result;
 }
 
 IRenderTargetView* D3D12GraphicsDevice::CreateRenderTargetView(ITexture2D* InTexture)
@@ -1036,21 +1010,23 @@ D3D12CommandList* D3D12GraphicsDevice::GetCommandList(ECOMMAND_CONTEXT_TYPE Cont
 void D3D12GraphicsDevice::UpdateCurrentFrameInfo()
 {
 	GCurrentFrameIndex = m_SwapChain->SwapChain->GetCurrentBackBufferIndex();
+	m_SrvAllocator.Reset();
+	m_SmpAllocator.Reset();
 }
 
 void D3D12GraphicsDevice::EnsureAllUploadsOccured()
 {
-	if (m_UploadList->HasBegun()) // If there is work for it to do
+	if (m_UploadList->CurrentCommandBuffer)
 	{
-		if (!GetCopyQueue().IsFinished())
+		if (m_UploadList->CurrentCommandBuffer->HasDoneWork())
 		{
-			GetCopyQueue().StallForFinish();
+			D3D12GraphicsCommandBuffer* CmdBuff = m_UploadList->CurrentCommandBuffer;
+			D3D12CommandList* CommandList = CmdBuff->CommandList;
+			CmdBuff->EndPass();
+			CmdBuff->CloseCommandBuffer();
+			D3D12CommandQueue& CmdQueue = GetCopyQueue();
+			CmdQueue.ExecuteImmediate(CommandList, true);
+			CmdBuff->FetchNewCommandList();
 		}
-		else
-		{
-			GetCopyQueue().CompleteExecution();
-		}
-		m_UploadList->End(); // End it, Begin will be called again when someone wants to upload
-		m_UploadList->Begin();
 	}
 }

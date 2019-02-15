@@ -21,8 +21,6 @@ public:
 
 	Font* CurrentFont;
 
-	void DrawText(Font* FontToDraw, const std::string& TextToDraw);
-
 	IVertexBuffer* QuadVB;
 	IIndexBuffer* QuadIB;
 	InputKeyboardDevice& KeyboardState;

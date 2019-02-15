@@ -40,15 +40,18 @@ void Font::LoadFont(const std::string& FontName)
 			float fImgW = static_cast<float>(ImgWidth);
 			float fImgH = static_cast<float>(ImgHeight);
 
+			float HalfDimX = DimensionX / 2.f;
+			float HalfDimY = DimensionY / 2.f;
+
 			float2 Start((StartX - BearingX) / fImgW, StartY / fImgH);
 			float2 End((StartX + (FontAdvance / 64.f)) / fImgW, (StartY - (DimensionY + BearingY)) / fImgH);
-			m_Characters[i].Data[0].Position = float2();
+			m_Characters[i].Data[0].Position = float2(-HalfDimX, HalfDimY);
 			m_Characters[i].Data[0].UV = float2(Start.x, Start.y);
-			m_Characters[i].Data[1].Position = float2();
+			m_Characters[i].Data[1].Position = float2(HalfDimX, HalfDimY);
 			m_Characters[i].Data[1].UV = float2(End.x, Start.y);
-			m_Characters[i].Data[2].Position = float2();
+			m_Characters[i].Data[2].Position = float2(-HalfDimX, -HalfDimY);
 			m_Characters[i].Data[2].UV = float2(Start.x, End.y);
-			m_Characters[i].Data[3].Position = float2();
+			m_Characters[i].Data[3].Position = float2(HalfDimX, -HalfDimY);
 			m_Characters[i].Data[3].UV = float2(End.x, End.y);
 		}
 	}
@@ -77,8 +80,8 @@ void Font::LoadFont(const std::string& FontName)
 	FontTexture = Device->CreateTexture2D(ImgWidth, ImgHeight, FORMAT_R8_UNORM, CreateDefaultSamplerDesc(), TEXTURE_USAGE_SHADER_RESOURCE, &Data);
 	FontDataStructuredBuff = Device->CreateStructuredBuffer(static_cast<uint32>(sizeof(float4) * 2 * m_Characters.size()), reinterpret_cast<uint8*>(m_Characters.data()));
 	FontShader = GetShaderCache()->LoadGraphicsPipeline("Fonts/FontShader.gfx");
-	ResourceTable = Device->CreateShaderTable(FontShader);
-	Device->CreateShaderResourceView(ResourceTable, FontDataStructuredBuff, 1, static_cast<uint32>(sizeof(float4) * 2), static_cast<uint32>(sizeof(float4) * 2 * m_Characters.size()));
+	IB = GetApiRuntime()->QuadIB;
+	VB = Device->CreateVertexBuffer(sizeof(FONT_VERTEX) * static_cast<uint32>(m_Characters.size()), reinterpret_cast<uint8*>(m_Characters.data()));
 }
 
 //void Font::InitializeGPUMemory(CHARACTER_CBUFFER_DATA* pCbuffData)

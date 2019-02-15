@@ -7,7 +7,7 @@
 #define USE_WARP 0
 #define USE_DEBUG_INTERFACE 0
 
-#define PLEASE_HELP_I_BROKE_THE_THING_AGAIN 1
+#define PLEASE_HELP_I_BROKE_THE_THING_AGAIN 0
 
 void D3D12Runtime::Initialize(const Window* pWindow)
 {

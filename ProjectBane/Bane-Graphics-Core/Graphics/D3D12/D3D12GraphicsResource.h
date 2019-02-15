@@ -4,6 +4,7 @@
 #include "../Interfaces/GraphicsResources.h"
 #include "../Interfaces/GraphicsCommandList.h"
 #include "D3D12PipelineState.h"
+#include "D3D12Translator.h"
 #include <iostream>
 
 
@@ -278,6 +279,31 @@ public:
 		return D3D12_RESOURCE_TYPE_BUFFER;
 	}
 
+	// Makes a very broad assumption that you're only going to use this as a structured buffer
+	inline D3D12_SHADER_RESOURCE_VIEW_DESC GetSRVDesc(uint64 IndexToStart, uint32 NumElements, uint32 StructureByteStride) const
+	{
+		D3D12_SHADER_RESOURCE_VIEW_DESC SrvDesc = { };
+		SrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+		SrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		SrvDesc.ViewDimension = Resource.SRVDimension;
+		SrvDesc.Buffer.FirstElement = IndexToStart;
+		SrvDesc.Buffer.NumElements = NumElements;
+		SrvDesc.Buffer.StructureByteStride = StructureByteStride;
+		return SrvDesc;
+	}
+
+	inline D3D12_UNORDERED_ACCESS_VIEW_DESC GetUAVDesc(uint64 IndexToStart, uint32 NumElements, uint32 StructureByteStride) const
+	{
+		D3D12_UNORDERED_ACCESS_VIEW_DESC UavDesc = { };
+		UavDesc.Format = DXGI_FORMAT_UNKNOWN;
+		UavDesc.ViewDimension = Resource.UAVDimension;
+		UavDesc.Buffer.FirstElement = IndexToStart;
+		UavDesc.Buffer.NumElements = NumElements;
+		UavDesc.Buffer.StructureByteStride = StructureByteStride;
+		UavDesc.Buffer.CounterOffsetInBytes = 0;
+		return UavDesc;
+	}
+
 	std::string GetDebugName() const override
 	{
 		return Resource.DebugName;
@@ -339,6 +365,67 @@ public:
 	virtual EFORMAT GetFormat() const final override { return Format; }
 	virtual uint32 GetMipCount() const final override { return MipCount; }
 	virtual void SetSamplerDesc(const SAMPLER_DESC& InSampleDesc) final override;
+
+	// Todo: Figure out a way to replace this with a member variable, maybe on resource creation? or after upload?
+	inline D3D12_SHADER_RESOURCE_VIEW_DESC GetSRVDesc(uint32 Subresource) const
+	{
+		D3D12_SHADER_RESOURCE_VIEW_DESC SrvDesc = { };
+		SrvDesc.Format = D3D_TranslateFormat(Format);
+		SrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		SrvDesc.ViewDimension = Resource.SRVDimension;
+		if (Subresource == 0)
+		{
+			SrvDesc.Texture2D.MipLevels = MipCount;
+		}
+		else
+		{
+			if (SrvDesc.ViewDimension == D3D12_SRV_DIMENSION_TEXTURE2D)
+			{
+				SrvDesc.Texture2D.MipLevels = 1;
+				SrvDesc.Texture2D.MostDetailedMip = Subresource;
+			}
+			if (SrvDesc.ViewDimension == D3D12_SRV_DIMENSION_TEXTURE2DARRAY)
+			{
+				SrvDesc.Texture2DArray.MipLevels = 1;
+				SrvDesc.Texture2DArray.MostDetailedMip = Subresource;
+			}
+		}
+
+		if (SrvDesc.ViewDimension == D3D12_SRV_DIMENSION_TEXTURE2DARRAY)
+		{
+			SrvDesc.Texture2DArray.ArraySize = ArrayCount;
+		}
+		if (SrvDesc.ViewDimension == D3D12_SRV_DIMENSION_TEXTURECUBE)
+		{
+			SrvDesc.TextureCube.MipLevels = MipCount;
+			SrvDesc.TextureCube.MostDetailedMip = 0;
+		}
+		return SrvDesc;
+	}
+
+	inline D3D12_UNORDERED_ACCESS_VIEW_DESC GetUAVDesc(uint32 Subresource) const
+	{
+		D3D12_UNORDERED_ACCESS_VIEW_DESC UavDesc = { };
+		UavDesc.Format = D3D_TranslateFormat(Format);
+		UavDesc.ViewDimension = Resource.UAVDimension;
+		if (Subresource == 0)
+		{
+			UavDesc.Texture2D.MipSlice = 0;
+			UavDesc.Texture2D.PlaneSlice = 0;
+		}
+		else
+		{
+			if (Subresource <= MipCount)
+			{
+				UavDesc.Texture2D.MipSlice = Subresource;
+			}
+			else
+			{
+				__debugbreak();
+			}
+		}
+		return UavDesc;
+	}
 
 	virtual ED3D12_RESOURCE_TYPE GetResourceType() const
 	{

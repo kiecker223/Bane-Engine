@@ -16,6 +16,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
 	{
 		return;
 	}
-	float2 TexCoords = TexelSize.xy * (float2((float)DTid.x, (float)DTid.y) + 0.5);
+	float2 texelSize = float2(1.0f / (float)DestDimensions.x, 1.0f / (float)DestDimensions.y);
+	float2 TexCoords = texelSize.xy * (float2((float)DTid.x, (float)DTid.y) + 0.5);
 	DestTexture[DTid.xy] = SrcTexture.SampleLevel(Sampler, TexCoords, 0);
 }
