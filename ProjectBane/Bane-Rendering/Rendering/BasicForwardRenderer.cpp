@@ -92,8 +92,11 @@ void BasicForwardRenderer::Submit(const RenderLoop& pRenderLoop)
 {
 	//std::lock_guard<std::mutex> RenderLock(m_RenderSubmitLock);
 	m_Commits.clear();
-	for (auto& Commit : pRenderLoop.GetCommitedData())
-		m_Commits.push_back(Commit);
+	const auto& OtherCommit = pRenderLoop.GetCommitedData();
+	for (uint32 i = 0; i < OtherCommit.size(); i++)
+	{
+		m_Commits.push_back(OtherCommit[i]);
+	}
 }
 
 void BasicForwardRenderer::GatherSceneData()

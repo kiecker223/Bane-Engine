@@ -150,10 +150,10 @@ void Scene::Tick(double DT)
 			e.pEntity->PhysicsTick();
 		}
 		std::lock_guard<std::mutex> ScopedLock(m_World.GenerateOctTreeMutex);
-		if (m_PhysOctree.Base)
-		{
-			m_PhysOctree.RecursivelyDelete();
-		}
+// 		if (m_PhysOctree.Base)
+// 		{
+// 			m_PhysOctree.RecursivelyDelete();
+// 		}
 		m_PhysOctree = m_World.GetOctTree();
 	}
 }

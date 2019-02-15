@@ -33,6 +33,7 @@ public:
 		template<class ...Args>
 		inline void Assign(Args&& ...InArgs)
 		{
+			Value.~TType();
 			new (&Value) TType(std::forward<Args...>(InArgs...));
 		}
 		TNode* Parent;
@@ -101,7 +102,7 @@ private:
 
 	inline void DeleteNodeImpl(TNode* BaseNode)
 	{
-		if (BaseNode->Children[0]) // We assume that there is at least one child
+		if (BaseNode)
 		{
 			for (uint32 i = 0; i < NumChildrenPerNode; i++)
 			{
@@ -110,8 +111,8 @@ private:
 					DeleteNodeImpl(BaseNode->Children[i]);
 				}
 			}
+			delete BaseNode;
 		}
-		delete BaseNode;
 	}
 
 public:
