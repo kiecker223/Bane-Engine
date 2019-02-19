@@ -2,7 +2,7 @@
 
 #include "Common.h"
 
-class IRuntimeGraphicsDevice;
+class IGraphicsDevice;
 
 class IDeviceSwapChain
 {
@@ -14,6 +14,6 @@ public:
 
 	virtual void Present() = 0;
 
-	virtual IRuntimeGraphicsDevice* GetParent() = 0;
+	virtual IGraphicsDevice* GetParent() = 0;
 
 };

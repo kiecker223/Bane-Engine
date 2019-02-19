@@ -25,21 +25,20 @@ public:
 
 	virtual bool SupportsAsyncContexts() { return true; }
 
-	virtual void Submit(const RenderLoop& pRenderLoop) override;
+	virtual void Submit(RenderLoop& pRenderLoop) override;
 
 private:
 
 	void GatherSceneData();
 
 	bool m_bIsRendering;
+	std::vector<RenderMeshMaterialBucket::BucketItem> m_DrawList;
 	//std::mutex m_RenderSubmitLock;
-	IRuntimeGraphicsDevice* m_Device;
+	IGraphicsDevice* m_Device;
 	IConstantBuffer* m_CameraConstants;
 	IConstantBuffer* m_MaterialConstants;
 	IConstantBuffer* m_MeshDataBuffer;
 	IConstantBuffer* m_LightBuffer;
 	IGraphicsPipelineState* m_ImmediateGeometryPS;
-	std::vector<IVertexBuffer*> m_ImmediateGeometry;
-	std::vector<RENDER_LOOP_DRAW_COMMIT> m_Commits;
-
+	RenderLoop* m_pRenderLoop;
 };

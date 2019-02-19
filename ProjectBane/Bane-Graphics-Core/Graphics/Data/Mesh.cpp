@@ -8,7 +8,7 @@
 
 MeshLayout::MeshLayout(IInputLayout* Layout)
 {
-	for (auto& Item : Layout->GetDesc().InputItems)
+	for (auto& Item : Layout->Desc.InputItems)
 	{
 		AddItem(Item.Name, Item.ItemFormat);
 	}
@@ -349,7 +349,7 @@ void Mesh::GenerateCylinder(uint32 RadialSegments, uint32 HeightSegments)
 
 void Mesh::Upload()
 {
-	IRuntimeGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
+	IGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
 	if (m_VertexBuffer)
 	{
 		delete m_VertexBuffer;

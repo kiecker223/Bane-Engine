@@ -247,7 +247,23 @@ class TestUIComponent : public RenderComponent
 
 public:
 
+	TestUIComponent() { }
 
+	void Start()
+	{
+		Context.Initialize();
+		Button.Initialize();
+		Button.Text = "H";
+	}
+
+	void GraphicsUpdate(RenderLoop& RL)
+	{
+		RL.PostRenderCallback.Push([this](IGraphicsDevice* pDevice, IGraphicsCommandContext* CommandContext)
+		{
+			Context.BeginFrame(CommandContext, nullptr);
+			Button.Render(Context);
+		});
+	}
 
 	UIButton Button;
 	UIContext Context;
@@ -273,6 +289,7 @@ void InitApplication()
 	CamComp->ZFar = 1e+21f;
 	CameraEntity->AddComponent<CameraMovementComponent>()->Speed = 1.;
 	CameraEntity->AddComponent<RaycastTestComponent>();
+	CameraEntity->AddComponent<TestUIComponent>();
 
 	{
 		Entity* CylinderMeshTest = Level->CreateEntity("Collision test");

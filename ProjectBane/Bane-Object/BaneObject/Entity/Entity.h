@@ -204,6 +204,7 @@ public:
 
 	Entity(EntityIdentifier Id) :
 		m_Parent(nullptr),
+		m_ParentChildIdx(-1),
 		m_Allocator(2048),
 		m_Id(Id)
 	{
@@ -273,12 +274,29 @@ public:
 	{
 		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
 			reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(m_Allocator.GetAllocatedObjects()[i]) + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin))->Tick(DT);
+
+		if (!m_Children.empty())
+		{
+			for (uint32 i = 0; i < m_Children.size(); i++)
+			{
+				m_Children[i]->Tick(DT);
+			}
+		}
 	}
 
 	inline void PhysicsTick()
 	{
 		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
 			reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(m_Allocator.GetAllocatedObjects()[i]) + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin))->PhysicsTick();
+
+
+		if (!m_Children.empty())
+		{
+			for (uint32 i = 0; i < m_Children.size(); i++)
+			{
+				m_Children[i]->PhysicsTick();
+			}
+		}
 	}
 
 	inline Transform* GetTransform() const
@@ -286,17 +304,14 @@ public:
 		return (Transform*)&m_Transform;
 	}
 
-	inline void SetParent(Entity* Parent)
-	{
-		m_Parent = Parent;
-	}
+	void SetParent(Entity* Parent);
 
-	inline std::vector<Entity*> GetChildren()
+	inline std::vector<Entity*>& GetChildren()
 	{
 		return m_Children;
 	}
 
-	inline Entity* GetChild(uint32 Idx)
+	inline Entity* GetChild(uint32 Idx) const
 	{
 		return m_Children[Idx];
 	}
@@ -323,6 +338,7 @@ private:
 	PhysicsProperties m_PhysicsProperties;
 	Transform m_Transform;
 	EntityIdentifier m_Id;
+	int32 m_ParentChildIdx;
 	Entity* m_Parent;
 	std::vector<Entity*> m_Children;
 	class Scene* m_SceneOwner;

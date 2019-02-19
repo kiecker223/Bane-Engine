@@ -1,26 +1,20 @@
 #pragma once
 
 #include <vector>
+#include <Core/Containers/StackQueue.h>
+#include <functional>
 #include "Core/Data/BoundingBox.h"
 #include "Mesh.h"
 #include "LightData.h"
 #include "Material.h"
 #include "CameraData.h"
+#include "RenderPass.h"
 
 
 typedef struct ALIGN_FOR_GPU_BUFFER MESH_RENDER_DATA {
 	float4x4 Model;
 	MATERIAL_PARAMETERS Parameters;
 } MESH_RENDER_DATA;
-
-typedef struct ALIGN_FOR_GPU_BUFFER CAMERA_CONSTANT_BUFFER_DATA {
-	float4x4 View;
-	float4x4 Projection;
-	float3 Position;
-	float ZResolution;
-	float FarPlane;
-} CAMERA_CONSTANT_BUFFER_DATA;
-
 
 typedef struct MESH_ITEM {
 	Mesh* pMesh;
@@ -54,21 +48,38 @@ typedef struct RENDER_LOOP_DRAW_COMMIT {
 } RENDER_LOOP_DRAW_COMMIT;
 
 
+class RenderMeshMaterialBucket
+{
+public:
+
+	struct BucketItem
+	{
+		const Mesh* pMesh;
+		const ITexture2D* DiffuseTex;
+		MESH_RENDER_DATA Data;
+	};
+
+	struct ShaderKey
+	{
+		uint64 Key;
+		IGraphicsPipelineState* pShader;
+	};
+
+	void AddDrawnMesh(const Mesh* pMesh, const Material* pMat, const float4x4& Transformation);
+
+	int32 KeyExists(const ShaderKey& InKey);
+
+	std::vector<ShaderKey> Keys;
+	std::vector<std::vector<BucketItem>> Values;
+
+};
+
 class RenderLoop
 {
 	typedef struct RENDER_LOOP_GLOBALS {
 		struct
 		{
-			CAMERA_CONSTANT_BUFFER_DATA Buffer[24];
-			IRenderPassInfo* RenderPasses[24];
-			uint64 Offset;
-			uint64 Size;
-		} CameraData;
-		struct
-		{
 			MESH_RENDER_DATA* Buffer;
-			uint64 Offset;
-			uint64 Size;
 		} MeshData;
 		struct SHADER_ALIGNMENT SHADER_LIGHT_DATA
 		{
@@ -84,60 +95,24 @@ class RenderLoop
 			const ITextureCube* Cubemap;
 			float3 AmbientLight;
 		} SkyboxData;
-
-		struct IMMEDIATE_GEOMETRY {
-			IVertexBuffer* VertexBuffer;
-			typedef struct IMMEDIATE_GEOMETRY_DRAW_ARGS
-			{
-				IMMEDIATE_GEOMETRY_DRAW_ARGS() { }
-				IMMEDIATE_GEOMETRY_DRAW_ARGS(IBuffer* InUploadBuffer, uint32 InVertexCount) : UploadBuffer(InUploadBuffer), VertexCount(InVertexCount)
-				{
-				}
-				~IMMEDIATE_GEOMETRY_DRAW_ARGS()
-				{
-				}
-				IBuffer* UploadBuffer;
-				uint32 VertexCount;
-			} IMMEDIATE_GEOMETRY_DRAW_ARGS;
-			std::vector<IMMEDIATE_GEOMETRY_DRAW_ARGS> DrawArgs;
-			uint32 CurrentCount;
-		} ImmediateGeometry;
 	} RENDER_LOOP_GLOBALS;
 
 public:
 
-	static RENDER_LOOP_GLOBALS GRenderGlobals;
-	static void ResetForNextFrame();
+	RENDER_LOOP_GLOBALS GRenderGlobals;
+	void ResetForNextFrame();
 
 	RenderLoop();
+	RenderLoop& operator = (const RenderLoop& Rhs) = delete;
 	~RenderLoop();
 
-	void SetCamera(const CAMERA_DATA& CamData);
-	void AddDrawable(const Mesh* pMesh, const Material& Mat, const float4x4& Transformation);
-	
-	void BeginNewShape();
-	void EndNewShape();
-	
-	void AddLine(const double3& Start, const double3& End);
-	void AddBoundingBox(BoundingBox InBox);
-	
-	void AddLight(const DIRECTIONAL_LIGHT_DATA& DirLight);
-	void AddLight(const POINT_LIGHT_DATA& PointLight);
-	void AddLight(const SPOTLIGHT_DATA& SpotLight);
-	void SetSkybox(const SKYBOX_DATA& Skybox);
-	
-	void Draw();
+	void DrawMesh(const Mesh* pMesh, const Material* pMaterial, const float4x4& Transformation);
+	void AddCamera(const CAMERA_DATA& InData);
 
-	inline std::vector<RENDER_LOOP_DRAW_COMMIT> const& GetCommitedData() const
-	{
-		return m_Commits;
-	}
+	TStack<std::function<void(IGraphicsDevice*, IGraphicsCommandContext*)>, 24> PostRenderCallback;
 
-private:
-
-	RENDER_LOOP_DRAW_COMMIT m_Current;
-	std::vector<RENDER_LOOP_DRAW_COMMIT> m_Commits;
-	std::vector<RENDER_LINE_DATA> m_CurrentShape;
+	TStack<CAMERA_DATA, 24> CameraStack;
+	RenderMeshMaterialBucket Bucket;
 };
 
 

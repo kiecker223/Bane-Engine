@@ -140,18 +140,18 @@ public:
 	}
 
 	inline bool HasBegun() { return CommandList != nullptr; }
-	virtual void BeginPass(IRenderPassInfo* InRenderPass) override final;
+	virtual void BeginPass(IRenderTargetInfo* InRenderPass) override final;
 	virtual void EndPass() override final; 
 
 	virtual void CloseCommandBuffer() override final;
 
 	virtual void SetGraphicsPipelineState(const IGraphicsPipelineState* InPipelineState) final override;
 
-	virtual void SetTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource) override final;
-	virtual void SetStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
-	virtual void SetUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) override final;
-	virtual void SetUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
-	virtual void SetConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset) override final;
+	virtual void SetTexture(uint32 Slot, const ITextureBase* InTexture, uint32 Subresource) override final;
+	virtual void SetStructuredBuffer(uint32 Slot, const IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetUnorderedAccessView(uint32 Slot, const ITextureBase* InResource, uint32 Subresource) override final;
+	virtual void SetUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset) override final;
 
 	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer, uint64 Offset) final override;
 	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer) final override;
@@ -171,11 +171,11 @@ public:
 
 	virtual void SetComputePipelineState(const IComputePipelineState* InState) final override;
 
-	virtual void SetComputeTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource) override final;
-	virtual void SetComputeStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
-	virtual void SetComputeUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) override final;
-	virtual void SetComputeUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
-	virtual void SetComputeConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset) override final;
+	virtual void SetComputeTexture(uint32 Slot, const ITextureBase* InTexture, uint32 Subresource) override final;
+	virtual void SetComputeStructuredBuffer(uint32 Slot, const IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, const ITextureBase* InResource, uint32 Subresource) override final;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetComputeConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset) override final;
 
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) final override;
 
@@ -253,7 +253,7 @@ public:
 		return false;
 	}
 
-	virtual void BeginPass(IRenderPassInfo* InRenderPass) override final;
+	virtual void BeginPass(IRenderTargetInfo* InRenderPass) override final;
 	virtual void EndPass() override final; // This will submit our handle and grab a new one
 
 	virtual void Flush() override final;
@@ -265,11 +265,11 @@ public:
 
 	virtual void SetGraphicsPipelineState(const IGraphicsPipelineState* InPipelineState) final override;
 
-	virtual void SetTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource) override final;
-	virtual void SetStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
-	virtual void SetUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) override final;
-	virtual void SetUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
-	virtual void SetConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset) override final;
+	virtual void SetTexture(uint32 Slot, const ITextureBase* InTexture, uint32 Subresource) override final;
+	virtual void SetStructuredBuffer(uint32 Slot, const IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetUnorderedAccessView(uint32 Slot, const ITextureBase* InResource, uint32 Subresource) override final;
+	virtual void SetUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset) override final;
 
 	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer, uint64 Offset) final override;
 	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer) final override;
@@ -289,11 +289,11 @@ public:
 
 	virtual void SetComputePipelineState(const IComputePipelineState* InState) final override;
 
-	virtual void SetComputeTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource) override final;
-	virtual void SetComputeStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
-	virtual void SetComputeUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) override final;
-	virtual void SetComputeUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
-	virtual void SetComputeConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset) override final;
+	virtual void SetComputeTexture(uint32 Slot, const ITextureBase* InTexture, uint32 Subresource) override final;
+	virtual void SetComputeStructuredBuffer(uint32 Slot, const IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, const ITextureBase* InResource, uint32 Subresource) override final;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
+	virtual void SetComputeConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset) override final;
 
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) final override;
 

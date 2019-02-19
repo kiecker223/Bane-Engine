@@ -22,7 +22,7 @@ class ISceneRenderer
 {
 public:
 
-	virtual void Submit(const RenderLoop& pRenderLoop) = 0;
+	virtual void Submit(RenderLoop& pRenderLoop) = 0;
 
 	virtual void StartRenderThread() = 0;
 

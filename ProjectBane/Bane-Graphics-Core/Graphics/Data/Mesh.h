@@ -35,7 +35,7 @@ public:
 	inline void SetLayout(IInputLayout* Layout)
 	{
 		Reset();
-		for (auto& Item : Layout->GetDesc().InputItems)
+		for (auto& Item : Layout->Desc.InputItems)
 		{
 			AddItem(Item.Name, Item.ItemFormat);
 		}

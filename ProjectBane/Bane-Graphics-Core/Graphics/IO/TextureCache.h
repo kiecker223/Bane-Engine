@@ -26,6 +26,8 @@ public:
 		const SAMPLER_DESC* pSampler = nullptr
 	);
 
+	uint8* LoadRawBytes(const std::string& TextureName, uint32& OutWidth, uint32& OutHeight, uint32& OutStep, bool bFlip = false);
+
 	void AddTexture(const std::string& TextureName, ITextureBase* Texture);
 	void DestroyTexture(const std::string& TextureName);
 

@@ -1,7 +1,7 @@
 #include "Font.h"
 #include <JSON/JsonCPP.h>
 #include <fstream>
-#include <Il/devil_cpp_wrapper.hpp>
+#include <Graphics/IO/TextureCache.h>
 #include <Graphics/IO/ShaderCache.h>
 
 using namespace nlohmann;
@@ -10,22 +10,20 @@ void Font::LoadFont(const std::string& FontName)
 {
 	m_Name = FontName;
 	
-	m_Characters.reserve(128);
-	
-	ilImage SDFImage;
+	m_Characters.resize(128);
 
 	IB = ApiRuntime::Get()->QuadIB;
 	uint32 ImgWidth = 0;
 	uint32 ImgHeight = 0;
+	uint32 ByteStep = 0;
+	uint8* SDFImageBuff = nullptr;
 	std::string ImageName;
 	{
 		std::ifstream FileReadStream("FontInfo.json");
 		json BaseJson = json::parse(FileReadStream);
 		json FontJson = BaseJson[FontName];
 		ImageName = BaseJson["TextureLocation"].get<std::string>();
-		SDFImage.Load(ImageName.c_str());
-		ImgWidth = SDFImage.Width();
-		ImgHeight = SDFImage.Height();
+		SDFImageBuff = GetTextureCache()->LoadRawBytes(ImageName, ImgWidth, ImgHeight, ByteStep, true);
 		for (uint32 i = 0; i < 127; i++)
 		{
 			BANE_CHECK(FontJson.is_array());
@@ -61,7 +59,7 @@ void Font::LoadFont(const std::string& FontName)
 	{
 		uint8 r, g, b, a;
 	};
-	Color* ImageColors = reinterpret_cast<Color*>(SDFImage.GetData());
+	Color* ImageColors = reinterpret_cast<Color*>(SDFImageBuff);
 	for (uint32 y = 0; y < ImgHeight; y++)
 	{
 		for (uint32 x = 0; x < ImgWidth; x++)
@@ -69,7 +67,7 @@ void Font::LoadFont(const std::string& FontName)
 			ImageData[(y * ImgWidth) + x] = ImageColors[(y * ImgWidth) + x].r;
 		}
 	}
-	SDFImage.Delete();
+	delete SDFImageBuff;
 	auto* Device = GetApiRuntime()->GetGraphicsDevice();
 	SUBRESOURCE_DATA Data = { };
 	Data.Width = ImgWidth;
@@ -79,7 +77,7 @@ void Font::LoadFont(const std::string& FontName)
 	Data.Pointer = reinterpret_cast<void*>(ImageData);
 	FontTexture = Device->CreateTexture2D(ImgWidth, ImgHeight, FORMAT_R8_UNORM, CreateDefaultSamplerDesc(), TEXTURE_USAGE_SHADER_RESOURCE, &Data);
 	FontDataStructuredBuff = Device->CreateStructuredBuffer(static_cast<uint32>(sizeof(float4) * 2 * m_Characters.size()), reinterpret_cast<uint8*>(m_Characters.data()));
-	FontShader = GetShaderCache()->LoadGraphicsPipeline("Fonts/FontShader.gfx");
+	FontShader = GetShaderCache()->LoadGraphicsPipeline("FontShader.gfx");
 	IB = GetApiRuntime()->QuadIB;
 	VB = Device->CreateVertexBuffer(sizeof(FONT_VERTEX) * static_cast<uint32>(m_Characters.size()), reinterpret_cast<uint8*>(m_Characters.data()));
 }

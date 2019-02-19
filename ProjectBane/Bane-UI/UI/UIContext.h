@@ -12,6 +12,8 @@ class UIContext
 {
 public:
 
+	UIContext() {}
+
 	void Initialize();
 
 	void BeginFrame(IGraphicsCommandContext* InCommandList, IComputeCommandContext* InComputeList);
@@ -23,8 +25,8 @@ public:
 
 	IVertexBuffer* QuadVB;
 	IIndexBuffer* QuadIB;
-	InputKeyboardDevice& KeyboardState;
-	InputMouseDevice& MouseState;
+	InputKeyboardDevice* KeyboardState;
+	InputMouseDevice* MouseState;
 	IGraphicsCommandContext* CommandList;
 	IComputeCommandContext* ComputeContext;
 };

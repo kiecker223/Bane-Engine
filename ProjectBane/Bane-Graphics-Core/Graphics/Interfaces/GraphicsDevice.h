@@ -15,11 +15,11 @@ enum EGENERATE_MIPS_MODE
 
 #define GPU_BUFFER_MIN_SIZE KILOBYTE(65)
 
-class IRuntimeGraphicsDevice
+class IGraphicsDevice
 {
 public:
 
-	virtual ~IRuntimeGraphicsDevice() { }
+	virtual ~IGraphicsDevice() { }
 
 	// This is here in case someone absolutely knows what they are doing and absolutely positively need a new context
 	virtual IGraphicsCommandContext* CreateCommandContext(ECOMMAND_CONTEXT_TYPE Type) = 0;
@@ -71,9 +71,9 @@ public:
 
 	virtual IInputLayout* CreateInputLayout(const GFX_INPUT_LAYOUT_DESC& Desc) = 0;
 
-	virtual IRenderPassInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint32 NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor) = 0;
+	virtual IRenderTargetInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint32 NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor) = 0;
 	
-	inline IRenderPassInfo* CreateRenderPass(const IRenderTargetView* RenderTarget, const IDepthStencilView* DepthStencil, const float4& ClearColor)
+	inline IRenderTargetInfo* CreateRenderPass(const IRenderTargetView* RenderTarget, const IDepthStencilView* DepthStencil, const float4& ClearColor)
 	{
 		return CreateRenderPass(&RenderTarget, 1U, DepthStencil, ClearColor);
 	}
@@ -81,7 +81,7 @@ public:
 	// Warn, On d3d12 and vulkan this will flush any state that was set previously on the main thread command list and the compute command list
 	virtual void GenerateMips(ITextureBase* Texture) = 0;
 
-	virtual IRenderPassInfo* GetBackBufferTargetPass() = 0; // This just returns the screen target
+	virtual IRenderTargetInfo* GetBackBufferTargetPass() = 0; // This just returns the screen target
 	virtual IRenderTargetView* GetBackBuffer() = 0;
 
 	virtual IRenderTargetView* CreateRenderTargetView(ITexture2D* InTexture) = 0;

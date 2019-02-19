@@ -23,7 +23,7 @@ void D3D12CommandList::FlushDestructionQueue()
 
 ///--------- D3D12GraphicsCommandBuffer ---------///
 
-void D3D12GraphicsCommandBuffer::BeginPass(IRenderPassInfo* InRenderPass)
+void D3D12GraphicsCommandBuffer::BeginPass(IRenderTargetInfo* InRenderPass)
 {
 	if (CommandList == nullptr)
 	{
@@ -84,33 +84,33 @@ void D3D12GraphicsCommandBuffer::SetGraphicsPipelineState(const IGraphicsPipelin
 	D3DCL->SetGraphicsRootSignature(GraphicsPipelineState->ShaderSignature.RootSignature);
 }
 
-void D3D12GraphicsCommandBuffer::SetTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource)
+void D3D12GraphicsCommandBuffer::SetTexture(uint32 Slot, const ITextureBase* InTexture, uint32 Subresource)
 {
-	D3D12TextureBase* Texture = (D3D12TextureBase*)InTexture;
+	const D3D12TextureBase* Texture = (D3D12TextureBase*)InTexture;
 	GraphicsResources.SetSRV(Texture, Slot, Subresource);
 }
 
-void D3D12GraphicsCommandBuffer::SetStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
+void D3D12GraphicsCommandBuffer::SetStructuredBuffer(uint32 Slot, const IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
 {
-	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
+	const D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
 	GraphicsResources.SetSRV(Buffer, Slot, IndexToStart, NumElements, StructureByteStride);
 }
 
-void D3D12GraphicsCommandBuffer::SetUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource)
+void D3D12GraphicsCommandBuffer::SetUnorderedAccessView(uint32 Slot, const ITextureBase* InResource, uint32 Subresource)
 {
-	D3D12TextureBase* Texture = (D3D12TextureBase*)InResource;
+	const D3D12TextureBase* Texture = (D3D12TextureBase*)InResource;
 	GraphicsResources.SetUAV(Texture, Subresource, Slot);
 }
 
-void D3D12GraphicsCommandBuffer::SetUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
+void D3D12GraphicsCommandBuffer::SetUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
 {
-	D3D12Buffer* Buffer = (D3D12Buffer*)InResource;
+	const D3D12Buffer* Buffer = (D3D12Buffer*)InResource;
 	GraphicsResources.SetUAV(Buffer, Slot, IndexToStart, NumElements, StructureByteStride);
 }
 
-void D3D12GraphicsCommandBuffer::SetConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset)
+void D3D12GraphicsCommandBuffer::SetConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset)
 {
-	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
+	const D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
 	GraphicsResources.SetCBV(Buffer, Offset, Slot);
 }
 
@@ -309,33 +309,33 @@ void D3D12GraphicsCommandBuffer::SetComputePipelineState(const IComputePipelineS
 	D3DCL->SetComputeRootSignature(RootSignature.RootSignature);
 }
 
-void D3D12GraphicsCommandBuffer::SetComputeTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource)
+void D3D12GraphicsCommandBuffer::SetComputeTexture(uint32 Slot, const ITextureBase* InTexture, uint32 Subresource)
 {
-	D3D12TextureBase* Texture = (D3D12TextureBase*)InTexture;
+	const D3D12TextureBase* Texture = (D3D12TextureBase*)InTexture;
 	ComputeResources.SetSRV(Texture, Slot, Subresource);
 }
 
-void D3D12GraphicsCommandBuffer::SetComputeStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
+void D3D12GraphicsCommandBuffer::SetComputeStructuredBuffer(uint32 Slot, const IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
 {
-	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
+	const D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
 	ComputeResources.SetSRV(Buffer, Slot, IndexToStart, NumElements, StructureByteStride);
 }
 
-void D3D12GraphicsCommandBuffer::SetComputeUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource)
+void D3D12GraphicsCommandBuffer::SetComputeUnorderedAccessView(uint32 Slot, const ITextureBase* InResource, uint32 Subresource)
 {
-	D3D12TextureBase* Texture = (D3D12TextureBase*)InResource;
+	const D3D12TextureBase* Texture = (D3D12TextureBase*)InResource;
 	ComputeResources.SetUAV(Texture, Subresource, Slot);
 }
 
-void D3D12GraphicsCommandBuffer::SetComputeUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
+void D3D12GraphicsCommandBuffer::SetComputeUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
 {
-	D3D12Buffer* Buffer = (D3D12Buffer*)InResource;
+	const D3D12Buffer* Buffer = (D3D12Buffer*)InResource;
 	ComputeResources.SetUAV(Buffer, Slot, IndexToStart, NumElements, StructureByteStride);
 }
 
-void D3D12GraphicsCommandBuffer::SetComputeConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset)
+void D3D12GraphicsCommandBuffer::SetComputeConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset)
 {
-	D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
+	const D3D12Buffer* Buffer = (D3D12Buffer*)InBuffer;
 	ComputeResources.SetCBV(Buffer, Offset, Slot);
 }
 
@@ -424,13 +424,20 @@ void D3D12GraphicsCommandBuffer::FlushResourceTransitions()
 
 void D3D12GraphicsCommandBuffer::CommitGraphicsResourcesToExecution()
 {
-	GraphicsResources.Initialize(GraphicsPipelineState, ParentDevice);
+	// Allow state inheritance
+//	if (GraphicsResources.bAnySrvDirty || GraphicsResources.bAnyUavDirty)
+//	{
+		GraphicsResources.Initialize(GraphicsPipelineState, ParentDevice);
+//	}
 	GraphicsResources.ApplyGraphicsResources(this);
 }
 
 void D3D12GraphicsCommandBuffer::CommitComputeResourcesToExecution()
 {
-	ComputeResources.Initialize(ComputePipelineState, ParentDevice);
+//	if (ComputeResources.bAnySrvDirty || ComputeResources.bAnyUavDirty)
+//	{
+		ComputeResources.Initialize(ComputePipelineState, ParentDevice);
+//	}
 	ComputeResources.ApplyComputeResources(this);
 }
 
@@ -452,7 +459,7 @@ void D3D12GraphicsCommandBuffer::ReturnCommandList()
 
 ///--------- End D3D12GraphicsCommandBuffer ---------///
 
-void D3D12GraphicsCommandContext::BeginPass(IRenderPassInfo* InRenderPass)
+void D3D12GraphicsCommandContext::BeginPass(IRenderTargetInfo* InRenderPass)
 {
 	CurrentCommandBuffer->BeginPass(InRenderPass);
 }
@@ -521,27 +528,27 @@ void D3D12GraphicsCommandContext::SetGraphicsPipelineState(const IGraphicsPipeli
 	CurrentCommandBuffer->SetGraphicsPipelineState(InPipelineState);
 }
 
-void D3D12GraphicsCommandContext::SetTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource)
+void D3D12GraphicsCommandContext::SetTexture(uint32 Slot, const ITextureBase* InTexture, uint32 Subresource)
 {
 	CurrentCommandBuffer->SetTexture(Slot, InTexture, Subresource);
 }
 
-void D3D12GraphicsCommandContext::SetStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
+void D3D12GraphicsCommandContext::SetStructuredBuffer(uint32 Slot, const IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
 {
 	CurrentCommandBuffer->SetStructuredBuffer(Slot, InBuffer, IndexToStart, NumElements, StructureByteStride);
 }
 
-void D3D12GraphicsCommandContext::SetUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource)
+void D3D12GraphicsCommandContext::SetUnorderedAccessView(uint32 Slot, const ITextureBase* InResource, uint32 Subresource)
 {
 	CurrentCommandBuffer->SetUnorderedAccessView(Slot, InResource, Subresource);
 }
 
-void D3D12GraphicsCommandContext::SetUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
+void D3D12GraphicsCommandContext::SetUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
 {
 	CurrentCommandBuffer->SetUnorderedAccessView(Slot, InResource, IndexToStart, NumElements, StructureByteStride);
 }
 
-void D3D12GraphicsCommandContext::SetConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset)
+void D3D12GraphicsCommandContext::SetConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset)
 {
 	CurrentCommandBuffer->SetConstantBuffer(Slot, InBuffer, Offset);
 }
@@ -616,27 +623,27 @@ void D3D12GraphicsCommandContext::SetComputePipelineState(const IComputePipeline
 	CurrentCommandBuffer->SetComputePipelineState(InState);
 }
 
-void D3D12GraphicsCommandContext::SetComputeTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource)
+void D3D12GraphicsCommandContext::SetComputeTexture(uint32 Slot, const ITextureBase* InTexture, uint32 Subresource)
 {
 	CurrentCommandBuffer->SetComputeTexture(Slot, InTexture, Subresource);
 }
 
-void D3D12GraphicsCommandContext::SetComputeStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
+void D3D12GraphicsCommandContext::SetComputeStructuredBuffer(uint32 Slot, const IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
 {
 	CurrentCommandBuffer->SetComputeStructuredBuffer(Slot, InBuffer, IndexToStart, NumElements, StructureByteStride);
 }
 
-void D3D12GraphicsCommandContext::SetComputeUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource)
+void D3D12GraphicsCommandContext::SetComputeUnorderedAccessView(uint32 Slot, const ITextureBase* InResource, uint32 Subresource)
 {
 	CurrentCommandBuffer->SetComputeUnorderedAccessView(Slot, InResource, Subresource);
 }
 
-void D3D12GraphicsCommandContext::SetComputeUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
+void D3D12GraphicsCommandContext::SetComputeUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
 {
 	CurrentCommandBuffer->SetComputeUnorderedAccessView(Slot, InResource, IndexToStart, NumElements, StructureByteStride);
 }
 
-void D3D12GraphicsCommandContext::SetComputeConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset)
+void D3D12GraphicsCommandContext::SetComputeConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset)
 {
 	CurrentCommandBuffer->SetComputeConstantBuffer(Slot, InBuffer, Offset);
 }

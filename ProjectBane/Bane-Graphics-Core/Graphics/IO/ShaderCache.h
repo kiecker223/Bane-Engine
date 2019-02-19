@@ -15,8 +15,21 @@ public:
 
 	static ShaderCache* GInstance;
 
-	IGraphicsPipelineState* LoadGraphicsPipeline(const std::string& ShaderFile);
-	IComputePipelineState* LoadComputePipeline(const std::string& ShaderFile);
+	IGraphicsPipelineState* LoadGraphicsPipeline(const std::string& ShaderFile, uint32& OutHash);
+	inline IGraphicsPipelineState* LoadGraphicsPipeline(const std::string& ShaderFile)
+	{
+		uint32 Dummy = 0;
+		UNUSED(Dummy);
+		return LoadGraphicsPipeline(ShaderFile, Dummy);
+	}
+
+	IComputePipelineState* LoadComputePipeline(const std::string& ShaderFile, uint32& OutHash);
+	inline IComputePipelineState* LoadComputePipeline(const std::string& ShaderFile)
+	{
+		uint32 Dummy = 0;
+		UNUSED(Dummy);
+		return LoadComputePipeline(ShaderFile, Dummy);
+	}
 
 	void ReloadAllShaders();
 	
@@ -25,8 +38,8 @@ public:
 
 private:
 
-	std::map<std::string, IGraphicsPipelineState*> m_GraphicsPipelines;
-	std::map<std::string, IComputePipelineState*> m_ComputePipelines;
+	std::map<std::string, std::pair<IGraphicsPipelineState*, uint32>> m_GraphicsPipelines;
+	std::map<std::string, std::pair<IComputePipelineState*, uint32>> m_ComputePipelines;
 	
 };
 

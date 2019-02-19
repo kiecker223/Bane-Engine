@@ -114,10 +114,7 @@ bool Scene::EntityExists(uint64 Id)
 
 void Scene::Tick(double DT)
 {
-	for (auto& e : m_Entities)
-	{
-		e.pEntity->Tick(DT);
-	}
+	m_Root->Tick(DT);
 	if (m_EntityAddList.size() > 0)
 	{
 		for (auto& e : m_EntityAddList)
@@ -145,33 +142,26 @@ void Scene::Tick(double DT)
 	}
 	if (m_World.IsReadyForRead())
 	{
-		for (auto& e : m_Entities)
-		{
-			e.pEntity->PhysicsTick();
-		}
-		std::lock_guard<std::mutex> ScopedLock(m_World.GenerateOctTreeMutex);
-// 		if (m_PhysOctree.Base)
+		m_Root->PhysicsTick();
+//		std::lock_guard<std::mutex> ScopedLock(m_World.GenerateOctTreeMutex);
+//		m_PhysOctree = m_World.GetOctTree();
+	}
+}
+
+
+// void DrawOctsImpl(PhysicsWorld::OctTreeType::TNode* pNewNode, RenderLoop& RL, uint32& CallDepth)
+// {
+// 	using TNode = PhysicsWorld::OctTreeType::TNode;
+// 	CallDepth++;
+// 	for (uint32 i = 0; i < 8; i++)
+// 	{
+// 		if (pNewNode->Children[i])
 // 		{
-// 			m_PhysOctree.RecursivelyDelete();
+// 			DrawOctsImpl(pNewNode->Children[i], RL, CallDepth);
 // 		}
-		m_PhysOctree = m_World.GetOctTree();
-	}
-}
-
-
-void DrawOctsImpl(PhysicsWorld::OctTreeType::TNode* pNewNode, RenderLoop& RL, uint32& CallDepth)
-{
-	using TNode = PhysicsWorld::OctTreeType::TNode;
-	CallDepth++;
-	for (uint32 i = 0; i < 8; i++)
-	{
-		if (pNewNode->Children[i])
-		{
-			DrawOctsImpl(pNewNode->Children[i], RL, CallDepth);
-		}
-	}
-	RL.AddBoundingBox(pNewNode->Value.Bounds);
-}
+// 	}
+// 	RL.AddBoundingBox(pNewNode->Value.Bounds);
+// }
 
 void Scene::Render(RenderLoop& RL)
 {
@@ -181,9 +171,9 @@ void Scene::Render(RenderLoop& RL)
 	}
 	if (bDrawPhysicsDebugInfo)
 	{
-		uint32 CallDepth;
-		DrawOctsImpl(m_PhysOctree.Base, RL, CallDepth);
-		UNUSED(CallDepth);
+//		uint32 CallDepth;
+//		DrawOctsImpl(m_PhysOctree.Base, RL, CallDepth);
+//		UNUSED(CallDepth);
 	}
 }
 

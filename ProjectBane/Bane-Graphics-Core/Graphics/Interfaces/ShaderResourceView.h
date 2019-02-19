@@ -27,10 +27,10 @@ public:
 	virtual ~IShaderResourceView() { }
 };
 
-class IRenderPassInfo
+class IRenderTargetInfo
 {
 public:
-	virtual ~IRenderPassInfo() { }
+	virtual ~IRenderTargetInfo() { }
 
 	virtual IRenderTargetView** GetRenderTargets() const = 0;
 	virtual uint32 GetNumRenderTargets() const = 0;

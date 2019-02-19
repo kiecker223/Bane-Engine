@@ -1,6 +1,9 @@
 group "Core"
 project "BaneUI"
     kind "StaticLib"
+	libdirs {
+		"../External/libs/"
+	}
     links { "BaneGraphicsCore", "BaneGraphicsRenderer", "BaneObject" }
     includedirs {
         "../Bane-Common/",

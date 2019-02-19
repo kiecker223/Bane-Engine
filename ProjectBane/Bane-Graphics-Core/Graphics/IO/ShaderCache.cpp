@@ -9,12 +9,13 @@
 #include <fstream>
 #include <iostream>
 #include <JSON/JsonCPP.h>
+#include "Common/Hash.h"
 
 
 
 ShaderCache* ShaderCache::GInstance = nullptr;
 
-IGraphicsPipelineState* ShaderCache::LoadGraphicsPipeline(const std::string& ShaderFile)
+IGraphicsPipelineState* ShaderCache::LoadGraphicsPipeline(const std::string& ShaderFile, uint32& OutHash)
 {
 	auto PipeFind = m_GraphicsPipelines.find(ShaderFile);
 	if (PipeFind == m_GraphicsPipelines.end())
@@ -23,10 +24,11 @@ IGraphicsPipelineState* ShaderCache::LoadGraphicsPipeline(const std::string& Sha
 		__debugbreak();
 		return nullptr;
 	}
-	return PipeFind->second;
+	OutHash = PipeFind->second.second;
+	return PipeFind->second.first;
 }
 
-IComputePipelineState* ShaderCache::LoadComputePipeline(const std::string& ShaderFile)
+IComputePipelineState* ShaderCache::LoadComputePipeline(const std::string& ShaderFile, uint32& OutHash)
 {
 	auto PipeFind = m_ComputePipelines.find(ShaderFile);
 	if (PipeFind == m_ComputePipelines.end())
@@ -34,7 +36,8 @@ IComputePipelineState* ShaderCache::LoadComputePipeline(const std::string& Shade
 		__debugbreak();
 		return nullptr;
 	}
-	return PipeFind->second;
+	OutHash = PipeFind->second.second;
+	return PipeFind->second.first;
 }
 
 
@@ -486,7 +489,9 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 			}
 			delete[] FileBinary;
 			IGraphicsPipelineState* PipelineState = Device->CreatePipelineState(&Desc);
-			auto PipelineNamePair = std::pair<std::string, IGraphicsPipelineState*>(CurrentPipeline, PipelineState);
+			uint32 Hash = GetFNV0Hash(CurrentPipeline.c_str(), CurrentPipeline.size());
+			auto PipelineNamePair = std::pair<std::string, std::pair<IGraphicsPipelineState*, uint32>>(CurrentPipeline, 
+				std::pair<IGraphicsPipelineState*, uint32>(PipelineState, Hash));
 			m_GraphicsPipelines.insert(PipelineNamePair);
 		}
 		else
@@ -500,8 +505,10 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 			memcpy(ByteCode.data(), FileBinary, NumBytes);
 			Desc.CS = Device->CreateComputeShaderFromBytecode(ByteCode);
 			delete[] FileBinary;
+			uint32 Hash = GetFNV0Hash(CurrentPipeline.c_str(), CurrentPipeline.size());
 			IComputePipelineState* PipelineState = Device->CreatePipelineState(&Desc);
-			auto PipelineNamePair = std::pair<std::string, IComputePipelineState*>(CurrentPipeline, PipelineState);
+			auto PipelineNamePair = std::pair<std::string, std::pair<IComputePipelineState*, uint32>>(CurrentPipeline,
+				std::pair<IComputePipelineState*, uint32>(PipelineState, Hash));
 			m_ComputePipelines.insert(PipelineNamePair);
 		}
 	}
@@ -511,12 +518,12 @@ void ShaderCache::DestroyCache()
 {
 	for (auto& Iter : m_GraphicsPipelines)
 	{
-		delete Iter.second;
+		delete Iter.second.first;
 	}
 	m_GraphicsPipelines.clear();
 	for (auto& Iter : m_ComputePipelines)
 	{
-		delete Iter.second;
+		delete Iter.second.first;
 	}
 	m_ComputePipelines.clear();
 }

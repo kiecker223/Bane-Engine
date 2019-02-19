@@ -21,5 +21,5 @@ void MeshRenderingComponent::Start()
 void MeshRenderingComponent::GraphicsUpdate(RenderLoop& Loop)
 {
 	auto Mat = GetOwner()->GetMatrixAffectedByParents();
-	Loop.AddDrawable(RenderedMesh, RenderedMaterial, Mat);
+	Loop.DrawMesh(RenderedMesh, &RenderedMaterial, Mat);
 }

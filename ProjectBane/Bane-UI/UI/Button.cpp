@@ -4,13 +4,15 @@
 void UIButton::Initialize()
 {
 	m_FontDrawInfo = GetApiRuntime()->GetGraphicsDevice()->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
+	FontOverride = new Font();
+	FontOverride->LoadFont("arial.ttf");
 }
 
 void UIButton::Update(UIContext& Context)
 {
-	if (Context.MouseState.GetButtonUp(0))
+	if (Context.MouseState->GetButtonUp(0))
 	{
-		double2 MousePos = Context.MouseState.GetMousePosition();
+		double2 MousePos = Context.MouseState->GetMousePosition();
 
 		if (PointInside(MousePos))
 		{
@@ -38,8 +40,8 @@ void UIButton::Render(UIContext& Context)
 	CBufferData* pData = m_FontDrawInfo->MapT<CBufferData>();
 	double2 Position = GetPosition();
 	double2 Scale = GetScale();
-	pData->Data = matTranslation(fromDouble3(double3(Position.x, Position.y, 0.f))) * matScale(fromDouble3(double3(Scale.x, Scale.y, 0.f)));
-	pData->Data *= matScale(fromDouble3(double3(1. / 1920., 1. / 1080., 0.)));
+	//pData->Data = matTranslation(fromDouble3(double3(Position.x, Position.y, 0.f))) * matScale(fromDouble3(double3(Scale.x, Scale.y, 0.f)));
+	pData->Data = matScale(float3(1.f / (1920.f / 6.f), 1.f / (1080.f / 6.f), 0.f));
 	m_FontDrawInfo->Unmap();
 
 	CmdList->SetGraphicsPipelineState(FontOverride->FontShader);
@@ -50,7 +52,7 @@ void UIButton::Render(UIContext& Context)
 		CmdList->SetVertexBuffer(FontOverride->VB, FontOverride->GetVertexBufferOffset(CurrChar));
 		CmdList->SetIndexBuffer(FontOverride->IB);
 		CmdList->SetConstantBuffer(0, m_FontDrawInfo);
-		CmdList->DrawIndexed(4, 0, 0);
+		CmdList->DrawIndexed(3, 0, 0);
 	}
 }
 

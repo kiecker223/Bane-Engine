@@ -38,8 +38,11 @@ public:
 	};
 
 	bool DirtySrvs[16];
+	bool bAnySrvDirty;
 	bool DirtyUavs[16];
+	bool bAnyUavDirty;
 	bool DirtyCbvs[16];
+	bool bAnyCbvDirty;
 
 	D3D12_SHADER_RESOURCE				Srvs[16];
 	D3D12_UNORDERED_ACCESS_RESOURCE		Uavs[16];
@@ -53,39 +56,44 @@ public:
 	void Initialize(D3D12GraphicsPipelineState* pPipeline, D3D12GraphicsDevice* pDevice);
 	void Initialize(D3D12ComputePipelineState* pPipeline, D3D12GraphicsDevice* pDevice);
 
-	inline void SetSRV(D3D12TextureBase* Texture, uint32 Slot, uint32 Subresource)
+	inline void SetSRV(const D3D12TextureBase* Texture, uint32 Slot, uint32 Subresource)
 	{
 		BANE_CHECK(Slot < 16);
 		Srvs[Slot] = { Texture->Resource.D3DResource, Texture->GetSRVDesc(Subresource), Texture->D3DSampleDesc };
 		DirtySrvs[Slot] = true;
+		bAnySrvDirty = true;
 	}
 
-	inline void SetSRV(D3D12Buffer* StructuredBuffer, uint32 Slot, uint64 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
+	inline void SetSRV(const D3D12Buffer* StructuredBuffer, uint32 Slot, uint64 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
 	{
 		BANE_CHECK(Slot < 16);
 		Srvs[Slot] = { StructuredBuffer->Resource.D3DResource, StructuredBuffer->GetSRVDesc(IndexToStart, NumElements, StructureByteStride), {} };
 		DirtySrvs[Slot] = true;
+		bAnySrvDirty = true;
 	}
 
-	inline void SetCBV(D3D12Buffer* ConstantBuffer, uint64 Offset, uint32 Slot)
+	inline void SetCBV(const D3D12Buffer* ConstantBuffer, uint64 Offset, uint32 Slot)
 	{
 		BANE_CHECK(Slot < 16);
 		Cbvs[Slot] = { ConstantBuffer->Resource.Location + Offset };
 		DirtyCbvs[Slot] = true;
+		bAnyCbvDirty = true;
 	}
 
-	inline void SetUAV(D3D12TextureBase* Texture, uint32 Subresource, uint32 Slot)
+	inline void SetUAV(const D3D12TextureBase* Texture, uint32 Subresource, uint32 Slot)
 	{
 		BANE_CHECK(Slot < 16);
 		Uavs[Slot] = { Texture->Resource.D3DResource, Texture->GetUAVDesc(Subresource) };
 		DirtyUavs[Slot] = true;
+		bAnyUavDirty = true;
 	}
 
-	inline void SetUAV(D3D12Buffer* Buffer, uint32 Slot, uint64 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
+	inline void SetUAV(const D3D12Buffer* Buffer, uint32 Slot, uint64 IndexToStart, uint32 NumElements, uint32 StructureByteStride)
 	{
 		BANE_CHECK(Slot < 16);
 		Uavs[Slot] = { Buffer->Resource.D3DResource, Buffer->GetUAVDesc(IndexToStart, NumElements, StructureByteStride) };
 		DirtyUavs[Slot] = true;
+		bAnyUavDirty = true;
 	}
 
 	void ApplyGraphicsResources(D3D12GraphicsCommandBuffer* pCmdList);

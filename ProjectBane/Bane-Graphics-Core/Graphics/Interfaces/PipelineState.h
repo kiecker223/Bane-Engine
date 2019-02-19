@@ -293,13 +293,12 @@ class IInputLayout
 public:
 	virtual ~IInputLayout() { }
 
-	virtual const GFX_INPUT_LAYOUT_DESC& GetDesc() const = 0;
-
+	GFX_INPUT_LAYOUT_DESC Desc;
 };
 
 inline uint32 GetLayoutStride(IInputLayout* Layout)
 {
-	return GetLayoutDescSize(Layout->GetDesc());
+	return GetLayoutDescSize(Layout->Desc);
 }
 
 class IDepthStencilState
@@ -307,7 +306,7 @@ class IDepthStencilState
 public:
 	virtual ~IDepthStencilState() { }
 
-	virtual const GFX_DEPTH_STENCIL_DESC GetDesc() const = 0;
+	GFX_DEPTH_STENCIL_DESC Desc;
 };
 
 typedef struct PIPELINE_STATE_RESOURCE_COUNTS {
@@ -381,13 +380,15 @@ class IGraphicsPipelineState : public IPipelineState
 {
 public:
 	virtual ~IGraphicsPipelineState() { }
-	virtual void GetDesc(GFX_PIPELINE_STATE_DESC* OutDesc) const = 0;
+
+	GFX_PIPELINE_STATE_DESC Desc;
 };
 
 class IComputePipelineState : public IPipelineState
 {
 public:
 	virtual ~IComputePipelineState() { }
-	virtual void GetDesc(COMPUTE_PIPELINE_STATE_DESC* OutDesc) const = 0;
+
+	COMPUTE_PIPELINE_STATE_DESC Desc;
 };
 

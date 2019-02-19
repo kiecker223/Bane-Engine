@@ -74,6 +74,31 @@ float4x4 Entity::GetMatrixAffectedByParents() const
 	return Result;
 }
 
+void Entity::SetParent(Entity* Parent)
+{
+	if (m_Parent)
+	{
+		BANE_CHECK(m_ParentChildIdx != -1);
+		m_Parent->GetChildren().erase(m_Parent->GetChildren().begin() + m_ParentChildIdx);
+		m_ParentChildIdx = -1;
+	}
+
+	if (Parent)
+	{
+		m_Parent = Parent;
+		m_ParentChildIdx = Parent->GetChildCount();
+		Parent->AddChild(this);
+	}
+	else
+	{
+		m_Parent = m_SceneOwner->GetSceneRoot();
+		m_ParentChildIdx = m_Parent->GetChildCount();
+		m_Parent->AddChild(this);
+	}
+}
+
+
+
 Entity* GetEntityById(const EntityIdentifier& Id)
 {
 	return GetSceneManager()->CurrentScene->FindEntity(Id.HashedName);

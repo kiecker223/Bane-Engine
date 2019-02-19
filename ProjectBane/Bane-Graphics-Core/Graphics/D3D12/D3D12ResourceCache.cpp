@@ -30,7 +30,10 @@ void D3D12ResourceCache::ApplyGraphicsResources(D3D12GraphicsCommandBuffer* pCmd
 {
 	ID3D12GraphicsCommandList* pCL = pCmdList->D3DCL;
 	D3D12ShaderSignature RootSignature = pCmdList->RootSignature;
-	//pCL->SetGraphicsRootSignature(RootSignature.RootSignature);
+
+	bAnySrvDirty = false;
+	bAnyCbvDirty = false;
+	bAnyUavDirty = false;
 	for (uint32 i = 0; i < Counts.NumShaderResourceViews; i++)
 	{
 		if (DirtySrvs[i])
@@ -74,7 +77,11 @@ void D3D12ResourceCache::ApplyComputeResources(D3D12GraphicsCommandBuffer* pCmdL
 {
 	ID3D12GraphicsCommandList* pCL = pCmdList->D3DCL;
 	D3D12ShaderSignature RootSignature = pCmdList->RootSignature;
-	//pCL->SetComputeRootSignature(RootSignature.RootSignature);
+	
+	bAnySrvDirty = false;
+	bAnyCbvDirty = false;
+	bAnyUavDirty = false;
+
 	for (uint32 i = 0; i < Counts.NumShaderResourceViews; i++)
 	{
 		if (DirtySrvs[i])

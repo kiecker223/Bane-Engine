@@ -14,7 +14,7 @@ void TextureCache::InitCache()
 	COL ImgData[64 * 64];
 	memset(ImgData, 255, 64 * 64 * 4);
 
-	IRuntimeGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
+	IGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
 
 	SUBRESOURCE_DATA Data = { };
 	Data.Width = 64;
@@ -107,6 +107,16 @@ enum TexCubeFace
 ITextureCube* TextureCache::LoadCubemap(const std::string& Tex, const SAMPLER_DESC* pSampler)
 {
 	return LoadCubemap(Tex, Tex + "_Left", Tex + "_Up", Tex + "_Back", Tex + "_Right", Tex + "_Up", Tex + "_Front");
+}
+
+uint8* TextureCache::LoadRawBytes(const std::string& TextureName, uint32& OutWidth, uint32& OutHeight, uint32& OutStep, bool bFlip)
+{
+	int32 Width, Height, Step;
+	uint8* Result = InternalLoadImage(TextureName.c_str(), Width, Height, Step, bFlip);
+	OutWidth = Width;
+	OutHeight = Height;
+	OutStep = Step;
+	return Result;
 }
 
 void TextureCache::AddTexture(const std::string& TextureName, ITextureBase* Texture)
@@ -211,7 +221,7 @@ SUBRESOURCE_DATA TextureCache::CreateTexData(LOADED_IMAGE* InImages, uint32& Out
 	OutWidth = Width;
 	OutHeight = Height;
 	OutDepth = 6;
-	Result.Width = Width;
+	Result.Width = Width; 
 	Result.Height = Height;
 	Result.Depth = 6;
 	Result.Subresource = 0;

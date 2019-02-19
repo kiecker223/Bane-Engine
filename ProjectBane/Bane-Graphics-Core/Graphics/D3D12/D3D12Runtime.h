@@ -13,7 +13,7 @@ public:
 	virtual void Destroy() final override;
 	virtual bool SupportsAsyncContexts() const final override { return true; }
 	
-	virtual IRuntimeGraphicsDevice* GetGraphicsDevice() final override { return (IRuntimeGraphicsDevice*)m_Device; }
+	virtual IGraphicsDevice* GetGraphicsDevice() final override { return (IGraphicsDevice*)m_Device; }
 	virtual IDeviceSwapChain* GetSwapChain() final override { return (IDeviceSwapChain*)m_SwapChain; }
 
 private:

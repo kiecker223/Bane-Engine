@@ -28,7 +28,7 @@ class IGraphicsCommandBuffer
 {
 public:
 
-	virtual void BeginPass(IRenderPassInfo* RenderPass) = 0;
+	virtual void BeginPass(IRenderTargetInfo* RenderPass) = 0;
 	virtual void EndPass() = 0;
 
 	virtual void CloseCommandBuffer() = 0;
@@ -38,11 +38,11 @@ public:
 
 	virtual void SetGraphicsPipelineState(const IGraphicsPipelineState* PipelineState) = 0;
 
-	virtual void SetTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource = 0) = 0;
-	virtual void SetStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
-	virtual void SetUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource = 0) = 0;
-	virtual void SetUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
-	virtual void SetConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset) = 0;
+	virtual void SetTexture(uint32 Slot, const ITextureBase* InTexture, uint32 Subresource = 0) = 0;
+	virtual void SetStructuredBuffer(uint32 Slot, const IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetUnorderedAccessView(uint32 Slot, const ITextureBase* InResource, uint32 Subresource = 0) = 0;
+	virtual void SetUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset) = 0;
 
 	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer, uint64 Offset) = 0;
 	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer) = 0;
@@ -62,11 +62,11 @@ public:
 
 	virtual void SetComputePipelineState(const IComputePipelineState* PipelineState) = 0;
 
-	virtual void SetComputeTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource = 0) = 0;
-	virtual void SetComputeStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
-	virtual void SetComputeUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) = 0;
-	virtual void SetComputeUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
-	virtual void SetComputeConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset) = 0;
+	virtual void SetComputeTexture(uint32 Slot, const ITextureBase* InTexture, uint32 Subresource = 0) = 0;
+	virtual void SetComputeStructuredBuffer(uint32 Slot, const IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, const ITextureBase* InResource, uint32 Subresource) = 0;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetComputeConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset) = 0;
 
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) = 0;
 };
@@ -76,7 +76,7 @@ class IGraphicsCommandContext
 public:
 	virtual ~IGraphicsCommandContext() { }
 
-	virtual void BeginPass(IRenderPassInfo* RenderPass) = 0;
+	virtual void BeginPass(IRenderTargetInfo* RenderPass) = 0;
 	virtual void EndPass() = 0; // This will submit the workload for execution, no need to manually release it, it will be taken care of on a per-thread basis
 
 	virtual void Flush() = 0; // Stall until execution is finished
@@ -84,11 +84,11 @@ public:
 	virtual void Begin() { BeginPass(nullptr); } // No graphics tasks are allowed to be done
 	virtual void End() { EndPass(); }
 
-	virtual void SetTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource = 0) = 0;
-	virtual void SetStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
-	virtual void SetUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) = 0;
-	virtual void SetUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
-	virtual void SetConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset = 0) = 0;
+	virtual void SetTexture(uint32 Slot, const ITextureBase* InTexture, uint32 Subresource = 0) = 0;
+	virtual void SetStructuredBuffer(uint32 Slot, const IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetUnorderedAccessView(uint32 Slot, const ITextureBase* InResource, uint32 Subresource) = 0;
+	virtual void SetUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset = 0) = 0;
 
 	virtual void SetGraphicsPipelineState(const IGraphicsPipelineState* PipelineState) = 0;
 
@@ -123,11 +123,11 @@ public:
 
 	virtual void SetComputePipelineState(const IComputePipelineState* PipelineState) = 0;
 
-	virtual void SetComputeTexture(uint32 Slot, ITextureBase* InTexture, uint32 Subresource = 0) = 0;
-	virtual void SetComputeStructuredBuffer(uint32 Slot, IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
-	virtual void SetComputeUnorderedAccessView(uint32 Slot, ITextureBase* InResource, uint32 Subresource) = 0;
-	virtual void SetComputeUnorderedAccessView(uint32 Slot, IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
-	virtual void SetComputeConstantBuffer(uint32 Slot, IBuffer* InBuffer, uint64 Offset = 0) = 0;
+	virtual void SetComputeTexture(uint32 Slot, const ITextureBase* InTexture, uint32 Subresource = 0) = 0;
+	virtual void SetComputeStructuredBuffer(uint32 Slot, const IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, const ITextureBase* InResource, uint32 Subresource) = 0;
+	virtual void SetComputeUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
+	virtual void SetComputeConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset = 0) = 0;
 
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) = 0;
 };

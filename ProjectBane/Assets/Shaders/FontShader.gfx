@@ -6,7 +6,7 @@ struct FontInformation
 
 Resources
 {
-    Texture2D FontTexture : register(t0);
+    Texture2D<float> FontTexture : register(t0);
     SamplerState FontSampler : register(s0);
     cbuffer ScreenConstants : register(b0)
     {
@@ -42,12 +42,12 @@ struct PS_INPUT
 PS_INPUT VSMain(VS_INPUT Input)
 {
     PS_INPUT Result;
-    Result.Position = float4(Input.Position, 0.f, 1.f);
-    Result.UV = Input.UV;
+    Result.Position = mul(float4(Input.Position, 0.f, 1.f), ScreenOrthoMatrix);
+    Result.UV = float2(Input.UV.x, Input.UV.y);
     return Result;
 }
 
 float4 PSMain(PS_INPUT Input) : SV_TARGET0
 {
-    return float4(1.f, 1.f, 1.f, 1.f);
+    return float4(FontTexture.Sample(FontSampler, Input.UV).r, 0.f, 0.f, 1.f);
 }

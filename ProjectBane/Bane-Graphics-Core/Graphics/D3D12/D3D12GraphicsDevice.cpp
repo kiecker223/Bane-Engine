@@ -91,7 +91,7 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 		ITexture2D* DepthTexture = CreateTexture2D(RenderingWindow->GetWidth(), RenderingWindow->GetHeight(), FORMAT_UNKNOWN, CreateDefaultSamplerDesc(), TEXTURE_USAGE_DEPTH_STENCIL, nullptr);
 		IDepthStencilView* DepthStencil = CreateDepthStencilView(DepthTexture);
 
-		m_BasicRenderPass = (D3D12RenderPassInfo*)IRuntimeGraphicsDevice::CreateRenderPass(m_BackBuffer, DepthStencil, float4(0.1f, 0.1f, 0.1f, 0.f));
+		m_BasicRenderPass = (D3D12RenderPassInfo*)IGraphicsDevice::CreateRenderPass(m_BackBuffer, DepthStencil, float4(0.1f, 0.1f, 0.1f, 0.f));
 	}
 	
 	for (uint32 i = 0; i < COMMAND_CONTEXT_TYPE_NUM_TYPES; i++)
@@ -781,14 +781,14 @@ IInputLayout* D3D12GraphicsDevice::CreateInputLayout(const GFX_INPUT_LAYOUT_DESC
 	return new D3D12InputLayout(Desc, CreationDesc);
 }
 
-IRenderPassInfo* D3D12GraphicsDevice::CreateRenderPass(const IRenderTargetView** RenderTargets, uint32 NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor)
+IRenderTargetInfo* D3D12GraphicsDevice::CreateRenderPass(const IRenderTargetView** RenderTargets, uint32 NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor)
 {
 	// Consider making this store the command list too? That would make alot of the task submission easier, but potentially less performant
 	D3D12RenderPassInfo* RenderPassInfo = new D3D12RenderPassInfo(RenderTargets, NumRenderTargets, DepthStencil, ClearColor);
 	return RenderPassInfo;
 }
 
-IRenderPassInfo* D3D12GraphicsDevice::GetBackBufferTargetPass()
+IRenderTargetInfo* D3D12GraphicsDevice::GetBackBufferTargetPass()
 {
 	return m_BasicRenderPass;
 }
@@ -921,10 +921,7 @@ IRenderTargetView* D3D12GraphicsDevice::GetBackBuffer()
 
 D3D12ShaderItemData GetShaderRequirements(IGraphicsPipelineState* pState)
 {
-	GFX_PIPELINE_STATE_DESC PipelineDesc;
-	{
-		pState->GetDesc(&PipelineDesc);
-	}
+	GFX_PIPELINE_STATE_DESC PipelineDesc = pState->Desc;
 	auto& Counts = PipelineDesc.Counts;
 	D3D12ShaderItemData ParameterList(
 		static_cast<uint32>(Counts.NumConstantBuffers), 
@@ -937,8 +934,7 @@ D3D12ShaderItemData GetShaderRequirements(IGraphicsPipelineState* pState)
 
 D3D12ShaderItemData GetShaderRequirements(IComputePipelineState* pState)
 {
-	COMPUTE_PIPELINE_STATE_DESC Desc;
-	pState->GetDesc(&Desc);
+	COMPUTE_PIPELINE_STATE_DESC Desc = pState->Desc;
 	auto& Counts = Desc.Counts;
 	D3D12ShaderItemData ParameterList;
 	ParameterList.NumCBVs = Counts.NumConstantBuffers;

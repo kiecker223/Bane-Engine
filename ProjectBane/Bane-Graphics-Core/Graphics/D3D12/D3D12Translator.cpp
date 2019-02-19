@@ -258,7 +258,6 @@ D3D12_INPUT_LAYOUT_DESC D3D12_TranslateInputLayout(const GFX_INPUT_LAYOUT_DESC& 
 	}
 
 	Result.pInputElementDescs = ResultItems;
-	ResultItems->Format = DXGI_FORMAT_R32G32B32_FLOAT;
 	Result.NumElements = static_cast<uint32>(InDesc.InputItems.size());
 	return Result;
 }
@@ -323,7 +322,7 @@ D3D12_GRAPHICS_PIPELINE_STATE_DESC D3D12_TranslateGraphicsPipelineStateDesc(cons
 		OutDesc.BlendState.RenderTarget[i].RenderTargetWriteMask =	D3D12_COLOR_WRITE_ENABLE_ALL;
 		OutDesc.RTVFormats[i] = D3D_TranslateFormat(InDesc->RtvDescs[i].Format);
 	}
-	OutDesc.DSVFormat = D3D_TranslateFormat(InDesc->DepthStencilState->GetDesc().Format);
+	OutDesc.DSVFormat = D3D_TranslateFormat(InDesc->DepthStencilState->Desc.Format);
 	OutDesc.SampleMask = 0xffffffff;
 	OutDesc.NumRenderTargets = InDesc->NumRenderTargets;
 	if (InDesc->RasterDesc.bFillSolid)
@@ -383,7 +382,7 @@ D3D12_GRAPHICS_PIPELINE_STATE_DESC D3D12_TranslateGraphicsPipelineStateDesc(cons
 
 	if (InDesc->DepthStencilState)
 	{
-		GFX_DEPTH_STENCIL_DESC DepthStencilDesc = InDesc->DepthStencilState->GetDesc();
+		GFX_DEPTH_STENCIL_DESC DepthStencilDesc = InDesc->DepthStencilState->Desc;
 
 		if (DepthStencilDesc.bDepthEnable)
 		{

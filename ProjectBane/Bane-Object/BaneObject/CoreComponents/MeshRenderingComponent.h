@@ -17,7 +17,7 @@ public:
 
 	inline MATERIAL_PARAMETERS GetMaterialParameters()
 	{
-		if (RenderedMaterial.GetShaderConfiguration() != nullptr)
+		if (RenderedMaterial.GetShader() != nullptr)
 			return RenderedMaterial.GetMaterialParameters();
 		return MATERIAL_PARAMETERS();
 	}

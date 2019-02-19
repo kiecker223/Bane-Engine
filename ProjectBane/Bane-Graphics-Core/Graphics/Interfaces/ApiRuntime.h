@@ -28,7 +28,7 @@ public:
 	virtual void Destroy() = 0;
 	virtual bool SupportsAsyncContexts() const = 0;
 
-	virtual IRuntimeGraphicsDevice* GetGraphicsDevice() = 0;
+	virtual IGraphicsDevice* GetGraphicsDevice() = 0;
 	virtual IDeviceSwapChain* GetSwapChain() = 0;
 
 	IVertexBuffer* QuadVB;

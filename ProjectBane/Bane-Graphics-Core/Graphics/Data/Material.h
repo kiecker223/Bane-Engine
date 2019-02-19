@@ -38,7 +38,7 @@ public:
 
 	void SetMaterialParameters(const MATERIAL_PARAMETERS& Params);
 
-	inline IGraphicsPipelineState* GetShaderConfiguration() const { return m_Pipeline; }
+	inline IGraphicsPipelineState* GetShader() const { return m_Pipeline; }
 
 	ITexture2D* Diffuse;
 	ITexture2D* Normal;
@@ -51,9 +51,15 @@ public:
 		return m_Parameters;
 	}
 	
+	inline uint32 GetShaderHash() const
+	{
+		return m_MaterialHash;
+	}
+
 	ERENDER_FLAGS RenderFlags;
 
 private:
+	uint32 m_MaterialHash;
 	std::string m_MaterialName;
 	MATERIAL_PARAMETERS m_Parameters;
 	IGraphicsPipelineState* m_Pipeline;

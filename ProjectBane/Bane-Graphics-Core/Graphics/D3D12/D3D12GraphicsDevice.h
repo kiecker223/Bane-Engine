@@ -10,7 +10,7 @@
 #include <mutex>
 
 
-class D3D12GraphicsDevice : public IRuntimeGraphicsDevice
+class D3D12GraphicsDevice : public IGraphicsDevice
 {
 	friend class D3D12CommandQueue;
 	friend class D3D12GraphicsCommandContext;
@@ -60,8 +60,8 @@ public:
 
 	virtual IInputLayout* CreateInputLayout(const GFX_INPUT_LAYOUT_DESC& Desc) final override;
 
-	virtual IRenderPassInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint32 NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor) final override;
-	virtual IRenderPassInfo* GetBackBufferTargetPass() final override;
+	virtual IRenderTargetInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint32 NumRenderTargets, const IDepthStencilView* DepthStencil, const float4& ClearColor) final override;
+	virtual IRenderTargetInfo* GetBackBufferTargetPass() final override;
 	virtual IRenderTargetView* GetBackBuffer() final override;
 
 	virtual IRenderTargetView* CreateRenderTargetView(ITexture2D* InTexture) final override;

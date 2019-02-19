@@ -77,9 +77,9 @@ class D3D12InputLayout : public IInputLayout
 {
 public:
 	D3D12InputLayout(GFX_INPUT_LAYOUT_DESC InDesc, D3D12_INPUT_LAYOUT_DESC InInputDesc) :
-		Desc(InDesc),
 		InputDesc(InInputDesc)
 	{
+		Desc = InDesc;
 	}
 
 	~D3D12InputLayout()
@@ -87,17 +87,11 @@ public:
 		delete InputDesc.pInputElementDescs;
 	}
 
-	const GFX_INPUT_LAYOUT_DESC& GetDesc() const final override 
-	{
-		return Desc;
-	}
-
 	inline uint32 GetStride() const
 	{
 		return GetLayoutDescSize(Desc);
 	}
 
-	GFX_INPUT_LAYOUT_DESC Desc;
 	D3D12_INPUT_LAYOUT_DESC InputDesc;
 };
 
@@ -105,17 +99,11 @@ class D3D12DepthStencilState : public IDepthStencilState
 {
 public:
 
-	D3D12DepthStencilState(const GFX_DEPTH_STENCIL_DESC& InDesc) :
-		Desc(InDesc)
+	D3D12DepthStencilState(const GFX_DEPTH_STENCIL_DESC& InDesc)
 	{
+		Desc = InDesc;
 	}
 
-	virtual const GFX_DEPTH_STENCIL_DESC GetDesc() const final override
-	{
-		return Desc;
-	}
-
-	GFX_DEPTH_STENCIL_DESC Desc;
 };
 
 class D3D12GraphicsPipelineState : public IGraphicsPipelineState
@@ -126,12 +114,10 @@ public:
 	D3D12GraphicsPipelineState(ID3D12PipelineState* InPipelineState, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& InCreationDesc, const GFX_PIPELINE_STATE_DESC& InDesc, D3D12ShaderSignature InShaderSignature);
 	~D3D12GraphicsPipelineState();
 
-	virtual void GetDesc(GFX_PIPELINE_STATE_DESC* OutDesc) const final override;
 	virtual uint8* GetSerialized(uint32& OutBytes) const final override;
 
 	void Reset(ID3D12Device1* Device, const D3D12_GRAPHICS_PIPELINE_STATE_DESC& InCreationDesc, const GFX_PIPELINE_STATE_DESC& InDesc, D3D12ShaderSignature InShaderSignature);
 
-	GFX_PIPELINE_STATE_DESC				Desc;
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC	CreationDesc;
 	ID3D12PipelineState*				PipelineState;
 	D3D12ShaderSignature				ShaderSignature;
@@ -145,12 +131,10 @@ public:
 	D3D12ComputePipelineState(ID3D12PipelineState* InPipeline, const D3D12_COMPUTE_PIPELINE_STATE_DESC& InCreationDesc, const COMPUTE_PIPELINE_STATE_DESC& InDesc, D3D12ShaderSignature InShaderSignature);
 	~D3D12ComputePipelineState();
 
-	virtual void GetDesc(COMPUTE_PIPELINE_STATE_DESC* OutDesc) const final override;
 	virtual uint8* GetSerialized(uint32& OutBytes) const final override;
 
 	void Reset(ID3D12Device1* Device, const D3D12_COMPUTE_PIPELINE_STATE_DESC& InCreationDesc, const COMPUTE_PIPELINE_STATE_DESC& InDesc, D3D12ShaderSignature InShaderSignature);
 
-	COMPUTE_PIPELINE_STATE_DESC			Desc;
 	D3D12_COMPUTE_PIPELINE_STATE_DESC	CreationDesc;
 	ID3D12PipelineState*				PipelineState;
 	D3D12ShaderSignature				ShaderSignature;

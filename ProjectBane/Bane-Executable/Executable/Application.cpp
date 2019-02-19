@@ -106,6 +106,7 @@ void Application::Run()
 	Timer FrameTime;
 	bool bLimitFrames = false;
 	double DT = 0.;
+	RenderLoop RL;
 	while (!m_Window->QuitRequested())
 	{
 		FrameTime.StartTimer();
@@ -119,13 +120,11 @@ void Application::Run()
 			else GetSceneRenderer()->GetSwapChain()->SetSwapInterval(0);
 		}
 		pCurrentScene->Tick(DT);
-		RenderLoop RL;
-		RL.SetSkybox({ pCurrentScene->GetSkybox(), float3(0.f, 0.f, 0.f) });
 		pCurrentScene->Render(RL);
-		RL.Draw();
 		m_SceneRenderer->Submit(RL);
 		m_SceneRenderer->Render();
 		m_SceneRenderer->Present();
+		RL.ResetForNextFrame();
 		FrameTime.EndTimer();
 		DT = FrameTime.GetTimerElapsedSeconds();
 	}

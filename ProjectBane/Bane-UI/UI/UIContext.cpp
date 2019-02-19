@@ -32,8 +32,6 @@ void UIContext::BeginFrame(IGraphicsCommandContext* InCommandList, IComputeComma
 {
 	CommandList = InCommandList;
 	ComputeContext = InComputeList;
-
-
 }
 
 void UIContext::EndFrame()

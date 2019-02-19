@@ -5,7 +5,6 @@
 void BasicForwardRenderer::Initialize(const Window* pWindow)
 {
 	UNUSED(pWindow);
-	m_Commits.reserve(100);
 	m_Device = GetApiRuntime()->GetGraphicsDevice();
 	m_ImmediateGeometryPS = GetShaderCache()->LoadGraphicsPipeline("ImmediateModeGeometry.gfx");
 	m_LightBuffer = m_Device->CreateConstantBuffer(GPU_BUFFER_MIN_SIZE);
@@ -29,53 +28,43 @@ void BasicForwardRenderer::Render()
 	IGraphicsCommandContext* ctx = m_Device->GetGraphicsContext();
 	ctx->BeginPass(m_Device->GetBackBufferTargetPass());
 	GatherSceneData();
-	if (!m_Commits.empty())
+	
+	for (uint32 d = 0; d < m_pRenderLoop->CameraStack.GetNumElements(); d++)
 	{
-		for (uint32 i = 0; i < m_Commits.size(); i++)
+		uint32 Index = 0;
+		CAMERA_DATA Data = m_pRenderLoop->CameraStack.Pop();
 		{
-			auto& Commit = m_Commits[i];
-			for (uint32 y = 0; y < Commit.Meshes.size(); y++)
-			{
-				auto& DrawMesh = Commit.Meshes[y];
-				ctx->SetGraphicsPipelineState(DrawMesh.Pipeline);
-				ctx->SetConstantBuffer(0, m_CameraConstants, Commit.CameraIdxOffset * sizeof(CAMERA_CONSTANT_BUFFER_DATA));
-				ctx->SetConstantBuffer(1, m_MeshDataBuffer, y * sizeof(MESH_RENDER_DATA));
-				ctx->SetConstantBuffer(2, m_LightBuffer);
-				ctx->SetTexture(0, DrawMesh.Diffuse);
-				ctx->SetVertexBuffer(DrawMesh.VertexBuffer);
-				ctx->SetIndexBuffer(DrawMesh.IndexBuffer);
-				ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-				ctx->DrawIndexed(DrawMesh.IndexCount, 0, 0);
-			}
+			CAMERA_CBUFFER_DATA* pData = m_CameraConstants->MapT<CAMERA_CBUFFER_DATA>();
+			pData[d] = GetCBufferCameraDataFromAcquireData(Data);
+			auto TestData = pData[d];
+			UNUSED(TestData);
+			m_CameraConstants->Unmap();
 		}
+		for (uint32 x = 0; x < m_pRenderLoop->Bucket.Values.size(); x++)
 		{
-			auto& IG = RenderLoop::GRenderGlobals.ImmediateGeometry;
-			auto& DrawArgs = IG.DrawArgs;
-			if (IG.CurrentCount)
+			ctx->SetConstantBuffer(0, m_CameraConstants, sizeof(CAMERA_DATA) * d);
+			ctx->SetGraphicsPipelineState(m_pRenderLoop->Bucket.Keys[x].pShader);
+			for (uint32 i = 0; i < m_pRenderLoop->Bucket.Values[x].size(); i++)
 			{
-				uint64 ByteOffsetForVertexBuffer = 0;
-				for (uint32 i = 0; i < DrawArgs.size(); i++)
-				{
-					uint64 SizeInBytes = static_cast<uint64>(DrawArgs[i].UploadBuffer->GetSizeInBytes());
-					ctx->CopyBufferLocations(DrawArgs[i].UploadBuffer, 0, IG.VertexBuffer, ByteOffsetForVertexBuffer, SizeInBytes);
-					ByteOffsetForVertexBuffer += SizeInBytes;
-				}
-				ByteOffsetForVertexBuffer = 0;
-				for (uint32 i = 0; i < IG.CurrentCount; i++)
-				{
-					auto& Obj = DrawArgs[i];
-					ctx->SetGraphicsPipelineState(m_ImmediateGeometryPS);
-					ctx->SetConstantBuffer(0, m_CameraConstants);
-					ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_LINES);
-					ctx->SetVertexBuffer(IG.VertexBuffer, ByteOffsetForVertexBuffer);
-					ctx->Draw(Obj.VertexCount, 0);
-					ByteOffsetForVertexBuffer += Obj.UploadBuffer->GetSizeInBytes();
-				}
+				auto& Item = m_pRenderLoop->Bucket.Values[x][i];
+				ctx->SetVertexBuffer(Item.pMesh->GetVertexBuffer());
+				ctx->SetIndexBuffer(Item.pMesh->GetIndexBuffer());
+				ctx->SetConstantBuffer(1, m_MeshDataBuffer, sizeof(MESH_RENDER_DATA) * Index);
+				ctx->SetTexture(0, Item.DiffuseTex);
+				ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				ctx->DrawIndexed(Item.pMesh->GetIndexCount(), 0, 0);
+				Index++;
 			}
 		}
 	}
+
+	for (uint32 i = 0; i < m_pRenderLoop->PostRenderCallback.GetNumElements(); i++)
+	{
+		auto& Callback = m_pRenderLoop->PostRenderCallback.Pop();
+		Callback(m_Device, ctx);
+	}
+
 	ctx->EndPass();
-	RenderLoop::ResetForNextFrame();
 }
 
 void BasicForwardRenderer::Present()
@@ -88,47 +77,26 @@ void BasicForwardRenderer::Shutdown()
 	m_bIsRendering = false;
 }
 
-void BasicForwardRenderer::Submit(const RenderLoop& pRenderLoop)
+void BasicForwardRenderer::Submit(RenderLoop& pRenderLoop)
 {
 	//std::lock_guard<std::mutex> RenderLock(m_RenderSubmitLock);
-	m_Commits.clear();
-	const auto& OtherCommit = pRenderLoop.GetCommitedData();
-	for (uint32 i = 0; i < OtherCommit.size(); i++)
-	{
-		m_Commits.push_back(OtherCommit[i]);
-	}
+	m_pRenderLoop = &pRenderLoop;
 }
 
 void BasicForwardRenderer::GatherSceneData()
 {
 	{
-		if (RenderLoop::GRenderGlobals.CameraData.Size > 0)
+		MESH_RENDER_DATA* pData = m_MeshDataBuffer->MapT<MESH_RENDER_DATA>();
+		auto& Buckets = m_pRenderLoop->Bucket.Values;
+		for (uint32 x = 0; x < Buckets.size(); x++)
 		{
-			byte* Buff = reinterpret_cast<byte*>(m_CameraConstants->Map());
-			memcpy(Buff,
-				reinterpret_cast<void*>(RenderLoop::GRenderGlobals.CameraData.Buffer),
-				RenderLoop::GRenderGlobals.CameraData.Size * sizeof(CAMERA_CONSTANT_BUFFER_DATA)
-			);
-			m_CameraConstants->Unmap();
+			auto& CurBucket = Buckets[x];
+			for (uint32 i = 0; i < CurBucket.size(); i++)
+			{
+				*pData = CurBucket[i].Data;
+				pData++;
+			}
 		}
-	}
-	{
-		if (RenderLoop::GRenderGlobals.MeshData.Size > 0)
-		{
-			byte* Buff = reinterpret_cast<byte*>(m_MeshDataBuffer->Map());
-			memcpy(Buff,
-				reinterpret_cast<void*>(RenderLoop::GRenderGlobals.MeshData.Buffer),
-				RenderLoop::GRenderGlobals.MeshData.Size * sizeof(MESH_RENDER_DATA)
-			);
-			m_MeshDataBuffer->Unmap();
-		}
-	}
-	{
-		byte* Buff = reinterpret_cast<byte*>(m_LightBuffer->Map());
-		memcpy(Buff,
-			reinterpret_cast<void*>(&RenderLoop::GRenderGlobals.LightData),
-			sizeof(RenderLoop::GRenderGlobals.LightData)
-		);
-		m_LightBuffer->Unmap();
+		m_MeshDataBuffer->Unmap();
 	}
 }

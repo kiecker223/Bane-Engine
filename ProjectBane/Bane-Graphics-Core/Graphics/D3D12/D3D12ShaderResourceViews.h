@@ -36,7 +36,7 @@ public:
 	FRAME_DATA& GetCurrentFrame();
 };
 
-class D3D12RenderPassInfo : public IRenderPassInfo
+class D3D12RenderPassInfo : public IRenderTargetInfo
 {
 public:
 

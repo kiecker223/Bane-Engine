@@ -52,5 +52,5 @@ void CameraComponent::GraphicsUpdate(RenderLoop& Loop)
 	CamData.View = GetLookAt();
 	CamData.FarPlane = ZFar;
 	CamData.ZResolution = 0.0005f;
-	Loop.SetCamera(CamData);
+	Loop.AddCamera(CamData);
 }

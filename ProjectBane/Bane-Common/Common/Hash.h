@@ -2,6 +2,24 @@
 
 #include "Types.h"
 
+namespace FNVConstants
+{
+	static constexpr uint32 FNV_BASIS = 2166136261;
+	static constexpr uint32 FNV_PRIME = 16777619;
+}
+
+inline uint32 GetFNV0Hash(const char* Ptr, size_t Length)
+{
+	uint32 Result = FNVConstants::FNV_BASIS;
+	for (size_t i = 0; i < Length; i++)
+	{
+		Result = Result * FNVConstants::FNV_PRIME;
+		Result = Result ^ static_cast<uint32>(Ptr[i]);
+	}
+	return Result;
+}
+
+
 inline uint64 GetDJB264BitHash(const char* Ptr, size_t Length)
 {
 	uint64 Result = 5381;

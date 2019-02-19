@@ -45,7 +45,7 @@ void D3D12SwapChain::Present()
 	Device->UpdateCurrentFrameInfo();
 }
 
-IRuntimeGraphicsDevice* D3D12SwapChain::GetParent()
+IGraphicsDevice* D3D12SwapChain::GetParent()
 {
 	return Device;
 }

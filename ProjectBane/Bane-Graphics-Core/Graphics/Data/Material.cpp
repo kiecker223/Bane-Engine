@@ -56,7 +56,7 @@ void Material::SetMaterialParameters(const MATERIAL_PARAMETERS& Params)
 
 void Material::InitializeMaterial(const std::string& ShaderName)
 {
-	IRuntimeGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
+	IGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
 	m_MaterialName = ShaderName;
-	m_Pipeline = GetShaderCache()->LoadGraphicsPipeline(ShaderName);
+	m_Pipeline = GetShaderCache()->LoadGraphicsPipeline(ShaderName, m_MaterialHash);
 }
