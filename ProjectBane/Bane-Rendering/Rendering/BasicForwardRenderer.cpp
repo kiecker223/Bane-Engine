@@ -47,11 +47,11 @@ void BasicForwardRenderer::Render()
 			for (uint32 i = 0; i < m_pRenderLoop->Bucket.Values[x].size(); i++)
 			{
 				auto& Item = m_pRenderLoop->Bucket.Values[x][i];
+				ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 				ctx->SetVertexBuffer(Item.pMesh->GetVertexBuffer());
 				ctx->SetIndexBuffer(Item.pMesh->GetIndexBuffer());
 				ctx->SetConstantBuffer(1, m_MeshDataBuffer, sizeof(MESH_RENDER_DATA) * Index);
 				ctx->SetTexture(0, Item.DiffuseTex);
-				ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 				ctx->DrawIndexed(Item.pMesh->GetIndexCount(), 0, 0);
 				Index++;
 			}

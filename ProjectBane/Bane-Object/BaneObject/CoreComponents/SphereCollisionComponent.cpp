@@ -12,6 +12,7 @@ void SphereCollisionComponent::Awake()
 
 void SphereCollisionComponent::Start()
 {
+	SetPosition(GetTransform()->GetPosition());
 }
 
 void SphereCollisionComponent::Tick(double DT)

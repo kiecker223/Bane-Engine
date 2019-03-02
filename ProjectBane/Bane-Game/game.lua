@@ -11,6 +11,7 @@ project "BaneGame"
 		"../Bane-Physics",
         "../Bane-Platform",
         "../Bane-UI",
+		"../Bane-Platform/Platform",
         "../External/include"}
 
 --  libdirs {"../External/libs/" }

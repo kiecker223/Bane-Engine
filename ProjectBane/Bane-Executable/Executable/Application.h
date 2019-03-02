@@ -69,6 +69,16 @@ public:
 		m_StartCallback = StartCallback;
 	}
 
+	inline bool HasCustomUpdateFunction() const
+	{
+		return m_UpdateCallback != nullptr;
+	}
+
+	inline PFNApplicationUpdateCallback GetUpdateCallback()
+	{
+		return m_UpdateCallback;
+	}
+
 	inline void SetUpdateCallback(PFNApplicationUpdateCallback UpdateCallback)
 	{
 		m_UpdateCallback = UpdateCallback;
@@ -96,9 +106,9 @@ private:
 	
 	static Application* GApplication;
 
-	PFNApplicationStartCallback m_StartCallback;
-	PFNApplicationUpdateCallback m_UpdateCallback;
-	PFNApplicationCleanupCallback m_CleanupCallback;
+	PFNApplicationStartCallback m_StartCallback = (PFNApplicationStartCallback)0;
+	PFNApplicationUpdateCallback m_UpdateCallback = (PFNApplicationUpdateCallback)0;
+	PFNApplicationCleanupCallback m_CleanupCallback = (PFNApplicationCleanupCallback)0;
 
 	Assembly* m_GameAssembly;
 	ISceneRenderer* m_SceneRenderer;

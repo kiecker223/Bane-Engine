@@ -7,7 +7,7 @@
 #ifdef _DEBUG
 #define BANE_CHECK(x) if (!(x)) {  __debugbreak(); abort(); }
 #else
-#define BANE_CHECK(x) 
+#define BANE_CHECK(x) if (!(x)) { abort(); }
 #endif
 
 #define KILOBYTE(x) x * 1024

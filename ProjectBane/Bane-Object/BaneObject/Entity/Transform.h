@@ -2,17 +2,20 @@
 
 #include "KieckerMath.h"
 
+
 class Transform
 {
 public:
 
 	Transform() :
+		m_bDirty(true),
 		m_Position(0.0, 0.0, 0.0),
 		m_Rotation(float3(0.f, 0.f, 0.f)),
 		m_Scale(1.0, 1.0, 1.0)
 	{
 	}
 	Transform(const double3& InPosition, const float3& InRotation, const double3& InScale) :
+		m_bDirty(true),
 		m_Position(InPosition),
 		m_Rotation(InRotation),
 		m_Scale(InScale)
@@ -36,6 +39,7 @@ public:
 
 	inline void Translate(const double3& Direction)
 	{
+		m_bDirty = true;
 		m_Position.x += Direction.x;
 		m_Position.y += Direction.y;
 		m_Position.z += Direction.z;
@@ -58,6 +62,7 @@ public:
 
 	inline void Rotate(const float3& Euler)
 	{
+		m_bDirty = true;
 		m_Rotation *= Quaternion(Euler);
 		m_Rotation.Normalize();
 	}
@@ -70,21 +75,25 @@ public:
 
 	inline void SetRotation(const float3& Euler)
 	{
+		m_bDirty = true;
 		m_Rotation = Quaternion(Euler).Normalized();
 	}
 
 	inline void SetRotation(float X, float Y, float Z)
 	{
+		m_bDirty = true;
 		SetRotation(float3(X, Y, Z));
 	}
 
 	inline void SetPosition(const double3& InPosition)
 	{
+		m_bDirty = true;
 		m_Position = InPosition;
 	}
 
 	inline void Scale(double Scalar)
 	{
+		m_bDirty = true;
 		m_Scale.x = Scalar;
 		m_Scale.y = Scalar;
 		m_Scale.z = Scalar;
@@ -92,17 +101,22 @@ public:
 
 	inline void SetScale(const double3& InScale)
 	{
+		m_bDirty = true;
 		m_Scale = InScale;
 	}
 
-	inline float4x4 GetMatrix(const double3& CameraPos) const
+	inline float4x4 GetMatrix(const double3& CameraPos)
 	{
 		return matTransformation(fromDouble3(m_Position - CameraPos), m_Rotation, fromDouble3(m_Scale));
 	}
 
 	inline float4x4 GetRawMatrix() const
 	{
-		return matTransformation(fromDouble3(m_Position), m_Rotation, fromDouble3(m_Scale));
+		if (m_bDirty)
+		{
+			m_RawMatrix = matTransformation(fromDouble3(m_Position), m_Rotation, fromDouble3(m_Scale));
+		}
+		return m_RawMatrix;
 	}
 
 	inline double3 GetForward() const
@@ -129,9 +143,11 @@ public:
 
 private:
 
+	mutable bool m_bDirty;
 	double3 m_Position;
 	Quaternion m_Rotation;
 	double3 m_Scale;
+	mutable matrix m_RawMatrix;
 };
 
 

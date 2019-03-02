@@ -111,7 +111,9 @@ void Application::Run()
 	{
 		FrameTime.StartTimer();
 		Scene* pCurrentScene = GetSceneManager()->CurrentScene;
-		
+		pCurrentScene->Render(RL);
+		m_SceneRenderer->Submit(RL);
+		m_SceneRenderer->Render();
 		UpdateInput();
 		if (GetInput()->Keyboard.GetKeyDown(KEY_Z))
 		{
@@ -120,11 +122,9 @@ void Application::Run()
 			else GetSceneRenderer()->GetSwapChain()->SetSwapInterval(0);
 		}
 		pCurrentScene->Tick(DT);
-		pCurrentScene->Render(RL);
-		m_SceneRenderer->Submit(RL);
-		m_SceneRenderer->Render();
 		m_SceneRenderer->Present();
 		RL.ResetForNextFrame();
+
 		FrameTime.EndTimer();
 		DT = FrameTime.GetTimerElapsedSeconds();
 	}

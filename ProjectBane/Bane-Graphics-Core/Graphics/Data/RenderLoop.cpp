@@ -199,7 +199,9 @@ void RenderLoop::ResetForNextFrame()
 	GRenderGlobals.SkyboxData.AmbientLight = float3(0.f, 0.f, 0.f);
 	GRenderGlobals.SkyboxData.Cubemap = nullptr;
 	Bucket.Values.clear();
+	Bucket.Values.reserve(128);
 	Bucket.Keys.clear();
+	Bucket.Keys.reserve(128);
 	//Bucket.MeshDataRingBufferCurrent = Bucket.MeshDataRingBufferStart;
 }
 

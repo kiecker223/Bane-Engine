@@ -91,5 +91,5 @@ inline void D3D_BuildErrorMessage(HRESULT Res)
 
 #define D3D12ERRORCHECK(x) { HRESULT HResult = x; if (FAILED(HResult)) { D3D_BuildErrorMessage(HResult); __debugbreak(); } }
 #else
-#define D3D12ERRORCHECK(x) x
+#define D3D12ERRORCHECK(x) { x; }
 #endif

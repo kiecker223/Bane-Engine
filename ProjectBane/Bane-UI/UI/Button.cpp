@@ -30,7 +30,7 @@ void UIButton::Update(UIContext& Context)
 void UIButton::Render(UIContext& Context)
 {
 	auto* CmdList = Context.CommandList;
-	BANE_CHECK(FontOverride != nullptr);
+	if (!FontOverride) return;
 
 	struct ALIGN_FOR_GPU_BUFFER CBufferData
 	{
@@ -49,10 +49,11 @@ void UIButton::Render(UIContext& Context)
 	for (uint32 i = 0; i < Text.size(); i++)
 	{
 		char CurrChar = Text[i];
+		CmdList->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		CmdList->SetVertexBuffer(FontOverride->VB, FontOverride->GetVertexBufferOffset(CurrChar));
 		CmdList->SetIndexBuffer(FontOverride->IB);
 		CmdList->SetConstantBuffer(0, m_FontDrawInfo);
-		CmdList->DrawIndexed(3, 0, 0);
+		CmdList->DrawIndexed(6, 0, 0);
 	}
 }
 

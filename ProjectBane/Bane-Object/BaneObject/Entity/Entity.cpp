@@ -45,6 +45,11 @@ void Entity::UpdateRenderObjects(RenderLoop& RL)
 			RC->GraphicsUpdate(RL);
 		}
 	}
+
+	for (uint32 i = 0; i < m_Children.size(); i++)
+	{
+		m_Children[i]->UpdateRenderObjects(RL);
+	}
 }
 
 void Entity::AddChild(Entity* Child)
@@ -91,9 +96,8 @@ void Entity::SetParent(Entity* Parent)
 	}
 	else
 	{
-		m_Parent = m_SceneOwner->GetSceneRoot();
-		m_ParentChildIdx = m_Parent->GetChildCount();
-		m_Parent->AddChild(this);
+		m_Parent = nullptr;
+		m_ParentChildIdx = -1;
 	}
 }
 

@@ -1,3 +1,5 @@
+
+#include "../Bane-Executable/Executable/Application.h"
 #include "BaneObject/Scene/SceneManager.h"
 #include "BaneObject/CoreComponents/MeshRenderingComponent.h"
 #include <iostream>
@@ -10,6 +12,7 @@
 #include "CameraMovementComponent.h"
 #include "BaneObject/CoreComponents/CylinderCollisionComponent.h"
 #include "RaycastTestComponent.h"
+#include "Graphics/IO/ShaderCache.h"
 
 
 
@@ -269,6 +272,95 @@ public:
 	UIContext Context;
 };
 
+class TestDummyComponent : public Component
+{
+	IMPLEMENT_COMPONENT(TestDummyComponent)
+public:
+
+	void Tick(double DT)
+	{
+	}
+};
+
+class TestRenderingMeshComponent : public Component
+{
+	IMPLEMENT_COMPONENT(TestRenderingMeshComponent)
+
+public:
+
+	double TimeLeft = 5.0;
+	uint32 NumMeshes;
+	Mesh* pMesh;
+
+	void Start()
+	{
+		pMesh = GetScene()->GetMeshCache().LoadMesh("Sphere");
+	}
+
+	void Tick(double Dt)
+	{
+		if (NumMeshes > 120) return;
+		TimeLeft -= Dt;
+		if (TimeLeft <= 0)
+		{
+			NumMeshes++;
+			Entity* NewEntity = GetScene()->CreateEntity(std::string("Entity Num: ") + std::to_string(NumMeshes));
+			auto Mrc = NewEntity->AddComponent<MeshRenderingComponent>();
+			Mrc->RenderedMesh = pMesh;
+			Mrc->RenderedMaterial.InitializeMaterial("MainShader.gfx");
+			Mrc->RenderedMaterial.SetDiffuseTexture("DefaultBlue");
+			auto Collision = NewEntity->AddComponent<SphereCollisionComponent>();
+			Collision->SetMass(100000000);
+			Collision->SetRadius(0.03);
+			double DNumMeshes = static_cast<double>(NumMeshes);
+			NewEntity->GetTransform()->SetPosition(double3(DNumMeshes + 1.1, 40.0 - DNumMeshes, (40.0 - DNumMeshes) / 30.0));
+			TimeLeft = 0.001;
+		}
+	}
+
+};
+
+
+void RenderJob(IGraphicsCommandBuffer* CmdBuff)
+{
+
+}
+
+void JobSystemTestForGame()
+{
+	Window* pWindow = GetApplicationInstance()->GetWindow();
+	ApiRuntime* Runtime = GetApiRuntime();
+	IGraphicsDevice* GraphicsDevice = Runtime->GetGraphicsDevice();
+
+	auto* BackPass = GraphicsDevice->GetBackBufferTargetPass();
+
+	ITexture2D* pTex = GraphicsDevice->CreateTexture2D(1920, 1080, FORMAT_R8G8B8A8_UNORM, CreateDefaultSamplerDesc(), TEXTURE_USAGE_RENDER_TARGET | TEXTURE_USAGE_SHADER_RESOURCE, nullptr);
+	IRenderTargetView* pView = GraphicsDevice->CreateRenderTargetView(pTex);
+	ITexture2D* pDepthTex = GraphicsDevice->CreateTexture2D(1920, 1080, FORMAT_D24_UNORM_S8_UINT, CreateDefaultSamplerDesc(), TEXTURE_USAGE_DEPTH_STENCIL, nullptr);
+	IDepthStencilView* pDepthView = GraphicsDevice->CreateDepthStencilView(pTex);
+	IRenderTargetInfo* pTarget = GraphicsDevice->CreateRenderPass(pView, pDepthView, float4());
+
+	Scene* Level = GetSceneManager()->CreateNewScene("Test drawing scene");
+	Mesh* pMesh = Level->GetMeshCache().LoadMesh("Meshes/TestMesh.fbx");
+
+	IGraphicsPipelineState* DrawingPipeline = GetShaderCache()->LoadGraphicsPipeline("MainShader.gfx");
+
+	while (!pWindow->QuitRequested())
+	{
+		IGraphicsCommandContext* Context = GraphicsDevice->GetGraphicsContext();
+ 		IGraphicsCommandBuffer* CommandBuffer = Context->CreateCommandBuffer();
+ 		CommandBuffer->BeginPass(BackPass);
+		CommandBuffer->SetGraphicsPipelineState(DrawingPipeline);
+		CommandBuffer->SetVertexBuffer(pMesh->GetVertexBuffer());
+		CommandBuffer->SetIndexBuffer(pMesh->GetIndexBuffer());
+ 		CommandBuffer->EndPass();
+ 		CommandBuffer->CloseCommandBuffer();
+ 		Context->ExecuteCommandBuffer(CommandBuffer);
+		GraphicsDevice->GetSwapChain()->Present();
+	}
+}
+
+
 void InitApplication()
 {
 	GetSceneManager()->CreateNewScene("Test scene");
@@ -291,6 +383,10 @@ void InitApplication()
 	CameraEntity->AddComponent<RaycastTestComponent>();
 	CameraEntity->AddComponent<TestUIComponent>();
 
+	Entity* Test = Level->CreateEntity("TestEntity");
+	Test->AddComponent<TestRenderingMeshComponent>();
+
+#if 0
 	{
 		Entity* CylinderMeshTest = Level->CreateEntity("Collision test");
 		auto MCC = CylinderMeshTest->AddComponent<MeshRenderingComponent>();
@@ -351,10 +447,10 @@ void InitApplication()
 		CCC->SetVelocity(double3(1. / 120., 0., 0.));
 		CCC->SetRadius(1.0);
 	}
-
+#endif
 }
 
-void InitApplication2()
+void InitApplication1()
 {
 	GetSceneManager()->CreateNewScene("Space Scene");
 	Scene* SpaceLevel = GetSceneManager()->CurrentScene;

@@ -23,34 +23,34 @@ void Font::LoadFont(const std::string& FontName)
 		json BaseJson = json::parse(FileReadStream);
 		json FontJson = BaseJson[FontName];
 		ImageName = BaseJson["TextureLocation"].get<std::string>();
-		SDFImageBuff = GetTextureCache()->LoadRawBytes(ImageName, ImgWidth, ImgHeight, ByteStep, true);
+		SDFImageBuff = GetTextureCache()->LoadRawBytes(ImageName, ImgWidth, ImgHeight, ByteStep);
 		for (uint32 i = 0; i < 127; i++)
 		{
 			BANE_CHECK(FontJson.is_array());
 			json FontData = FontJson[i];
 			float StartX =		static_cast<float>(FontData["Location"]["x"].get<uint32>());
 			float StartY =		static_cast<float>(FontData["Location"]["y"].get<uint32>());
-			float FontAdvance = static_cast<float>(FontData["Advance"].get<uint32>());
+			float FontAdvance = static_cast<float>(FontData["Advance"].get<uint32>()) / 64.f;
 			float BearingX =	static_cast<float>(FontData["Bearing"]["x"].get<uint32>());
 			float BearingY =	static_cast<float>(FontData["Bearing"]["y"].get<uint32>());
 			float DimensionX =	static_cast<float>(FontData["Dimensions"]["x"].get<uint32>());
 			float DimensionY =	static_cast<float>(FontData["Dimensions"]["y"].get<uint32>());
-			float fImgW = static_cast<float>(ImgWidth);
-			float fImgH = static_cast<float>(ImgHeight);
+			float fImgW =		static_cast<float>(ImgWidth);
+			float fImgH =		static_cast<float>(ImgHeight);
 
 			float HalfDimX = DimensionX / 2.f;
 			float HalfDimY = DimensionY / 2.f;
 
 			float2 Start((StartX - BearingX) / fImgW, StartY / fImgH);
-			float2 End((StartX + (FontAdvance / 64.f)) / fImgW, (StartY - (DimensionY + BearingY)) / fImgH);
-			m_Characters[i].Data[0].Position = float2(-HalfDimX, HalfDimY);
-			m_Characters[i].Data[0].UV = float2(Start.x, Start.y);
-			m_Characters[i].Data[1].Position = float2(HalfDimX, HalfDimY);
-			m_Characters[i].Data[1].UV = float2(End.x, Start.y);
-			m_Characters[i].Data[2].Position = float2(-HalfDimX, -HalfDimY);
-			m_Characters[i].Data[2].UV = float2(Start.x, End.y);
-			m_Characters[i].Data[3].Position = float2(HalfDimX, -HalfDimY);
-			m_Characters[i].Data[3].UV = float2(End.x, End.y);
+			float2 End(StartX + FontAdvance / fImgW, (StartY + (DimensionY + BearingY)) / fImgH);
+			m_Characters[i].Data[0].Position = float2(-HalfDimX, -HalfDimY);
+			m_Characters[i].Data[0].UV = float2(Start.x, End.y);
+			m_Characters[i].Data[1].Position = float2(HalfDimX, -HalfDimY);
+			m_Characters[i].Data[1].UV = float2(End.x, End.y);
+			m_Characters[i].Data[2].Position = float2(HalfDimX, HalfDimY);
+			m_Characters[i].Data[2].UV = float2(End.x, Start.y);
+			m_Characters[i].Data[3].Position = float2(-HalfDimX, HalfDimY);
+			m_Characters[i].Data[3].UV = float2(Start.x, Start.y);
 		}
 	}
 
@@ -67,7 +67,7 @@ void Font::LoadFont(const std::string& FontName)
 			ImageData[(y * ImgWidth) + x] = ImageColors[(y * ImgWidth) + x].r;
 		}
 	}
-	delete SDFImageBuff;
+	delete[] SDFImageBuff;
 	auto* Device = GetApiRuntime()->GetGraphicsDevice();
 	SUBRESOURCE_DATA Data = { };
 	Data.Width = ImgWidth;
@@ -79,6 +79,7 @@ void Font::LoadFont(const std::string& FontName)
 	FontDataStructuredBuff = Device->CreateStructuredBuffer(static_cast<uint32>(sizeof(float4) * 2 * m_Characters.size()), reinterpret_cast<uint8*>(m_Characters.data()));
 	FontShader = GetShaderCache()->LoadGraphicsPipeline("FontShader.gfx");
 	IB = GetApiRuntime()->QuadIB;
+	delete[] ImageData;
 	VB = Device->CreateVertexBuffer(sizeof(FONT_VERTEX) * static_cast<uint32>(m_Characters.size()), reinterpret_cast<uint8*>(m_Characters.data()));
 }
 

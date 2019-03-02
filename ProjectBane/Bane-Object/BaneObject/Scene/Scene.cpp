@@ -11,48 +11,29 @@ static std::string GenerateNewName(std::string OriginalName, uint32 Count)
 
 Scene::Scene()
 {
-	m_Root = new Entity(EntityIdentifier("SceneRoot"));
-	m_Entities.push_back({ m_Root->GetId().HashedName, m_Root });
+	m_EntitiesAllocated = 0;
+	m_Entities.resize(10000);
 }
 
 Scene::Scene(const std::string& SceneName) :
 	m_Name(SceneName)
 {
-	m_Root = new Entity(EntityIdentifier("SceneRoot"));
-	m_Entities.push_back({ m_Root->GetId().HashedName, m_Root });
+	m_EntitiesAllocated = 0;
+	m_Entities.resize(10000);
 }
 
 Entity* Scene::CreateEntity(const std::string& EntityName)
 {
-	Entity* pEntity = FindEntity(EntityName);
-	if (pEntity == nullptr)
-	{
-		auto Iter = std::find_if(m_EntityAddList.begin(), m_EntityAddList.end(), [EntityName](const EntityHashEntry& EntityToFind)
-		{
-			if (EntityToFind.pEntity->GetId().Name == EntityName)
-			{
-				return true;
-			}
-			return false;
-		});
-		if (Iter != m_EntityAddList.end())
-		{
-			pEntity = Iter->pEntity;
-		}
-	}
 	std::string FinalName;
-	// Slow
-	uint32 Index = 1;
-	if (pEntity)
+	if (EntityExists(EntityName))
 	{
-		while (pEntity)
+		for (uint32 i = 0; ; i++)
 		{
-			std::string SearchName = GenerateNewName(EntityName, Index);
-			pEntity = FindEntity(SearchName);
-			Index++;
-			if (!pEntity)
+			std::string TestingName = GenerateNewName(EntityName, i);
+			if (!EntityExists(TestingName))
 			{
-				FinalName = SearchName;
+				FinalName = TestingName;
+				break;
 			}
 		}
 	}
@@ -60,12 +41,16 @@ Entity* Scene::CreateEntity(const std::string& EntityName)
 	{
 		FinalName = EntityName;
 	}
-	pEntity = new Entity(EntityIdentifier(FinalName));
-	pEntity->m_SceneOwner = this;
-	pEntity->SetParent(m_Root);
-	EntityHashEntry Entry = { pEntity->GetId().HashedName, pEntity };
-	m_EntityAddList.push_back(Entry);
-	return pEntity;
+	Entity* Result = &m_Entities[m_EntitiesAllocated];
+	m_EntitiesAllocated++;
+	if (Result->GetComponentCount())
+	{
+		Result->DestroyComponents();
+	}
+	Result->SetId(EntityIdentifier(FinalName));
+	Result->m_SceneOwner = this;
+	m_EntityStartList.push_back(Result);
+	return Result;
 }
 
 Entity* Scene::FindEntity(const std::string& EntityName)
@@ -100,80 +85,42 @@ bool Scene::EntityExists(const EntityIdentifier& Id)
 
 bool Scene::EntityExists(uint64 Id)
 {
-	return std::find_if(m_Entities.begin(), m_Entities.end(), 
-		[&](const EntityHashEntry& Entry) 
-		{
-			if (Entry.Hash == Id)
-			{
-				return true;
-			}
-			return false;
-		}
-	) != m_Entities.end();
+	return FindEntity(Id) != nullptr;
 }
 
 void Scene::Tick(double DT)
 {
-	m_Root->Tick(DT);
-	if (m_EntityAddList.size() > 0)
-	{
-		for (auto& e : m_EntityAddList)
-		{
-			m_Entities.push_back(e);
-			m_EntityStartList.push_back(e);
-			if (m_EntitySearchList.find(e.Hash) == m_EntitySearchList.end())
-			{
-				m_EntitySearchList[e.Hash] = e.pEntity;
-			}
-			else
-			{
-				__debugbreak();
-			}
-		}
-		m_EntityAddList.clear();
-	}
-	if (m_EntityStartList.size() > 0)
+	if (!m_EntityStartList.empty())
 	{
 		for (uint32 i = 0; i < m_EntityStartList.size(); i++)
 		{
-			m_EntityStartList[i].pEntity->Start();
+			m_EntityStartList[i]->Start();
 		}
 		m_EntityStartList.clear();
 	}
+
+	for (uint32 i = 0; i < m_EntitiesAllocated; i++)
+	{
+		m_Entities[i].Tick(DT);
+	}
 	if (m_World.IsReadyForRead())
 	{
-		m_Root->PhysicsTick();
-//		std::lock_guard<std::mutex> ScopedLock(m_World.GenerateOctTreeMutex);
-//		m_PhysOctree = m_World.GetOctTree();
+		for (uint32 i = 0; i < m_EntitiesAllocated; i++)
+		{
+			m_Entities[i].PhysicsTick();
+		}
 	}
 }
 
 
-// void DrawOctsImpl(PhysicsWorld::OctTreeType::TNode* pNewNode, RenderLoop& RL, uint32& CallDepth)
-// {
-// 	using TNode = PhysicsWorld::OctTreeType::TNode;
-// 	CallDepth++;
-// 	for (uint32 i = 0; i < 8; i++)
-// 	{
-// 		if (pNewNode->Children[i])
-// 		{
-// 			DrawOctsImpl(pNewNode->Children[i], RL, CallDepth);
-// 		}
-// 	}
-// 	RL.AddBoundingBox(pNewNode->Value.Bounds);
-// }
-
 void Scene::Render(RenderLoop& RL)
 {
-	for (auto& e : m_Entities)
+	for (uint32 i = 0; i < m_EntitiesAllocated; i++)
 	{
-		e.pEntity->UpdateRenderObjects(RL);
+		m_Entities[i].UpdateRenderObjects(RL);
 	}
 	if (bDrawPhysicsDebugInfo)
 	{
-//		uint32 CallDepth;
-//		DrawOctsImpl(m_PhysOctree.Base, RL, CallDepth);
-//		UNUSED(CallDepth);
 	}
 }
 
@@ -183,7 +130,7 @@ void Scene::DumpScene()
 	m_MeshCache.Destroy();
 	for (auto& e : m_Entities)
 	{
-		delete e.pEntity;
+		e.~Entity();
 	}
 	m_Entities.clear();
 	m_World.DestroyThread();
@@ -199,7 +146,7 @@ void Scene::InitScene()
 	m_MeshCache.Initialize();
 	for (auto& e : m_Entities)
 	{
-		e.pEntity->SubmitRenderingComponents();
+		e.SubmitRenderingComponents();
 	}
 	m_World.SpawnThread();
 }

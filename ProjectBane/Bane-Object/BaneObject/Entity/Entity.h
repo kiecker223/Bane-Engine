@@ -198,7 +198,7 @@ public:
 
 	Entity() :
 		m_Parent(nullptr),
-		m_Allocator(2048) // Allocate with 1024 bytes
+		m_Allocator(2048) // Allocate with this parameter's bytes
 	{
 	}
 
@@ -208,6 +208,19 @@ public:
 		m_Allocator(2048),
 		m_Id(Id)
 	{
+	}
+
+	inline Entity(const Entity& Rhs)
+	{
+		m_Transform = Rhs.m_Transform;
+		m_Id = Rhs.m_Id;
+		m_ParentChildIdx = Rhs.m_ParentChildIdx;
+		m_Parent = Rhs.m_Parent;
+		m_Children = Rhs.m_Children;
+		m_SceneOwner = Rhs.m_SceneOwner;
+		m_Allocator = Rhs.m_Allocator;
+		m_ComponentStartList = Rhs.m_ComponentStartList;
+		m_Components = Rhs.m_Components;
 	}
 
 	template<typename T>
@@ -228,6 +241,7 @@ public:
 		RetPointer->m_Transform = &m_Transform;
 		RetPointer->m_Scene = m_SceneOwner;
 		RetPointer->Awake();
+		m_ComponentStartList.push_back(Result);
 		return Result;
 	}
 
@@ -244,6 +258,7 @@ public:
 		RetPointer->m_Transform = &m_Transform;
 		RetPointer->m_Scene = m_SceneOwner;
 		RetPointer->Awake();
+		m_ComponentStartList.push_back(Result);
 		return Result;
 	}
 
@@ -264,38 +279,44 @@ public:
 		return m_Id;
 	}
 
+	void SetId(const EntityIdentifier& InId)
+	{
+		m_Id = InId;
+	}
+
 	inline void Start()
 	{
-		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
-			reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(m_Allocator.GetAllocatedObjects()[i]) + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin))->Start();
+		for (uint32 i = 0; i < GetComponentCount(); i++) 
+		{
+			GetComponentByIndex(i)->Start();
+			if (!m_ComponentStartList.empty())
+			{
+				m_ComponentStartList.clear();
+			}
+		}
 	}
 
 	inline void Tick(double DT)
 	{
-		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
-			reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(m_Allocator.GetAllocatedObjects()[i]) + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin))->Tick(DT);
-
-		if (!m_Children.empty())
+		if (!m_ComponentStartList.empty())
 		{
-			for (uint32 i = 0; i < m_Children.size(); i++)
+			for (uint32 i = 0; i < m_ComponentStartList.size(); i++)
 			{
-				m_Children[i]->Tick(DT);
+				m_ComponentStartList[i]->Start();
 			}
+			m_ComponentStartList.clear();
+		}
+		for (uint32 i = 0; i < GetComponentCount(); i++) 
+		{
+			GetComponentByIndex(i)->Tick(DT);
 		}
 	}
 
 	inline void PhysicsTick()
 	{
-		for (uint32 i = 0; i < m_Allocator.GetAllocatedObjects().size(); i++)
-			reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(m_Allocator.GetAllocatedObjects()[i]) + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin))->PhysicsTick();
-
-
-		if (!m_Children.empty())
+		for (uint32 i = 0; i < GetComponentCount(); i++) 
 		{
-			for (uint32 i = 0; i < m_Children.size(); i++)
-			{
-				m_Children[i]->PhysicsTick();
-			}
+			GetComponentByIndex(i)->PhysicsTick();
 		}
 	}
 
@@ -331,11 +352,26 @@ public:
 		return static_cast<uint32>(m_Components.size());
 	}
 
+	inline void DestroyComponents(bool bFreeMemory = false)
+	{
+		for (uint32 i = 0; i < GetComponentCount(); i++)
+		{
+			GetComponentByIndex(i)->~Component();
+		}
+		m_Allocator.AllocatedObjects.clear();
+		m_Allocator.PtrCurrent = m_Allocator.PtrBegin;
+	}
+
+	inline Component* GetComponentByIndex(uint32 Idx)
+	{
+		BANE_CHECK(Idx < GetComponentCount());
+		return reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(m_Allocator.GetAllocatedObjects()[Idx]) + reinterpret_cast<ptrdiff_t>(m_Allocator.PtrBegin));
+	}
+
 private:
 
 	friend class Entity;
 
-	PhysicsProperties m_PhysicsProperties;
 	Transform m_Transform;
 	EntityIdentifier m_Id;
 	int32 m_ParentChildIdx;
@@ -343,6 +379,7 @@ private:
 	std::vector<Entity*> m_Children;
 	class Scene* m_SceneOwner;
 	ComponentAllocator m_Allocator;
+	std::vector<TComponentHandle<Component>> m_ComponentStartList;
 	std::vector<uint64> m_Components;
 };
 

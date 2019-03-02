@@ -46,10 +46,10 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 	BANE_CHECK(AvailableThreadCount != 0);
 	m_AvailableContexts.resize(AvailableThreadCount);
 
-	m_SrvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1024, true);
+	m_SrvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1024 * 2, true);
 	m_RtvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 256, false);
 	m_DsvAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 48, false);
-	m_SmpAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 128, true);
+	m_SmpAllocator.Initialize(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 1024 * 2, true);
 	
 	m_ViewPort = { 0 };
 	m_ViewPort.TopLeftX = 0.f;
@@ -84,6 +84,8 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 			Bases[i].Usage = TEXTURE_USAGE_RENDER_TARGET;
 			Bases[i].Format = FORMAT_R8G8B8A8_UNORM;
 			Bases[i].CurrentState = D3D12_RESOURCE_STATE_COMMON;
+			Bases[i].PromotedState = D3D12_RESOURCE_STATE_COMMON;
+			Bases[i].PendingState = D3D12_RESOURCE_STATE_INVALID_STATE;
 		}
 
 		m_BackBuffer = CreateRenderTargetView(Bases);
@@ -110,12 +112,13 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 			D3D12_COMMAND_LIST_TYPE ListType = FromContextType((ECOMMAND_CONTEXT_TYPE)i);
 
 			D3D12ERRORCHECK(
-				Device->CreateCommandAllocator(ListType, IID_PPV_ARGS(&CommandAllocator));
+				Device->CreateCommandAllocator(ListType, IID_PPV_ARGS(&CommandAllocator))
 			);
 
 			D3D12ERRORCHECK(
 				Device->CreateCommandList(1, ListType, CommandAllocator, nullptr, IID_PPV_ARGS(&CommandList))
 			);
+			CommandList->SetName((std::wstring(L"Command Pool Command List: ") + std::to_wstring(b)).c_str());
 
 			m_AvailableCLs[i].Push(new D3D12CommandList(CommandAllocator, CommandList, this));
 		}
@@ -426,7 +429,7 @@ IVertexBuffer* D3D12GraphicsDevice::CreateVertexBuffer(uint32 ByteCount, uint8* 
 	{
 		m_UploadList->Begin();
 	}
-
+	
 	D3D12Buffer* Result = new D3D12Buffer(this, ByteCount, BUFFER_USAGE_GPU);
 	if (Buffer)
 	{
@@ -947,11 +950,13 @@ D3D12ShaderItemData GetShaderRequirements(IComputePipelineState* pState)
 IRenderTargetView* D3D12GraphicsDevice::CreateRenderTargetView(ITexture2D* InTexture)
 {
 	D3D12RenderTargetView* Result = new D3D12RenderTargetView();
+#if DEBUG
 	if (!InTexture->IsRenderTarget())
 	{
 		BaneLog() << "The texture: " << InTexture->GetDebugName() << " is not a valid resource for making a render target view";
 		return nullptr;
 	}
+#endif
 	D3D12TextureBase* Textures = (D3D12TextureBase*)InTexture;
 	D3D12DescriptorAllocation Allocations[3] = { };
 	for (uint32 i = 0; i < 3; i++)
@@ -966,11 +971,13 @@ IRenderTargetView* D3D12GraphicsDevice::CreateRenderTargetView(ITexture2D* InTex
 IDepthStencilView* D3D12GraphicsDevice::CreateDepthStencilView(ITexture2D* InTexture)
 {
 	D3D12DepthStencilView* Result = new D3D12DepthStencilView();
+#if DEBUG
 	if (!InTexture->IsDepthStencil())
 	{
 		BaneLog() << "The texture: " << InTexture->GetDebugName() << " is not a valid resource for making a depth stencil view";
 		return nullptr;
 	}
+#endif
 	D3D12TextureBase* Textures = (D3D12TextureBase*)InTexture;
 	D3D12DescriptorAllocation Allocations[3] = { };
 	for (uint32 i = 0; i < 3; i++)

@@ -75,11 +75,6 @@ public:
 		return m_MeshCache;
 	}
 	
-	inline Entity* GetSceneRoot()
-	{
-		return m_Root;
-	}
-
 	bool Raycast(const double3& RayStart, const double3& Direction, double MaxDistance, RayHitInformation& HitInfo);
 
 	inline PhysicsWorld& GetPhysicsWorld()
@@ -94,23 +89,17 @@ private:
 	MeshCache m_MeshCache;
 	PhysicsWorld m_World;
 
+	Entity* m_CameraEntity;
 	// TODO: Remove me when you're done debugging physics stuff.
 	// please!!
 	PhysicsWorld::OctTreeType m_PhysOctree;
 	std::vector<PhysicsWorld::OctTreeType::TNode*> m_NodesIntersected;
 	ITextureCube* m_Skybox;
 	std::string m_Name;
-	Entity* m_Root;
-	Entity* m_CameraEntity;
-	struct EntityHashEntry
-	{
-		uint64 Hash;
-		Entity* pEntity;
-	};
 	std::unordered_map<uint64, Entity*> m_EntitySearchList;
-	std::vector<EntityHashEntry> m_Entities;
-	std::vector<EntityHashEntry> m_EntityAddList;
-	std::vector<EntityHashEntry> m_EntityStartList;
+	uint32 m_EntitiesAllocated;
+	std::vector<Entity> m_Entities;
+	std::vector<Entity*> m_EntityStartList;
 };
 
 // Scene* GetCurrentScene();

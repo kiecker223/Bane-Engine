@@ -14,6 +14,23 @@ public:
 	ComponentAllocator(uint32 NumBytes);
 	~ComponentAllocator();
 
+	inline ComponentAllocator(const ComponentAllocator& Rhs)
+	{
+		PtrBegin = Rhs.PtrBegin;
+		PtrEnd = Rhs.PtrEnd;
+		PtrCurrent = Rhs.PtrCurrent;
+		AllocatedObjects = Rhs.AllocatedObjects;
+	}
+
+	inline ComponentAllocator& operator = (const ComponentAllocator& Rhs)
+	{
+		PtrBegin = Rhs.PtrBegin;
+		PtrEnd = Rhs.PtrEnd;
+		PtrCurrent = Rhs.PtrCurrent;
+		AllocatedObjects = Rhs.AllocatedObjects;
+		return *this;
+	}
+
 	inline size_t GetNumBytesAllocated() const
 	{
 		return PtrEnd - PtrBegin;
@@ -117,11 +134,6 @@ public:
 
 	std::vector<Component*> AllocatedObjects;
 	std::mutex ThreadLock;
-	
-	inline Component* GetComponent(uint32 Index)
-	{
-		return reinterpret_cast<Component*>(reinterpret_cast<ptrdiff_t>(AllocatedObjects[Index]) + reinterpret_cast<ptrdiff_t>(PtrBegin));
-	}
 
 	inline std::vector<Component*>& GetAllocatedObjects()
 	{

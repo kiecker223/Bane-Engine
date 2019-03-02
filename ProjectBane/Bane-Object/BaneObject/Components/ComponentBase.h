@@ -45,9 +45,8 @@ public:
 	virtual void Start() { }
 	virtual void Tick(double DT) { UNUSED(DT); }
 	virtual void Dispose() { }
-	virtual void FixedTick() { } // Maybe not do this
 	virtual bool IsRenderComponent() const { return false; }
-	virtual void PhysicsTick() { }
+	virtual void PhysicsTick() { } // Called when the physics system has data to read
 
 	virtual uint32 GetTypeSize() const = 0; // Overridden by IMPLEMENT_COMPONENT(type)
 

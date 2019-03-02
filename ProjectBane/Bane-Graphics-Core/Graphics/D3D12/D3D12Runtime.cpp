@@ -18,7 +18,6 @@ void D3D12Runtime::Initialize(const Window* pWindow)
 	D3D12GetDebugInterface(IID_PPV_ARGS(&Debug));
 	Debug->EnableDebugLayer();
 	Debug->Release();
-
 #endif
 
 	IDXGIFactory4* DxgiFactory = nullptr;

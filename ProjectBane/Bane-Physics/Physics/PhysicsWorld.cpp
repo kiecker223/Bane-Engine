@@ -106,6 +106,17 @@ bool CheckSweepingCollision(PhysicsBody& Src, PhysicsBody& Other, double MotionD
 	double3 VelocityDir = normalized(Src.Velocity);
 	double3 OtherVelocityDir = normalized(Other.Velocity);
 
+	double Distance = length(Src.Position - Other.Position);
+	if (Distance < min(Src.Sphere.Radius, Other.Sphere.Radius))
+	{
+		return true;
+	}
+
+	if (TSrc == TDst)
+	{
+		return false;
+	}
+
 	BANE_CHECK(TDst > TSrc);
 	double PercentCheck = TDst - TSrc;
 
@@ -133,6 +144,7 @@ bool CheckSweepingCollision(PhysicsBody& Src, PhysicsBody& Other, double MotionD
 void PhysicsWorld::UpdatePhysics()
 {
 	// At the start lock the physics buffer
+	BANE_CHECK(SetThreadAffinityMask(GetCurrentThread(), 1 << 1) != 0);
 	while (bRunningPhysicsSim)
 	{
 		m_bUnlockedForRead = false;
@@ -185,35 +197,37 @@ void PhysicsWorld::UpdatePhysics()
 						}
 					}
 
-					double MotionDelta = length(Body.Velocity);
-					double3 ToObject = OtherBody.Position - Body.Position;
-					double ObjectDistance = length(ToObject);
-
-					if (MotionDelta + Body.Sphere.Radius > ObjectDistance)
-					{
- 						double3 MotionDir = normalized(Body.Velocity);
-
-						double NumToSubdivideTest = std::ceil(MotionDelta / (Body.Sphere.Radius * 0.9));
-						uint32 NumToSubdivide = static_cast<uint32>(NumToSubdivideTest);
-
-						double OtherMotionDelta = length(OtherBody.Velocity);
-
-						double TimeToCollsion;
-						if (CheckSweepingCollision(Body, OtherBody, MotionDelta, OtherMotionDelta, 0., 1., TimeToCollsion))
-						{
-							Body.Velocity = double3();
-						}
-					}
+//					double MotionDelta = length(Body.Velocity);
+//					double3 ToObject = OtherBody.Position - Body.Position;
+//					double ObjectDistance = length(ToObject);
+//
+//					if (MotionDelta + Body.Sphere.Radius > ObjectDistance)
+//					{
+// 						double3 MotionDir = normalized(Body.Velocity);
+//
+//						double NumToSubdivideTest = std::ceil(MotionDelta / (Body.Sphere.Radius * 0.9));
+//						uint32 NumToSubdivide = static_cast<uint32>(NumToSubdivideTest);
+//
+//						double OtherMotionDelta = length(OtherBody.Velocity);
+//
+// 						double TimeToCollsion;
+// 						if (CheckSweepingCollision(Body, OtherBody, MotionDelta, OtherMotionDelta, 0., 1., TimeToCollsion))
+// 						{
+// 							Body.Velocity = double3();
+// 						}
+//					}
 
 					Body.Position += Body.Velocity;
 				}
 			}
 		}
-
-		UpdateBuffer.Bodies = m_Bodies;
+		{
+			UpdateBuffer.Bodies = m_Bodies;
+		}
 		m_bUnlockedForRead = true;
 		auto TimeTaken = Clock::now() - Start;
 		SecondsTakenForThread = static_cast<float>(std::chrono::duration_cast<std::chrono::nanoseconds>(TimeTaken).count()) / 1e9f;
+		//std::cout << "Physics thread: " << SecondsTakenForThread << std::endl;
 		std::chrono::nanoseconds SleepTime = (std::chrono::nanoseconds(16666667) - std::chrono::duration_cast<std::chrono::nanoseconds>(TimeTaken));
 		if (SleepTime > std::chrono::nanoseconds(0))
 		{

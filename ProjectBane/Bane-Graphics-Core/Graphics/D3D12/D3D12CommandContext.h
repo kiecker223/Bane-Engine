@@ -153,9 +153,10 @@ public:
 	virtual void SetUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
 	virtual void SetConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset) override final;
 
-	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer, uint64 Offset) final override;
 	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer) final override;
+	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer, uint64 Offset) final override;
 	virtual void SetIndexBuffer(const IBuffer* InIndexBuffer) final override;
+	virtual void SetIndexBuffer(const IBuffer* InIndexBuffer, uint64 Offset) final override;
 	virtual void SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY InTopology) final override;
 
 	virtual void Draw(uint32 VertexCount, uint32 StartVertexLocation) final override;
@@ -178,6 +179,8 @@ public:
 	virtual void SetComputeConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset) override final;
 
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) final override;
+
+	void InitializeAllocators(D3D12LinearDescriptorAllocator& ParentSrvAllocator, D3D12LinearDescriptorAllocator& ParentSmpAllocator);
 
 	void FlushResourceTransitions();
 
@@ -207,6 +210,9 @@ public:
 	ID3D12GraphicsCommandList* D3DCL;
 	
 	D3D12ShaderSignature RootSignature;
+
+	D3D12LinearDescriptorAllocator SrvDescriptorAllocator;
+	D3D12LinearDescriptorAllocator SmpDescriptorAllocator;
 	
 	D3D12ResourceCache GraphicsResources;
 	D3D12ResourceCache ComputeResources;
@@ -271,9 +277,10 @@ public:
 	virtual void SetUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
 	virtual void SetConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset) override final;
 
-	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer, uint64 Offset) final override;
 	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer) final override;
+	virtual void SetVertexBuffer(const IBuffer* InVertexBuffer, uint64 Offset) final override;
 	virtual void SetIndexBuffer(const IBuffer* InIndexBuffer) final override;
+	virtual void SetIndexBuffer(const IBuffer* InIndexBuffer, uint64 Offset) final override;
 	virtual void SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY InTopology) final override;
 	
 	virtual void Draw(uint32 VertexCount, uint32 StartVertexLocation) final override;

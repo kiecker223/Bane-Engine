@@ -2,27 +2,33 @@
 #include "D3D12CommandContext.h"
 #include "D3D12GraphicsDevice.h"
 
-void D3D12ResourceCache::Initialize(D3D12GraphicsPipelineState* pPipeline, D3D12GraphicsDevice* pDevice)
+void D3D12ResourceCache::Initialize(D3D12GraphicsPipelineState* pPipeline, D3D12GraphicsDevice* pDevice, D3D12LinearDescriptorAllocator& SrvAllocator, D3D12LinearDescriptorAllocator& SmpAllocator)
 {
 	Device = pDevice->GetDevice();
 	Counts = pPipeline->Desc.Counts;
-	SrvAllocation = pDevice->GetSrvAllocator().AllocateMultiple(Counts.NumShaderResourceViews);
-	SmpAllocation = pDevice->GetSmpAllocator().AllocateMultiple(Counts.NumSamplers);
+	if (Counts.NumShaderResourceViews > 0)
+	{
+		SrvAllocation = SrvAllocator.AllocateMultiple(Counts.NumShaderResourceViews);
+		SmpAllocation = SmpAllocator.AllocateMultiple(Counts.NumSamplers);
+	}
 	if (Counts.NumUnorderedAccessViews > 0)
 	{
-		UavAllocation = pDevice->GetSrvAllocator().AllocateMultiple(Counts.NumUnorderedAccessViews);
+		UavAllocation = SrvAllocator.AllocateMultiple(Counts.NumUnorderedAccessViews);
 	}
 }
 
-void D3D12ResourceCache::Initialize(D3D12ComputePipelineState* pPipeline, D3D12GraphicsDevice* pDevice)
+void D3D12ResourceCache::Initialize(D3D12ComputePipelineState* pPipeline, D3D12GraphicsDevice* pDevice, D3D12LinearDescriptorAllocator& SrvAllocator, D3D12LinearDescriptorAllocator& SmpAllocator)
 {
 	Device = pDevice->GetDevice();
 	Counts = pPipeline->Desc.Counts;
-	SrvAllocation = pDevice->GetSrvAllocator().AllocateMultiple(Counts.NumShaderResourceViews);
-	SmpAllocation = pDevice->GetSmpAllocator().AllocateMultiple(Counts.NumSamplers);
+	if (Counts.NumShaderResourceViews > 0)
+	{
+		SrvAllocation = SrvAllocator.AllocateMultiple(Counts.NumShaderResourceViews);
+		SmpAllocation = SmpAllocator.AllocateMultiple(Counts.NumSamplers);
+	}
 	if (Counts.NumUnorderedAccessViews > 0)
 	{
-		UavAllocation = pDevice->GetSrvAllocator().AllocateMultiple(Counts.NumUnorderedAccessViews);
+		UavAllocation = SrvAllocator.AllocateMultiple(Counts.NumUnorderedAccessViews);
 	}
 }
 

@@ -36,9 +36,9 @@ void D3D12GraphicsCommandBuffer::BeginPass(IRenderTargetInfo* InRenderPass)
 	if (InRenderPass)
 	{
 		D3D12RenderPassInfo* RenderPass = (D3D12RenderPassInfo*)InRenderPass;
-		RenderPass->TransitionResourcesToWrite(this);
 		ID3D12DescriptorHeap* ppHeaps[] = { ParentDevice->m_SrvAllocator.DescriptorHeap, ParentDevice->m_SmpAllocator.DescriptorHeap };
 		D3DCL->SetDescriptorHeaps(2, ppHeaps);
+		RenderPass->TransitionResourcesToWrite(this);
 		FlushResourceTransitions();
 		RenderPass->SetRenderTargets(D3DCL);
 		RenderPass->Clear(D3DCL);
@@ -143,6 +143,18 @@ void D3D12GraphicsCommandBuffer::SetIndexBuffer(const IBuffer* InIndexBuffer)
 	Buffer->TransitionResource(this, D3D12_RESOURCE_STATE_GENERIC_READ);
 	Buffer->PromotedState = D3D12_RESOURCE_STATE_INDEX_BUFFER;
 	D3D12_INDEX_BUFFER_VIEW IbView = Buffer->GetIBView();
+	FlushResourceTransitions();
+	D3DCL->IASetIndexBuffer(&IbView);
+}
+
+void D3D12GraphicsCommandBuffer::SetIndexBuffer(const IBuffer* InIndexBuffer, uint64 Offset)
+{
+	D3D12Buffer* Buffer = (D3D12Buffer*)InIndexBuffer;
+	Buffer->TransitionResource(this, D3D12_RESOURCE_STATE_GENERIC_READ);
+	Buffer->PromotedState = D3D12_RESOURCE_STATE_INDEX_BUFFER;
+	D3D12_INDEX_BUFFER_VIEW IbView = Buffer->GetIBView();
+	IbView.BufferLocation += Offset;
+	IbView.SizeInBytes -= static_cast<uint32>(Offset);
 	FlushResourceTransitions();
 	D3DCL->IASetIndexBuffer(&IbView);
 }
@@ -397,6 +409,24 @@ void D3D12GraphicsCommandBuffer::Dispatch(uint32 ThreadX, uint32 ThreadY, uint32
 	D3DCL->Dispatch(ThreadX, ThreadY, ThreadZ);
 }
 
+void D3D12GraphicsCommandBuffer::InitializeAllocators(D3D12LinearDescriptorAllocator& ParentSrvAllocator, D3D12LinearDescriptorAllocator& ParentSmpAllocator)
+{
+	D3D12DescriptorAllocation SrvAllocation = ParentSrvAllocator.AllocateMultiple(512);
+	D3D12DescriptorAllocation SmpAllocation = ParentSmpAllocator.AllocateMultiple(512);
+	SrvDescriptorAllocator.InitializeSubAllocator(
+		SrvAllocation.BaseCpuHandle,
+		ParentSrvAllocator.IncrementSize,
+		{ SrvAllocation.BaseCpuHandle.ptr + static_cast<SIZE_T>(ParentSrvAllocator.IncrementSize * 512) },
+		SrvAllocation.GpuHandle
+	);
+	SmpDescriptorAllocator.InitializeSubAllocator(
+		SmpAllocation.BaseCpuHandle,
+		ParentSmpAllocator.IncrementSize,
+		{ SmpAllocation.BaseCpuHandle.ptr + static_cast<SIZE_T>(ParentSmpAllocator.IncrementSize * 512) },
+		SmpAllocation.GpuHandle
+	);
+}
+
 D3D12_RESOURCE_BARRIER TranslateResourceTransition(const D3D12_RESOURCE_TRANSITION& ResourceTransition)
 {
 	D3D12_RESOURCE_BARRIER Result = CD3DX12_RESOURCE_BARRIER::Transition
@@ -425,19 +455,13 @@ void D3D12GraphicsCommandBuffer::FlushResourceTransitions()
 void D3D12GraphicsCommandBuffer::CommitGraphicsResourcesToExecution()
 {
 	// Allow state inheritance
-//	if (GraphicsResources.bAnySrvDirty || GraphicsResources.bAnyUavDirty)
-//	{
-		GraphicsResources.Initialize(GraphicsPipelineState, ParentDevice);
-//	}
+	GraphicsResources.Initialize(GraphicsPipelineState, ParentDevice, SrvDescriptorAllocator, SmpDescriptorAllocator);
 	GraphicsResources.ApplyGraphicsResources(this);
 }
 
 void D3D12GraphicsCommandBuffer::CommitComputeResourcesToExecution()
 {
-//	if (ComputeResources.bAnySrvDirty || ComputeResources.bAnyUavDirty)
-//	{
-		ComputeResources.Initialize(ComputePipelineState, ParentDevice);
-//	}
+	ComputeResources.Initialize(ComputePipelineState, ParentDevice, SrvDescriptorAllocator, SmpDescriptorAllocator);
 	ComputeResources.ApplyComputeResources(this);
 }
 
@@ -461,6 +485,10 @@ void D3D12GraphicsCommandBuffer::ReturnCommandList()
 
 void D3D12GraphicsCommandContext::BeginPass(IRenderTargetInfo* InRenderPass)
 {
+	if (InRenderPass)
+	{
+		CurrentCommandBuffer->InitializeAllocators(ParentDevice->GetSrvAllocator(), ParentDevice->GetSmpAllocator());
+	}
 	CurrentCommandBuffer->BeginPass(InRenderPass);
 }
 
@@ -493,14 +521,15 @@ IGraphicsCommandBuffer* D3D12GraphicsCommandContext::CreateCommandBuffer()
 		return nullptr;
 	}
 	Result = CommandPool.Pop();
+	Result->InitializeAllocators(ParentDevice->GetSrvAllocator(), ParentDevice->GetSmpAllocator());
 	return Result;
 }
 
 void D3D12GraphicsCommandContext::ExecuteCommandBuffer(IGraphicsCommandBuffer* InCommandBuffer)
 {
 	D3D12GraphicsCommandBuffer* CmdBuff = (D3D12GraphicsCommandBuffer*)InCommandBuffer;
-	BANE_CHECK(CmdBuff->CommandList != nullptr);
-	BANE_CHECK(CmdBuff->CommandList->bCanReset);
+	//BANE_CHECK(CmdBuff->CommandList != nullptr);
+	//BANE_CHECK(CmdBuff->CommandList->bCanReset);
 	ParentDevice->EnsureAllUploadsOccured();
 	ParentDevice->GetCommandQueue(ContextType).ExecuteImmediate(CmdBuff->CommandList);
 	CmdBuff->ReturnCommandList();
@@ -553,19 +582,24 @@ void D3D12GraphicsCommandContext::SetConstantBuffer(uint32 Slot, const IBuffer* 
 	CurrentCommandBuffer->SetConstantBuffer(Slot, InBuffer, Offset);
 }
 
-void D3D12GraphicsCommandContext::SetVertexBuffer(const IBuffer* InBuffer, uint64 Offset)
-{
-	CurrentCommandBuffer->SetVertexBuffer(InBuffer, Offset);
-}
-
 void D3D12GraphicsCommandContext::SetVertexBuffer(const IBuffer* InVertexBuffer)
 {
 	CurrentCommandBuffer->SetVertexBuffer(InVertexBuffer);
 }
 
+void D3D12GraphicsCommandContext::SetVertexBuffer(const IBuffer* InBuffer, uint64 Offset)
+{
+	CurrentCommandBuffer->SetVertexBuffer(InBuffer, Offset);
+}
+
 void D3D12GraphicsCommandContext::SetIndexBuffer(const IBuffer* InIndexBuffer)
 {
 	CurrentCommandBuffer->SetIndexBuffer(InIndexBuffer);
+}
+
+void D3D12GraphicsCommandContext::SetIndexBuffer(const IBuffer* InIndexBuffer, uint64 Offset)
+{
+	CurrentCommandBuffer->SetIndexBuffer(InIndexBuffer, Offset);
 }
 
 void D3D12GraphicsCommandContext::SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY InTopology)

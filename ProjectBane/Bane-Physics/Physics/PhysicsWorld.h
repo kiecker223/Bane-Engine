@@ -77,6 +77,7 @@ public:
 	ApplicationToPhysicsQueue MessageQueue;
 	std::mutex BodyAddMutex;
 	std::mutex GenerateOctTreeMutex;
+	std::mutex BodyReadMutex;
 	uint32 CurrentId;
 	bool bRunningPhysicsSim;
 	float SecondsTakenForThread;

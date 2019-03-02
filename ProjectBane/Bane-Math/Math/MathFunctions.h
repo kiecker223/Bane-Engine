@@ -451,9 +451,9 @@ inline matrix matView(float3 Eye, float3 Forward, float3 Up)
 inline matrix matTranslation(const float3& Position)
 {
 	matrix Result(1.0f);
-	Result[0][3] = Position.x;
-	Result[1][3] = Position.y;
-	Result[2][3] = Position.z;
+	Result.p[0][3] = Position.x;
+	Result.p[1][3] = Position.y;
+	Result.p[2][3] = Position.z;
 	return Result;
 }
 
@@ -466,24 +466,16 @@ inline matrix matScale(const float3& Scale)
 {
 	matrix Result(1.0f);
 
-	Result[0][0] = Scale.x;
-	Result[1][1] = Scale.y;
-	Result[2][2] = Scale.z;
+	Result.p[0][0] = Scale.x;
+	Result.p[1][1] = Scale.y;
+	Result.p[2][2] = Scale.z;
 
 	return Result;
 }
 
 inline matrix matTransformation(const float3& Position, const Quaternion& Rotation, const float3& Scale)
 {
-	matrix Result;
-
-	const matrix m1 = matTranslation(Position);
-	const matrix m2 = matRotation(Rotation);
-	const matrix m3 = matScale(Scale);
-
-	Result = m1 * m2 * m3;
-
-	return Result;
+	return matTranslation(Position) * matRotation(Rotation) * matScale(Scale);
 }
 
 inline matrix matRotX(float Radians)

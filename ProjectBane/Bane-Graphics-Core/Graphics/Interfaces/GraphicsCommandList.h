@@ -44,9 +44,10 @@ public:
 	virtual void SetUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
 	virtual void SetConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset) = 0;
 
-	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer, uint64 Offset) = 0;
 	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer) = 0;
+	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer, uint64 Offset) = 0;
 	virtual void SetIndexBuffer(const IIndexBuffer* IndexBuffer) = 0;
+	virtual void SetIndexBuffer(const IIndexBuffer* IndexBuffer, uint64 Offset) = 0;
 	virtual void SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY Topology) = 0;
 
 	virtual void CopyBufferLocations(IBuffer* Src, uint64 SrcOffset, IBuffer* Dst, uint64 DstOffset, uint64 NumBytes) = 0;
@@ -105,9 +106,10 @@ public:
 	// Prefer this because its faster
 	virtual void ExecuteCommandBuffers(const std::vector<IGraphicsCommandBuffer*>& InCommandBuffers) = 0;
 
-	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer, uint64 Offset) = 0;
 	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer) = 0;
+	virtual void SetVertexBuffer(const IVertexBuffer* VertexBuffer, uint64 Offset) = 0;
 	virtual void SetIndexBuffer(const IIndexBuffer* IndexBuffer) = 0;
+	virtual void SetIndexBuffer(const IIndexBuffer* IndexBuffer, uint64 Offset) = 0;
 	virtual void SetPrimitiveTopology(const EPRIMITIVE_TOPOLOGY Topology) = 0;
 
 	virtual void CopyBufferLocations(IBuffer* Src, uint64 SrcOffset, IBuffer* Dst, uint64 DstOffset, uint64 NumBytes) = 0;

@@ -5,7 +5,9 @@
 
 
 Material::Material() :
-	m_Pipeline(nullptr)
+	m_Pipeline(nullptr),
+	Diffuse(nullptr),
+	Normal(nullptr)
 {
 	m_Parameters.Color = float3(1.0f, 1.0f, 1.0f);
 	m_Parameters.SpecularFactor = 0.5f;
@@ -33,6 +35,7 @@ void Material::SetSpecularTexture(const std::string& FileName)
 
 void Material::SetTexture(ITextureBase* Texture, uint32 TextureRegister, uint32 SamplerRegister)
 {
+	Diffuse = Texture;
 }
 
 void Material::SetTexture(ITextureBase* Texture, uint32 TextureRegister)
