@@ -7,7 +7,8 @@ class PhysicsData
 {
 public:
 
-	vec4 AngularVelocity; // (x, y, z) = Angle (w) = Power
+	vec4 CurrentAngularVelocity; // (x, y, z) = Angle (w) = Power
+	vec4 NextAngularVelocity;
 
 	vec3 CurrentVelocity;
 	vec3 NextVelocity;
