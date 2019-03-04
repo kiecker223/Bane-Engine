@@ -1,18 +1,21 @@
-group "Graphics"
+group "BaneLib"
 project "BaneGraphicsCore"
     kind "StaticLib"
-    links { "BaneCore", "BanePlatform"}
-    includedirs { 
-        "../Bane-Common",  
-        "../Bane-Core",
+    includedirs {
+		"../Bane-Common",
         "../Bane-Math",
-        "../Bane-Platform",
-        "../External/include",
+        "../Bane-Core/",
+		"../Bane-Platform",
+		"../External/include/"
     }
-    files { "**.h", "**.cpp" }
 
-    excludes { "Graphics/D3D12/D3D12ShaderSignature.cpp", "Graphics/Interfaces/GraphicsDevice.cpp", "Graphics/IO/ShaderTokenizer.cpp" }
-            
---    filter "system:windows"
---        links { "d3d12"}
+    links
+    {
+        "BaneCore",
+        "BanePlatform"
+    }
 
+    files
+    {
+        "**.h", "**.cpp"
+    }

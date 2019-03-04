@@ -4,13 +4,13 @@
 #include "4ComponentVector.h"
 #include <xmmintrin.h>
 
-struct int4x4
+struct imat4x4
 {
 	using T = int;
-	using TT = int4x4;
-	using TT3 = int3x3;
-	using TT2 = int2x2;
-	using RowType = int4;
+	using TT = imat4x4;
+	using TT3 = imat3x3;
+	using TT2 = imat2x2;
+	using RowType = ivec4;
 	static const uint32 NumRows = 4;
 	static const uint32 NumCols = 4;
 
@@ -20,7 +20,7 @@ struct int4x4
 		RowType v[4];
 	};
 
-	int4x4()
+	imat4x4()
 	{
 		v[0] = RowType();
 		v[1] = RowType();
@@ -28,7 +28,7 @@ struct int4x4
 		v[3] = RowType();
 	}
 
-	int4x4(T IdentityVal)
+	imat4x4(T IdentityVal)
 	{
 		for (int i = 0; i < NumRows; i++)
 		{
@@ -40,17 +40,17 @@ struct int4x4
 		p[3][3] = IdentityVal;
 	}
 
-	int4x4(const int4x4& Rhs)
+	imat4x4(const imat4x4& Rhs)
 	{
 		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
 	}
 
-	int4x4(const T* Values)
+	imat4x4(const T* Values)
 	{
 		memcpy(p, Values, sizeof(p));
 	}
 
-	int4x4(T p00, T p01, T p02, T p03, T p10, T p11, T p12, T p13, T p20, T p21, T p22, T p23, T p30, T p31, T p32, T p33)
+	imat4x4(T p00, T p01, T p02, T p03, T p10, T p11, T p12, T p13, T p20, T p21, T p22, T p23, T p30, T p31, T p32, T p33)
 	{
 		v[0] = RowType(p00, p01, p02, p03);
 		v[1] = RowType(p10, p11, p12, p13);
@@ -58,7 +58,7 @@ struct int4x4
 		v[3] = RowType(p30, p31, p32, p33);
 	}
 
-	int4x4(RowType r1, RowType r2, RowType r3, RowType r4)
+	imat4x4(RowType r1, RowType r2, RowType r3, RowType r4)
 	{
 		v[0] = r1;
 		v[1] = r2;
@@ -176,13 +176,13 @@ struct int4x4
 #pragma endregion
 };
 
-struct uint324x4
+struct umat4x4
 {
 	using T = uint32;
-	using TT = uint324x4;
-	using TT3 = uint323x3;
-	using TT2 = uint322x2;
-	using RowType = uint4;
+	using TT = umat4x4;
+	using TT3 = umat3x3;
+	using TT2 = umat2x2;
+	using RowType = uvec4;
 	static const uint32 NumRows = 4;
 	static const uint32 NumCols = 4;
 
@@ -192,7 +192,7 @@ struct uint324x4
 		RowType v[4];
 	};
 
-	uint324x4()
+	umat4x4()
 	{
 		v[0] = RowType();
 		v[1] = RowType();
@@ -200,7 +200,7 @@ struct uint324x4
 		v[3] = RowType();
 	}
 
-	uint324x4(T IdentityVal)
+	umat4x4(T IdentityVal)
 	{
 		for (int i = 0; i < NumRows; i++)
 		{
@@ -212,17 +212,17 @@ struct uint324x4
 		p[3][3] = IdentityVal;
 	}
 
-	uint324x4(const uint324x4& Rhs)
+	umat4x4(const umat4x4& Rhs)
 	{
 		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
 	}
 
-	uint324x4(const T* Values)
+	umat4x4(const T* Values)
 	{
 		memcpy(p, Values, sizeof(p));
 	}
 
-	uint324x4(T p00, T p01, T p02, T p03, T p10, T p11, T p12, T p13, T p20, T p21, T p22, T p23, T p30, T p31, T p32, T p33)
+	umat4x4(T p00, T p01, T p02, T p03, T p10, T p11, T p12, T p13, T p20, T p21, T p22, T p23, T p30, T p31, T p32, T p33)
 	{
 		v[0] = RowType(p00, p01, p02, p03);
 		v[1] = RowType(p10, p11, p12, p13);
@@ -230,7 +230,7 @@ struct uint324x4
 		v[3] = RowType(p30, p31, p32, p33);
 	}
 
-	uint324x4(RowType r1, RowType r2, RowType r3, RowType r4)
+	umat4x4(RowType r1, RowType r2, RowType r3, RowType r4)
 	{
 		v[0] = r1;
 		v[1] = r2;
@@ -354,13 +354,13 @@ struct uint324x4
 #pragma endregion
 };
 
-struct float4x4
+struct fmat4x4
 {
 	using T = float;
-	using TT = float4x4;
-	using TT3 = float3x3;
-	using TT2 = float2x2;
-	using RowType = float4;
+	using TT = fmat4x4;
+	using TT3 = fmat3x3;
+	using TT2 = fmat2x2;
+	using RowType = fvec4;
 	static const uint32 NumRows = 4;
 	static const uint32 NumCols = 4;
 
@@ -371,7 +371,7 @@ struct float4x4
 		RowType v[4];
 	};
 
-	float4x4()
+	fmat4x4()
 	{
 		v[0] = RowType();
 		v[1] = RowType();
@@ -379,7 +379,7 @@ struct float4x4
 		v[3] = RowType();
 	}
 
-	float4x4(T IdentityVal)
+	fmat4x4(T IdentityVal)
 	{
 		float Val = 0.0f;
 		for (int i = 0; i < NumRows; i++)
@@ -392,7 +392,7 @@ struct float4x4
 		p[3][3] = IdentityVal;
 	}
 
-	float4x4(const float4x4& Rhs)
+	fmat4x4(const fmat4x4& Rhs)
 	{
 		f[0] = _mm_load_ps(Rhs.p[0]);
 		f[1] = _mm_load_ps(Rhs.p[1]);
@@ -400,7 +400,7 @@ struct float4x4
 		f[3] = _mm_load_ps(Rhs.p[3]);
 	}
 
-	float4x4(const T* Values)
+	fmat4x4(const T* Values)
 	{
 		f[0] = _mm_load_ps(&Values[0]);
 		f[1] = _mm_load_ps(&Values[3]);
@@ -408,7 +408,7 @@ struct float4x4
 		f[3] = _mm_load_ps(&Values[11]);
 	}
 
-	float4x4(T p00, T p01, T p02, T p03, T p10, T p11, T p12, T p13, T p20, T p21, T p22, T p23, T p30, T p31, T p32, T p33)
+	fmat4x4(T p00, T p01, T p02, T p03, T p10, T p11, T p12, T p13, T p20, T p21, T p22, T p23, T p30, T p31, T p32, T p33)
 	{
 		v[0] = RowType(p00, p01, p02, p03);
 		v[1] = RowType(p10, p11, p12, p13);
@@ -416,7 +416,7 @@ struct float4x4
 		v[3] = RowType(p30, p31, p32, p33);
 	}
 
-	float4x4(RowType r1, RowType r2, RowType r3, RowType r4)
+	fmat4x4(RowType r1, RowType r2, RowType r3, RowType r4)
 	{
 		f[0] = _mm_load_ps(reinterpret_cast<float*>(&r1));
 		f[1] = _mm_load_ps(reinterpret_cast<float*>(&r2));
@@ -548,16 +548,16 @@ struct float4x4
 #pragma endregion
 };
 
-typedef float4x4 matrix;
+typedef fmat4x4 matrix;
 
 
-struct double4x4
+struct mat4x4
 {
 	using T = double;
-	using TT = double4x4;
-	using TT3 = double3x3;
-	using TT2 = double2x2;
-	using RowType = double4;
+	using TT = mat4x4;
+	using TT3 = mat3x3;
+	using TT2 = mat2x2;
+	using RowType = vec4;
 	static const uint32 NumRows = 4;
 	static const uint32 NumCols = 4;
 
@@ -567,7 +567,7 @@ struct double4x4
 		RowType v[4];
 	};
 
-	double4x4()
+	mat4x4()
 	{
 		v[0] = RowType();
 		v[1] = RowType();
@@ -575,7 +575,7 @@ struct double4x4
 		v[3] = RowType();
 	}
 
-	double4x4(T IdentityVal)
+	mat4x4(T IdentityVal)
 	{
 		for (uint32 i = 0; i < NumRows; i++)
 		{
@@ -587,17 +587,17 @@ struct double4x4
 		p[3][3] = IdentityVal;
 	}
 
-	double4x4(const double4x4& Rhs)
+	mat4x4(const mat4x4& Rhs)
 	{
 		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
 	}
 
-	double4x4(const T* Values)
+	mat4x4(const T* Values)
 	{
 		memcpy(p, Values, sizeof(p));
 	}
 
-	double4x4(T p00, T p01, T p02, T p03, T p10, T p11, T p12, T p13, T p20, T p21, T p22, T p23, T p30, T p31, T p32, T p33)
+	mat4x4(T p00, T p01, T p02, T p03, T p10, T p11, T p12, T p13, T p20, T p21, T p22, T p23, T p30, T p31, T p32, T p33)
 	{
 		v[0] = RowType(p00, p01, p02, p03);
 		v[1] = RowType(p10, p11, p12, p13);
@@ -605,7 +605,7 @@ struct double4x4
 		v[3] = RowType(p30, p31, p32, p33);
 	}
 
-	double4x4(RowType r1, RowType r2, RowType r3, RowType r4)
+	mat4x4(RowType r1, RowType r2, RowType r3, RowType r4)
 	{
 		v[0] = r1;
 		v[1] = r2;

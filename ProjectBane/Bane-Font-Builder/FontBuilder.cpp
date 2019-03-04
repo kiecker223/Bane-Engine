@@ -82,7 +82,7 @@ class SDFBuilderInformation
 {
 public:
 
-	float2 GradientDirections[WIDTH*HEIGHT];
+	fvec2 GradientDirections[WIDTH*HEIGHT];
 	float GradientDistances[WIDTH*HEIGHT];
 
 	SDFBuilderInformation()
@@ -94,12 +94,12 @@ public:
 		}
 	}
 
-	float2& GetDirection(uint32 X, uint32 Y)
+	fvec2& GetDirection(uint32 X, uint32 Y)
 	{
 		return GradientDirections[(Y * WIDTH) + X];
 	}
 
-	float2& GetDirection(const uint2& Pos)
+	fvec2& GetDirection(const uvec2& Pos)
 	{
 		return GetDirection(Pos.x, Pos.y);
 	}
@@ -109,7 +109,7 @@ public:
 		return GradientDistances[(Y * WIDTH) + X];
 	}
 
-	float& GetDistances(const uint2& Pos)
+	float& GetDistances(const uvec2& Pos)
 	{
 		return GetDistances(Pos.x, Pos.y);
 	}
@@ -123,8 +123,8 @@ public:
 
 	struct Character
 	{
-		uint2 PixelStartLocation;
-		uint2 Dimensions, Bearing;
+		uvec2 PixelStartLocation;
+		uvec2 Dimensions, Bearing;
 		uint32 Advance;
 	};
 
@@ -215,7 +215,7 @@ float DistanceToEdge(float gradientX, float gradientY, float color)
 	return distance;
 }
 
-float DistanceSquared(const float2& r, const float2& l)
+float DistanceSquared(const fvec2& r, const fvec2& l)
 {
 	float x = fabsf(l.x - r.x);
 	float y = fabsf(l.y - r.y);
@@ -227,12 +227,12 @@ enum SearchDir
 	Up, Down, Left, Right, None
 };
 
-void GenerateImageInfo(Image* ResultingImage, SDFBuilderInformation* BuildInfo, uint2 Position)
+void GenerateImageInfo(Image* ResultingImage, SDFBuilderInformation* BuildInfo, uvec2 Position)
 {
 	static const float DistSlack = 1e-3f;
-	float2 Point((float)Position.x, (float)Position.y);
+	fvec2 Point((float)Position.x, (float)Position.y);
 	float PointDist = BuildInfo->GetDistances(Position);
-	float2 PointDir = BuildInfo->GetDirection(Position);
+	fvec2 PointDir = BuildInfo->GetDirection(Position);
 	uint32 cX = Position.x;
 	uint32 cY = Position.y;
 	float Distance;
@@ -273,11 +273,11 @@ void GenerateImageInfo(Image* ResultingImage, SDFBuilderInformation* BuildInfo, 
 
 	if (Dir == Left)
 	{
-		float2 Dir = BuildInfo->GetDirection(cX - 1, cY);
-		float2 DirDist = (Dir * BuildInfo->GetDistances(cX - 1, cY));
-		float2 OtherPoint((float)cX - 1, (float)cY);
-		float2 OtherResultPoint = OtherPoint + DirDist;
-		float2 ToResult = OtherResultPoint - Point;
+		fvec2 Dir = BuildInfo->GetDirection(cX - 1, cY);
+		fvec2 DirDist = (Dir * BuildInfo->GetDistances(cX - 1, cY));
+		fvec2 OtherPoint((float)cX - 1, (float)cY);
+		fvec2 OtherResultPoint = OtherPoint + DirDist;
+		fvec2 ToResult = OtherResultPoint - Point;
 		Distance = length(ToResult);
 
 		if (Distance + DistSlack < PointDist)
@@ -288,11 +288,11 @@ void GenerateImageInfo(Image* ResultingImage, SDFBuilderInformation* BuildInfo, 
 	}
 	else if (Dir == Down)
 	{
-		float2 Dir = BuildInfo->GetDirection(cX, cY + 1);
-		float2 DirDist = (Dir * BuildInfo->GetDistances(cX, cY + 1));
-		float2 OtherPoint((float)cX, (float)cY + 1);
-		float2 OtherResultPoint = OtherPoint + DirDist;
-		float2 ToResult = OtherResultPoint - Point;
+		fvec2 Dir = BuildInfo->GetDirection(cX, cY + 1);
+		fvec2 DirDist = (Dir * BuildInfo->GetDistances(cX, cY + 1));
+		fvec2 OtherPoint((float)cX, (float)cY + 1);
+		fvec2 OtherResultPoint = OtherPoint + DirDist;
+		fvec2 ToResult = OtherResultPoint - Point;
 		Distance = length(ToResult);
 
 		if (Distance + DistSlack < PointDist)
@@ -303,11 +303,11 @@ void GenerateImageInfo(Image* ResultingImage, SDFBuilderInformation* BuildInfo, 
 	}
 	else if (Dir == Right)
 	{
-		float2 Dir = BuildInfo->GetDirection(cX + 1, cY);
-		float2 DirDist = (Dir * BuildInfo->GetDistances(cX + 1, cY));
-		float2 OtherPoint((float)cX + 1, (float)cY);
-		float2 OtherResultPoint = OtherPoint + DirDist;
-		float2 ToResult = OtherResultPoint - Point;
+		fvec2 Dir = BuildInfo->GetDirection(cX + 1, cY);
+		fvec2 DirDist = (Dir * BuildInfo->GetDistances(cX + 1, cY));
+		fvec2 OtherPoint((float)cX + 1, (float)cY);
+		fvec2 OtherResultPoint = OtherPoint + DirDist;
+		fvec2 ToResult = OtherResultPoint - Point;
 		Distance = length(ToResult);
 
 		if (Distance + DistSlack < PointDist)
@@ -318,11 +318,11 @@ void GenerateImageInfo(Image* ResultingImage, SDFBuilderInformation* BuildInfo, 
 	}
 	else if (Dir == Up)
 	{
-		float2 Dir = BuildInfo->GetDirection(cX, cY - 1);
-		float2 DirDist = (Dir * BuildInfo->GetDistances(cX, cY - 1));
-		float2 OtherPoint((float)cX, (float)cY - 1);
-		float2 OtherResultPoint = OtherPoint + DirDist;
-		float2 ToResult = OtherResultPoint - Point;
+		fvec2 Dir = BuildInfo->GetDirection(cX, cY - 1);
+		fvec2 DirDist = (Dir * BuildInfo->GetDistances(cX, cY - 1));
+		fvec2 OtherPoint((float)cX, (float)cY - 1);
+		fvec2 OtherResultPoint = OtherPoint + DirDist;
+		fvec2 ToResult = OtherResultPoint - Point;
 		Distance = length(ToResult);
 
 		if (Distance + DistSlack < PointDist)
@@ -357,7 +357,7 @@ void MakeImageIntoSDF(Image* ResultingImage, SDFBuilderInformation* BuildInfo)
 					continue;
 				}
 			}
-			float2 Direction;
+			fvec2 Direction;
 			Direction.x = (-ResultingImage->GetColor(x - 1, y - 1).NormalizedCol()) - (ResultingImage->GetColor(x - 1, y).NormalizedCol() * SQUARE_OF_2) - 
 							(ResultingImage->GetColor(x - 1, y + 1).NormalizedCol()) + (ResultingImage->GetColor(x + 1, y - 1).NormalizedCol()) +
 							(ResultingImage->GetColor(x + 1, y).NormalizedCol() * SQUARE_OF_2) + (ResultingImage->GetColor(x + 1, y + 1).NormalizedCol());
@@ -383,7 +383,7 @@ void MakeImageIntoSDF(Image* ResultingImage, SDFBuilderInformation* BuildInfo)
 		{
 			for (uint32 x = WIDTH - 1; x > 1; x--)
 			{
-				GenerateImageInfo(ResultingImage, BuildInfo, uint2(x, y));
+				GenerateImageInfo(ResultingImage, BuildInfo, uvec2(x, y));
 			}
 		}
 
@@ -391,7 +391,7 @@ void MakeImageIntoSDF(Image* ResultingImage, SDFBuilderInformation* BuildInfo)
 		{
 			for (uint32 x = 1; x < WIDTH - 1; x++)
 			{
-				GenerateImageInfo(ResultingImage, BuildInfo, uint2(x, y));
+				GenerateImageInfo(ResultingImage, BuildInfo, uvec2(x, y));
 			}
 		}
 	}
@@ -440,7 +440,7 @@ int main(int argc, char** argv)
 		FT_Load_Char(FTFace, c, FT_LOAD_RENDER);
 
 		auto& Char = CharInfo->GetCharacter(c);
-		Char.Dimensions = uint2(FTFace->glyph->bitmap.width, FTFace->glyph->bitmap.rows);
+		Char.Dimensions = uvec2(FTFace->glyph->bitmap.width, FTFace->glyph->bitmap.rows);
 		CharInfo->SetCharacterInfo(c, FTFace);
 		if ((CurX + Char.Dimensions.x) + SLACK > WIDTH)
 		{
@@ -460,7 +460,7 @@ int main(int argc, char** argv)
 			}
 		}
 		
-		Char.PixelStartLocation = uint2(CurX, CurY);
+		Char.PixelStartLocation = uvec2(CurX, CurY);
 		ResultingImage->CopyPixelRegion(CurX, CurY, ColorBuff, Char.Dimensions.x, Char.Dimensions.y);
 		delete[] ColorBuff;
 

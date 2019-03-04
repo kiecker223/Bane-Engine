@@ -14,7 +14,7 @@
 #define MEGABYTE(x) KILOBYTE(x) * 1024
 
 #define MAKE_ALIGN(x) __declspec(align(x))
-#define SHADER_ALIGNMENT MAKE_ALIGN(sizeof(float4))
+#define SHADER_ALIGNMENT MAKE_ALIGN(sizeof(fvec4))
 #define ALIGN_FOR_GPU_BUFFER MAKE_ALIGN(256)
 
 #if defined(BANE_BUILD_EXPORT) && 1

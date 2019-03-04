@@ -2,12 +2,12 @@
 
 #include "3ComponentVector.h"
 
-struct int4
+struct ivec4
 {
 	using T = int;
-	using TT = int4;
-	using TT3 = int3;
-	using TT2 = int2;
+	using TT = ivec4;
+	using TT3 = ivec3;
+	using TT2 = ivec2;
 	static const uint32 ColCount = 4;
 
 	union
@@ -33,14 +33,14 @@ struct int4
 		T p[ColCount];
 	};
 
-	int4()
+	ivec4()
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = T(0);
 		}
 	}
-	int4(T X, T Y, T Z, T W) :
+	ivec4(T X, T Y, T Z, T W) :
 		x(X),
 		y(Y),
 		z(Z),
@@ -48,7 +48,7 @@ struct int4
 	{
 	}
 
-	int4(const TT& SelfType)
+	ivec4(const TT& SelfType)
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -56,7 +56,7 @@ struct int4
 		}
 	}
 
-	int4(T X, T Y, TT2 ZW) :
+	ivec4(T X, T Y, TT2 ZW) :
 		x(X),
 		y(Y),
 		z(ZW.x),
@@ -64,7 +64,7 @@ struct int4
 	{
 	}
 
-	int4(TT3 XYZ, T W) :
+	ivec4(TT3 XYZ, T W) :
 		x(XYZ.x),
 		y(XYZ.y),
 		z(XYZ.w),
@@ -259,12 +259,12 @@ struct int4
 #pragma endregion
 };
 
-struct uint4
+struct uvec4
 {
 	using T = uint32;
-	using TT = uint4;
-	using TT3 = uint3;
-	using TT2 = uint2;
+	using TT = uvec4;
+	using TT3 = uvec3;
+	using TT2 = uvec2;
 	static const uint32 ColCount = 4;
 
 	union
@@ -290,7 +290,7 @@ struct uint4
 		T p[ColCount];
 	};
 
-	uint4()
+	uvec4()
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -298,7 +298,7 @@ struct uint4
 		}
 	}
 
-	uint4(T X, T Y, T Z, T W) :
+	uvec4(T X, T Y, T Z, T W) :
 		x(X),
 		y(Y),
 		z(Z),
@@ -306,7 +306,7 @@ struct uint4
 	{
 	}
 
-	uint4(const TT& SelfType)
+	uvec4(const TT& SelfType)
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -314,7 +314,7 @@ struct uint4
 		}
 	}
 
-	uint4(T X, T Y, TT2 ZW) :
+	uvec4(T X, T Y, TT2 ZW) :
 		x(X),
 		y(Y),
 		z(ZW.x),
@@ -322,7 +322,7 @@ struct uint4
 	{
 	}
 
-	uint4(TT3 XYZ, T W) :
+	uvec4(TT3 XYZ, T W) :
 		x(XYZ.x),
 		y(XYZ.y),
 		z(XYZ.w),
@@ -512,12 +512,12 @@ struct uint4
 #pragma endregion
 };
 
-struct float4
+struct fvec4
 {
 	using T = float;
-	using TT = float4;
-	using TT3 = float3;
-	using TT2 = float2;
+	using TT = fvec4;
+	using TT3 = fvec3;
+	using TT2 = fvec2;
 	static const uint32 ColCount = 4;
 
 	union
@@ -543,14 +543,14 @@ struct float4
 		T p[ColCount];
 	};
 
-	float4()
+	fvec4()
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = T(0);
 		}
 	}
-	float4(T X, T Y, T Z, T W) :
+	fvec4(T X, T Y, T Z, T W) :
 		x(X),
 		y(Y),
 		z(Z),
@@ -558,7 +558,7 @@ struct float4
 	{
 	}
 
-	float4(const TT& SelfType)
+	fvec4(const TT& SelfType)
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -566,7 +566,7 @@ struct float4
 		}
 	}
 
-	float4(T X, T Y, TT2 ZW) :
+	fvec4(T X, T Y, TT2 ZW) :
 		x(X),
 		y(Y),
 		z(ZW.x),
@@ -574,7 +574,7 @@ struct float4
 	{
 	}
 
-	float4(TT3 XYZ, T W) :
+	fvec4(TT3 XYZ, T W) :
 		x(XYZ.x),
 		y(XYZ.y),
 		z(XYZ.w),
@@ -771,12 +771,12 @@ struct float4
 #pragma endregion
 };
 
-struct double4
+struct vec4
 {
 	using T = double;
-	using TT = double4;
-	using TT3 = double3;
-	using TT2 = double2;
+	using TT = vec4;
+	using TT3 = vec3;
+	using TT2 = vec2;
 	static const uint32 ColCount = 4;
 
 	union
@@ -802,14 +802,14 @@ struct double4
 		T p[ColCount];
 	};
 
-	double4()
+	vec4()
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = T(0);
 		}
 	}
-	double4(T X, T Y, T Z, T W) :
+	vec4(T X, T Y, T Z, T W) :
 		x(X),
 		y(Y),
 		z(Z),
@@ -817,7 +817,7 @@ struct double4
 	{
 	}
 
-	double4(const TT& SelfType)
+	vec4(const TT& SelfType)
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -825,7 +825,7 @@ struct double4
 		}
 	}
 
-	double4(T X, T Y, TT2 ZW) :
+	vec4(T X, T Y, TT2 ZW) :
 		x(X),
 		y(Y),
 		z(ZW.x),
@@ -833,7 +833,7 @@ struct double4
 	{
 	}
 
-	double4(TT3 XYZ, T W) :
+	vec4(TT3 XYZ, T W) :
 		x(XYZ.x),
 		y(XYZ.y),
 		z(XYZ.w),
@@ -1030,32 +1030,32 @@ struct double4
 };
 
 
-inline float4 fromDouble4(const double4& InVal)
+inline fvec4 fromDouble4(const vec4& InVal)
 {
-	return float4(static_cast<float>(InVal.x), static_cast<float>(InVal.y), static_cast<float>(InVal.z), static_cast<float>(InVal.w));
+	return fvec4(static_cast<float>(InVal.x), static_cast<float>(InVal.y), static_cast<float>(InVal.z), static_cast<float>(InVal.w));
 }
 
-inline float3 fromDouble3(const double3& InVal)
+inline fvec3 fromDouble3(const vec3& InVal)
 {
-	return float3(static_cast<float>(InVal.x), static_cast<float>(InVal.y), static_cast<float>(InVal.z));
+	return fvec3(static_cast<float>(InVal.x), static_cast<float>(InVal.y), static_cast<float>(InVal.z));
 }
 
-inline float2 fromDouble2(const double2& InVal)
+inline fvec2 fromDouble2(const vec2& InVal)
 {
-	return float2(static_cast<float>(InVal.x), static_cast<float>(InVal.y));
+	return fvec2(static_cast<float>(InVal.x), static_cast<float>(InVal.y));
 }
 
-inline double4 fromFloat4(const float4& InVal)
+inline vec4 fromFloat4(const fvec4& InVal)
 {
-	return double4(static_cast<double>(InVal.x), static_cast<double>(InVal.y), static_cast<double>(InVal.z), static_cast<double>(InVal.w));
+	return vec4(static_cast<double>(InVal.x), static_cast<double>(InVal.y), static_cast<double>(InVal.z), static_cast<double>(InVal.w));
 }
 
-inline double3 fromFloat3(const float3& InVal)
+inline vec3 fromFloat3(const fvec3& InVal)
 {
-	return double3(static_cast<double>(InVal.x), static_cast<double>(InVal.y), static_cast<double>(InVal.z));
+	return vec3(static_cast<double>(InVal.x), static_cast<double>(InVal.y), static_cast<double>(InVal.z));
 }
 
-inline double2 fromFloat2(const float2& InVal)
+inline vec2 fromFloat2(const fvec2& InVal)
 {
-	return double2(static_cast<double>(InVal.x), static_cast<double>(InVal.y));
+	return vec2(static_cast<double>(InVal.x), static_cast<double>(InVal.y));
 }

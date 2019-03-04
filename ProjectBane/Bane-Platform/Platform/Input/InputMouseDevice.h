@@ -9,8 +9,8 @@ public:
 	InputMouseDevice(class Window* pWin);
 	~InputMouseDevice();
 
-	double2 GetMouseDelta() const;
-	double2 GetMousePosition() const;
+	vec2 GetMouseDelta() const;
+	vec2 GetMousePosition() const;
 	float GetScrollWheel() const;
 	bool GetButtonDown(uint32 Button) const;
 	bool GetButtonUp(uint32 Button) const;

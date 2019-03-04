@@ -3,15 +3,14 @@
 #include <fstream>
 #include <iostream>
 #include <JSON/JsonCPP.h>
-#include <Graphics/Interfaces/PipelineState.h>
+#include <GraphicsCore/Interfaces/PipelineState.h>
 #include "D3DCompilePath.h"
 #include <Platform/System/File/PlatformFile.h>
-#include <Graphics/IO/ShaderCache.h>
+#include <GraphicsCore/IO/ShaderCache.h>
 #include <Common/StringHelpers.h>
 #include "ShaderDeclarations.h"
 #include <Windows.h>
 #include <JSON/JsonCPP.h>
-#include "PE/PEImage.h"
 
 
 enum ShaderCompilationType

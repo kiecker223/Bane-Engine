@@ -2,11 +2,11 @@
 
 #include "2ComponentVector.h"
 
-struct int2x2
+struct imat2x2
 {
-	using TT = int2x2;
+	using TT = imat2x2;
 	using T = int;
-	using RowType = int2;
+	using RowType = ivec2;
 	static const uint32 NumRows = 2;
 	static const uint32 NumCols = 2;
 
@@ -16,13 +16,13 @@ struct int2x2
 		RowType v[2];
 	};
 
-	int2x2()
+	imat2x2()
 	{
 		v[0] = RowType();
 		v[1] = RowType();
 	}
 
-	int2x2(T IdentityVal)
+	imat2x2(T IdentityVal)
 	{
 		for (int i = 0; i < NumRows; i++)
 		{
@@ -32,23 +32,23 @@ struct int2x2
 		p[1][1] = IdentityVal;
 	}
 
-	int2x2(const TT& Rhs)
+	imat2x2(const TT& Rhs)
 	{
 		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
 	}
 
-	int2x2(const T* Values)
+	imat2x2(const T* Values)
 	{
 		memcpy(p, Values, sizeof(p));
 	}
 
-	int2x2(T p00, T p01, T p10, T p11)
+	imat2x2(T p00, T p01, T p10, T p11)
 	{
 		v[0] = RowType(p00, p01);
 		v[1] = RowType(p10, p11);
 	}
 
-	int2x2(RowType r1, RowType r2)
+	imat2x2(RowType r1, RowType r2)
 	{
 		v[0] = r1;
 		v[1] = r2;
@@ -125,11 +125,11 @@ struct int2x2
 #pragma endregion
 };
 
-struct uint322x2
+struct umat2x2
 {
-	using TT = uint322x2;
+	using TT = umat2x2;
 	using T = uint32;
-	using RowType = uint2;
+	using RowType = uvec2;
 	static const uint32 NumRows = 2;
 	static const uint32 NumCols = 2;
 
@@ -139,13 +139,13 @@ struct uint322x2
 		RowType v[2];
 	};
 
-	uint322x2()
+	umat2x2()
 	{
 		v[0] = RowType();
 		v[1] = RowType();
 	}
 
-	uint322x2(T IdentityVal)
+	umat2x2(T IdentityVal)
 	{
 		for (int i = 0; i < NumRows; i++)
 		{
@@ -155,23 +155,23 @@ struct uint322x2
 		p[1][1] = IdentityVal;
 	}
 
-	uint322x2(const TT& Rhs)
+	umat2x2(const TT& Rhs)
 	{
 		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
 	}
 
-	uint322x2(const T* Values)
+	umat2x2(const T* Values)
 	{
 		memcpy(p, Values, sizeof(p));
 	}
 
-	uint322x2(T p00, T p01, T p10, T p11)
+	umat2x2(T p00, T p01, T p10, T p11)
 	{
 		v[0] = RowType(p00, p01);
 		v[1] = RowType(p10, p11);
 	}
 
-	uint322x2(RowType r1, RowType r2)
+	umat2x2(RowType r1, RowType r2)
 	{
 		v[0] = r1;
 		v[1] = r2;
@@ -248,11 +248,11 @@ struct uint322x2
 #pragma endregion
 };
 
-struct float2x2
+struct fmat2x2
 {
-	using TT = float2x2;
+	using TT = fmat2x2;
 	using T = float;
-	using RowType = float2;
+	using RowType = fvec2;
 	static const uint32 NumRows = 2;
 	static const uint32 NumCols = 2;
 
@@ -262,13 +262,13 @@ struct float2x2
 		RowType v[2];
 	};
 
-	float2x2()
+	fmat2x2()
 	{
 		v[0] = RowType();
 		v[1] = RowType();
 	}
 
-	float2x2(T IdentityVal)
+	fmat2x2(T IdentityVal)
 	{
 		for (int i = 0; i < NumRows; i++)
 		{
@@ -278,23 +278,23 @@ struct float2x2
 		p[1][1] = IdentityVal;
 	}
 
-	float2x2(const TT& Rhs)
+	fmat2x2(const TT& Rhs)
 	{
 		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
 	}
 
-	float2x2(const T* Values)
+	fmat2x2(const T* Values)
 	{
 		memcpy(p, Values, sizeof(p));
 	}
 
-	float2x2(T p00, T p01, T p10, T p11)
+	fmat2x2(T p00, T p01, T p10, T p11)
 	{
 		v[0] = RowType(p00, p01);
 		v[1] = RowType(p10, p11);
 	}
 
-	float2x2(RowType r1, RowType r2)
+	fmat2x2(RowType r1, RowType r2)
 	{
 		v[0] = r1;
 		v[1] = r2;
@@ -371,11 +371,11 @@ struct float2x2
 #pragma endregion
 };
 
-struct double2x2
+struct mat2x2
 {
-	using TT = double2x2;
+	using TT = mat2x2;
 	using T = double;
-	using RowType = double2;
+	using RowType = vec2;
 	static const uint32 NumRows = 2;
 	static const uint32 NumCols = 2;
 
@@ -385,13 +385,13 @@ struct double2x2
 		RowType v[2];
 	};
 
-	double2x2()
+	mat2x2()
 	{
 		v[0] = RowType();
 		v[1] = RowType();
 	}
 
-	double2x2(T IdentityVal)
+	mat2x2(T IdentityVal)
 	{
 		for (int i = 0; i < NumRows; i++)
 		{
@@ -401,23 +401,23 @@ struct double2x2
 		p[1][1] = IdentityVal;
 	}
 
-	double2x2(const TT& Rhs)
+	mat2x2(const TT& Rhs)
 	{
 		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
 	}
 
-	double2x2(const T* Values)
+	mat2x2(const T* Values)
 	{
 		memcpy(p, Values, sizeof(p));
 	}
 
-	double2x2(T p00, T p01, T p10, T p11)
+	mat2x2(T p00, T p01, T p10, T p11)
 	{
 		v[0] = RowType(p00, p01);
 		v[1] = RowType(p10, p11);
 	}
 
-	double2x2(RowType r1, RowType r2)
+	mat2x2(RowType r1, RowType r2)
 	{
 		v[0] = r1;
 		v[1] = r2;

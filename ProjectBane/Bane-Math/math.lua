@@ -1,11 +1,7 @@
-group "Core"
+group "BaneLib"
 project "BaneMath"
     kind "StaticLib"
-    links {}
-    includedirs { 
-        "../Bane-Common" 
-		}
+    includedirs { "../Bane-Common/" }
+    links { "BaneCommon" }
 
-    files { "Math/**.h",
-            "Math/**.cpp",
-            "KieckerMath.h"}
+    files { "**.h", "**.cpp" }

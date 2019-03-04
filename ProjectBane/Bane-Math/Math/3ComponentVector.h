@@ -2,12 +2,14 @@
 
 #include "Common/Types.h"
 #include "2ComponentVector.h"
+#include <xmmintrin.h>
+#include <emmintrin.h>
 
-struct int3
+struct ivec3
 {
-	using TT = int3;
+	using TT = ivec3;
 	using T = int;
-	using TT2 = int2;
+	using TT2 = ivec2;
 	static const uint32 ColCount = 3;
 
 	union
@@ -21,21 +23,21 @@ struct int3
 		T p[ColCount];
 	};
 	
-	int3() :
+	ivec3() :
 		x(0),
 		y(0),
 		z(0)
 	{
 	}
 
-	int3(T X, T Y, T Z) :
+	ivec3(T X, T Y, T Z) :
 		x(X),
 		y(Y),
 		z(Z)
 	{
 	}
 
-	int3(const TT& SelfType)
+	ivec3(const TT& SelfType)
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -43,14 +45,14 @@ struct int3
 		}
 	}
 
-	int3(T X, TT2 YZ) :
+	ivec3(T X, TT2 YZ) :
 		x(X),
 		y(YZ.x),
 		z(YZ.y)
 	{
 	}
 
-	int3(TT2 XY, T Z) :
+	ivec3(TT2 XY, T Z) :
 		x(XY.x),
 		y(XY.y),
 		z(Z)
@@ -247,27 +249,27 @@ struct int3
 #pragma endregion
 };
 
-struct uint3
+struct uvec3
 {
 	using T = uint32;
-	using TT = uint3;
-	using TT2 = uint2;
+	using TT = uvec3;
+	using TT2 = uvec2;
 	static const uint32 ColCount = 3;
-	uint3()
+	uvec3()
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = T(0);
 		}
 	}
-	uint3(T X, T Y, T Z) :
+	uvec3(T X, T Y, T Z) :
 		x(X),
 		y(Y),
 		z(Z)
 	{
 	}
 
-	uint3(const TT& SelfType)
+	uvec3(const TT& SelfType)
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -275,14 +277,14 @@ struct uint3
 		}
 	}
 
-	uint3(T X, TT2 YZ) :
+	uvec3(T X, TT2 YZ) :
 		x(X),
 		y(YZ.x),
 		z(YZ.y)
 	{
 	}
 
-	uint3(TT2 XY, T Z) :
+	uvec3(TT2 XY, T Z) :
 		x(XY.x),
 		y(XY.y),
 		z(Z)
@@ -482,11 +484,11 @@ struct uint3
 #pragma endregion
 };
 
-struct float3
+struct fvec3
 {
 	using T = float;
-	using TT = float3;
-	using TT2 = float2;
+	using TT = fvec3;
+	using TT2 = fvec2;
 	static const uint32 ColCount = 3;
 
 	union
@@ -499,21 +501,21 @@ struct float3
 		T p[ColCount];
 	};
 
-	float3()
+	fvec3()
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
 			p[i] = T(0);
 		}
 	}
-	float3(T X, T Y, T Z) :
+	fvec3(T X, T Y, T Z) :
 		x(X),
 		y(Y),
 		z(Z)
 	{
 	}
 
-	float3(const TT& SelfType)
+	fvec3(const TT& SelfType)
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -521,14 +523,14 @@ struct float3
 		}
 	}
 
-	float3(T X, TT2 YZ) :
+	fvec3(T X, TT2 YZ) :
 		x(X),
 		y(YZ.x),
 		z(YZ.y)
 	{
 	}
 
-	float3(TT2 XY, T Z) :
+	fvec3(TT2 XY, T Z) :
 		x(XY.x),
 		y(XY.y),
 		z(Z)
@@ -723,11 +725,11 @@ struct float3
 #pragma endregion
 };
 
-struct double3
+struct vec3
 {
-	using TT = double3;
+	using TT = vec3;
 	using T = double;
-	using TT2 = double2;
+	using TT2 = vec2;
 	static const uint32 ColCount = 3;
 
 	union
@@ -741,36 +743,35 @@ struct double3
 		T p[ColCount];
 	};
 
-	double3() :
+	vec3() :
 		x(0),
 		y(0),
 		z(0)
 	{
 	}
 
-	double3(T X, T Y, T Z) :
+	vec3(T X, T Y, T Z) :
 		x(X),
 		y(Y),
 		z(Z)
 	{
 	}
 
-	double3(const TT& SelfType)
+	vec3(const TT& SelfType)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] = SelfType[i];
-		}
+		__m128d* pSelf = reinterpret_cast<__m128d*>(this);
+		*pSelf = _mm_load_pd(reinterpret_cast<const double*>(&SelfType));
+		z = SelfType.z;
 	}
 
-	double3(T X, TT2 YZ) :
+	vec3(T X, TT2 YZ) :
 		x(X),
 		y(YZ.x),
 		z(YZ.y)
 	{
 	}
 
-	double3(TT2 XY, T Z) :
+	vec3(TT2 XY, T Z) :
 		x(XY.x),
 		y(XY.y),
 		z(Z)
@@ -781,10 +782,9 @@ struct double3
 
 	inline TT& operator = (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] = Rhs.p[i];
-		}
+		__m128d* pSelf = reinterpret_cast<__m128d*>(this);
+		*pSelf = _mm_load_pd(reinterpret_cast<const double*>(&Rhs));
+		z = Rhs.z;
 		return *this;
 	}
 	inline T& operator[] (const uint32 Index)
@@ -803,73 +803,73 @@ struct double3
 
 	inline TT& operator *= (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] *= Rhs.p[i];
-		}
+		__m128d* pSelf = reinterpret_cast<__m128d*>(this);
+		__m128d Other = _mm_load_pd(reinterpret_cast<const double*>(&Rhs));
+		*pSelf = _mm_mul_pd(*pSelf, Other);
+		z *= Rhs.z;
 		return *this;
 	}
 
 	inline TT& operator /= (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] /= Rhs.p[i];
-		}
+		__m128d* pSelf = reinterpret_cast<__m128d*>(this);
+		__m128d Other = _mm_load_pd(reinterpret_cast<const double*>(&Rhs));
+		*pSelf = _mm_div_pd(*pSelf, Other);
+		z /= Rhs.z;
 		return *this;
 	}
 
 	inline TT& operator += (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] += Rhs.p[i];
-		}
+		__m128d* pSelf = reinterpret_cast<__m128d*>(this);
+		__m128d Other = _mm_load_pd(reinterpret_cast<const double*>(&Rhs));
+		*pSelf = _mm_add_pd(*pSelf, Other);
+		z += Rhs.z;
 		return *this;
 	}
 
 	inline TT& operator -= (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] -= Rhs.p[i];
-		}
+		__m128d* pSelf = reinterpret_cast<__m128d*>(this);
+		__m128d Other = _mm_load_pd(reinterpret_cast<const double*>(&Rhs));
+		*pSelf = _mm_sub_pd(*pSelf, Other);
+		y -= Rhs.y;
 		return *this;
 	}
 
 	inline TT& operator *= (const T& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] *= Rhs;
-		}
+		__m128d* pSelf = reinterpret_cast<__m128d*>(this);
+		__m128d Other = _mm_load1_pd(&Rhs);
+		*pSelf = _mm_mul_pd(*pSelf, Other);
+		z *= Rhs;
 		return *this;
 	}
 
 	inline TT& operator /= (const T& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] /= Rhs;
-		}
+		__m128d* pSelf = reinterpret_cast<__m128d*>(this);
+		__m128d Other = _mm_load1_pd(&Rhs);
+		*pSelf = _mm_div_pd(*pSelf, Other);
+		z /= Rhs;
 		return *this;
 	}
 
 	inline TT& operator += (const T& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] += Rhs;
-		}
+		__m128d* pSelf = reinterpret_cast<__m128d*>(this);
+		__m128d Other = _mm_load1_pd(&Rhs);
+		*pSelf = _mm_add_pd(*pSelf, Other);
+		z += Rhs;
 		return *this;
 	}
 
 	inline TT& operator -= (const T& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] -= Rhs;
-		}
+		__m128d* pSelf = reinterpret_cast<__m128d*>(this);
+		__m128d Other = _mm_load1_pd(&Rhs);
+		*pSelf = _mm_sub_pd(*pSelf, Other);
+		z -= Rhs;
 		return *this;
 	}
 
@@ -885,80 +885,88 @@ struct double3
 	inline TT operator * (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] * Rhs.p[i];
-		}
+		__m128d* mResult = reinterpret_cast<__m128d*>(&Result);
+		__m128d Self = _mm_load_pd(reinterpret_cast<const double*>(this));
+		__m128d Other = _mm_load_pd(reinterpret_cast<const double*>(&Rhs));
+		*mResult = _mm_mul_pd(Self, Other);
+		Result.z = z * Rhs.z;
 		return Result;
 	}
 
 	inline TT operator / (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] / Rhs.p[i];
-		}
+		__m128d* mResult = reinterpret_cast<__m128d*>(&Result);
+		__m128d Self = _mm_load_pd(reinterpret_cast<const double*>(this));
+		__m128d Other = _mm_load_pd(reinterpret_cast<const double*>(&Rhs));
+		*mResult = _mm_div_pd(Self, Other);
+		Result.z = z / Rhs.z;
 		return Result;
 	}
 
 	inline TT operator + (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] + Rhs.p[i];
-		}
+		__m128d* mResult = reinterpret_cast<__m128d*>(&Result);
+		__m128d Self = _mm_load_pd(reinterpret_cast<const double*>(this));
+		__m128d Other = _mm_load_pd(reinterpret_cast<const double*>(&Rhs));
+		*mResult = _mm_add_pd(Self, Other);
+		Result.z = z + Rhs.z;
 		return Result;
 	}
 
 	inline TT operator - (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] - Rhs.p[i];
-		}
+		__m128d* mResult = reinterpret_cast<__m128d*>(&Result);
+		__m128d Self = _mm_load_pd(reinterpret_cast<const double*>(this));
+		__m128d Other = _mm_load_pd(reinterpret_cast<const double*>(&Rhs));
+		*mResult = _mm_sub_pd(Self, Other);
+		Result.z = z - Rhs.z;
 		return Result;
 	}
 
 	inline TT operator * (const T& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] * Rhs;
-		}
+		__m128d* mResult = reinterpret_cast<__m128d*>(&Result);
+		__m128d Self = _mm_load_pd(reinterpret_cast<const double*>(this));
+		__m128d Other = _mm_load1_pd(reinterpret_cast<const double*>(&Rhs));
+		*mResult = _mm_mul_pd(Self, Other);
+		Result.z = z * Rhs;
 		return Result;
 	}
 
 	inline TT operator / (const T& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] / Rhs;
-		}
+		__m128d* mResult = reinterpret_cast<__m128d*>(&Result);
+		__m128d Self = _mm_load_pd(reinterpret_cast<const double*>(this));
+		__m128d Other = _mm_load1_pd(reinterpret_cast<const double*>(&Rhs));
+		*mResult = _mm_div_pd(Self, Other);
+		Result.z = z / Rhs;
 		return Result;
 	}
 
 	inline TT operator + (const T& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] + Rhs;
-		}
+		__m128d* mResult = reinterpret_cast<__m128d*>(&Result);
+		__m128d Self = _mm_load_pd(reinterpret_cast<const double*>(this));
+		__m128d Other = _mm_load1_pd(reinterpret_cast<const double*>(&Rhs));
+		*mResult = _mm_add_pd(Self, Other);
+		Result.z = z + Rhs;
 		return Result;
 	}
 
 	inline TT operator - (const T& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] - Rhs;
-		}
+		__m128d* mResult = reinterpret_cast<__m128d*>(&Result);
+		__m128d Self = _mm_load_pd(reinterpret_cast<const double*>(this));
+		__m128d Other = _mm_load1_pd(reinterpret_cast<const double*>(&Rhs));
+		*mResult = _mm_sub_pd(Self, Other);
+		Result.z = z - Rhs;
 		return Result;
 	}
 

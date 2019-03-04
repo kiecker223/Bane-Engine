@@ -3,12 +3,12 @@
 #include "2RowColMatrix.h"
 #include "3ComponentVector.h"
 
-struct int3x3
+struct imat3x3
 {
-	using TT = int3x3;
-	using TT2 = int2x2;
+	using TT = imat3x3;
+	using TT2 = imat2x2;
 	using T = int;
-	using RowType = int3;
+	using RowType = ivec3;
 	static const uint32 NumRows = 3;
 	static const uint32 NumCols = 3;
 
@@ -18,14 +18,14 @@ struct int3x3
 		RowType v[3];
 	};
 
-	int3x3()
+	imat3x3()
 	{
 		v[0] = RowType();
 		v[1] = RowType();
 		v[2] = RowType();
 	}
 
-	int3x3(T IdentityVal)
+	imat3x3(T IdentityVal)
 	{
 		for (int i = 0; i < NumRows; i++)
 		{
@@ -36,24 +36,24 @@ struct int3x3
 		p[2][2] = IdentityVal;
 	}
 
-	int3x3(const int3x3& Rhs)
+	imat3x3(const imat3x3& Rhs)
 	{
 		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
 	}
 
-	int3x3(const T* Values)
+	imat3x3(const T* Values)
 	{
 		memcpy(p, Values, sizeof(p));
 	}
 
-	int3x3(T p00, T p01, T p02, T p10, T p11, T p12, T p20, T p21, T p22)
+	imat3x3(T p00, T p01, T p02, T p10, T p11, T p12, T p20, T p21, T p22)
 	{
 		v[0] = RowType(p00, p01, p02);
 		v[1] = RowType(p10, p11, p12);
 		v[2] = RowType(p20, p21, p22);
 	}
 
-	int3x3(RowType r1, RowType r2, RowType r3)
+	imat3x3(RowType r1, RowType r2, RowType r3)
 	{
 		v[0] = r1;
 		v[1] = r2;
@@ -153,12 +153,12 @@ struct int3x3
 #pragma endregion
 };
 
-struct uint323x3
+struct umat3x3
 {
-	using TT = uint323x3;
-	using TT2 = uint322x2;
+	using TT = umat3x3;
+	using TT2 = umat2x2;
 	using T = uint32;
-	using RowType = uint3;
+	using RowType = uvec3;
 	static const uint32 NumRows = 3;
 	static const uint32 NumCols = 3;
 
@@ -168,14 +168,14 @@ struct uint323x3
 		RowType v[3];
 	};
 
-	uint323x3()
+	umat3x3()
 	{
 		v[0] = RowType();
 		v[1] = RowType();
 		v[2] = RowType();
 	}
 
-	uint323x3(T IdentityVal)
+	umat3x3(T IdentityVal)
 	{
 		for (int i = 0; i < NumRows; i++)
 		{
@@ -186,24 +186,24 @@ struct uint323x3
 		p[2][2] = IdentityVal;
 	}
 
-	uint323x3(const uint323x3& Rhs)
+	umat3x3(const umat3x3& Rhs)
 	{
 		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
 	}
 
-	uint323x3(const T* Values)
+	umat3x3(const T* Values)
 	{
 		memcpy(p, Values, sizeof(p));
 	}
 
-	uint323x3(T p00, T p01, T p02, T p10, T p11, T p12, T p20, T p21, T p22)
+	umat3x3(T p00, T p01, T p02, T p10, T p11, T p12, T p20, T p21, T p22)
 	{
 		v[0] = RowType(p00, p01, p02);
 		v[1] = RowType(p10, p11, p12);
 		v[2] = RowType(p20, p21, p22);
 	}
 
-	uint323x3(RowType r1, RowType r2, RowType r3)
+	umat3x3(RowType r1, RowType r2, RowType r3)
 	{
 		v[0] = r1;
 		v[1] = r2;
@@ -304,12 +304,12 @@ struct uint323x3
 #pragma endregion
 };
 
-struct float3x3
+struct fmat3x3
 {
-	using TT = float3x3;
-	using TT2 = float2x2;
+	using TT = fmat3x3;
+	using TT2 = fmat2x2;
 	using T = float;
-	using RowType = float3;
+	using RowType = fvec3;
 	static const uint32 NumRows = 3;
 	static const uint32 NumCols = 3;
 
@@ -319,14 +319,14 @@ struct float3x3
 		RowType v[3];
 	};
 
-	float3x3()
+	fmat3x3()
 	{
 		v[0] = RowType();
 		v[1] = RowType();
 		v[2] = RowType();
 	}
 
-	float3x3(T IdentityVal)
+	fmat3x3(T IdentityVal)
 	{
 		for (int i = 0; i < NumRows; i++)
 		{
@@ -337,24 +337,24 @@ struct float3x3
 		p[2][2] = IdentityVal;
 	}
 
-	float3x3(const float3x3& Rhs)
+	fmat3x3(const fmat3x3& Rhs)
 	{
 		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
 	}
 
-	float3x3(const T* Values)
+	fmat3x3(const T* Values)
 	{
 		memcpy(p, Values, sizeof(p));
 	}
 
-	float3x3(T p00, T p01, T p02, T p10, T p11, T p12, T p20, T p21, T p22)
+	fmat3x3(T p00, T p01, T p02, T p10, T p11, T p12, T p20, T p21, T p22)
 	{
 		v[0] = RowType(p00, p01, p02);
 		v[1] = RowType(p10, p11, p12);
 		v[2] = RowType(p20, p21, p22);
 	}
 
-	float3x3(RowType r1, RowType r2, RowType r3)
+	fmat3x3(RowType r1, RowType r2, RowType r3)
 	{
 		v[0] = r1;
 		v[1] = r2;
@@ -454,12 +454,12 @@ struct float3x3
 #pragma endregion
 };
 
-struct double3x3
+struct mat3x3
 {
-	using TT =  double3x3;
-	using TT2 = double2x2;
+	using TT =  mat3x3;
+	using TT2 = mat2x2;
 	using T = double;
-	using RowType = double3;
+	using RowType = vec3;
 	static const uint32 NumRows = 3;
 	static const uint32 NumCols = 3;
 
@@ -469,14 +469,14 @@ struct double3x3
 		RowType v[3];
 	};
 
-	double3x3()
+	mat3x3()
 	{
 		v[0] = RowType();
 		v[1] = RowType();
 		v[2] = RowType();
 	}
 
-	double3x3(T IdentityVal)
+	mat3x3(T IdentityVal)
 	{
 		for (uint32 i = 0; i < NumRows; i++)
 		{
@@ -487,24 +487,24 @@ struct double3x3
 		p[2][2] = IdentityVal;
 	}
 
-	double3x3(const double3x3& Rhs)
+	mat3x3(const mat3x3& Rhs)
 	{
 		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
 	}
 
-	double3x3(const T* Values)
+	mat3x3(const T* Values)
 	{
 		memcpy(p, Values, sizeof(p));
 	}
 
-	double3x3(T p00, T p01, T p02, T p10, T p11, T p12, T p20, T p21, T p22)
+	mat3x3(T p00, T p01, T p02, T p10, T p11, T p12, T p20, T p21, T p22)
 	{
 		v[0] = RowType(p00, p01, p02);
 		v[1] = RowType(p10, p11, p12);
 		v[2] = RowType(p20, p21, p22);
 	}
 
-	double3x3(RowType r1, RowType r2, RowType r3)
+	mat3x3(RowType r1, RowType r2, RowType r3)
 	{
 		v[0] = r1;
 		v[1] = r2;

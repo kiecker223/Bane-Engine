@@ -7,10 +7,10 @@ struct InputMouseDevice::Impl
 {
 	Impl(Window* pWin)
 	{
-		WindowSize = double2(static_cast<double>(pWin->GetWidth()), static_cast<double>(pWin->GetHeight()));
+		WindowSize = vec2(static_cast<double>(pWin->GetWidth()), static_cast<double>(pWin->GetHeight()));
 		POINT Cursor;
 		GetCursorPos(&Cursor);
-		MousePosition = double2(static_cast<double>(Cursor.x), static_cast<double>(Cursor.y));
+		MousePosition = vec2(static_cast<double>(Cursor.x), static_cast<double>(Cursor.y));
 
 		BANE_CHECK(
 			SUCCEEDED(
@@ -39,10 +39,10 @@ struct InputMouseDevice::Impl
 	}
 	IDirectInput8* DirectInput;
 	IDirectInputDevice8* Mouse;
-	double2 MouseDelta;
-	double2 MousePosition;
-	double2 LastMousePosition;
-	double2 WindowSize;
+	vec2 MouseDelta;
+	vec2 MousePosition;
+	vec2 LastMousePosition;
+	vec2 WindowSize;
 	float MouseScroll;
 	bool bButtons[5];
 	bool bLastButtons[5];
@@ -54,7 +54,7 @@ struct InputMouseDevice::Impl
 		Mouse->Acquire();
 		Mouse->GetDeviceState(sizeof(DIMOUSESTATE2), &MouseState);
 		LastMousePosition = MousePosition;
-		MouseDelta = double2(static_cast<double>(MouseState.lX), static_cast<double>(MouseState.lY)) * (WindowSize.y / WindowSize.x);
+		MouseDelta = vec2(static_cast<double>(MouseState.lX), static_cast<double>(MouseState.lY)) * (WindowSize.y / WindowSize.x);
 		MousePosition += MouseDelta;
 		MouseScroll = static_cast<float>(MouseState.lZ);
 	}
@@ -71,12 +71,12 @@ InputMouseDevice::~InputMouseDevice()
 	delete m_Impl;
 }
 
-double2 InputMouseDevice::GetMouseDelta() const
+vec2 InputMouseDevice::GetMouseDelta() const
 {
 	return m_Impl->MouseDelta;
 }
 
-double2 InputMouseDevice::GetMousePosition() const
+vec2 InputMouseDevice::GetMousePosition() const
 {
 	return m_Impl->MousePosition;
 }

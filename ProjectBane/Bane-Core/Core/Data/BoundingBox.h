@@ -13,7 +13,7 @@ public:
 
 	BoundingBox(const BoundingBox& Rhs) : Min(Rhs.Min), Max(Rhs.Max) { }
 
-	BoundingBox(double3 InMin, double3 InMax) : Min(InMin), Max(InMax) { }
+	BoundingBox(vec3 InMin, vec3 InMax) : Min(InMin), Max(InMax) { }
 
 	BoundingBox& operator = (const BoundingBox& Rhs)
 	{
@@ -22,17 +22,17 @@ public:
 		return *this;
 	}
 
-	double3 Min;
-	double3 Max;
+	vec3 Min;
+	vec3 Max;
 
-	inline double3 GetExtents() const
+	inline vec3 GetExtents() const
 	{
 		return Max - Min;
 	}
 
 	inline uint32 GetBiggestAxis() const
 	{
-		double3 Extents = GetExtents();
+		vec3 Extents = GetExtents();
 		if (abs(Extents.x) > abs(Extents.y) && abs(Extents.x) > abs(Extents.z))
 		{
 			return 0;
@@ -48,7 +48,7 @@ public:
 		return 3;
 	}
 
-	inline bool PointInBounds(const double3& Point) const
+	inline bool PointInBounds(const vec3& Point) const
 	{
 		for (uint32 i = 0; i < 3; i++)
 		{
@@ -69,14 +69,14 @@ public:
 		return true;
 	}
 
-	inline double3 GetCenter() const 
+	inline vec3 GetCenter() const 
 	{
 		return Min + (GetExtents() / 2.0);
 	}
 
-	inline double3 ClosestPoint(const double3& InPoint) const
+	inline vec3 ClosestPoint(const vec3& InPoint) const
 	{
-		double3 Result;
+		vec3 Result;
 		for (uint32 i = 0; i < 3; i++)
 		{
 			if (InPoint[i] > Max[i]) { Result[i] = Max[i]; continue; }
@@ -92,20 +92,20 @@ public:
 		return (Extents.x * Extents.y * Extents.z);
 	}
 
-	inline bool AllComponentsLess(const double3& Lhs, const double3& Rhs)
+	inline bool AllComponentsLess(const vec3& Lhs, const vec3& Rhs)
 	{
 		return Lhs.x < Rhs.x && Lhs.y < Rhs.y && Lhs.z < Rhs.z;
 	}
 
-	inline bool AllComponentsGreater(const double3& Lhs, const double3& Rhs)
+	inline bool AllComponentsGreater(const vec3& Lhs, const vec3& Rhs)
 	{
 		return !AllComponentsLess(Lhs, Rhs);
 	}
 
-	inline void CalculateFromArray(const double3* pPoints, uint32 ArraySize)
+	inline void CalculateFromArray(const vec3* pPoints, uint32 ArraySize)
 	{
-		double3 NewMin(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
-		double3 NewMax(-std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity());
+		vec3 NewMin(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+		vec3 NewMax(-std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity());
 		for (uint32 i = 0; i < ArraySize; i++)
 		{
 			if (pPoints[i].x < NewMin.x) NewMin.x = pPoints[i].x;

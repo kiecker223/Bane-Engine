@@ -2,10 +2,10 @@
 
 #include <Common/Types.h>
 
-struct int2
+struct ivec2
 {
 	using T = int;
-	using TT = int2;
+	using TT = ivec2;
 	static const uint32 ColCount = 2;
 	
 	union
@@ -16,7 +16,7 @@ struct int2
 		T p[ColCount];
 	};
 	
-	int2()
+	ivec2()
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -24,13 +24,13 @@ struct int2
 		}
 	}
 
-	int2(T X, T Y) :
+	ivec2(T X, T Y) :
 		x(X),
 		y(Y)
 	{
 	}
 
-	int2(const int2& SelfType)
+	ivec2(const ivec2& SelfType)
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -225,10 +225,10 @@ struct int2
 #pragma endregion
 };
 
-struct uint2
+struct uvec2
 {
 	using T = uint32;
-	using TT = uint2;
+	using TT = uvec2;
 	static const uint32 ColCount = 2;
 	union
 	{
@@ -238,7 +238,7 @@ struct uint2
 		T p[ColCount];
 	};
 
-	uint2()
+	uvec2()
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -246,13 +246,13 @@ struct uint2
 		}
 	}
 	
-	uint2(T X, T Y) :
+	uvec2(T X, T Y) :
 		x(X),
 		y(Y)
 	{
 	}
 
-	uint2(const TT& SelfType)
+	uvec2(const TT& SelfType)
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -445,10 +445,10 @@ struct uint2
 #pragma endregion
 };
 
-struct float2
+struct fvec2
 {
 	using T = float;
-	using TT = float2;
+	using TT = fvec2;
 	static const uint32 ColCount = 2;
 	
 	union
@@ -459,7 +459,7 @@ struct float2
 		T p[ColCount];
 	};
 
-	float2()
+	fvec2()
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -467,13 +467,13 @@ struct float2
 		}
 	}
 	
-	float2(T X, T Y) :
+	fvec2(T X, T Y) :
 		x(X),
 		y(Y)
 	{
 	}
 
-	float2(const TT& SelfType)
+	fvec2(const TT& SelfType)
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -668,10 +668,10 @@ struct float2
 #pragma endregion
 };
 
-struct double2
+struct vec2
 {
 	using T = double;
-	using TT = double2;
+	using TT = vec2;
 	static const uint32 ColCount = 2;
 
 	union
@@ -682,7 +682,7 @@ struct double2
 		T p[ColCount];
 	};
 
-	double2()
+	vec2()
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
@@ -690,13 +690,13 @@ struct double2
 		}
 	}
 
-	double2(T X, T Y) :
+	vec2(T X, T Y) :
 		x(X),
 		y(Y)
 	{
 	}
 
-	double2(const double2& SelfType)
+	vec2(const vec2& SelfType)
 	{
 		for (uint32 i = 0; i < ColCount; i++)
 		{
