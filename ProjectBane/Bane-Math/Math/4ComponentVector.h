@@ -522,6 +522,7 @@ struct fvec4
 
 	union
 	{
+		__m128 f;
 		struct { T x, y, z, w; };
 		struct { T r, g, b, a; };
 		struct { T u, v, w, P0; };
@@ -560,10 +561,7 @@ struct fvec4
 
 	fvec4(const TT& SelfType)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] = SelfType[i];
-		}
+		f = _mm_load_ps(reinterpret_cast<const float*>(&SelfType));
 	}
 
 	fvec4(T X, T Y, TT2 ZW) :
@@ -584,10 +582,7 @@ struct fvec4
 
 	inline TT& operator = (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] = Rhs.p[i];
-		}
+		f = _mm_load_ps(reinterpret_cast<const float*>(&Rhs));
 		return *this;
 	}
 
@@ -607,73 +602,57 @@ struct fvec4
 
 	inline TT& operator *= (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] *= Rhs.p[i];
-		}
+		__m128 Other = _mm_load_ps(reinterpret_cast<const float*>(&Rhs));
+		f = _mm_mul_ps(f, Other);
 		return *this;
 	}
 
 	inline TT& operator /= (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] /= Rhs.p[i];
-		}
+		__m128 Other = _mm_load_ps(reinterpret_cast<const float*>(&Rhs));
+		f = _mm_div_ps(f, Other);
 		return *this;
 	}
 
 	inline TT& operator += (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] += Rhs.p[i];
-		}
+		__m128 Other = _mm_load_ps(reinterpret_cast<const float*>(&Rhs));
+		f = _mm_add_ps(f, Other);
 		return *this;
 	}
 
 	inline TT& operator -= (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] -= Rhs.p[i];
-		}
+		__m128 Other = _mm_load_ps(reinterpret_cast<const float*>(&Rhs));
+		f = _mm_sub_ps(f, Other);
 		return *this;
 	}
 
 	inline TT& operator *= (const T& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] *= Rhs;
-		}
+		__m128 Other = _mm_load_ps1(reinterpret_cast<const float*>(&Rhs));
+		f = _mm_mul_ps(f, Other);
 		return *this;
 	}
 
 	inline TT& operator /= (const T& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] /= Rhs;
-		}
+		__m128 Other = _mm_load_ps1(reinterpret_cast<const float*>(&Rhs));
+		f = _mm_div_ps(f, Other);
 		return *this;
 	}
 
 	inline TT& operator += (const T& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] += Rhs;
-		}
+		__m128 Other = _mm_load_ps1(reinterpret_cast<const float*>(&Rhs));
+		f = _mm_add_ps(f, Other);
 		return *this;
 	}
 
 	inline TT& operator -= (const T& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] -= Rhs;
-		}
+		__m128 Other = _mm_load_ps1(reinterpret_cast<const float*>(&Rhs));
+		f = _mm_sub_ps(f, Other);
 		return *this;
 	}
 
@@ -689,80 +668,64 @@ struct fvec4
 	inline TT operator * (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] * Rhs.p[i];
-		}
+		__m128 Other = _mm_load_ps(reinterpret_cast<const float*>(&Rhs));
+		Result.f = _mm_mul_ps(f, Other);
 		return Result;
 	}
 
 	inline TT operator / (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] / Rhs.p[i];
-		}
+		__m128 Other = _mm_load_ps(reinterpret_cast<const float*>(&Rhs));
+		Result.f = _mm_div_ps(f, Other);
 		return Result;
 	}
 
 	inline TT operator + (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] + Rhs.p[i];
-		}
+		__m128 Other = _mm_load_ps(reinterpret_cast<const float*>(&Rhs));
+		Result.f = _mm_add_ps(f, Other);
 		return Result;
 	}
 
 	inline TT operator - (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] - Rhs.p[i];
-		}
+		__m128 Other = _mm_load_ps(reinterpret_cast<const float*>(&Rhs));
+		Result.f = _mm_sub_ps(f, Other);
 		return Result;
 	}
 
 	inline TT operator * (const T& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] * Rhs;
-		}
+		__m128 Other = _mm_load_ps1(reinterpret_cast<const float*>(&Rhs));
+		Result.f = _mm_mul_ps(f, Other);
 		return Result;
 	}
 
 	inline TT operator / (const T& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] / Rhs;
-		}
+		__m128 Other = _mm_load_ps1(reinterpret_cast<const float*>(&Rhs));
+		Result.f = _mm_sub_ps(f, Other);
 		return Result;
 	}
 
 	inline TT operator + (const T& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] + Rhs;
-		}
+		__m128 Other = _mm_load_ps1(reinterpret_cast<const float*>(&Rhs));
+		Result.f = _mm_add_ps(f, Other);
 		return Result;
 	}
 
 	inline TT operator - (const T& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] - Rhs;
-		}
+		__m128 Other = _mm_load_ps1(reinterpret_cast<const float*>(&Rhs));
+		Result.f = _mm_sub_ps(f, Other);
 		return Result;
 	}
 
@@ -781,6 +744,7 @@ struct vec4
 
 	union
 	{
+		__m128d f[2];
 		struct { T x, y, z, w; };
 		struct { T r, g, b, a; };
 		struct { T u, v, w, P0; };
@@ -842,10 +806,8 @@ struct vec4
 	}
 	inline TT& operator = (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] = Rhs.p[i];
-		}
+		f[0] = Rhs.f[0];
+		f[1] = Rhs.f[1];
 		return *this;
 	}
 
@@ -865,73 +827,61 @@ struct vec4
 
 	inline TT& operator *= (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] *= Rhs.p[i];
-		}
+		f[0] = _mm_mul_pd(f[0], Rhs.f[0]);
+		f[1] = _mm_mul_pd(f[0], Rhs.f[1]);
 		return *this;
 	}
 
 	inline TT& operator /= (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] /= Rhs.p[i];
-		}
+		f[0] = _mm_div_pd(f[0], Rhs.f[0]);
+		f[1] = _mm_div_pd(f[0], Rhs.f[1]);
 		return *this;
 	}
 
 	inline TT& operator += (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] += Rhs.p[i];
-		}
+		f[0] = _mm_add_pd(f[0], Rhs.f[0]);
+		f[1] = _mm_add_pd(f[0], Rhs.f[1]);
 		return *this;
 	}
 
 	inline TT& operator -= (const TT& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] -= Rhs.p[i];
-		}
+		f[0] = _mm_sub_pd(f[0], Rhs.f[0]);
+		f[1] = _mm_sub_pd(f[0], Rhs.f[1]);
 		return *this;
 	}
 
 	inline TT& operator *= (const T& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] *= Rhs;
-		}
+		__m128d Other = _mm_load1_pd(&Rhs);
+		f[0] = _mm_mul_pd(f[0], Other);
+		f[1] = _mm_mul_pd(f[1], Other);
 		return *this;
 	}
 
 	inline TT& operator /= (const T& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] /= Rhs;
-		}
+		__m128d Other = _mm_load1_pd(&Rhs);
+		f[0] = _mm_div_pd(f[0], Other);
+		f[1] = _mm_div_pd(f[1], Other);
 		return *this;
 	}
 
 	inline TT& operator += (const T& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] += Rhs;
-		}
+		__m128d Other = _mm_load1_pd(&Rhs);
+		f[0] = _mm_add_pd(f[0], Other);
+		f[1] = _mm_add_pd(f[1], Other);
 		return *this;
 	}
 
 	inline TT& operator -= (const T& Rhs)
 	{
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			p[i] -= Rhs;
-		}
+		__m128d Other = _mm_load1_pd(&Rhs);
+		f[0] = _mm_sub_pd(f[0], Other);
+		f[1] = _mm_sub_pd(f[1], Other);
 		return *this;
 	}
 
@@ -947,80 +897,68 @@ struct vec4
 	inline TT operator * (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] * Rhs.p[i];
-		}
+		Result.f[0] = _mm_mul_pd(f[0], Rhs.f[0]);
+		Result.f[1] = _mm_mul_pd(f[1], Rhs.f[1]);
 		return Result;
 	}
 
 	inline TT operator / (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] / Rhs.p[i];
-		}
+		Result.f[0] = _mm_div_pd(f[0], Rhs.f[0]);
+		Result.f[1] = _mm_div_pd(f[1], Rhs.f[1]);
 		return Result;
 	}
 
 	inline TT operator + (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] + Rhs.p[i];
-		}
+		Result.f[0] = _mm_add_pd(f[0], Rhs.f[0]);
+		Result.f[1] = _mm_add_pd(f[1], Rhs.f[1]);
 		return Result;
 	}
 
 	inline TT operator - (const TT& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] - Rhs.p[i];
-		}
+		Result.f[0] = _mm_sub_pd(f[0], Rhs.f[0]);
+		Result.f[1] = _mm_sub_pd(f[1], Rhs.f[1]);
 		return Result;
 	}
 
 	inline TT operator * (const T& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] * Rhs;
-		}
+		__m128d Other = _mm_load1_pd(&Rhs);
+		Result.f[0] = _mm_mul_pd(f[0], Other);
+		Result.f[1] = _mm_mul_pd(f[1], Other);
 		return Result;
 	}
 
 	inline TT operator / (const T& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] / Rhs;
-		}
+		__m128d Other = _mm_load1_pd(&Rhs);
+		Result.f[0] = _mm_div_pd(f[0], Other);
+		Result.f[1] = _mm_div_pd(f[1], Other);
 		return Result;
 	}
 
 	inline TT operator + (const T& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] + Rhs;
-		}
+		__m128d Other = _mm_load1_pd(&Rhs);
+		Result.f[0] = _mm_add_pd(f[0], Other);
+		Result.f[1] = _mm_add_pd(f[1], Other);
 		return Result;
 	}
 
 	inline TT operator - (const T& Rhs) const
 	{
 		TT Result;
-		for (uint32 i = 0; i < ColCount; i++)
-		{
-			Result[i] = p[i] - Rhs;
-		}
+		__m128d Other = _mm_load1_pd(&Rhs);
+		Result.f[0] = _mm_sub_pd(f[0], Other);
+		Result.f[1] = _mm_sub_pd(f[1], Other);
 		return Result;
 	}
 

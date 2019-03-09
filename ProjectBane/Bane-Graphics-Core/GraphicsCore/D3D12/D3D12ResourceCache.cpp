@@ -6,14 +6,14 @@ void D3D12ResourceCache::Initialize(D3D12GraphicsPipelineState* pPipeline, D3D12
 {
 	Device = pDevice->GetDevice();
 	Counts = pPipeline->Desc.Counts;
-	if (Counts.NumShaderResourceViews > 0)
+	if (HighestDirtySrv + 1 > 0)
 	{
-		SrvAllocation = SrvAllocator.AllocateMultiple(Counts.NumShaderResourceViews);
-		SmpAllocation = SmpAllocator.AllocateMultiple(Counts.NumSamplers);
+		SrvAllocation = SrvAllocator.AllocateMultiple(HighestDirtySrv + 1);
+		SmpAllocation = SmpAllocator.AllocateMultiple(HighestDirtySrv + 1);
 	}
-	if (Counts.NumUnorderedAccessViews > 0)
+	if (HighestDirtyUav + 1 > 0)
 	{
-		UavAllocation = SrvAllocator.AllocateMultiple(Counts.NumUnorderedAccessViews);
+		UavAllocation = SrvAllocator.AllocateMultiple(HighestDirtyUav + 1);
 	}
 }
 
@@ -21,14 +21,14 @@ void D3D12ResourceCache::Initialize(D3D12ComputePipelineState* pPipeline, D3D12G
 {
 	Device = pDevice->GetDevice();
 	Counts = pPipeline->Desc.Counts;
-	if (Counts.NumShaderResourceViews > 0)
+	if (HighestDirtySrv + 1 > 0)
 	{
-		SrvAllocation = SrvAllocator.AllocateMultiple(Counts.NumShaderResourceViews);
-		SmpAllocation = SmpAllocator.AllocateMultiple(Counts.NumSamplers);
+		SrvAllocation = SrvAllocator.AllocateMultiple(HighestDirtySrv + 1);
+		SmpAllocation = SmpAllocator.AllocateMultiple(HighestDirtySrv + 1);
 	}
-	if (Counts.NumUnorderedAccessViews > 0)
+	if (HighestDirtyUav + 1 > 0)
 	{
-		UavAllocation = SrvAllocator.AllocateMultiple(Counts.NumUnorderedAccessViews);
+		UavAllocation = SrvAllocator.AllocateMultiple(HighestDirtyUav + 1);
 	}
 }
 
@@ -40,7 +40,7 @@ void D3D12ResourceCache::ApplyGraphicsResources(D3D12GraphicsCommandBuffer* pCmd
 	bAnySrvDirty = false;
 	bAnyCbvDirty = false;
 	bAnyUavDirty = false;
-	for (uint32 i = 0; i < Counts.NumShaderResourceViews; i++)
+	for (int32 i = 0; i < HighestDirtySrv + 1; i++)
 	{
 		if (DirtySrvs[i])
 		{
@@ -54,7 +54,7 @@ void D3D12ResourceCache::ApplyGraphicsResources(D3D12GraphicsCommandBuffer* pCmd
 	}
 	pCL->SetGraphicsRootDescriptorTable(RootSignature.GetSRVTableIndex(), SrvAllocation.GpuHandle);
 	pCL->SetGraphicsRootDescriptorTable(RootSignature.GetSamplerTableIndex(), SmpAllocation.GpuHandle);
-	for (uint32 i = 0; i < Counts.NumConstantBuffers; i++)
+	for (int32 i = 0; i < HighestDirtyCbv + 1; i++)
 	{
 		if (DirtyCbvs[i])
 		{
@@ -64,7 +64,7 @@ void D3D12ResourceCache::ApplyGraphicsResources(D3D12GraphicsCommandBuffer* pCmd
 	}
 	if (Counts.NumUnorderedAccessViews)
 	{
-		for (uint32 i = 0; i < Counts.NumShaderResourceViews; i++)
+		for (int32 i = 0; i < HighestDirtyUav + 1; i++)
 		{
 			if (DirtyUavs[i])
 			{
@@ -77,6 +77,9 @@ void D3D12ResourceCache::ApplyGraphicsResources(D3D12GraphicsCommandBuffer* pCmd
 	memset(DirtySrvs, 0, sizeof(DirtySrvs));
 	memset(DirtyCbvs, 0, sizeof(DirtyCbvs));
 	memset(DirtyUavs, 0, sizeof(DirtyUavs));
+	HighestDirtySrv = -1;
+	HighestDirtyUav = -1;
+	HighestDirtyCbv = -1;
 }
 
 void D3D12ResourceCache::ApplyComputeResources(D3D12GraphicsCommandBuffer* pCmdList)

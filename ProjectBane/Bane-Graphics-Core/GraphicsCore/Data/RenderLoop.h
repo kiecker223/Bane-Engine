@@ -3,7 +3,6 @@
 #include <vector>
 #include <Core/Containers/StackQueue.h>
 #include <functional>
-#include "Core/Data/BoundingBox.h"
 #include "Mesh.h"
 #include "LightData.h"
 #include "Material.h"

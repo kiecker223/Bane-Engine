@@ -454,14 +454,20 @@ void D3D12GraphicsCommandBuffer::FlushResourceTransitions()
 
 void D3D12GraphicsCommandBuffer::CommitGraphicsResourcesToExecution()
 {
-	// Allow state inheritance
-	GraphicsResources.Initialize(GraphicsPipelineState, ParentDevice, SrvDescriptorAllocator, SmpDescriptorAllocator);
+	// Allow state inheritance	
+	if (GraphicsResources.bAnySrvDirty || GraphicsResources.bAnyUavDirty)
+	{
+		GraphicsResources.Initialize(GraphicsPipelineState, ParentDevice, SrvDescriptorAllocator, SmpDescriptorAllocator);
+	}
 	GraphicsResources.ApplyGraphicsResources(this);
 }
 
 void D3D12GraphicsCommandBuffer::CommitComputeResourcesToExecution()
 {
-	ComputeResources.Initialize(ComputePipelineState, ParentDevice, SrvDescriptorAllocator, SmpDescriptorAllocator);
+	if (ComputeResources.bAnySrvDirty || ComputeResources.bAnyUavDirty)
+	{
+		ComputeResources.Initialize(ComputePipelineState, ParentDevice, SrvDescriptorAllocator, SmpDescriptorAllocator);
+	}
 	ComputeResources.ApplyComputeResources(this);
 }
 

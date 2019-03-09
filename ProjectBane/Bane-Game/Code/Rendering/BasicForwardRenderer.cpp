@@ -24,49 +24,6 @@ void BasicForwardRenderer::StartRenderThread()
 
 void BasicForwardRenderer::Render()
 {
-	//std::lock_guard<std::mutex> RenderLock(m_RenderSubmitLock);
-	IGraphicsCommandContext* ctx = m_Device->GetGraphicsContext();
-	ctx->BeginPass(m_Device->GetBackBufferTargetPass());
-	ctx->EndPass();
-	return;
-// 	GatherSceneData();
-// 	
-// 	for (uint32 d = 0; d < m_pRenderLoop->CameraStack.GetNumElements(); d++)
-// 	{
-// 		uint32 Index = 0;
-// 		CAMERA_DATA Data = m_pRenderLoop->CameraStack.Pop();
-// 		{
-// 			CAMERA_CBUFFER_DATA* pData = m_CameraConstants->MapT<CAMERA_CBUFFER_DATA>();
-// 			pData[d] = GetCBufferCameraDataFromAcquireData(Data);
-// 			auto TestData = pData[d];
-// 			UNUSED(TestData);
-// 			m_CameraConstants->Unmap();
-// 		}
-// 		for (uint32 x = 0; x < m_pRenderLoop->Bucket.Values.size(); x++)
-// 		{
-// 			ctx->SetConstantBuffer(0, m_CameraConstants, sizeof(CAMERA_DATA) * d);
-// 			ctx->SetGraphicsPipelineState(m_pRenderLoop->Bucket.Keys[x].pShader);
-// 			for (uint32 i = 0; i < m_pRenderLoop->Bucket.Values[x].size(); i++)
-// 			{
-// 				auto& Item = m_pRenderLoop->Bucket.Values[x][i];
-// 				ctx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-// 				ctx->SetVertexBuffer(Item.pMesh->GetVertexBuffer());
-// 				ctx->SetIndexBuffer(Item.pMesh->GetIndexBuffer());
-// 				ctx->SetConstantBuffer(1, m_MeshDataBuffer, sizeof(MESH_RENDER_DATA) * Index);
-// 				ctx->SetTexture(0, Item.DiffuseTex);
-// 				ctx->DrawIndexed(Item.pMesh->GetIndexCount(), 0, 0);
-// 				Index++;
-// 			}
-// 		}
-// 	}
-// 
-// 	for (uint32 i = 0; i < m_pRenderLoop->PostRenderCallback.GetNumElements(); i++)
-// 	{
-// 		auto& Callback = m_pRenderLoop->PostRenderCallback.Pop();
-// 		Callback(m_Device, ctx);
-// 	}
-// 
-// 	ctx->EndPass();
 }
 
 void BasicForwardRenderer::Present()

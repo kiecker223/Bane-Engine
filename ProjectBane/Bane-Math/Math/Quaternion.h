@@ -1,54 +1,33 @@
 #pragma once
 
 #include "4RowColMatrix.h"
+#include "MathFunctions.h"
 
-#define _PI_ 3.141592654f
-#define _M_PI_ 3.1415926535897932384
-
-inline float radians(float Degrees)
-{
-	return (_PI_ / 180.f) * Degrees;
-}
-
-inline float degrees(float Radians)
-{
-	return (180.f / _PI_) * Radians;
-}
-
-inline double radiansD(double Degrees)
-{
-	return (_M_PI_ / 180.) * Degrees;
-}
-
-inline double degreesD(double Radians)
-{
-	return (180. / _M_PI_) * Radians;
-}
 
 struct Quaternion
 {
 public:
 
-	float w, x, y, z;
+	union 
+	{
+		__m128 f;
+		struct { float x, y, z, w; };
+	};
+
 
 	Quaternion()
 	{
+		f = { };
 	}
 
-	Quaternion(const Quaternion& Rhs) :
-		w(Rhs.w),
-		x(Rhs.x),
-		y(Rhs.y),
-		z(Rhs.z)
+	Quaternion(const Quaternion& Rhs)
 	{
+		f = Rhs.f;
 	}
 
-	Quaternion(float W, float X, float Y, float Z) :
-		w(W),
-		x(X),
-		y(Y),
-		z(Z)
+	Quaternion(float W, float X, float Y, float Z) 
 	{
+		f = _mm_set_ps(W, X, Y, Z);
 	}
 
 	Quaternion(const fvec3& Euler)
@@ -68,16 +47,13 @@ public:
 
 	inline Quaternion& operator = (const Quaternion& Rhs)
 	{
-		w = Rhs.w;
-		x = Rhs.x;
-		y = Rhs.y;
-		z = Rhs.z;
+		f = Rhs.f;
 		return *this;
 	}
 
 	inline static Quaternion FromAxisAngle(const fvec3& InAxis, const float InAngle)
 	{
-		fvec3 Axis = (InAxis);
+		fvec4 Axis(InAxis, 0.0f);
 		float Angle = InAngle;
 		if (InAngle > 6.28318531f)
 		{
@@ -85,9 +61,9 @@ public:
 		}
 		Quaternion Result;
 		const float s = sinf(Angle / 2.f);
-		Result.x = Axis.x * s;
-		Result.y = Axis.y * s;
-		Result.z = Axis.z * s;
+		__m128 S = _mm_load_ps1(&s);
+		__m128 A = Axis.f;
+		Result.f = _mm_mul_ps(S, A);
 		Result.w = cosf(Angle / 2.f);
 		Result.Normalize();
 		return Result;
@@ -114,6 +90,15 @@ public:
 		return Quaternion(-x, -y, -z, w);
 	}
 
+	// Credit to: https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
+	inline fvec3 operator * (const fvec3& Rhs) const
+	{
+		fvec3 u(x, y, z);
+
+		float s = w;
+
+		return (u * (2.0f * dot(u, Rhs)) + (Rhs * (s*s - dot(u, u))) + (cross(u, Rhs) * 2.0f) * s);
+ 	}
 
 	inline Quaternion operator * (const Quaternion& Rhs) const
 	{
@@ -227,40 +212,18 @@ public:
 	{
 		Quaternion q(*this);
 		float Length = sqrtf(w * w + x * x + y * y + z * z);
-		q.w /= Length;
-		q.x /= Length;
-		q.y /= Length;
-		q.z /= Length;
+		__m128 L = _mm_load_ps1(&Length);
+		q.f = _mm_div_ps(f, L);
 		return q;
 	}
 
 	inline Quaternion& Normalize()
 	{
 		float Length = sqrtf(w * w + x * x + y * y + z * z);
-		w /= Length;
-		x /= Length;
-		y /= Length;
-		z /= Length;
+		__m128 L = _mm_load_ps1(&Length);
+		f = _mm_div_ps(f, L);
 		return *this;
 	}
-
-
-	// Credit to: https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
-	// very clean and performant solution
-// 	inline double3 RotateVector(const double3& InVector)
-// 	{
-// 		double3 Result;
-// 		// Extract the vector part of the quaternion
-// 		double3 u(q.x, q.y, q.z);
-// 
-// 		// Extract the scalar part of the quaternion
-// 		double s = q.w;
-// 
-// 		// Do the math
-// 		Result = u * (2.0 * dot(u, InVector))
-// 			+ (InVector * (s*s - dot(u, u)))
-// 			+ cross(u, InVector) * (2.0f * s);
-// 	}
 };
 
 struct Quaternion64
@@ -419,4 +382,40 @@ public:
 	}
 };
 
+inline matrix matRotation(const Quaternion& Rotation)
+{
+	return Rotation.RotationMatrix();
+}
 
+
+
+inline matrix matTransformation(const fvec3& Position, const Quaternion& Rotation, const fvec3& Scale)
+{
+	return matTranslation(Position) * matRotation(Rotation) * matScale(Scale);
+}
+
+
+
+inline mat4x4 matRotation(const Quaternion64& Rotation)
+{
+	return Rotation.RotationMatrix();
+}
+
+inline mat4x4 matTransformation(const vec3& Position, const Quaternion64& Rotation, const vec3& Scale)
+{
+	mat4x4 Result;
+
+	const mat4x4 m1 = matTranslation(Position);
+	const mat4x4 m2 = matRotation(Rotation);
+	const mat4x4 m3 = matScale(Scale);
+
+	Result = m1 * m2 * m3;
+
+	return Result;
+}
+
+
+inline Quaternion FromQuat64(const Quaternion64& InVal)
+{
+	return Quaternion(static_cast<float>(InVal.w), static_cast<float>(InVal.x), static_cast<float>(InVal.y), static_cast<float>(InVal.z));
+}

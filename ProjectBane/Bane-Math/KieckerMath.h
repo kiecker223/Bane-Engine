@@ -12,7 +12,7 @@
 
 
 
-#include "Math/MathFunctions.h"
+#include "Math/Quaternion.h"
 
 template<>
 inline Quaternion lerp<Quaternion, float>(const Quaternion& V0, const Quaternion& V1, float Factor)

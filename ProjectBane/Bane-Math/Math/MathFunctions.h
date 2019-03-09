@@ -3,10 +3,31 @@
 #include <math.h>
 #include "Common/BaneMacros.h"
 
-#include "Quaternion.h"
 #include "4ComponentVector.h"
 #include "4RowColMatrix.h"
 
+#define _PI_ 3.141592654f
+#define _M_PI_ 3.1415926535897932384
+
+inline float radians(float Degrees)
+{
+	return (_PI_ / 180.f) * Degrees;
+}
+
+inline float degrees(float Radians)
+{
+	return (180.f / _PI_) * Radians;
+}
+
+inline double radiansD(double Degrees)
+{
+	return (_M_PI_ / 180.) * Degrees;
+}
+
+inline double degreesD(double Radians)
+{
+	return (180. / _M_PI_) * Radians;
+}
 
 template<typename T, class TDeterminer>
 inline T lerp(const T& Lhs, const T& Rhs, TDeterminer Factor)
@@ -426,10 +447,6 @@ inline T Abs(const T& InVal)
 // 	return Result;
 // }
 
-inline Quaternion FromQuat64(const Quaternion64& InVal)
-{
-	return Quaternion(static_cast<float>(InVal.w), static_cast<float>(InVal.x), static_cast<float>(InVal.y), static_cast<float>(InVal.z));
-}
 
 // Forward is expected to be normalized already
 inline matrix matView(fvec3 Eye, fvec3 Forward, fvec3 Up)
@@ -457,10 +474,6 @@ inline matrix matTranslation(const fvec3& Position)
 	return Result;
 }
 
-inline matrix matRotation(const Quaternion& Rotation)
-{
-	return Rotation.RotationMatrix();
-}
 
 inline matrix matScale(const fvec3& Scale)
 {
@@ -471,11 +484,6 @@ inline matrix matScale(const fvec3& Scale)
 	Result.p[2][2] = Scale.z;
 
 	return Result;
-}
-
-inline matrix matTransformation(const fvec3& Position, const Quaternion& Rotation, const fvec3& Scale)
-{
-	return matTranslation(Position) * matRotation(Rotation) * matScale(Scale);
 }
 
 inline matrix matRotX(float Radians)
@@ -556,10 +564,6 @@ inline mat4x4 matTranslation(const vec3& Position)
 	return Result;
 }
 
-inline mat4x4 matRotation(const Quaternion64& Rotation)
-{
-	return Rotation.RotationMatrix();
-}
 
 inline mat4x4 matScale(const vec3& Scale)
 {
@@ -572,23 +576,3 @@ inline mat4x4 matScale(const vec3& Scale)
 	return Result;
 }
 
-inline mat4x4 matTransformation(const vec3& Position, const Quaternion64& Rotation, const vec3& Scale)
-{
-	mat4x4 Result;
-
-	const mat4x4 m1 = matTranslation(Position);
-	const mat4x4 m2 = matRotation(Rotation);
-	const mat4x4 m3 = matScale(Scale);
-
-	Result = m1 * m2 * m3;
-
-	return Result;
-}
-
-inline bool testSphereIntersection(const vec3& LhsCenter, double LhsRadius, const vec3& RhsCenter, double RhsRadius)
-{
-	vec3 D = LhsCenter - RhsCenter;
-	double Dist2 = dot(D, D);
-	double RadiusSum = LhsRadius + RhsRadius;
-	return Dist2 <= RadiusSum * RadiusSum;
-}

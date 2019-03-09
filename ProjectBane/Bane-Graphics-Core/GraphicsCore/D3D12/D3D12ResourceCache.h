@@ -14,9 +14,15 @@ public:
 
 	D3D12ResourceCache()
 	{
-		memset(DirtySrvs, 0, sizeof(DirtySrvs));
-		memset(DirtyCbvs, 0, sizeof(DirtyCbvs));
-		memset(DirtyUavs, 0, sizeof(DirtyUavs));
+		for (uint32 i = 0; i < 16; i++)
+		{
+			DirtySrvs[i] = false;
+			DirtyUavs[i] = false;
+			DirtyCbvs[i] = false;
+		}
+		HighestDirtySrv = -1;
+		HighestDirtyUav = -1;
+		HighestDirtyCbv = -1;
 	}
 
 	struct D3D12_SHADER_RESOURCE
@@ -39,10 +45,13 @@ public:
 
 	bool DirtySrvs[16];
 	bool bAnySrvDirty;
+	int32 HighestDirtySrv;
 	bool DirtyUavs[16];
 	bool bAnyUavDirty;
+	int32 HighestDirtyUav;
 	bool DirtyCbvs[16];
 	bool bAnyCbvDirty;
+	int32 HighestDirtyCbv;
 
 	D3D12_SHADER_RESOURCE				Srvs[16];
 	D3D12_UNORDERED_ACCESS_RESOURCE		Uavs[16];
@@ -63,6 +72,7 @@ public:
 		{
 			Srvs[Slot] = { Texture->Resource.D3DResource, Texture->GetSRVDesc(Subresource), Texture->D3DSampleDesc };
 			DirtySrvs[Slot] = true;
+			HighestDirtySrv = Slot;
 			bAnySrvDirty = true;
 		}
 	}
@@ -74,6 +84,7 @@ public:
 		{
 			Srvs[Slot] = { StructuredBuffer->Resource.D3DResource, StructuredBuffer->GetSRVDesc(IndexToStart, NumElements, StructureByteStride), {} };
 			DirtySrvs[Slot] = true;
+			HighestDirtySrv = Slot;
 			bAnySrvDirty = true;
 		}
 	}
@@ -85,6 +96,7 @@ public:
 		{
 			Cbvs[Slot] = { ConstantBuffer->Resource.Location + Offset };
 			DirtyCbvs[Slot] = true;
+			HighestDirtyCbv = Slot;
 			bAnyCbvDirty = true;
 		}
 	}
@@ -96,6 +108,7 @@ public:
 		{
 			Uavs[Slot] = { Texture->Resource.D3DResource, Texture->GetUAVDesc(Subresource) };
 			DirtyUavs[Slot] = true;
+			HighestDirtyUav = Slot;
 			bAnyUavDirty = true;
 		}
 	}
@@ -107,6 +120,7 @@ public:
 		{
 			Uavs[Slot] = { Buffer->Resource.D3DResource, Buffer->GetUAVDesc(IndexToStart, NumElements, StructureByteStride) };
 			DirtyUavs[Slot] = true;
+			HighestDirtyUav = Slot;
 			bAnyUavDirty = true;
 		}
 	}

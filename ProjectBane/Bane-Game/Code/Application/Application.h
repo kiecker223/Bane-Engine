@@ -3,6 +3,7 @@
 #include <string>
 #include "Platform/System/Window.h"
 #include "Platform/System/AssemblyLoader.h"
+#include "TaskSystem/MainTaskSystem.h"
 
 
 typedef enum EMESH_QUALITY {
@@ -96,6 +97,11 @@ public:
 	void Run();
 
 	void Shutdown();
+
+	inline TaskSystem* GetTaskSystem() const
+	{
+		return m_TaskSystem;
+	}
 	
 	inline void SetSceneRenderer(ISceneRenderer* InSceneRenderer)
 	{
@@ -111,6 +117,7 @@ private:
 	PFNApplicationCleanupCallback m_CleanupCallback = (PFNApplicationCleanupCallback)0;
 
 	Assembly* m_GameAssembly;
+	TaskSystem* m_TaskSystem;
 	ISceneRenderer* m_SceneRenderer;
 	Window* m_Window = nullptr;
 

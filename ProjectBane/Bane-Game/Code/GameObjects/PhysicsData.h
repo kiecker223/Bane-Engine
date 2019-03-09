@@ -2,26 +2,48 @@
 
 #include <KieckerMath.h>
 #include <vector>
+#include "CarrierShipPart.h"
 
-class PhysicsData
+
+class PhysicsProperties
 {
 public:
 
-	vec4 CurrentAngularVelocity; // (x, y, z) = Angle (w) = Power
-	vec4 NextAngularVelocity;
+	void BuildCollisionShape(CarrierShipPart* BaseShipPart) { }
+	void BuildCollisionShape(CombatShipPart* BaseShipPart) { }
 
-	vec3 CurrentVelocity;
-	vec3 NextVelocity;
+	double Mass;
 
-	vec3 CurrentPosition;
-	vec3 NextPosition;
+};
 
-	std::vector<vec3> AllNextVelocities;
-	std::vector<vec3> AllNextPositions;
+class CurrentPhysicsData
+{
+public:
+	vec4 AngularVelocity;
+	vec3 Position;
+	vec3 Velocity;
+};
 
-	int32 PositionDirtyIndex;
-	double PositionDirtyTime;
+class NextPhysicsData
+{
+public:
+	vec4 AngularVelocity;
+	vec3 Position;
+	vec3 Velocity;
+};
 
-	int32 VelocityDirtyIndex;
-	double VelocityDirtyTime;
+class FuturePhysicsData
+{
+public:
+	std::vector<vec4> AngularVelocities;
+	int32 DirtyAngularVelocityIndex;
+	double DirtyAngularVelocityTime;
+
+	std::vector<vec3> Positions;
+	int32 DirtyPositionIndex;
+	double DirtyPositionTime;
+
+	std::vector<vec3> Velocities;
+	int32 DirtyVelocityIndex;
+	double DirtyVelocityTime;
 };

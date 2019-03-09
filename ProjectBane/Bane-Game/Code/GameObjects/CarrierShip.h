@@ -2,7 +2,7 @@
 
 #include "PhysicsData.h"
 
-class CarrierShip : public PhysicsData
+class CarrierShip
 {
 public:
 
