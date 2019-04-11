@@ -440,15 +440,21 @@ D3D12_RESOURCE_BARRIER TranslateResourceTransition(const D3D12_RESOURCE_TRANSITI
 
 void D3D12GraphicsCommandBuffer::FlushResourceTransitions()
 {
-	if (PendingTransitions.GetNumElements() > 0)
+	if (!PendingTransitions.empty())
 	{
-		D3DCL->ResourceBarrier(PendingTransitions.GetNumElements(), PendingTransitions.Data.data());
-		PendingTransitions.Reset();
+		D3DCL->ResourceBarrier(static_cast<uint32>(PendingTransitions.size()), PendingTransitions.data());
+		PendingTransitions.clear();
+		PendingTransitions.reserve(32);
 	}
-	while (TransitionedResources.GetNumElements() != 0)
+	if (!TransitionedResources.empty())
 	{
-		D3D12GPUResource* Res = TransitionedResources.Pop();
-		Res->CurrentState = Res->PendingState;
+		for (uint32 i = 0; i < TransitionedResources.size(); i++)
+		{
+			D3D12GPUResource* Res = TransitionedResources[i];
+			Res->CurrentState = Res->PendingState;
+		}
+		TransitionedResources.clear();
+		TransitionedResources.reserve(32);
 	}
 }
 
@@ -767,15 +773,21 @@ void D3D12ComputeCommandContext::Dispatch(uint32 ThreadX, uint32 ThreadY, uint32
 
 void D3D12ComputeCommandContext::FlushResourceTransitions()
 {
-	ParentDevice->EnsureAllUploadsOccured();
-	if (PendingTransitions.GetNumElements() > 0)
+	if (!PendingTransitions.empty())
 	{
-		D3DCL->ResourceBarrier(PendingTransitions.GetNumElements(), PendingTransitions.Data.data());
+		D3DCL->ResourceBarrier(static_cast<uint32>(PendingTransitions.size()), PendingTransitions.data());
+		PendingTransitions.clear();
+		PendingTransitions.reserve(32);
 	}
-	for (uint32 i = 0; i < TransitionedResources.GetNumElements(); i++)
+	if (!TransitionedResources.empty())
 	{
-		D3D12GPUResource* Res = TransitionedResources.Pop();
-		Res->CurrentState = Res->PendingState;
+		for (uint32 i = 0; i < TransitionedResources.size(); i++)
+		{
+			D3D12GPUResource* Res = TransitionedResources[i];
+			Res->CurrentState = Res->PendingState;
+		}
+		TransitionedResources.clear();
+		TransitionedResources.reserve(32);
 	}
 }
 

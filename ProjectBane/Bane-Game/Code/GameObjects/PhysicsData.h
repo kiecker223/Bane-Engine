@@ -9,41 +9,26 @@ class PhysicsProperties
 {
 public:
 
-	void BuildCollisionShape(CarrierShipPart* BaseShipPart) { }
-	void BuildCollisionShape(CombatShipPart* BaseShipPart) { }
-
 	double Mass;
 
 };
 
-class CurrentPhysicsData
+class PhysicsData
 {
 public:
+	PhysicsProperties* Props;
 	vec4 AngularVelocity;
 	vec3 Position;
 	vec3 Velocity;
 };
 
-class NextPhysicsData
-{
-public:
-	vec4 AngularVelocity;
-	vec3 Position;
-	vec3 Velocity;
-};
+typedef PhysicsData CurrentPhysicsData;
+typedef PhysicsData NextPhysicsData;
 
 class FuturePhysicsData
 {
 public:
-	std::vector<vec4> AngularVelocities;
-	int32 DirtyAngularVelocityIndex;
-	double DirtyAngularVelocityTime;
-
-	std::vector<vec3> Positions;
-	int32 DirtyPositionIndex;
-	double DirtyPositionTime;
-
-	std::vector<vec3> Velocities;
-	int32 DirtyVelocityIndex;
-	double DirtyVelocityTime;
+	std::vector<PhysicsData> NewPhysicsData;
+	uint32 DirtyPhysicsDataIndex;
+	double DirtyPhysicsDataTime;
 };

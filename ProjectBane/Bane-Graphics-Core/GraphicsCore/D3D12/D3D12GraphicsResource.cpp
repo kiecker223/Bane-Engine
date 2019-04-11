@@ -17,8 +17,8 @@ void D3D12GPUResource::TransitionResource(D3D12GraphicsCommandBuffer* Ctx, D3D12
 		Transition.Transition.StateAfter = NewState;
 		PendingState = NewState;
 		Transition.Transition.pResource = Resource.D3DResource;
-		Ctx->PendingTransitions.Push(Transition);
-		Ctx->TransitionedResources.Push(this);
+		Ctx->PendingTransitions.push_back(Transition);
+		Ctx->TransitionedResources.push_back(this);
 	}
 }
 
@@ -33,8 +33,8 @@ void D3D12GPUResource::TransitionResource(D3D12ComputeCommandContext* Ctx, D3D12
 		Transition.Transition.StateAfter = NewState;
 		PendingState = NewState;
 		Transition.Transition.pResource = Resource.D3DResource;
-		Ctx->PendingTransitions.Push(Transition);
-		Ctx->TransitionedResources.Push(this);
+		Ctx->PendingTransitions.push_back(Transition);
+		Ctx->TransitionedResources.push_back(this);
 	}
 }
 
@@ -44,7 +44,7 @@ void D3D12GPUResource::PushUAVBarrier(D3D12GraphicsCommandBuffer* Ctx)
 	Transition.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
 	Transition.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 	Transition.UAV.pResource = Resource.D3DResource;
-	Ctx->PendingTransitions.Push(Transition);
+	Ctx->PendingTransitions.push_back(Transition);
 }
 
 void D3D12GPUResource::PushUAVBarrier(D3D12ComputeCommandContext* Ctx)
@@ -53,7 +53,7 @@ void D3D12GPUResource::PushUAVBarrier(D3D12ComputeCommandContext* Ctx)
 	Transition.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
 	Transition.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 	Transition.UAV.pResource = Resource.D3DResource;
-	Ctx->PendingTransitions.Push(Transition);
+	Ctx->PendingTransitions.push_back(Transition);
 }
 
 D3D12Buffer::D3D12Buffer(D3D12GraphicsDevice* InDevice, uint64 InSize, EBUFFER_USAGE InUsage) :

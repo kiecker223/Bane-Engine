@@ -13,9 +13,6 @@ class Material;
 class IGraphicsCommandContext;
 class IDeviceSwapChain;
 class SkyboxComponent;
-class CameraComponent;
-class Entity;
-
 
 
 class ISceneRenderer

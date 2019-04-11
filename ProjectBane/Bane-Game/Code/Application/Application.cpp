@@ -15,7 +15,8 @@
 
 #pragma warning(disable:4049)
 
-#define NUM_OBJECTS 100
+#define NUM_OBJECTS 96
+
 
 Application* Application::GApplication = nullptr;
 
@@ -101,173 +102,7 @@ void Application::InitSystems()
 	m_SceneRenderer->Initialize(m_Window);
 }
 
-class UpdatePhysicsBodyTask : public Task
-{
-public:
 
-	UpdatePhysicsBodyTask(SharedTaskResource& InDependentResource, int32 InThreadCount, uint32 InSizeOfForeach, ETASK_EXECUTION_TYPE InExecutionType) :
-		Task(InDependentResource, InThreadCount, InSizeOfForeach, InExecutionType)
-	{
-	}
-
-	class UpdatePhysicsTaskExecutionHandle : public ITaskExecutionHandle
-	{
-	public:
-
-		std::vector<CurrentPhysicsData>& Data;
-		UpdatePhysicsTaskExecutionHandle(std::vector<CurrentPhysicsData>& InData) : Data(InData) { }
-
-		uint32 StartIndex, EndIndex;
-		bool bIsFinished = false;
-		bool bStarted = false;
-
-		// Calculate the bodies velocities
-		void Execute()
-		{
-			bStarted = true;
-			bIsFinished = false;
-			for (uint32 x = StartIndex; x < EndIndex; x++)
-			{
-				for (uint32 i = 0; i < Data.size(); i++)
-				{
-					if (i == x) { continue; }
-					vec3 ForceDir = Data[i].Position - Data[x].Position;
-					double Distance = length(ForceDir);
-					normalize(ForceDir);
-					double Force = M_GRAV_CONST * (100000.0 * 100000.0) / (Distance * Distance);
-					if (isnan(Force)) { continue; }
-					Data[x].Velocity += ForceDir * Force * (1.0 / 60.0);
-				}
-			}
-			bIsFinished = true;
-		}
-
-		bool IsFinished() const override
-		{
-			return bIsFinished;
-		}
-
-	};
-	
-	ITaskExecutionHandle* CreateTaskExecutionHandle(uint32 WorkerThreadIndex)
-	{
-		if (m_TaskExecutionHandles.size() >= WorkerThreadIndex + 1)
-		{
-			if (m_TaskExecutionHandles[WorkerThreadIndex] != nullptr)
-			{
-				return m_TaskExecutionHandles[WorkerThreadIndex];
-			}
-		}
-		if (m_TaskExecutionHandles.size() != ThreadDispatchCount)
-		{
-			m_TaskExecutionHandles.resize(ThreadDispatchCount);
-		}
-		auto* PhysicsData = DependentResource.ResourceHandle.Get<std::vector<CurrentPhysicsData>>();
-		UpdatePhysicsTaskExecutionHandle* Result = new UpdatePhysicsTaskExecutionHandle(*PhysicsData);
-		uint32 NumToIterate = NUM_OBJECTS / ThreadDispatchCount;
-		Result->StartIndex = NumToIterate * WorkerThreadIndex;
-		Result->EndIndex = (NumToIterate * WorkerThreadIndex) + NumToIterate;
-		m_TaskExecutionHandles[WorkerThreadIndex] = Result;
-		return Result;
-	}
-
-	bool IsFinished() const
-	{
-		bool bFinished = false;
-		for (uint32 i = 0; i < m_TaskExecutionHandles.size(); i++)
-		{
-			if (m_TaskExecutionHandles[i]->IsFinished() == true)
-			{
-				bFinished = true;
-			}
-			else
-			{
-				bFinished = false;
-			}
-		}
-		return bFinished;
-	}
-};
-
-class UpdatePhysicsBodyPositionTask : public Task
-{
-public:
-	UpdatePhysicsBodyPositionTask(SharedTaskResource& InDependentResource, int32 InThreadCount, uint32 InSizeOfForeach, ETASK_EXECUTION_TYPE InExecutionType) :
-		Task(InDependentResource, InThreadCount, InSizeOfForeach, InExecutionType)
-	{
-	}
-
-	// The actual execution
-	class UpdatePhysicsPositionTaskExecutionHandle : public ITaskExecutionHandle
-	{
-	public:
-
-		std::vector<CurrentPhysicsData>& Data;
-		UpdatePhysicsPositionTaskExecutionHandle(std::vector<CurrentPhysicsData>& InData) : Data(InData) { }
-
-		uint32 StartIndex, EndIndex;
-		bool bIsFinished = false;
-
-		void Execute()
-		{
-			bIsFinished = false;
-			for (uint32 x = StartIndex; x < EndIndex; x++)
-			{
-				Data[x].Position += Data[x].Velocity;
-			}
-			bIsFinished = true;
-		}
-
-		bool IsFinished() const override
-		{
-			return bIsFinished;
-		}
-
-	};
-
-	ITaskExecutionHandle* CreateTaskExecutionHandle(uint32 WorkerThreadIndex)
-	{
-		// Make sure we aren't just calling new every frame
-		if (m_TaskExecutionHandles.size() >= WorkerThreadIndex + 1)
-		{
-			if (m_TaskExecutionHandles[WorkerThreadIndex] != nullptr)
-			{
-				return m_TaskExecutionHandles[WorkerThreadIndex];
-			}
-		}
-		if (m_TaskExecutionHandles.size() != ThreadDispatchCount)
-		{
-			m_TaskExecutionHandles.resize(ThreadDispatchCount);
-		}
-
-		// The worker thread index is the thread that the task handle will be executed on
-		// So make sure that when the task is dispatched on the thread the data is properly setup
-		auto* PhysicsData = DependentResource.ResourceHandle.Get<std::vector<CurrentPhysicsData>>();
-		UpdatePhysicsPositionTaskExecutionHandle* Result = new UpdatePhysicsPositionTaskExecutionHandle(*PhysicsData);
-		uint32 NumToIterate = NUM_OBJECTS / ThreadDispatchCount;
-		Result->StartIndex = NumToIterate * WorkerThreadIndex;
-		Result->EndIndex = (NumToIterate * WorkerThreadIndex) + NumToIterate;
-		m_TaskExecutionHandles[WorkerThreadIndex] = Result;
-		return Result;
-	}
-
-	bool IsFinished() const
-	{
-		bool bFinished = false;
-		for (uint32 i = 0; i < m_TaskExecutionHandles.size(); i++)
-		{
-			if (m_TaskExecutionHandles[i]->IsFinished() == true)
-			{
-				bFinished = true;
-			}
-			else
-			{
-				bFinished = false;
-			}
-		}
-		return bFinished;
-	}
-};
 
 void Application::Run()
 {
@@ -285,12 +120,26 @@ void Application::Run()
 	}
 
 	// Create the shared resource handle
-	SharedTaskResource TaskResource;
-	TaskResource.ResourceHandle.Set<std::vector<CurrentPhysicsData>>(&PhysicsData);
 	
-	// Instantiate the tasks with the task system
-	UpdatePhysicsBodyTask* pTask = m_TaskSystem->CreateParallelForTask<UpdatePhysicsBodyTask>(TaskResource, NUM_OBJECTS);
-	UpdatePhysicsBodyPositionTask* pNextTask = m_TaskSystem->CreateParallelForTask<UpdatePhysicsBodyPositionTask>(TaskResource, NUM_OBJECTS);
+	Task* CalculateNBodyAccelerationTask = TaskSystem::Get()->CreateTask(TASK_DISPATCH_ON_ALL_THREADS, [&PhysicsData](uint32 DispatchSize, uint32 DispatchIndex) 
+	{
+		uint32 NumToIterate = NUM_OBJECTS / DispatchSize;
+		uint32 StartIndex = NumToIterate * DispatchIndex;
+		uint32 EndIndex = StartIndex + NumToIterate;
+		for (uint32 x = StartIndex; x < EndIndex; x++)
+		{
+			for (uint32 i = 0; i < PhysicsData.size(); i++)
+			{
+				if (i == x) { continue; }
+				vec3 ForceDir = PhysicsData[i].Position - PhysicsData[x].Position;
+				double Distance = length(ForceDir);
+				normalize(ForceDir);
+				double Force = M_GRAV_CONST * (100000.0 * 100000.0) / (Distance * Distance);
+				if (isnan(Force)) { continue; }
+				PhysicsData[x].Velocity += ForceDir * Force * (1.0 / 60.0);
+			}
+		}
+	});
 
 	IGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
 	ITexture2D* Tex = GetTextureCache()->LoadTexture("DefaultBlue");
@@ -298,15 +147,65 @@ void Application::Run()
 	Mesh* pMesh = new Mesh();
 	pMesh->GenerateUVSphere(12);
 
-	IBuffer* ConstantBuff = Device->CreateConstantBuffer(256 * 12000);
 	IBuffer* CameraBuff = Device->CreateConstBuffer<matrix>();
+	IBuffer* ConstantBuff = Device->CreateConstantBuffer(256 * 12000);
+
+	struct ConstantBuffMappedPointerRef
+	{
+		matrix* pPointer;
+	} ConstantBuffMappedRef;
+
+	Task* ApplyNBodyAccelerationTask = TaskSystem::Get()->CreateTask(TASK_DISPATCH_ON_ALL_THREADS, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
+	{
+		uint32 NumToIterate = NUM_OBJECTS / DispatchSize;
+		uint32 StartIndex = NumToIterate * DispatchIndex;
+		uint32 EndIndex = StartIndex + NumToIterate;
+		for (uint32 x = StartIndex; x < EndIndex; x++)
+		{
+			PhysicsData[x].Position += PhysicsData[x].Velocity;
+			ConstantBuffMappedRef.pPointer[x] = matTranslation(fromDouble3(PhysicsData[x].Position)) * matScale(fvec3(30.0f, 30.0f, 30.0f));
+		}
+	});
+
+	Task* MoveShitRight = TaskSystem::Get()->CreateTask(2, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
+	{
+		uint32 NumToIterate = NUM_OBJECTS / 4;
+		uint32 StartIndex = NumToIterate * DispatchIndex;
+		uint32 EndIndex = StartIndex + NumToIterate;
+		for (uint32 x = StartIndex; x < EndIndex; x++)
+		{
+			PhysicsData[x].Position += vec3(0.001, 0.0, 0.0);
+		}
+	});
+
+	Task* MoveShitLeft = TaskSystem::Get()->CreateTask(2, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
+	{
+		uint32 NumToIterate = NUM_OBJECTS / 4;
+		uint32 StartIndex = NumToIterate * (DispatchIndex + 2);
+		uint32 EndIndex = StartIndex + NumToIterate;
+		for (uint32 x = StartIndex; x < EndIndex; x++)
+		{
+			PhysicsData[x].Position += vec3(-0.001, 0.0, 0.0);
+		}
+	});
+
+	Task* ApplyTransforms = TaskSystem::Get()->CreateTask(TASK_DISPATCH_ON_ALL_THREADS, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
+	{
+		uint32 NumToIterate = NUM_OBJECTS / DispatchSize;
+		uint32 StartIndex = NumToIterate * DispatchIndex;
+		uint32 EndIndex = StartIndex + NumToIterate;
+		for (uint32 x = StartIndex; x < EndIndex; x++)
+		{
+			ConstantBuffMappedRef.pPointer[x] = matTranslation(fromDouble3(PhysicsData[x].Position)) * matScale(fvec3(30.0f, 30.0f, 30.0f));
+		}
+	});
 
 	vec3 CameraPosition;
-	Device->GetSwapChain()->SetSwapInterval(1);
 
 	while (!m_Window->QuitRequested())
 	{
 		// Allow for moving around
+		ConstantBuffMappedRef.pPointer = ConstantBuff->MapT<matrix>();
 		GetInput()->Update();
 		if (GetInput()->Keyboard.GetKey(KEY_S))
 		{
@@ -326,22 +225,17 @@ void Application::Run()
 		}
 
 		// Schedule the tasks to be executed
- 		m_TaskSystem->ScheduleTask(pTask);
- 		m_TaskSystem->ScheduleTask(pNextTask);
-
-		// UpdateSchedule is called by main thread to
-		// update the work for the worker threads
-		// Essentially making sure that the tasks scheduled
-		// by ScheduleTask(...) are distributed to their threads
- 		m_TaskSystem->UpdateSchedule();
-
-		// Force a flush of the threads
- 		m_TaskSystem->WaitForThreadStop();
+		MoveShitLeft->Dispatch();
+		MoveShitRight->Dispatch();
+		m_TaskSystem->AddTaskBarrier();
+		ApplyTransforms->Dispatch();
+		m_TaskSystem->UpdateSchedule();
+		//m_TaskSystem->WaitForThreadStop();
+		std::cout << "Finished wait for pNextTask" << std::endl;
 
 		// Setup the constant buffer data
 		matrix* pMats = CameraBuff->MapT<matrix>();
 		*pMats = matProjection(1.33f, 60.f, 0.001f, 10000000.0f) * matView(fromDouble3(CameraPosition), fvec3(0.0f, 0.0f, 0.0f), fvec3(0.0f, 1.0f, 0.0f));
-		pMats = ConstantBuff->MapT<matrix>();
 
 		// Draw the shit
 		IGraphicsCommandContext* pCtx = Device->GetGraphicsContext();
@@ -351,7 +245,6 @@ void Application::Run()
 		pCtx->SetTexture(0, Tex);
 		for (uint32 i = 0; i < PhysicsData.size(); i++)
 		{
-			pMats[i] = matTranslation(fromDouble3(PhysicsData[i].Position)) * matScale(fvec3(40.0f, 40.0f, 40.0f));
 			pCtx->SetConstantBuffer(1, ConstantBuff, 256 * i);
 			pCtx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			pCtx->SetVertexBuffer(pMesh->GetVertexBuffer());

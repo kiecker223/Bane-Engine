@@ -29,8 +29,7 @@ static D3D12_COMMAND_LIST_TYPE FromContextType(ECOMMAND_CONTEXT_TYPE ContextType
 D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window* RenderingWindow, ID3D12Device1* Device, ID3D12CommandQueue* MainQueue) :
 	m_Device(Device),
 	m_SwapChain(SwapChain),
-	m_GenerateMipsPipeline2D(nullptr),
-	m_GenerateMipsTable2D(nullptr)
+	m_GenerateMipsPipeline2D(nullptr)
 {
 	m_CommandQueues[0].Initialize(MainQueue, Device, "D3D12GraphicsDevice::m_DirectQueue", COMMAND_CONTEXT_TYPE_GRAPHICS);
 	m_CommandQueues[0].SetParentDevice(this);

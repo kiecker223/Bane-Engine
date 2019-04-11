@@ -2,6 +2,9 @@
 
 #include <Common.h>
 #include <vector>
+#include <atomic>
+#include <functional>
+#include "TaskSystemCommand.h"
 
 class SharedTaskResourceHandle
 {
@@ -76,62 +79,72 @@ public:
 };
 
 
-class ITaskExecutionHandle
+class TaskSegmentExecutor : public TaskExecutionHandle
 {
 public:
-	
-	virtual ~ITaskExecutionHandle() { }
 
-	virtual bool IsFinished() const = 0;
-	virtual void Execute() = 0;
+	TaskSegmentExecutor()
+	{
+		pOwningTask = nullptr;
+		NextValue.store(0);
+		CompletedValue.store(0);
+	}
+
+	std::function<void(uint32 /*DispatchSize*/, uint32 /*DispatchIndex*/)> Func;
+
+	void InternalExecute() override;
 };
 
 class Task
 {
 public:
-	
-	Task(SharedTaskResource& InDependentResource, int32 InThreadCount, uint32 InSizeOfForeach, ETASK_EXECUTION_TYPE InExecutionType) :
-		DependentResource(InDependentResource),
-		ThreadCount(InThreadCount),
-		DataIterationSize(InSizeOfForeach),
-		ExecutionType(InExecutionType)
+
+	Task() : 
+		NextValue(0),
+		CurrentValue(0),
+		m_ThreadCount(0)
 	{
-		BANE_CHECK(ExecutionType == TASK_EXECUTION_TYPE_PARALLEL_FOR);
-	}
-	Task(SharedTaskResource& InDependentResource, ETASK_EXECUTION_TYPE InExecutionType) :
-		DependentResource(InDependentResource),
-		ExecutionType(InExecutionType)
-	{
-		BANE_CHECK(ExecutionType == TASK_EXECUTION_TYPE_SINGLE);
 	}
 
-	inline void BlockTillFinished()
+	void WaitForFinish();
+	void Setup();
+
+	void Dispatch();
+
+	bool AllHandlesFinished();
+	void SetupForNextDispatch();
+
+	// ThreadCount = -1 means that this task will be distributed among all threads
+	void SetNumThreads(int32 ThreadCount);
+	void SetTaskFunction(std::function<void(uint32 DispatchSize, uint32 DispatchIndex)> InFunc);
+	uint32 GetDispatchCount() const;
+
+	inline TaskSegmentExecutor* GetTaskExecutionHandle(uint32 Index) const
 	{
-		bool bFinished = false;
-		while (true)
-		{
-			bFinished = IsFinished();
-			if (bFinished)
-			{
-				break;
-			}
-		}
+		return m_OwnedHandles[Index];
 	}
 
-	virtual ITaskExecutionHandle* CreateTaskExecutionHandle() { return nullptr; }
-	virtual ITaskExecutionHandle* CreateTaskExecutionHandle(uint32 WorkerThreadIndex) { UNUSED(WorkerThreadIndex); return nullptr; }
-	virtual bool IsFinished() const = 0;
+	std::atomic<uint64> NextValue;
+	std::atomic<uint64> CurrentValue;
 
-	SharedTaskResource& DependentResource;
-	int32 ThreadCount;
-	uint32 ThreadDispatchCount;
-	uint32 DataIterationSize;
-	ETASK_EXECUTION_TYPE ExecutionType;
+	inline bool IsCompleted()
+	{
+		return AllHandlesFinished();
+		//return NextValue.load() == CurrentValue.load();
+	}
+
+	inline bool HasDispatched()
+	{
+		return NextValue.load() > CurrentValue.load();
+	}
 
 protected:
 
-	std::vector<ITaskExecutionHandle*> m_TaskExecutionHandles;
-	bool m_bIsFinished;
+	std::function<void(uint32, uint32)> m_DispatchFunc;
+
+	std::vector<Task*> m_Dependencies;
+	int32 m_ThreadCount;
+	std::vector<TaskSegmentExecutor*> m_OwnedHandles;
 };
 
 

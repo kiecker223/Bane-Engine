@@ -8,7 +8,6 @@
 
 class D3D12ResourceLocation;
 class D3D12GraphicsDevice;
-class D3D12ShaderResourceTable;
 class D3D12RenderPassInfo;
 
 class D3D12CommandList : D3D12DeviceChild
@@ -220,8 +219,8 @@ public:
 	D3D12ResourceCache ComputeResources;
 	D3D12GraphicsDevice* ParentDevice;
 
-	TStack<D3D12_RESOURCE_BARRIER, 32> PendingTransitions;
-	TStack<D3D12GPUResource*, 32> TransitionedResources;
+	std::vector<D3D12_RESOURCE_BARRIER> PendingTransitions;
+	std::vector<D3D12GPUResource*> TransitionedResources;
 	
 	D3D12_RECT ScissorRect;
 	D3D12_VIEWPORT Viewport;
@@ -344,9 +343,8 @@ public:
 	ID3D12GraphicsCommandList* D3DCL;
 	D3D12CommandList* CommandList;
 	D3D12ComputePipelineState* PipelineState;
-	D3D12ShaderResourceTable* CurrentTable;
 	ID3D12RootSignature* RootSignature;
 	D3D12GraphicsDevice* ParentDevice;
-	TStack<D3D12_RESOURCE_BARRIER, 32> PendingTransitions;
-	TStack<D3D12GPUResource*, 32> TransitionedResources;
+	std::vector<D3D12_RESOURCE_BARRIER> PendingTransitions;
+	std::vector<D3D12GPUResource*> TransitionedResources;
 };

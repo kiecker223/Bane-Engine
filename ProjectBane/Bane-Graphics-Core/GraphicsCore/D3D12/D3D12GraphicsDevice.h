@@ -120,7 +120,6 @@ private:
 	std::vector<D3D12GraphicsCommandContext*> m_AvailableContexts;
 	D3D12ComputeCommandContext* m_ComputeContext;
 	D3D12ComputePipelineState* m_GenerateMipsPipeline2D;
-	D3D12ShaderResourceTable* m_GenerateMipsTable2D;
 	D3D12GraphicsCommandContext* m_UploadList;
 	D3D12CommandQueue m_CommandQueues[COMMAND_CONTEXT_TYPE_NUM_TYPES];
 	

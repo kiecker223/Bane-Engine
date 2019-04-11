@@ -1,18 +1,41 @@
 #include "MainTaskSystem.h"
+#include "Application/Application.h"
 #include <Windows.h>
 
 
+ThreadSafeQueue<TaskExecutionGroup*> ThreadStatus::WorkMemPool;
+std::deque<TaskCommandGroup*> TaskSystem::CommandMemPool;
 
+TaskExecutionHandle* TaskSystem::StealWork()
+{
+	return nullptr;
+}
+
+TaskSystem* TaskSystem::Get()
+{
+	return GetApplicationInstance()->GetTaskSystem();
+}
 
 void TaskSystem::Initialize()
 {
-	uint32 ThreadCount = std::thread::hardware_concurrency() - 2;
+	uint32 ThreadCount = 4;//std::thread::hardware_concurrency() - 2;
 	m_bRunning = true;
 	m_Threads.reserve(ThreadCount);
-	m_ThreadStatuses.resize(ThreadCount);
-	for (uint32 i = 0; i < m_ThreadStatuses.size(); i++)
+	ThreadStats.resize(ThreadCount);
+	m_ThreadCount = ThreadCount;
+
+	for (uint32 i = 0; i < 128; i++)
 	{
-		m_ThreadStatuses[i] = new ThreadStatus();
+		for (uint32 x = 0; x < m_ThreadCount; x++)
+		{
+			ThreadStatus::WorkMemPool.SafeAdd(new TaskExecutionGroup());
+		}
+		TaskSystem::CommandMemPool.push_front(new TaskCommandGroup());
+	}
+
+	for (uint32 i = 0; i < ThreadStats.size(); i++)
+	{
+		ThreadStats[i] = new ThreadStatus();
 	}
 	for (uint32 i = 0; i < ThreadCount; i++)
 	{
@@ -35,10 +58,10 @@ void TaskSystem::WaitForThreadStop()
 	while (true)
 	{
 		bool bStop = false;
-		for (uint32 i = 0; i < m_ThreadStatuses.size(); i++)
+		for (uint32 i = 0; i < ThreadStats.size(); i++)
 		{
-			ThreadStatus* pStat = m_ThreadStatuses[i];
-			if (!pStat->IsExecutingTasks())
+			ThreadStatus* pStat = ThreadStats[i];
+			if (!pStat->HasOrIsExecutingWork())
 			{
 				bStop = true;
 			}
@@ -50,7 +73,7 @@ void TaskSystem::WaitForThreadStop()
 		}
 		if (!bStop)
 		{
-			std::this_thread::sleep_for(std::chrono::nanoseconds(100));
+			Sleep(0);
 		}
 		else
 		{
@@ -61,76 +84,130 @@ void TaskSystem::WaitForThreadStop()
 
 void TaskSystem::ScheduleTask(Task* pTask)
 {
-	Tasks.Add(pTask);
+	// Own the lock
+	std::lock_guard<std::mutex> LockGuard(PendingCommands.Lock);
+	if (PendingCommands.SafeGetCount() == 0)
+	{
+		PendingCommands.SafeAdd(TaskSystem::CommandMemPool.front()); // New TaskCommandGroup;
+		TaskSystem::CommandMemPool.pop_front();
+	}
+	(*PendingCommands.GetFront())->Commands.Add(pTask);
+}
+
+void TaskSystem::AddTaskBarrier()
+{
+	PendingCommands.SafeAdd(TaskSystem::CommandMemPool.front());
+	TaskSystem::CommandMemPool.pop_front();
 }
 
 void TaskSystem::UpdateSchedule()
 {
-	Task* pTask = Tasks.Pop();
-
-	if (pTask)
+	TaskCommandGroup* NewTaskGroup = PendingCommands.SafePop();
+	if (NewTaskGroup)
 	{
-		while (pTask)
+		while (NewTaskGroup)
 		{
-			if (pTask->ExecutionType == TASK_EXECUTION_TYPE_SINGLE)
+			if (NewTaskGroup->Commands.GetCount() > 0)
 			{
-				for (uint32 i = 0; i < m_ThreadStatuses.size(); i++)
+				for (uint32 i = 0; i < m_ThreadCount; i++)
 				{
-					if (!m_ThreadStatuses[i]->IsExecutingTasks())
+					ThreadStats[i]->WorkQueue.Lock.lock();
+					ThreadStats[i]->WorkQueue.SafeAdd(ThreadStatus::WorkMemPool.Pop());
+				}
+				uint32 CurrentDispatchThreadId = 0;
+				std::lock_guard<std::mutex> LockGuard(NewTaskGroup->Commands.Lock);
+				Task* pTask = NewTaskGroup->Commands.SafePop();
+				while (pTask)
+				{
+					for (uint32 i = 0; i < pTask->GetDispatchCount(); i++)
 					{
-						m_ThreadStatuses[i]->TaskExecutionHandles.Add(pTask->CreateTaskExecutionHandle());
+						(*ThreadStats[CurrentDispatchThreadId % (m_ThreadCount)]->WorkQueue.GetFront())->Commands.Add(pTask->GetTaskExecutionHandle(i));
+						CurrentDispatchThreadId++;
 					}
+					pTask = NewTaskGroup->Commands.SafePop();
+				}
+				for (uint32 i = 0; i < m_ThreadCount; i++)
+				{
+					ThreadStats[i]->WorkQueue.Lock.unlock();
 				}
 			}
-			if (pTask->ExecutionType == TASK_EXECUTION_TYPE_PARALLEL_FOR)
-			{
-				if (pTask->ThreadCount == -1)
-				{
-					pTask->ThreadDispatchCount = static_cast<uint32>(m_Threads.size());
-				}
-				else
-				{
-					pTask->ThreadDispatchCount = pTask->ThreadCount;
-				}
-				for (uint32 i = 0; i < pTask->ThreadDispatchCount; i++)
-				{
-					ThreadStatus* Status = m_ThreadStatuses[i];
-					Status->TaskExecutionHandles.Add(pTask->CreateTaskExecutionHandle(i));
-				}
-			}
-			pTask = Tasks.Pop();
+			NewTaskGroup->Commands.Clear();
+			TaskSystem::CommandMemPool.push_front(NewTaskGroup);
+			NewTaskGroup = PendingCommands.SafePop();
 		}
 	}
 }
 
 void TaskSystem::ThreadFunc(uint32 ThreadIdx)
 {
+	// Wait for the stack??
+	// This is a really weird hack I have to setup but if I don't do this then values are 
+	// seemingly corrupted
+	while (true)
+	{
+		if (ThreadIdx < m_Threads.size())
+		{
+			break;
+		}
+	}
 	if (!SetThreadAffinityMask(GetCurrentThread(), (uint64(1) << uint64(ThreadIdx + 2))))
 	{
 		__debugbreak();
 	}
-
+	
+	ThreadStatus* Stats = ThreadStats[ThreadIdx];
 	while (m_bRunning)
 	{
-		if (m_ThreadStatuses.size() > 0)
 		{
-			if (ThreadIdx + 1 > m_Threads.size()) { continue; }
-			ThreadStatus* ThreadStats = m_ThreadStatuses[ThreadIdx];
-			if (ThreadStats)
+			TaskExecutionGroup* ExecutionGroup = Stats->WorkQueue.Pop();
+			if (ExecutionGroup)
 			{
-				ITaskExecutionHandle* TaskExecution = ThreadStats->TaskExecutionHandles.Pop();
-
-				if (TaskExecution)
+				TaskExecutionHandle* Handle = ExecutionGroup->Commands.Pop();
+				if (Handle)
 				{
-					ThreadStats->ExecutingTask.store(true);
-					TaskExecution->Execute();
-					ThreadStats->ExecutingTask.store(false);
+					while (Handle)
+					{
+						Stats->CurrentTask.store(Handle);
+						Handle->InternalExecute();
+						Handle = ExecutionGroup->Commands.Pop();
+					}
 				}
-				else
+				ThreadStatus::WorkMemPool.Add(ExecutionGroup);
+				Stats->CurrentTask.store(nullptr);
+				Stats->TaskGroupFenceValue++;
+			}
+			else
+			{
+				continue;
+			}
+		}
+		while (true)
+		{
+			bool bFinished = true;
+			for (uint32 i = 0; i < ThreadStats.size(); i++)
+			{
+				ThreadStatus* tStats = ThreadStats[i];
+				if (tStats->TaskGroupFenceValue.load() < Stats->TaskGroupFenceValue.load())
 				{
-					std::this_thread::sleep_for(std::chrono::nanoseconds(100));
+					bFinished = false;
 				}
+			}
+			if (!bFinished)
+			{
+				std::this_thread::yield();
+			}
+			else
+			{
+				break;
 			}
 		}
 	}
+}
+
+Task* TaskSystem::CreateTask(int32 ThreadCount, std::function<void(uint32, uint32)> Func)
+{
+	Task* Result = new Task();
+	Result->SetNumThreads(ThreadCount);
+	Result->SetTaskFunction(Func);
+	return Result;
 }
