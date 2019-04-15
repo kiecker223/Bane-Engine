@@ -13,6 +13,12 @@ void TaskSegmentExecutor::InternalExecute()
 	}
 }
 
+Task::Task(int32 InThreadCount, std::function<void(uint32 DispatchSize, uint32 DispatchIndex)> InFunc)
+{
+	SetNumThreads(InThreadCount);
+	SetTaskFunction(InFunc);
+}
+
 void Task::WaitForFinish()
 {
 	while (true)
@@ -92,3 +98,42 @@ uint32 Task::GetDispatchCount() const
 	return Result;
 }
 
+void Dispatcher::Begin()
+{
+	// Nothing to do for now
+}
+
+void Dispatcher::DispatchTasks(const std::vector<Task*>& pTasks)
+{
+	for (auto* pTask : pTasks)
+	{
+		pTask->Dispatch();
+	}
+	TaskSystem::Get()->AddTaskBarrier();
+}
+
+void Dispatcher::DispatchTask(Task* pTask)
+{
+	pTask->Dispatch();
+	TaskSystem::Get()->AddTaskBarrier();
+}
+
+void Dispatcher::AddTask(Task* pTask)
+{
+	pTask->Dispatch();
+}
+
+void Dispatcher::FinishTaskGroup()
+{
+	TaskSystem::Get()->AddTaskBarrier();
+}
+
+void Dispatcher::WaitOnTask(Task* pTask)
+{
+	pTask->WaitForFinish();
+}
+
+void Dispatcher::End()
+{
+	TaskSystem::Get()->UpdateSchedule();
+}

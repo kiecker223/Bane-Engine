@@ -6,11 +6,6 @@
 ThreadSafeQueue<TaskExecutionGroup*> ThreadStatus::WorkMemPool;
 std::deque<TaskCommandGroup*> TaskSystem::CommandMemPool;
 
-TaskExecutionHandle* TaskSystem::StealWork()
-{
-	return nullptr;
-}
-
 TaskSystem* TaskSystem::Get()
 {
 	return GetApplicationInstance()->GetTaskSystem();
@@ -138,6 +133,26 @@ void TaskSystem::UpdateSchedule()
 	}
 }
 
+TaskExecutionHandle* TaskSystem::StealTask(uint64 CurrentFenceValue, uint32 CallingThread)
+{
+	for (uint32 i = 0; i < m_ThreadCount; i++)
+	{
+		if (i == CallingThread)
+		{
+			continue;
+		}
+		if (ThreadStats[i]->TaskGroupFenceValue.load() == CurrentFenceValue)
+		{
+			auto* Group = ThreadStats[i]->CurrentGroup.load();
+			if (Group)
+			{
+				return Group->Commands.Pop();
+			}
+		}
+	}
+	return nullptr;
+}
+
 void TaskSystem::ThreadFunc(uint32 ThreadIdx)
 {
 	// Wait for the stack??
@@ -162,6 +177,7 @@ void TaskSystem::ThreadFunc(uint32 ThreadIdx)
 			TaskExecutionGroup* ExecutionGroup = Stats->WorkQueue.Pop();
 			if (ExecutionGroup)
 			{
+				Stats->CurrentGroup.store(ExecutionGroup);
 				TaskExecutionHandle* Handle = ExecutionGroup->Commands.Pop();
 				if (Handle)
 				{
@@ -170,6 +186,18 @@ void TaskSystem::ThreadFunc(uint32 ThreadIdx)
 						Stats->CurrentTask.store(Handle);
 						Handle->InternalExecute();
 						Handle = ExecutionGroup->Commands.Pop();
+					}
+					// Try to steal some work
+					Stats->CurrentGroup.store(nullptr);
+					Handle = StealTask(Stats->TaskGroupFenceValue.load(), ThreadIdx);
+					if (Handle)
+					{
+						while (Handle)
+						{
+							Stats->CurrentTask.store(Handle);
+							Handle->InternalExecute();
+							Handle = StealTask(Stats->TaskGroupFenceValue.load(), ThreadIdx);
+						}
 					}
 				}
 				ThreadStatus::WorkMemPool.Add(ExecutionGroup);

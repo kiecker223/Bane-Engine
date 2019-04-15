@@ -16,9 +16,9 @@ public:
 class PhysicsData
 {
 public:
-	PhysicsProperties* Props;
 	vec4 AngularVelocity;
 	vec3 Position;
+	double Mass;
 	vec3 Velocity;
 };
 

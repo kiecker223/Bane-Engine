@@ -121,7 +121,7 @@ void Application::Run()
 
 	// Create the shared resource handle
 	
-	Task* CalculateNBodyAccelerationTask = TaskSystem::Get()->CreateTask(TASK_DISPATCH_ON_ALL_THREADS, [&PhysicsData](uint32 DispatchSize, uint32 DispatchIndex) 
+	Task* CalculateNBodyAccelerationTask = new Task(TASK_DISPATCH_ON_ALL_THREADS, [&PhysicsData](uint32 DispatchSize, uint32 DispatchIndex) 
 	{
 		uint32 NumToIterate = NUM_OBJECTS / DispatchSize;
 		uint32 StartIndex = NumToIterate * DispatchIndex;
@@ -155,7 +155,7 @@ void Application::Run()
 		matrix* pPointer;
 	} ConstantBuffMappedRef;
 
-	Task* ApplyNBodyAccelerationTask = TaskSystem::Get()->CreateTask(TASK_DISPATCH_ON_ALL_THREADS, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
+	Task* ApplyNBodyAccelerationTask = new Task(TASK_DISPATCH_ON_ALL_THREADS, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
 	{
 		uint32 NumToIterate = NUM_OBJECTS / DispatchSize;
 		uint32 StartIndex = NumToIterate * DispatchIndex;
@@ -167,31 +167,39 @@ void Application::Run()
 		}
 	});
 
-	Task* MoveShitRight = TaskSystem::Get()->CreateTask(2, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
+	Task* MoveShitRight = new Task(3, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
 	{
-		uint32 NumToIterate = NUM_OBJECTS / 4;
+		uint32 NumToIterate = NUM_OBJECTS / 6;
 		uint32 StartIndex = NumToIterate * DispatchIndex;
 		uint32 EndIndex = StartIndex + NumToIterate;
 		for (uint32 x = StartIndex; x < EndIndex; x++)
 		{
 			PhysicsData[x].Position += vec3(0.001, 0.0, 0.0);
 		}
+		if (DispatchIndex == 1)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(2));
+		}
 	});
 
-	Task* MoveShitLeft = TaskSystem::Get()->CreateTask(2, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
+	Task* MoveShitLeft = new Task(3, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
 	{
-		uint32 NumToIterate = NUM_OBJECTS / 4;
-		uint32 StartIndex = NumToIterate * (DispatchIndex + 2);
+		uint32 NumToIterate = NUM_OBJECTS / 6;
+		uint32 StartIndex = NumToIterate * (DispatchIndex + 3);
 		uint32 EndIndex = StartIndex + NumToIterate;
 		for (uint32 x = StartIndex; x < EndIndex; x++)
 		{
 			PhysicsData[x].Position += vec3(-0.001, 0.0, 0.0);
 		}
+		if (DispatchIndex == 2)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(2));
+		}
 	});
 
-	Task* ApplyTransforms = TaskSystem::Get()->CreateTask(TASK_DISPATCH_ON_ALL_THREADS, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
+	Task* ApplyTransforms = new Task(TASK_DISPATCH_ON_ALL_THREADS, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
 	{
-		uint32 NumToIterate = NUM_OBJECTS / DispatchSize;
+		uint32 NumToIterate = NUM_OBJECTS / 4;
 		uint32 StartIndex = NumToIterate * DispatchIndex;
 		uint32 EndIndex = StartIndex + NumToIterate;
 		for (uint32 x = StartIndex; x < EndIndex; x++)
@@ -225,13 +233,11 @@ void Application::Run()
 		}
 
 		// Schedule the tasks to be executed
-		MoveShitLeft->Dispatch();
-		MoveShitRight->Dispatch();
-		m_TaskSystem->AddTaskBarrier();
-		ApplyTransforms->Dispatch();
-		m_TaskSystem->UpdateSchedule();
-		//m_TaskSystem->WaitForThreadStop();
-		std::cout << "Finished wait for pNextTask" << std::endl;
+		Dispatcher::Begin();
+		Dispatcher::DispatchTasks({ MoveShitLeft, MoveShitRight });
+		Dispatcher::DispatchTask(ApplyTransforms);
+		Dispatcher::End();
+		Dispatcher::WaitOnTask(ApplyTransforms);
 
 		// Setup the constant buffer data
 		matrix* pMats = CameraBuff->MapT<matrix>();

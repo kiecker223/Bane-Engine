@@ -1,6 +1,5 @@
 #pragma once
 
-#include "TaskBarrier.h"
 #include "Task.h"
 #include <Core/Containers/LinearAllocator.h>
 #include <vector>
@@ -123,6 +122,14 @@ public:
 		Data.clear();
 	}
 
+	inline TType& GetAt(const uint32 Index)
+	{
+		if (Data.empty() || Index >= Data.size())
+		{
+			return TType();
+		}
+	}
+
 	inline TType& operator[](const uint32 Index)
 	{
 		std::lock_guard<std::mutex> LockGuard(Lock);
@@ -183,11 +190,12 @@ class ThreadStatus
 {
 public:
 
-	ThreadStatus() : CurrentTask(nullptr), TaskGroupFenceValue(0) { }
+	ThreadStatus() : CurrentTask(nullptr), CurrentGroup(nullptr), TaskGroupFenceValue(0) { }
 
 	static ThreadSafeQueue<TaskExecutionGroup*> WorkMemPool;
 
 	ThreadSafeQueue<TaskExecutionGroup*> WorkQueue;
+	std::atomic<TaskExecutionGroup*> CurrentGroup;
 	std::atomic<TaskExecutionHandle*> CurrentTask;
 	std::atomic<uint64> TaskGroupFenceValue;
 
@@ -204,8 +212,6 @@ public:
 
 	static std::deque<TaskCommandGroup*> CommandMemPool;
 	ThreadSafeQueue<TaskCommandGroup*> PendingCommands;
-
-	TaskExecutionHandle* StealWork();
 
 	static TaskSystem* Get();
 
@@ -233,6 +239,9 @@ public:
 	void ScheduleTask(Task* pTask);
 	void AddTaskBarrier();
 	void UpdateSchedule();
+
+	TaskExecutionHandle* StealTask(uint64 CurrentFenceValue, uint32 CallingThread);
+
 	void ThreadFunc(uint32 ThreadIdx);
 
 	Task* CreateTask(int32 ThreadCount, std::function<void(uint32, uint32)> Func);

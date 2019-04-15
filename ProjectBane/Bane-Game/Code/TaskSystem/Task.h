@@ -106,9 +106,9 @@ public:
 	{
 	}
 
-	void WaitForFinish();
-	void Setup();
+	Task(int32 InThreadCount, std::function<void(uint32 DispatchSize, uint32 DispatchIndex)> InFunc);
 
+	void WaitForFinish();
 	void Dispatch();
 
 	bool AllHandlesFinished();
@@ -147,4 +147,28 @@ protected:
 	std::vector<TaskSegmentExecutor*> m_OwnedHandles;
 };
 
+
+namespace Dispatcher
+{
+	// Begin new list of tasks
+	void Begin();
+
+	// Dispatches a new group of tasks.
+	void DispatchTasks(const std::vector<Task*>& pTasks);
+
+	// Execute single task
+	void DispatchTask(Task* pTask);
+
+	// Adds task to an existing group
+	void AddTask(Task* pTask);
+
+	// Flushes the current task group
+	void FinishTaskGroup();
+
+	// Stall the calling thread until the pTask is complete
+	void WaitOnTask(Task* pTask);
+
+	// Execute them
+	void End();
+}
 
