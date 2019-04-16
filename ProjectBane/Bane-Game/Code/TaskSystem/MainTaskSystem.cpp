@@ -1,10 +1,10 @@
 #include "MainTaskSystem.h"
 #include "Application/Application.h"
 #include <Windows.h>
-
+#include <iostream>
 
 ThreadSafeQueue<TaskExecutionGroup*> ThreadStatus::WorkMemPool;
-std::deque<TaskCommandGroup*> TaskSystem::CommandMemPool;
+ThreadSafeQueue<TaskCommandGroup*> TaskSystem::CommandMemPool;
 
 TaskSystem* TaskSystem::Get()
 {
@@ -25,7 +25,7 @@ void TaskSystem::Initialize()
 		{
 			ThreadStatus::WorkMemPool.SafeAdd(new TaskExecutionGroup());
 		}
-		TaskSystem::CommandMemPool.push_front(new TaskCommandGroup());
+		TaskSystem::CommandMemPool.SafeAdd(new TaskCommandGroup());
 	}
 
 	for (uint32 i = 0; i < ThreadStats.size(); i++)
@@ -81,23 +81,21 @@ void TaskSystem::ScheduleTask(Task* pTask)
 {
 	// Own the lock
 	std::lock_guard<std::mutex> LockGuard(PendingCommands.Lock);
-	if (PendingCommands.SafeGetCount() == 0)
+	if (PendingCommands.Data.empty())
 	{
-		PendingCommands.SafeAdd(TaskSystem::CommandMemPool.front()); // New TaskCommandGroup;
-		TaskSystem::CommandMemPool.pop_front();
+		PendingCommands.SafeAdd(TaskSystem::CommandMemPool.Pop()); // New TaskCommandGroup;
 	}
-	(*PendingCommands.GetFront())->Commands.Add(pTask);
+	(*PendingCommands.SafeGetFront())->Commands.Add(pTask);
 }
 
 void TaskSystem::AddTaskBarrier()
 {
-	PendingCommands.SafeAdd(TaskSystem::CommandMemPool.front());
-	TaskSystem::CommandMemPool.pop_front();
+	PendingCommands.Add(TaskSystem::CommandMemPool.Pop());
 }
 
 void TaskSystem::UpdateSchedule()
 {
-	TaskCommandGroup* NewTaskGroup = PendingCommands.SafePop();
+	TaskCommandGroup* NewTaskGroup = PendingCommands.Pop();
 	if (NewTaskGroup)
 	{
 		while (NewTaskGroup)
@@ -116,7 +114,7 @@ void TaskSystem::UpdateSchedule()
 				{
 					for (uint32 i = 0; i < pTask->GetDispatchCount(); i++)
 					{
-						(*ThreadStats[CurrentDispatchThreadId % (m_ThreadCount)]->WorkQueue.GetFront())->Commands.Add(pTask->GetTaskExecutionHandle(i));
+						(*ThreadStats[CurrentDispatchThreadId % (m_ThreadCount)]->WorkQueue.SafeGetFront())->Commands.Add(pTask->GetTaskExecutionHandle(i));
 						CurrentDispatchThreadId++;
 					}
 					pTask = NewTaskGroup->Commands.SafePop();
@@ -127,8 +125,8 @@ void TaskSystem::UpdateSchedule()
 				}
 			}
 			NewTaskGroup->Commands.Clear();
-			TaskSystem::CommandMemPool.push_front(NewTaskGroup);
-			NewTaskGroup = PendingCommands.SafePop();
+			TaskSystem::CommandMemPool.Add(NewTaskGroup);
+			NewTaskGroup = PendingCommands.Pop();
 		}
 	}
 }
@@ -146,7 +144,11 @@ TaskExecutionHandle* TaskSystem::StealTask(uint64 CurrentFenceValue, uint32 Call
 			auto* Group = ThreadStats[i]->CurrentGroup.load();
 			if (Group)
 			{
-				return Group->Commands.Pop();
+				auto* Result = Group->Commands.Pop();
+				if (Result)
+				{
+					return Result;
+				}
 			}
 		}
 	}

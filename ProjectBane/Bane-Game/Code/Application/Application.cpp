@@ -176,13 +176,9 @@ void Application::Run()
 		{
 			PhysicsData[x].Position += vec3(0.001, 0.0, 0.0);
 		}
-		if (DispatchIndex == 1)
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(2));
-		}
 	});
 
-	Task* MoveShitLeft = new Task(3, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
+	Task* MoveShitLeft = new Task(3, [&PhysicsData, &ConstantBuffMappedRef, &MoveShitRight](uint32 DispatchSize, uint32 DispatchIndex)
 	{
 		uint32 NumToIterate = NUM_OBJECTS / 6;
 		uint32 StartIndex = NumToIterate * (DispatchIndex + 3);
@@ -193,13 +189,13 @@ void Application::Run()
 		}
 		if (DispatchIndex == 2)
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(2));
+			Dispatcher::DispatchTask(MoveShitRight);
 		}
 	});
 
 	Task* ApplyTransforms = new Task(TASK_DISPATCH_ON_ALL_THREADS, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
 	{
-		uint32 NumToIterate = NUM_OBJECTS / 4;
+		uint32 NumToIterate = NUM_OBJECTS / DispatchSize;
 		uint32 StartIndex = NumToIterate * DispatchIndex;
 		uint32 EndIndex = StartIndex + NumToIterate;
 		for (uint32 x = StartIndex; x < EndIndex; x++)
@@ -234,7 +230,7 @@ void Application::Run()
 
 		// Schedule the tasks to be executed
 		Dispatcher::Begin();
-		Dispatcher::DispatchTasks({ MoveShitLeft, MoveShitRight });
+		Dispatcher::DispatchTasks({ MoveShitLeft });
 		Dispatcher::DispatchTask(ApplyTransforms);
 		Dispatcher::End();
 		Dispatcher::WaitOnTask(ApplyTransforms);

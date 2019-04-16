@@ -55,13 +55,19 @@ public:
 		return Result;
 	}
 
-	inline TType* GetFront()
+	inline TType* SafeGetFront()
 	{
 		if (Data.empty())
 		{
 			return nullptr;
 		}
 		return &Data.front();
+	}
+
+	inline TType* GetFront()
+	{
+		std::lock_guard<std::mutex> LockGuard(Lock);
+		return SafeGetFront();
 	}
 
 	inline void Clear()
@@ -210,7 +216,7 @@ class TaskSystem
 {
 public:
 
-	static std::deque<TaskCommandGroup*> CommandMemPool;
+	static ThreadSafeQueue<TaskCommandGroup*> CommandMemPool;
 	ThreadSafeQueue<TaskCommandGroup*> PendingCommands;
 
 	static TaskSystem* Get();
@@ -236,6 +242,7 @@ public:
 
 	void WaitForThreadStop();
 
+	void UnsafeScheduleTask(Task* pTask);
 	void ScheduleTask(Task* pTask);
 	void AddTaskBarrier();
 	void UpdateSchedule();
