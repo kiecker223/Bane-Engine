@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Common/Types.h>
+#include <math.h>
 
 struct ivec2
 {

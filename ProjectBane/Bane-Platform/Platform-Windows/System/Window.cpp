@@ -91,7 +91,7 @@ void Window::Open(const char* windowName, uint32 width, uint32 height, bool isFu
 	WNDCLASSA wndClass = {};
 	wndClass.lpfnWndProc = &WndProc;
 	wndClass.hInstance = instance;
-	wndClass.lpszClassName = "EXPANSE-GAME-WINDOW-CLASS-NAME";
+	wndClass.lpszClassName = "GAME-WINDOW-CLASS-NAME";
 	wndClass.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
 
 	RegisterClassA(&wndClass);

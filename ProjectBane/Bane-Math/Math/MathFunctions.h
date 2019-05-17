@@ -187,37 +187,35 @@ inline fvec2 refract(const fvec2& Incidence, const fvec2& Normal, float IndicesT
 	return (Incidence * IndicesToRefraction) - (Normal * (IndicesToRefraction * NDotI + sqrtf(K)));
 }
 
+
+inline double lengthSqrd(const vec4& InType)
+{
+	return (InType.p[0] * InType.p[0]) + (InType.p[1] * InType.p[1]) + (InType.p[2] * InType.p[2]) + (InType.p[3] * InType.p[3]);
+}
+
 inline double length(const vec4& InType)
 {
-	double Result = 0.;
-	for (uint32 i = 0; i < 4; i++)
-	{
-		Result += (InType.p[i] * InType.p[i]);
-	}
-	Result = sqrt(Result);
-	return Result;
+	return sqrt(lengthSqrd(InType));
+}
+
+inline double lengthSqrd(const vec3& InType)
+{
+	return (InType.p[0] * InType.p[0]) + (InType.p[1] * InType.p[1]) + (InType.p[2] * InType.p[2]);
 }
 
 inline double length(const vec3& InType)
 {
-	double Result = 0.;
-	for (uint32 i = 0; i < 3; i++)
-	{
-		Result += (InType.p[i] * InType.p[i]);
-	}
-	Result = sqrt(Result);
-	return Result;
+	return sqrt(lengthSqrd(InType));
+}
+
+inline double lengthSqrd(const vec2& InType)
+{
+	return (InType.p[0] * InType.p[0]) + (InType.p[1] * InType.p[1]);
 }
 
 inline double length(const vec2& InType)
 {
-	double Result = 0.;
-	for (uint32 i = 0; i < 2; i++)
-	{
-		Result += (InType.p[i] * InType.p[i]);
-	}
-	Result = sqrt(Result);
-	return Result;
+	return sqrt(lengthSqrd(InType));
 }
 
 inline vec4 normalized(const vec4& InType)
@@ -390,7 +388,7 @@ inline matrix matProjection(float Aspect, float FovY, float Near, float Far)
 	matrix Result(
 		-(1.f / (Aspect * TanFovOverTwo)), 0.f, 0.f, 0.f,
 		0.f, 1.f / TanFovOverTwo, 0.f, 0.f,
-		0.f, 0.f, -((Far + Near) / (Far - Near)), -((2 * Far * Near) / (Far - Near)),
+		0.f, 0.f, -((Far + Near) / (Far - Near)), -((Far * Near) / (Far - Near)),
 		0.f, 0.f, -1.f, 0.f
 	);
 	return Result;
@@ -491,7 +489,7 @@ inline matrix matRotX(float Radians)
 	return matrix(
 		1.f, 0.f, 0.f, 0.f,
 		0.f, cosf(Radians), -sinf(Radians), 0,
-		0.f, sin(Radians), cos(Radians), 0,
+		0.f, sinf(Radians), cosf(Radians), 0,
 		0.f, 0.f, 0.f, 1.f
 	);
 }

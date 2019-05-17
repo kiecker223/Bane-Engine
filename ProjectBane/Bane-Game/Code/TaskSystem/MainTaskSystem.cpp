@@ -162,7 +162,7 @@ void TaskSystem::ThreadFunc(uint32 ThreadIdx)
 	// seemingly corrupted
 	while (true)
 	{
-		if (ThreadIdx < m_Threads.size())
+		if (ThreadIdx <= m_Threads.size())
 		{
 			break;
 		}
@@ -190,6 +190,21 @@ void TaskSystem::ThreadFunc(uint32 ThreadIdx)
 						Handle = ExecutionGroup->Commands.Pop();
 					}
 					// Try to steal some work
+					Stats->CurrentGroup.store(nullptr);
+					Handle = StealTask(Stats->TaskGroupFenceValue.load(), ThreadIdx);
+					if (Handle)
+					{
+						while (Handle)
+						{
+							Stats->CurrentTask.store(Handle);
+							Handle->InternalExecute();
+							Handle = StealTask(Stats->TaskGroupFenceValue.load(), ThreadIdx);
+						}
+					}
+				}
+				else
+				{
+					// Duplicate code is bad!!! But we need to keep the threads busy
 					Stats->CurrentGroup.store(nullptr);
 					Handle = StealTask(Stats->TaskGroupFenceValue.load(), ThreadIdx);
 					if (Handle)

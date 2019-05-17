@@ -110,17 +110,24 @@ void Dispatcher::DispatchTasks(const std::vector<Task*>& pTasks)
 		pTask->Dispatch();
 	}
 	TaskSystem::Get()->AddTaskBarrier();
+	TaskSystem::Get()->UpdateSchedule();
 }
 
 void Dispatcher::DispatchTask(Task* pTask)
 {
 	pTask->Dispatch();
 	TaskSystem::Get()->AddTaskBarrier();
+	TaskSystem::Get()->UpdateSchedule();
 }
 
 void Dispatcher::AddTask(Task* pTask)
 {
 	pTask->Dispatch();
+}
+
+uint32 Dispatcher::GetThreadCount()
+{
+	return TaskSystem::Get()->GetThreadCount();
 }
 
 void Dispatcher::FinishTaskGroup()

@@ -128,22 +128,25 @@ public:
 		Data.clear();
 	}
 
-	inline TType& GetAt(const uint32 Index)
+	inline TType& SafeGetAt(const uint32 Index)
 	{
-		if (Data.empty() || Index >= Data.size())
-		{
-			return TType();
-		}
-	}
-
-	inline TType& operator[](const uint32 Index)
-	{
-		std::lock_guard<std::mutex> LockGuard(Lock);
 		if (Data.empty() || Index >= Data.size())
 		{
 			return TType();
 		}
 		return Data[Index];
+	}
+
+
+	inline TType& GetAt(const uint32 Index)
+	{
+		std::lock_guard<std::mutex> LockGuard(Lock);
+		return SafeGetAt(Index);
+	}
+
+	inline TType& operator[](const uint32 Index)
+	{
+		return GetAt(Index);
 	}
 
 	std::mutex Lock;
@@ -242,7 +245,6 @@ public:
 
 	void WaitForThreadStop();
 
-	void UnsafeScheduleTask(Task* pTask);
 	void ScheduleTask(Task* pTask);
 	void AddTaskBarrier();
 	void UpdateSchedule();

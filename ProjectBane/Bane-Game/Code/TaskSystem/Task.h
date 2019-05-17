@@ -162,6 +162,9 @@ namespace Dispatcher
 	// Adds task to an existing group
 	void AddTask(Task* pTask);
 
+	// Get the number of threads the task system is using
+	uint32 GetThreadCount();
+
 	// Flushes the current task group
 	void FinishTaskGroup();
 

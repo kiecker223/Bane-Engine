@@ -740,6 +740,7 @@ struct vec3
 		TT2 rg;
 		TT2 xy;
 		TT2 uv;
+		struct { T __pad0; TT2 yz; };
 		T p[ColCount];
 	};
 

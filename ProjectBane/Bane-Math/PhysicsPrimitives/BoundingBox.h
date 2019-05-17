@@ -102,6 +102,48 @@ public:
 		return !AllComponentsLess(Lhs, Rhs);
 	}
 
+	inline BoundingBox Subdivide(uint32 SubdivideRegion)
+	{
+		BoundingBox Result(*this);
+		vec3 Center = GetCenter();
+		switch (SubdivideRegion)
+		{
+		case 0:
+			Result.Min.yz = Center.yz;
+			Result.Max.x = Center.x;
+			break;
+		case 1:
+			Result.Min = Center;
+			break;
+		case 2:
+			Result.Min.xy = Center.xy;
+			Result.Max.z = Center.z;
+			break;
+		case 3:
+			Result.Min.y = Center.y;
+			Result.Max.x = Center.x;
+			Result.Max.z = Center.z;
+			break;
+		case 4:
+			Result.Min.z = Center.z;
+			Result.Max.xy = Center.xy;
+			break;
+		case 5:
+			Result.Min.x = Center.x;
+			Result.Min.z = Center.z;
+			Result.Max.y = Center.y;
+			break;
+		case 6:
+			Result.Min.x = Center.x;
+			Result.Max.yz = Center.yz;
+			break;
+		case 7:
+			Result.Max = Center;
+			break;
+		}
+		return Result;
+	}
+
 	inline void CalculateFromArray(const vec3* pPoints, uint32 ArraySize)
 	{
 		vec3 NewMin(std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());

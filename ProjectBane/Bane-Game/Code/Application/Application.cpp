@@ -6,7 +6,9 @@
 #include "GameObjects/PhysicsData.h"
 #include <Platform/System/Logging/Logger.h>
 #include <Core/Data/Timer.h>
+#include <random>
 #include <Platform/System/Process.h>
+#include "../GameObjects/NBodyAcceleration.h"
 #include <Platform/Input/InputSystem.h>
 #include <iostream>
 #include <sys/timeb.h>
@@ -15,7 +17,7 @@
 
 #pragma warning(disable:4049)
 
-#define NUM_OBJECTS 96
+#define NUM_OBJECTS 100
 
 
 Application* Application::GApplication = nullptr;
@@ -102,7 +104,30 @@ void Application::InitSystems()
 	m_SceneRenderer->Initialize(m_Window);
 }
 
+void ResetVelocities(std::vector<CurrentPhysicsData>& InPhysicsData)
+{
+	for (uint32 i = 0; i < InPhysicsData.size(); i++)
+	{
+		InPhysicsData[i].Velocity = vec3();
+	}
+}
 
+void NBodyCalculation(uint32 StartIndex, uint32 EndIndex, std::vector<PhysicsData>& InOutPhysicsData)
+{
+	for (uint32 x = StartIndex; x < EndIndex; x++)
+	{
+		for (uint32 i = 0; i < InOutPhysicsData.size(); i++)
+		{
+			if (i == x) { continue; }
+			vec3 ForceDir = InOutPhysicsData[i].Position - InOutPhysicsData[x].Position;
+			double DistanceSqrd = lengthSqrd(ForceDir);
+			normalize(ForceDir);
+			double Force = M_GRAV_CONST * (100000.0 * 100000.0) / (DistanceSqrd);
+			if (isnan(Force)) { continue; }
+			InOutPhysicsData[x].Velocity += ForceDir * Force * (1.0 / 60.0);
+		}
+	}
+}
 
 void Application::Run()
 {
@@ -113,10 +138,13 @@ void Application::Run()
 	// Setup data needed for Tasks
 	std::vector<CurrentPhysicsData> PhysicsData;
 	PhysicsData.resize(NUM_OBJECTS);
+
+	std::uniform_real_distribution<double> unif(-100.0, 100.0);
+	std::default_random_engine re;
 	for (uint32 i = 0; i < NUM_OBJECTS; i++)
 	{
-		PhysicsData[i].Position = 
-			fromFloat3(Quaternion::FromAxisAngle(fvec3(0.0f, 1.0f, 0.0f), (static_cast<float>(i) / static_cast<float>(NUM_OBJECTS)) * 2.0f * _PI_) * fvec3(0.0, 0.0, 100.0));
+		PhysicsData[i].Position = vec3(unif(re), unif(re), unif(re));
+		PhysicsData[i].Mass = 1000000.0;
 	}
 
 	// Create the shared resource handle
@@ -126,19 +154,7 @@ void Application::Run()
 		uint32 NumToIterate = NUM_OBJECTS / DispatchSize;
 		uint32 StartIndex = NumToIterate * DispatchIndex;
 		uint32 EndIndex = StartIndex + NumToIterate;
-		for (uint32 x = StartIndex; x < EndIndex; x++)
-		{
-			for (uint32 i = 0; i < PhysicsData.size(); i++)
-			{
-				if (i == x) { continue; }
-				vec3 ForceDir = PhysicsData[i].Position - PhysicsData[x].Position;
-				double Distance = length(ForceDir);
-				normalize(ForceDir);
-				double Force = M_GRAV_CONST * (100000.0 * 100000.0) / (Distance * Distance);
-				if (isnan(Force)) { continue; }
-				PhysicsData[x].Velocity += ForceDir * Force * (1.0 / 60.0);
-			}
-		}
+		NBodyCalculation(StartIndex, EndIndex, PhysicsData);
 	});
 
 	IGraphicsDevice* Device = GetApiRuntime()->GetGraphicsDevice();
@@ -163,6 +179,7 @@ void Application::Run()
 		for (uint32 x = StartIndex; x < EndIndex; x++)
 		{
 			PhysicsData[x].Position += PhysicsData[x].Velocity;
+			if (isNan(PhysicsData[x].Position)) { __debugbreak(); }
 			ConstantBuffMappedRef.pPointer[x] = matTranslation(fromDouble3(PhysicsData[x].Position)) * matScale(fvec3(30.0f, 30.0f, 30.0f));
 		}
 	});
@@ -204,6 +221,8 @@ void Application::Run()
 		}
 	});
 
+	NBodyAcceleration AccelerationStructure;
+
 	vec3 CameraPosition;
 
 	while (!m_Window->QuitRequested())
@@ -227,13 +246,19 @@ void Application::Run()
 		{
 			CameraPosition.y -= 1.0f;
 		}
+		if (GetInput()->Keyboard.GetKeyDown(KEY_SPACE))
+		{
+			ResetVelocities(PhysicsData);
+		}
+
 
 		// Schedule the tasks to be executed
-		Dispatcher::Begin();
-		Dispatcher::DispatchTasks({ MoveShitLeft });
-		Dispatcher::DispatchTask(ApplyTransforms);
-		Dispatcher::End();
-		Dispatcher::WaitOnTask(ApplyTransforms);
+		AccelerationStructure.Construct(PhysicsData);
+		AccelerationStructure.Simulate(PhysicsData, 1.0 / 60.0);
+		
+		//Dispatcher::DispatchTask(CalculateNBodyAccelerationTask);
+		Dispatcher::DispatchTask(ApplyNBodyAccelerationTask);
+		Dispatcher::WaitOnTask(ApplyNBodyAccelerationTask);
 
 		// Setup the constant buffer data
 		matrix* pMats = CameraBuff->MapT<matrix>();
@@ -245,12 +270,12 @@ void Application::Run()
 		pCtx->SetConstantBuffer(0, CameraBuff);
 		pCtx->SetGraphicsPipelineState(PipelineState);
 		pCtx->SetTexture(0, Tex);
+		pCtx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		pCtx->SetVertexBuffer(pMesh->GetVertexBuffer());
+		pCtx->SetIndexBuffer(pMesh->GetIndexBuffer());
 		for (uint32 i = 0; i < PhysicsData.size(); i++)
 		{
 			pCtx->SetConstantBuffer(1, ConstantBuff, 256 * i);
-			pCtx->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			pCtx->SetVertexBuffer(pMesh->GetVertexBuffer());
-			pCtx->SetIndexBuffer(pMesh->GetIndexBuffer());
 			pCtx->DrawIndexed(pMesh->GetIndexCount(), 0, 0);
 		}
 		pCtx->EndPass();
