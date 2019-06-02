@@ -1,4 +1,5 @@
 #include "D3DCommonTranslator.h"
+#include <Math/SIMDFunctions.h>
 
 
 static std::vector<D3D_PRIMITIVE_TOPOLOGY> D3DPrimitiveTopologies;

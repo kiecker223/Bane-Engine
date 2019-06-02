@@ -162,7 +162,7 @@ void TaskSystem::ThreadFunc(uint32 ThreadIdx)
 	// seemingly corrupted
 	while (true)
 	{
-		if (ThreadIdx <= m_Threads.size())
+		if (ThreadIdx < m_Threads.size())
 		{
 			break;
 		}

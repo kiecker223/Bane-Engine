@@ -54,7 +54,7 @@ struct InputMouseDevice::Impl
 		Mouse->Acquire();
 		Mouse->GetDeviceState(sizeof(DIMOUSESTATE2), &MouseState);
 		LastMousePosition = MousePosition;
-		MouseDelta = vec2(static_cast<double>(MouseState.lX), static_cast<double>(MouseState.lY)) * (WindowSize.y / WindowSize.x);
+		MouseDelta = vec2(static_cast<double>(MouseState.lX), static_cast<double>(MouseState.lY));// *(WindowSize.y / WindowSize.x);
 		MousePosition += MouseDelta;
 		MouseScroll = static_cast<float>(MouseState.lZ);
 	}

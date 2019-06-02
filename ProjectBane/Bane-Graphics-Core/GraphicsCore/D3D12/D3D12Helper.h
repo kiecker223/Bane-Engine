@@ -13,6 +13,7 @@
 #define __D3DX12_H__
 
 #include "d3d12.h"
+#include <Math/SIMDFunctions.h>
 
 #if defined( __cplusplus )	
 
@@ -430,7 +431,7 @@ struct CD3DX12_CLEAR_VALUE : public D3D12_CLEAR_VALUE
 		UINT8 stencil)
 	{
 		Format = format;
-		/* Use memcpy to preserve NAN values */
+		/* Use Memcpy to preserve NAN values */
 		memcpy(&DepthStencil.Depth, &depth, sizeof(depth));
 		DepthStencil.Stencil = stencil;
 	}
@@ -1734,7 +1735,7 @@ inline void MemcpySubresource(
 		{
 			memcpy(pDestSlice + pDest->RowPitch * y,
 				pSrcSlice + pSrc->RowPitch * y,
-				RowSizeInBytes);
+				static_cast<uint32>(RowSizeInBytes));
 		}
 	}
 }

@@ -1,4 +1,5 @@
 #include "D3D12PipelineState.h"
+#include <Math/SIMDFunctions.h>
 
 
 D3D12GraphicsPipelineState::D3D12GraphicsPipelineState() :
@@ -35,7 +36,7 @@ uint8* D3D12GraphicsPipelineState::GetSerialized(uint32& OutBytes) const
 	uint8* BytesToWrite = new uint8[WrittenBlob->GetBufferSize() + 2];
 	BytesToWrite[0] = '\n';
 	BytesToWrite[WrittenBlob->GetBufferSize()] = '\n';
-	memcpy(&BytesToWrite[1], WrittenBlob->GetBufferPointer(), WrittenBlob->GetBufferSize());
+	SIMDMemcpy(&BytesToWrite[1], WrittenBlob->GetBufferPointer(), static_cast<uint32>(WrittenBlob->GetBufferSize()));
 
 	OutBytes = static_cast<uint32>(WrittenBlob->GetBufferSize());
 	return BytesToWrite;

@@ -5,6 +5,7 @@
 #pragma warning(disable:4324)
 #endif
 #ifdef _DEBUG
+#include <stdlib.h>
 #define BANE_CHECK(x) if (!(x)) {  __debugbreak(); abort(); }
 #else
 #define BANE_CHECK(x) if (!(x)) { abort(); }

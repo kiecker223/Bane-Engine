@@ -1,4 +1,3 @@
-
 Resources
 {
 	cbuffer PositionalData : register(b0)
@@ -35,7 +34,6 @@ Pipeline
 		Cull = false;
 		FillSolid = true;
 	};
-
 };
 
 struct VS_INPUT
@@ -66,7 +64,9 @@ PS_INPUT VSMain(VS_INPUT Input)
 	float4 Pos = float4(Input.Position, 1.0);
 	Pos = mul(Pos, Model);
 	Pos = mul(Pos, View);
-	//Output.Id = Input.Id;
+	Pos.z = log((0.0005f*Pos.z) + 1.0) / log((0.0005f*1e+23) + 1.0);
+	Pos.z *= Pos.w;
+//	Output.Id = Input.Id;
 	Output.Position = Pos;
 	Output.WorldPos = mul(float4(Input.Position, 1.0f), Model).xyz;
 	Output.Normal =   normalize(mul(Input.Normal,   (float3x3)Model));
@@ -87,7 +87,7 @@ float rand2(in uint Value, uint o)
 
 float4 PSMain(PS_INPUT Input) : SV_TARGET0
 {
-	return float4(1.0, 1.0, 1.0, 1.0);
+	return float4(AlbedoTexture.Sample(DefaultSampler, Input.TexCoords).rgb, 1.0);
 	//return float4(rand2(Input.Id, 1), rand2(Input.Id, 2), rand2(Input.Id, 3), 1.0);
 	//return float4(Input.TexCoords.x, Input.TexCoords.x, Input.TexCoords.x, 1.0f);
 }

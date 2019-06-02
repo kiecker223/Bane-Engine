@@ -56,12 +56,8 @@ void D3D12GraphicsCommandBuffer::EndPass()
 		FlushResourceTransitions();
 		CurrentRenderPass = nullptr;
 	}
-	//PipelineState = nullptr;
-	//RootSignature = nullptr;
-	//CurrentTable = nullptr;
-	//CommandList->Close();
-	//ParentDevice->GetCommandQueue(ContextType).ExecuteImmediate(CommandList); // Execute immediate, hopefully multiple passes per frame will hide the scheduler latency
-	//CommandList = nullptr;
+	GraphicsPipelineState = nullptr;
+	ComputePipelineState = nullptr;
 }
 
 void D3D12GraphicsCommandBuffer::CloseCommandBuffer()

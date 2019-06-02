@@ -117,7 +117,7 @@ void D3D12Buffer::UploadDataToGPU(D3D12GraphicsCommandContext* Ctx, uint8* Buffe
 {
 	D3D12Buffer* UploadBuffer = new D3D12Buffer(Resource.GetParentDevice(), SizeInBytes, BUFFER_USAGE_UPLOAD);
 
-	memcpy(UploadBuffer->MappedPointer, Buffer, SizeInBytes);
+	memcpy(UploadBuffer->MappedPointer, Buffer, static_cast<uint32>(SizeInBytes));
 	Ctx->CopyBuffers(UploadBuffer, this);
 	Ctx->CurrentCommandBuffer->CommandList->EnqueueUploadResourceToDestroy(dynamic_cast<D3D12GPUResource*>(UploadBuffer));
 }

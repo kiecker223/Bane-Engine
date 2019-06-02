@@ -272,7 +272,7 @@ static std::vector<uint8> CompileFromByteCode(const std::string& InByteCode, ESH
 	}
 
 	std::vector<uint8> RetCode(static_cast<uint32>(CompiledCode->GetBufferSize()));
-	memcpy(RetCode.data(), CompiledCode->GetBufferPointer(), RetCode.size());
+	memcpy(RetCode.data(), CompiledCode->GetBufferPointer(), static_cast<uint32>(RetCode.size()));
 	CompiledCode->Release();
 	return RetCode;
 }

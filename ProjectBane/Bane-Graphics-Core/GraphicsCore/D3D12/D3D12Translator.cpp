@@ -249,7 +249,7 @@ D3D12_INPUT_LAYOUT_DESC D3D12_TranslateInputLayout(const GFX_INPUT_LAYOUT_DESC& 
 	{
 		const GFX_INPUT_ITEM_DESC& Item = InDesc.InputItems[i];
 		ResultItems[i].SemanticName = new char[Item.Name.size()];
-		memcpy((void*)ResultItems[i].SemanticName, Item.Name.c_str(), Item.Name.size() + 1);
+		memcpy((void*)ResultItems[i].SemanticName, Item.Name.c_str(), static_cast<uint32>(Item.Name.size() + 1));
 		ResultItems[i].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
 		ResultItems[i].InputSlot = 0;
 		ResultItems[i].Format = D3D12_TranslateDataFormat(InDesc.InputItems[i].ItemFormat);

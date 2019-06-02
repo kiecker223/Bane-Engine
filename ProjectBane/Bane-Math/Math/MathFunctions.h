@@ -449,6 +449,8 @@ inline T Abs(const T& InVal)
 // Forward is expected to be normalized already
 inline matrix matView(fvec3 Eye, fvec3 Forward, fvec3 Up)
 {
+	BANE_CHECK(!(Forward.x == 0.0 && Forward.y == 0.0 && Forward.z == 0.0));
+
 	const fvec3 ZAxis = normalized(Eye - Forward);
 	const fvec3 XAxis = normalized(cross(Up, ZAxis));
 	const fvec3 YAxis = cross(ZAxis, XAxis);

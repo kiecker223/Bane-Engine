@@ -39,7 +39,8 @@ struct Triangle
 
 struct TriangleList
 {
-	std::vector<Triangle> Triangles;
+	Triangle* Triangles;
+	uint32 NumTriangles;
 };
 
 struct Cube
@@ -53,7 +54,6 @@ struct CollisionShape
 {
 	CollisionShape()
 	{
-		memset(this, 0, sizeof(this));
 	}
 	~CollisionShape()
 	{
@@ -83,13 +83,23 @@ struct SweepingVolumes
 	Cube RhsSweepingVolume;
 };
 
-SweepingVolumes ConstructSweepingVolumes(const CollisionShape& Lhs, const vec3& LhsVelocity, const CollisionShape& Rhs, const vec3& RhsVelocity);
+Cube ConstructSweepingVolume(const CollisionShape& Shape, const vec3& Velocity);
+
+vec3 CalculateBarycentrics(const vec2& UV);
+vec3 BarycentricLerp(const Triangle& InTriangle, const vec3& Barycentrics);
+
+struct Impact
+{
+	vec3 Normal;
+	vec3 Position;
+	vec2 Barycentric;
+	uint32 PrimitiveIndex;
+};
 
 struct CollisionData
 {
-	std::vector<vec3> ImpactNormals;
-	std::vector<vec3> ImpactPositions;
-	double TimeToCollision;
+	std::vector<Impact> Impacts;
+	std::vector<double> ImpactTimes;
 };
 
 vec3 ClosestPointOnPlane(const vec3& InPoint, const Plane& InPlane);

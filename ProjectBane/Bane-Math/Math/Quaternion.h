@@ -8,16 +8,15 @@ struct Quaternion
 {
 public:
 
-	union 
+	union
 	{
 		__m128 f;
-		struct { float x, y, z, w; };
+		struct { float w, x, y, z; };
 	};
 
 
-	Quaternion()
+	Quaternion() : w(1.0f), x(0.0f), y(0.0f), z(0.0f)
 	{
-		f = { };
 	}
 
 	Quaternion(const Quaternion& Rhs)
@@ -25,7 +24,7 @@ public:
 		f = Rhs.f;
 	}
 
-	Quaternion(float W, float X, float Y, float Z) 
+	Quaternion(float W, float X, float Y, float Z)
 	{
 		f = _mm_set_ps(W, X, Y, Z);
 	}
@@ -40,7 +39,7 @@ public:
 		*this = Quaternion::FromAxisAngle(Axis, Angle);
 	}
 
-	inline static Quaternion Identity() 
+	inline static Quaternion Identity()
 	{
 		return Quaternion(1.f, 0.f, 0.f, 0.f);
 	}
@@ -57,7 +56,7 @@ public:
 		float Angle = InAngle;
 		if (InAngle > 6.28318531f)
 		{
-			Angle = fmod(Angle, 6.28318531f);
+			Angle = fmodf(Angle, 6.28318531f);
 		}
 		Quaternion Result;
 		const float s = sinf(Angle / 2.f);
@@ -98,7 +97,12 @@ public:
 		float s = w;
 
 		return (u * (2.0f * dot(u, Rhs)) + (Rhs * (s*s - dot(u, u))) + (cross(u, Rhs) * 2.0f) * s);
- 	}
+	}
+
+	inline vec3 operator * (const vec3& Rhs)
+	{
+		return fromFloat3(operator*(fromDouble3(Rhs)));
+	}
 
 	inline Quaternion operator * (const Quaternion& Rhs) const
 	{

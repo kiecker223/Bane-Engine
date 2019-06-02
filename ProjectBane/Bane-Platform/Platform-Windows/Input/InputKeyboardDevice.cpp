@@ -1,4 +1,5 @@
 #include "../../Platform/Input/InputKeyboardDevice.h"
+#include <Math/SIMDFunctions.h>
 #include <Windows.h>
 
 

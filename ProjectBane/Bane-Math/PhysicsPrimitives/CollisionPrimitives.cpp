@@ -1,9 +1,19 @@
 #include "CollisionPrimitives.h"
 #include "../Math/MathFunctions.h"
 
-SweepingVolumes ConstructSweepingVolumes(const CollisionShape& Lhs, const vec3& LhsVelocity, const CollisionShape& Rhs, const vec3& RhsVelocity)
+Cube ConstructSweepingVolume(const CollisionShape& Shape, const vec3& Velocity)
 {
 	return {};
+}
+
+vec3 CalculateBarycentrics(const vec2& UV)
+{
+	return vec3(1.0 - UV.x - UV.y, UV.x, UV.y);
+}
+
+vec3 BarycentricLerp(const Triangle& InTriangle, const vec3& Barycentrics)
+{
+	return InTriangle.Points[0] * Barycentrics.x + InTriangle.Points[1] * Barycentrics.y + InTriangle.Points[2] * Barycentrics.z;
 }
 
 vec3 ClosestPointOnPlane(const vec3& InPoint, const Plane& InPlane)

@@ -1,4 +1,5 @@
 #include "../../Platform/System/Process.h"
+#include <Math/SIMDFunctions.h>
 #include <Windows.h>
 
 class WindowsProcessHandle : public IProcessHandle
@@ -40,7 +41,7 @@ IProcessHandle* StartProcess(const std::string& ProcessName, const std::vector<s
 		ArgumentsStr += ProcessArguments[i] + ' ';
 	}
 	char Arguments[2048];
-	memcpy(Arguments, ArgumentsStr.c_str(), ArgumentsStr.size() - 1);
+	memcpy(Arguments, ArgumentsStr.c_str(), static_cast<uint32>(ArgumentsStr.size() - 1));
 	Arguments[ArgumentsStr.size() - 1] = '\0';
 	if (!CreateProcessA(
 		ProcessName.c_str(),

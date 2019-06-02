@@ -285,7 +285,7 @@ struct fmat2x2
 
 	fmat2x2(const T* Values)
 	{
-		memcpy(p, Values, sizeof(p));
+		memcpy(p, (void*)Values, sizeof(p));
 	}
 
 	fmat2x2(T p00, T p01, T p10, T p11)

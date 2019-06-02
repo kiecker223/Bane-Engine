@@ -98,7 +98,7 @@ public:
 	inline void SetVertexData(const std::vector<T>& InVertices)
 	{
 		std::vector<FloatInt> Res(InVertices.size() * (sizeof(T) / sizeof(FloatInt)));
-		memcpy((void*)Res.data(), (void*)InVertices.data(), InVertices.size() * (sizeof(T)));
+		memcpy((void*)Res.data(), (void*)InVertices.data(), static_cast<uint32>(InVertices.size() * (sizeof(T))));
 		SetVertices(Res);
 	}
 

@@ -444,7 +444,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 			pHeader = reinterpret_cast<ShaderHeader*>(FileBinary);
 			std::vector<uint8> VSByteCode;
 			VSByteCode.resize(pHeader->PSStart - 78);
-			memcpy(VSByteCode.data(), FileBinary + 33, VSByteCode.size());
+			memcpy(VSByteCode.data(), FileBinary + 33, static_cast<uint32>(VSByteCode.size()));
 			Desc.VS = Device->CreateVertexShaderFromBytecode(VSByteCode);
 			// If we don't have a HullShader start location then we just assume that the shader ends at the end of the buffer
 			size_t PSStart = pHeader->PSStart;
@@ -460,7 +460,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 
 			std::vector<uint8> PSByteCode;
 			PSByteCode.resize(static_cast<uint32>(PSEnd - PSStart));
-			memcpy(PSByteCode.data(), FileBinary + static_cast<size_t>(PSStart), PSByteCode.size());
+			memcpy(PSByteCode.data(), FileBinary + static_cast<size_t>(PSStart), static_cast<uint32>(PSByteCode.size()));
 			Desc.PS = Device->CreatePixelShaderFromBytecode(PSByteCode);
 			if (pHeader->HSStart != 0)
 			{
@@ -476,7 +476,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 				}
 				size_t HSSize = HSEnd - pHeader->HSStart;
 				HSByteCode.resize(static_cast<uint32>(HSSize));
-				memcpy(HSByteCode.data(), FileBinary + static_cast<size_t>(pHeader->HSStart), HSByteCode.size());
+				memcpy(HSByteCode.data(), FileBinary + static_cast<size_t>(pHeader->HSStart), static_cast<uint32>(HSByteCode.size()));
 				Desc.HS = Device->CreateHullShaderFromBytecode(HSByteCode);
 			}
 			if (pHeader->GSStart != 0)
@@ -484,7 +484,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 				std::vector<uint8> GSByteCode;
 				size_t GSEnd = BufferSize - 28;
 				GSByteCode.resize(static_cast<uint32>(GSEnd - pHeader->GSStart));
-				memcpy(GSByteCode.data(), FileBinary + static_cast<size_t>(pHeader->GSStart), GSEnd - pHeader->GSStart);
+				memcpy(GSByteCode.data(), FileBinary + static_cast<size_t>(pHeader->GSStart), static_cast<uint32>(GSEnd - pHeader->GSStart));
 				Desc.GS = Device->CreateGeometryShaderFromBytecode(GSByteCode);
 			}
 			delete[] FileBinary;
@@ -502,7 +502,7 @@ void ShaderCache::InitCache(const std::string& JsonLocation)
 			uint8* FileBinary = ReadFileBinary(PipelineJson["ShaderReference"].get<std::string>(), NumBytes);
 			std::vector<uint8> ByteCode;
 			ByteCode.resize(static_cast<uint32>(NumBytes));
-			memcpy(ByteCode.data(), FileBinary, NumBytes);
+			memcpy(ByteCode.data(), FileBinary, static_cast<uint32>(NumBytes));
 			Desc.CS = Device->CreateComputeShaderFromBytecode(ByteCode);
 			delete[] FileBinary;
 			uint32 Hash = GetFNV0Hash(CurrentPipeline.c_str(), CurrentPipeline.size());

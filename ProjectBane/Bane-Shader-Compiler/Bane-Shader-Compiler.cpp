@@ -11,6 +11,7 @@
 #include "ShaderDeclarations.h"
 #include <Windows.h>
 #include <JSON/JsonCPP.h>
+#include <Math/SIMDFunctions.h>
 
 
 enum ShaderCompilationType
@@ -1946,35 +1947,35 @@ int DoCompileGraphics(const std::string& SourceFile, const std::string& Searched
 		}
 		{
 			P += sizeof(ShaderHeader);
-			memcpy(P, "$~$ VertexShader $~$\n", strlen("$~$ VertexShader $~$\n"));
+			memcpy(P, "$~$ VertexShader $~$\n", static_cast<uint32>(strlen("$~$ VertexShader $~$\n")));
 			P += strlen("$~$ VertexShader $~$\n");
-			memcpy(P, FullDesc.VS.ByteCode.data(), FullDesc.VS.ByteCode.size());
+			memcpy(P, FullDesc.VS.ByteCode.data(), static_cast<uint32>(FullDesc.VS.ByteCode.size()));
 			P += FullDesc.VS.ByteCode.size();
-			memcpy(P, "\n$~$ EndVertexShader $~$\n$~$ PixelShader $~$\n", strlen("\n$~$ EndVertexShader $~$\n$~$ PixelShader $~$\n"));
+			memcpy(P, "\n$~$ EndVertexShader $~$\n$~$ PixelShader $~$\n", static_cast<uint32>(strlen("\n$~$ EndVertexShader $~$\n$~$ PixelShader $~$\n")));
 			P += strlen("\n$~$ EndVertexShader $~$\n$~$ PixelShader $~$\n");
 			Header.PSStart = static_cast<uint32>(P - Buff);
-			memcpy(P, FullDesc.PS.ByteCode.data(), FullDesc.PS.ByteCode.size());
+			memcpy(P, FullDesc.PS.ByteCode.data(), static_cast<uint32>(FullDesc.PS.ByteCode.size()));
 			P += FullDesc.PS.ByteCode.size();
-			memcpy(P, "\n$~$ EndPixelShader $~$\n", strlen("\n$~$ EndPixelShader $~$\n"));
+			memcpy(P, "\n$~$ EndPixelShader $~$\n", static_cast<uint32>(strlen("\n$~$ EndPixelShader $~$\n")));
 			P += strlen("\n$~$ EndPixelShader $~$\n");
 			if (HasHullShader(FullDesc))
 			{
-				memcpy(P, "$~$ HullShader $~$\n", strlen("$~$ HullShader $~$\n"));
+				memcpy(P, "$~$ HullShader $~$\n", static_cast<uint32>(strlen("$~$ HullShader $~$\n")));
 				P += strlen("$~$ HullShader $~$\n");
 				Header.HSStart = static_cast<uint32>(P - Buff);
-				memcpy(P, FullDesc.HS.ByteCode.data(), FullDesc.HS.ByteCode.size());
+				memcpy(P, FullDesc.HS.ByteCode.data(), static_cast<uint32>(FullDesc.HS.ByteCode.size()));
 				P += FullDesc.HS.ByteCode.size();
-				memcpy(P, "\n$~$ EndHullShader $~$\n", strlen("\n$~$ EndHullShader $~$\n"));
+				memcpy(P, "\n$~$ EndHullShader $~$\n", static_cast<uint32>(strlen("\n$~$ EndHullShader $~$\n")));
 				P += strlen("\n$~$ EndHullShader $~$\n");
 			}
 			if (HasGeometryShader(FullDesc))
 			{
-				memcpy(P, "$~$ GeometryShader $~$\n", strlen("$~$ GeometryShader $~$\n"));
+				memcpy(P, "$~$ GeometryShader $~$\n", static_cast<uint32>(strlen("$~$ GeometryShader $~$\n")));
 				P += strlen("$~$ GeometryShader $~$\n");
 				Header.GSStart = static_cast<uint32>(P - Buff);
-				memcpy(P, FullDesc.GS.ByteCode.data(), FullDesc.GS.ByteCode.size());
+				memcpy(P, FullDesc.GS.ByteCode.data(), static_cast<uint32>(FullDesc.GS.ByteCode.size()));
 				P += FullDesc.GS.ByteCode.size();
-				memcpy(P, "\n$~$ EndGeometryShader $~$\n", strlen("\n$~$ EndGeometryShader $~$\n"));
+				memcpy(P, "\n$~$ EndGeometryShader $~$\n", static_cast<uint32>(strlen("\n$~$ EndGeometryShader $~$\n")));
 				P += strlen("\n$~$ EndGeometryShader $~$\n");
 			}
 			memcpy(Buff, &Header, sizeof(Header));

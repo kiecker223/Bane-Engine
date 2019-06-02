@@ -1,6 +1,7 @@
 #include "D3DCompilePath.h"
 #include <d3dcommon.h>
 #include <d3dcompiler.h>
+#include <Math/SIMDFunctions.h>
 #include <iostream>
 
 #define failed(x) ((x) < 0)
@@ -35,7 +36,7 @@ SHADER_BYTECODE D3DCompileVertexShader(const std::string& InByteCode, CompilerFl
 		return Result;
 	}
 	Result.ByteCode.resize(static_cast<uint32>(CompiledCode->GetBufferSize()));
-	memcpy(Result.ByteCode.data(), CompiledCode->GetBufferPointer(), CompiledCode->GetBufferSize());
+	memcpy(Result.ByteCode.data(), CompiledCode->GetBufferPointer(), static_cast<uint32>(CompiledCode->GetBufferSize()));
 	CompiledCode->Release();
 	return Result;
 }
@@ -61,7 +62,7 @@ SHADER_BYTECODE D3DCompilePixelShader(const std::string& InByteCode, CompilerFla
 		return Result;
 	}
 	Result.ByteCode.resize(static_cast<uint32>(CompiledCode->GetBufferSize()));
-	memcpy(Result.ByteCode.data(), CompiledCode->GetBufferPointer(), CompiledCode->GetBufferSize());
+	memcpy(Result.ByteCode.data(), CompiledCode->GetBufferPointer(), static_cast<uint32>(CompiledCode->GetBufferSize()));
 	CompiledCode->Release();
 	return Result;
 }
@@ -87,7 +88,7 @@ SHADER_BYTECODE D3DCompileHullShader(const std::string& InByteCode, CompilerFlag
 		return Result;
 	}
 	Result.ByteCode.resize(static_cast<uint32>(CompiledCode->GetBufferSize()));
-	memcpy(Result.ByteCode.data(), CompiledCode->GetBufferPointer(), CompiledCode->GetBufferSize());
+	memcpy(Result.ByteCode.data(), CompiledCode->GetBufferPointer(), static_cast<uint32>(CompiledCode->GetBufferSize()));
 	CompiledCode->Release();
 	return Result;
 }
@@ -113,7 +114,7 @@ SHADER_BYTECODE D3DCompileGeometryShader(const std::string& InByteCode, Compiler
 		return Result;
 	}
 	Result.ByteCode.resize(static_cast<uint32>(CompiledCode->GetBufferSize()));
-	memcpy(Result.ByteCode.data(), CompiledCode->GetBufferPointer(), CompiledCode->GetBufferSize());
+	memcpy(Result.ByteCode.data(), CompiledCode->GetBufferPointer(), static_cast<uint32>(CompiledCode->GetBufferSize()));
 	CompiledCode->Release();
 	return Result;
 }
@@ -139,7 +140,7 @@ SHADER_BYTECODE D3DCompileComputeShader(const std::string& InByteCode, CompilerF
 		return Result;
 	}
 	Result.ByteCode.resize(static_cast<uint32>(CompiledCode->GetBufferSize()));
-	memcpy(Result.ByteCode.data(), CompiledCode->GetBufferPointer(), CompiledCode->GetBufferSize());
+	memcpy(Result.ByteCode.data(), CompiledCode->GetBufferPointer(), static_cast<uint32>(CompiledCode->GetBufferSize()));
 	CompiledCode->Release();
 	return Result;
 
