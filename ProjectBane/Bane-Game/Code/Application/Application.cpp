@@ -304,7 +304,7 @@ void Application::Run()
 		{
 			vec3 TransformedPosition = PhysicsData[i].Position - CameraPosition;
 			if (isNan(TransformedPosition)) { __debugbreak(); }
-			matrix Mat = matTranslation(fromDouble3(TransformedPosition)) * matRotation(LookDirection) * matScale(fvec3(300.0f, 300.0f, 300.0f));
+			matrix Mat = matTranslation(fromDouble3(TransformedPosition)) * matScale(fvec3(300.0f, 300.0f, 300.0f));
 			ConstantBuffMappedRef.pPointer[i].Mat = Mat;
 		}
 
@@ -312,7 +312,7 @@ void Application::Run()
 		matrix* pMats = CameraBuff->MapT<matrix>();
 		//*pMats = matView(fvec3(0.0, 0.0, 0.0), fvec3(0.0f, 0.0f, 1.0f), fvec3(0.0f, 1.0f, 0.0f)) * matProjection(m_Window->AspectXY(), 60.f, 0.001f, 1e+23f);
 		//*pMats = matProjection(m_Window->AspectXY(), 60.f, 0.001f, 1e+23f) * matView(fvec3(0.0, 0.0, 0.0), fvec3(0.0f, 0.0f, 1.0f), fvec3(0.0f, 1.0f, 0.0f));
-		*pMats = matrix(1.0f) * matProjection(m_Window->AspectXY(), 60.f, 0.001f, 1e+23f);
+		*pMats = matProjection(m_Window->AspectXY(), 60.f, 0.001f, 1e+23f) * matView(fvec3(0.0f, 0.0f, 0.0f), LookDirection * fvec3(0.0f, 0.0f, 1.0f), fvec3(0.0f, 1.0f, 0.0f));
 		//pMats[1] = matView(fvec3(0.0, 0.0, 0.0), fvec3(0.0f, 0.0f, 1.0f), fvec3(0.0f, 1.0f, 0.0f));
 
 		// Draw the shit
