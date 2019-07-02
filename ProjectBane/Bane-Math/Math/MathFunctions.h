@@ -386,10 +386,10 @@ inline matrix matProjection(float Aspect, float FovY, float Near, float Far)
 	FovY = radians(FovY);
 	float TanFovOverTwo = tanf(FovY / 2.f);
 	matrix Result(
-		-(1.f / (Aspect * TanFovOverTwo)), 0.f, 0.f, 0.f,
-		0.f, 1.f / TanFovOverTwo, 0.f, 0.f,
-		0.f, 0.f, -((Far + Near) / (Far - Near)), -((Far * Near) / (Far - Near)),
-		0.f, 0.f, -1.f, 0.f
+		(1.f / (Aspect * TanFovOverTwo)), 0.f, 0.f, 0.f,
+		0.f, -1.f / TanFovOverTwo, 0.f, 0.f,
+		0.f, 0.f, 1.0f, -((Far * Near) / (Far - Near)),
+		0.f, 0.f, 1.f, 0.f
 	);
 	return Result;
 }
@@ -451,16 +451,23 @@ inline matrix matView(fvec3 Eye, fvec3 Forward, fvec3 Up)
 {
 	BANE_CHECK(!(Forward.x == 0.0 && Forward.y == 0.0 && Forward.z == 0.0));
 
-	const fvec3 ZAxis = normalized(Eye - Forward);
+	const fvec3 ZAxis = normalized(Forward);
 	const fvec3 XAxis = normalized(cross(Up, ZAxis));
-	const fvec3 YAxis = cross(ZAxis, XAxis);
+	const fvec3 YAxis = cross(XAxis, ZAxis);
 
 	matrix Result(
-		fvec4(XAxis.x, XAxis.y, XAxis.z, -dot(XAxis, Eye)),
-		fvec4(YAxis.x, YAxis.y, YAxis.z, -dot(YAxis, Eye)),
-		fvec4(ZAxis.x, ZAxis.y, ZAxis.z, -dot(ZAxis, Eye)),
+		fvec4(XAxis.x, XAxis.y, XAxis.z, 0.0f),
+		fvec4(YAxis.x, YAxis.y, YAxis.z, 0.0f),
+		fvec4(ZAxis.x, ZAxis.y, ZAxis.z, 0.0f),
 		fvec4(0.0f, 0.0f, 0.0f, 1.0f)
 	);
+
+// 	matrix Result(
+// 		fvec4(XAxis.x, YAxis.x, ZAxis.x, 0.0f),
+// 		fvec4(XAxis.y, YAxis.y, ZAxis.y, 0.0f),
+// 		fvec4(XAxis.z, YAxis.z, ZAxis.z, 0.0f),
+// 		fvec4(-dot(XAxis, Eye), -dot(YAxis, Eye), -dot(ZAxis, Eye), 1.0f)
+// 	);
 
 	return Result;
 }
@@ -576,3 +583,15 @@ inline mat4x4 matScale(const vec3& Scale)
 	return Result;
 }
 
+inline vec3 RandomVec3(double Magnitude = -1.0)
+{
+	std::random_device Dev;
+	std::mt19937 Gen(Dev());
+	std::uniform_real_distribution<double> Dist;
+	vec3 Result = vec3(Dist(Gen), Dist(Gen), Dist(Gen));
+	if (Magnitude > 0.0)
+	{
+		normalize(Result) * Magnitude;
+	}
+	return Result;
+}

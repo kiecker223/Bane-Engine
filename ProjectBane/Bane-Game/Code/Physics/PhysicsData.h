@@ -3,7 +3,6 @@
 #include <KieckerMath.h>
 #include "PhysicsPrimitives/BoundingBox.h"
 #include <vector>
-#include "CarrierShipPart.h"
 
 
 
@@ -44,10 +43,7 @@ public:
 		}
 	}
 
-	~NBodyNode() {
-		int a;
-		UNUSED(a);
-	}
+	~NBodyNode() { }
 
 	inline NBodyNode(const NBodyNode& Rhs) : Parent(Rhs.Parent), CenterOfMass(Rhs.CenterOfMass), Force(Rhs.Force), Bounds(Rhs.Bounds), Bodies(Rhs.Bodies)
 	{

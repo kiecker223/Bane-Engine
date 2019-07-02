@@ -1,7 +1,7 @@
 #pragma once
 
 #include <KieckerMath.h>
-#include <NeuralLayer.h>
+#include "NeuralLayer.h"
 
 class NeuralNetwork
 {

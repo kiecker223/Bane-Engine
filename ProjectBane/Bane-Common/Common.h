@@ -3,6 +3,7 @@
 #include "Common/Types.h"
 #include "Common/BaneMacros.h"
 #include "Common/MemFunctions.h"
+#include "Common/RandomHelper.h"
 
 // Below function is needed in Core and in BaneMath, so I put it here since this project lies
 // the lowest in the dependency tree

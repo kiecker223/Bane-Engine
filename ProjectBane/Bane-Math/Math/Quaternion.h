@@ -11,11 +11,11 @@ public:
 	union
 	{
 		__m128 f;
-		struct { float w, x, y, z; };
+		struct { float x, y, z, w; };
 	};
 
 
-	Quaternion() : w(1.0f), x(0.0f), y(0.0f), z(0.0f)
+	Quaternion() : x(0.0f), y(0.0f), z(0.0f), w(1.0f)
 	{
 	}
 
@@ -24,9 +24,9 @@ public:
 		f = Rhs.f;
 	}
 
-	Quaternion(float W, float X, float Y, float Z)
+	Quaternion(float X, float Y, float Z, float W)
 	{
-		f = _mm_set_ps(W, X, Y, Z);
+		f = _mm_set_ps(X, Y, Z, W);
 	}
 
 	Quaternion(const fvec3& Euler)
@@ -41,7 +41,7 @@ public:
 
 	inline static Quaternion Identity()
 	{
-		return Quaternion(1.f, 0.f, 0.f, 0.f);
+		return Quaternion(0.f, 0.f, 0.f, 1.f);
 	}
 
 	inline Quaternion& operator = (const Quaternion& Rhs)
@@ -61,9 +61,15 @@ public:
 		Quaternion Result;
 		const float s = sinf(Angle / 2.f);
 		__m128 S = _mm_load_ps1(&s);
-		__m128 A = Axis.f;
-		Result.f = _mm_mul_ps(S, A);
+		Result.f = _mm_mul_ps(S, Axis.f);
 		Result.w = cosf(Angle / 2.f);
+
+		// ^^ This should be the same as this:
+		//Result.x = InAxis.x * s;
+		//Result.y = InAxis.y * s;
+		//Result.z = InAxis.z * s;
+		//Result.w = cosf(Angle / 2.0f);
+		
 		Result.Normalize();
 		return Result;
 	}
@@ -108,20 +114,21 @@ public:
 	{
 		Quaternion Result;
 
-		Result.w = (w * Rhs.w - x * Rhs.x - y * Rhs.y - z * Rhs.z);
 		Result.x = (w * Rhs.x + x * Rhs.w - y * Rhs.z + z * Rhs.y);
 		Result.y = (w * Rhs.y + x * Rhs.z + y * Rhs.w - z * Rhs.x);
 		Result.z = (w * Rhs.z - x * Rhs.y + y * Rhs.x + z * Rhs.w);
-
+		Result.w = (w * Rhs.w - x * Rhs.x - y * Rhs.y - z * Rhs.z);
+		Result.Normalize();
 		return Result;
 	}
 
 	inline Quaternion& operator *= (const Quaternion& Rhs)
 	{
-		w = (w * Rhs.w - x * Rhs.x - y * Rhs.y - z * Rhs.z);
 		x = (w * Rhs.x + x * Rhs.w - y * Rhs.z + z * Rhs.y);
 		y = (w * Rhs.y + x * Rhs.z + y * Rhs.w - z * Rhs.x);
 		z = (w * Rhs.z - x * Rhs.y + y * Rhs.x + z * Rhs.w);
+		w = (w * Rhs.w - x * Rhs.x - y * Rhs.y - z * Rhs.z);
+		Normalize();
 		return *this;
 	}
 
@@ -156,7 +163,7 @@ public:
 	inline fvec3 GetRight() const
 	{
 		return fvec3(
-			1.f - 2.f *z *z - 2.f * y * y,
+			1.f - 2.f * z * z - 2.f * y * y,
 			-2.f * z * w + 2 * y * x,
 			2 * y * w + 2 * z * x
 		);
@@ -172,12 +179,14 @@ public:
 		const fvec3 R = GetRight();
 		const fvec3 U = GetUp();
 		const fvec3 F = GetForward();
+		
 		matrix Result(
-			fvec4(R, 0.f),
-			fvec4(U, 0.f),
-			fvec4(F, 0.f),
-			fvec4(0.f, 0.f, 0.f, 1.f)
+			fvec4(R, 0.0f),
+			fvec4(U, 0.0f),
+			fvec4(F, 0.0f),
+			fvec4(0.0f, 0.0f, 0.0f, 1.0f)
 		);
+
 		return Result;
 	}
 
