@@ -28,13 +28,12 @@ class IGraphicsCommandBuffer
 {
 public:
 
-	virtual void BeginPass(IRenderTargetInfo* RenderPass) = 0;
-	virtual void EndPass() = 0;
+	virtual void SetRenderTarget(IRenderTargetView* pRenderTargetView, IDepthStencilView* pDepthStencilView) = 0;
+	virtual void SetRenderTargets(const std::vector<IRenderTargetView*>& RenderTargetViews, IDepthStencilView* pDepthStencilView) = 0;
+
+	virtual void ClearRenderTargets() = 0;
 
 	virtual void CloseCommandBuffer() = 0;
-
-	virtual void Begin() { BeginPass(nullptr); }
-	virtual void End() { EndPass(); }
 
 	virtual void SetGraphicsPipelineState(const IGraphicsPipelineState* PipelineState) = 0;
 
@@ -69,6 +68,15 @@ public:
 	virtual void SetComputeUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
 	virtual void SetComputeConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset) = 0;
 
+	// Only support 2d textures at the moment
+	virtual ITexture2D* CreateTemporaryTexture(uint32 Width, uint32 Height, EFORMAT Format, const SAMPLER_DESC& SampleDesc, ETEXTURE_USAGE Usage) = 0;
+	virtual IRenderTargetView* CreateTemporaryRenderTargetView(ITexture2D* InTexture) = 0;
+	virtual IDepthStencilView* CreateTemporaryDepthStencilView(ITexture2D* InTexture) = 0;
+
+	virtual void DestroyTemporaryTexture(ITexture2D* pTexture) = 0;
+	virtual void DestroyTemporaryRenderTargetView(IRenderTargetView* pView) = 0;
+	virtual void DestroyTemporaryDepthStencilView(IDepthStencilView* pView) = 0;
+
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) = 0;
 };
 
@@ -77,13 +85,12 @@ class IGraphicsCommandContext
 public:
 	virtual ~IGraphicsCommandContext() { }
 
-	virtual void BeginPass(IRenderTargetInfo* RenderPass) = 0;
-	virtual void EndPass() = 0; // This will submit the workload for execution, no need to manually release it, it will be taken care of on a per-thread basis
+	virtual void SetRenderTarget(IRenderTargetView* pRenderTarget, IDepthStencilView* pDepthStencil) = 0;
+	virtual void SetRenderTargets(const std::vector<IRenderTargetView*>& RenderTargets, IDepthStencilView* pDepthStencil) = 0;
+
+	virtual void ClearRenderTargets() = 0;
 
 	virtual void Flush() = 0; // Stall until execution is finished
-
-	virtual void Begin() { BeginPass(nullptr); } // No graphics tasks are allowed to be done
-	virtual void End() { EndPass(); }
 
 	virtual void SetTexture(uint32 Slot, const ITextureBase* InTexture, uint32 Subresource = 0) = 0;
 	virtual void SetStructuredBuffer(uint32 Slot, const IBuffer* InBuffer, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
@@ -130,6 +137,14 @@ public:
 	virtual void SetComputeUnorderedAccessView(uint32 Slot, const ITextureBase* InResource, uint32 Subresource) = 0;
 	virtual void SetComputeUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) = 0;
 	virtual void SetComputeConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset = 0) = 0;
+
+	virtual ITexture2D* CreateTemporaryTexture(uint32 Width, uint32 Height, EFORMAT Format, const SAMPLER_DESC& SampleDesc, ETEXTURE_USAGE Usage) = 0;
+	virtual IRenderTargetView* CreateTemporaryRenderTargetView(ITexture2D* InTexture) = 0;
+	virtual IDepthStencilView* CreateTemporaryDepthStencilView(ITexture2D* InTexture) = 0;
+
+	virtual void DestroyTemporaryTexture(ITexture2D* pTexture) = 0;
+	virtual void DestroyTemporaryRenderTargetView(IRenderTargetView* pView) = 0;
+	virtual void DestroyTemporaryDepthStencilView(IDepthStencilView* pView) = 0;
 
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) = 0;
 };

@@ -36,7 +36,8 @@ public:
 	FRAME_DATA& GetCurrentFrame();
 };
 
-class D3D12RenderPassInfo : public IRenderTargetInfo
+/*
+class D3D12RenderPassInfo : public IRenderPass
 {
 public:
 
@@ -83,20 +84,18 @@ public:
 
 	inline void SetRenderTargets(ID3D12GraphicsCommandList* CommandList)
 	{
+		D3D12_CPU_DESCRIPTOR_HANDLE Rtvs[16] = { { } };
+		D3D12_CPU_DESCRIPTOR_HANDLE* Dsv = nullptr;
+		for (uint32 i = 0; i < NumRenderTargets; i++)
 		{
-			D3D12_CPU_DESCRIPTOR_HANDLE Rtvs[16] = { { } };
-			D3D12_CPU_DESCRIPTOR_HANDLE* Dsv = nullptr;
-			for (uint32 i = 0; i < NumRenderTargets; i++)
-			{
-				Rtvs[i] = RenderTargets[i]->GetCurrentFrame().CpuHandle;
-			}
-			if (HasDepthStencil())
-			{
-				Dsv = &DepthStencil->GetCurrentFrame().CpuHandle;
-			}
-
-			CommandList->OMSetRenderTargets(NumRenderTargets, Rtvs, FALSE, Dsv);
+			Rtvs[i] = RenderTargets[i]->GetCurrentFrame().CpuHandle;
 		}
+		if (HasDepthStencil())
+		{
+			Dsv = &DepthStencil->GetCurrentFrame().CpuHandle;
+		}
+
+		CommandList->OMSetRenderTargets(NumRenderTargets, Rtvs, FALSE, Dsv);
 	}
 
 	inline void Clear(ID3D12GraphicsCommandList* CommandList)
@@ -151,3 +150,4 @@ public:
 	D3D12DepthStencilView* DepthStencil;
 	const fvec4 ClearColor;
 };
+*/

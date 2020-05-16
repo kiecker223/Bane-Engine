@@ -109,6 +109,11 @@ void Application::InitSystems()
 	PhysicsDataObjectPool::Initialize();
 }
 
+void Application::RenderGameToTarget(Mesh* pMesh, IGraphicsCommandBuffer* CMDBuff)
+{
+
+}
+
 void ResetVelocities(std::vector<CurrentPhysicsData>& InPhysicsData)
 {
 	for (uint32 i = 0; i < InPhysicsData.size(); i++)
@@ -146,7 +151,7 @@ void Application::Run()
 
 	for (uint32 i = 0; i < PhysicsData.size(); i++)
 	{
-		vec3 RandomPos = RandomVec3();
+		vec3 RandomPos = RandomVec3(-30.0, 30.0);
 		PhysicsData[i].Position = RandomPos;
 		PhysicsData[i].Mass = 2000000.0;
 	}
@@ -235,13 +240,50 @@ void Application::Run()
 	double MovementSpeed = 1.0;
 
 	Quaternion LookDirection(fvec3(0.0f, 0.0f, 0.0f));
-	SIMDMEMZERO(CameraBuff->Map(), CameraBuff->GetSizeInBytes());
+	SIMDMEMZERO(CameraBuff->Map(), static_cast<uint32>(CameraBuff->GetSizeInBytes()));
 
+	IGraphicsCommandBuffer* BloomCommandBuffer;
+// 	IGraphicsCommandBuffer* SomeOtherWeirdEffect;
+// 	IGraphicsCommandBuffer* InversionCommandBuffer;
+
+	ITexture2D* BloomResult = Device->CreateTexture2D(m_Window->GetWidth(), m_Window->GetHeight(), FORMAT_R8G8B8A8_UNORM, CreateDefaultSamplerDesc(), TEXTURE_USAGE_RENDER_TARGET | TEXTURE_USAGE_SHADER_RESOURCE, nullptr); 
+	IRenderTargetView* BloomResultRT = Device->CreateRenderTargetView(BloomResult);
+
+	ITexture2D* SceneTex = Device->CreateTexture2D(m_Window->GetWidth(), m_Window->GetHeight(), FORMAT_R8G8B8A8_UNORM, CreateDefaultSamplerDesc(), TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET);
+	IRenderTargetView* SceneRtv = Device->CreateRenderTargetView(SceneTex);
+
+	ITexture2D* SceneDepth = Device->CreateTexture2D(m_Window->GetWidth(), m_Window->GetHeight(), FORMAT_D24_UNORM_S8_UINT, CreateDefaultSamplerDesc(), TEXTURE_USAGE_DEPTH_STENCIL | TEXTURE_USAGE_SHADER_RESOURCE);
+	IDepthStencilView* SceneDepth = Device->CreateDepthStencilView(SceneDepth);
+
+	IGraphicsPipelineState* BloomShader = GetShaderCache()->LoadGraphicsPipeline("Bloom.gfx");
+
+	Task* ApplyBloomTask = new Task(1, [&](uint32 DispatchSize, uint32 DispatchIndex)
+	{
+		ITexture2D* TemporaryTexture = BloomCommandBuffer->CreateTemporaryTexture(
+			m_Window->GetWidth(), 
+			m_Window->GetHeight(), 
+			FORMAT_R8G8B8A8_UNORM, 
+			CreateDefaultSamplerDesc(), 
+			TEXTURE_USAGE_RENDER_TARGET | TEXTURE_USAGE_SHADER_RESOURCE
+		);
+		IRenderTargetView* TemporaryRenderTarget = BloomCommandBuffer->CreateTemporaryRenderTargetView(TemporaryTexture);
+
+		IVertexBuffer* QuadVB = ApiRuntime::Get()->QuadVB;
+		IIndexBuffer* QuadIB = ApiRuntime::Get()->QuadIB;
+
+		BloomCommandBuffer->SetGraphicsPipelineState(BloomShader);
+		BloomCommandBuffer->SetTexture(0, SceneTex);
+		BloomCommandBuffer->SetVertexBuffer(QuadVB);
+		BloomCommandBuffer->SetIndexBuffer(QuadIB);
+		BloomCommandBuffer->DrawIndexed(4, 0, 0);
+	});
+
+//	Task* ApplyInversionFilterTask = new Task(1, [](uint32 DispatchSize, uint32 DispatchIndex) {});
 	while (!m_Window->QuitRequested())
 	{
 		// Allow for moving around
 		ConstantBuffMappedRef.pPointer = ConstantBuff->MapT<ConstantBuffMappedPointerRef::Reference>();
-		SIMDMEMZERO(ConstantBuffMappedRef.pPointer, ConstantBuff->GetSizeInBytes());
+		SIMDMEMZERO(ConstantBuffMappedRef.pPointer, static_cast<uint32>(ConstantBuff->GetSizeInBytes()));
 		GetInput()->Update();
 		vec3 Velocity;
 		if (GetInput()->Keyboard.GetKey(KEY_S))
@@ -297,6 +339,7 @@ void Application::Run()
 
 		/*CameraPosition = PhysicsData[3].Position + vec3(0.0, 0.0, 100.0);*/
 
+		Dispatcher::DispatchTask(CalculateNBodyAccelerationTask);
 		Dispatcher::DispatchTask(ApplyNBodyAccelerationTask);
 		Dispatcher::WaitOnTask(ApplyNBodyAccelerationTask);
 
@@ -317,7 +360,8 @@ void Application::Run()
 
 		// Draw the shit
 		IGraphicsCommandContext* pCtx = Device->GetGraphicsContext();
-		pCtx->BeginPass(GetApiRuntime()->GetGraphicsDevice()->GetBackBufferTargetPass());
+		pCtx->SetRenderTarget(Device->GetBackBuffer(), Device->GetDepthStencilForBackBuffer());
+		pCtx->ClearRenderTargets();
 		pCtx->SetConstantBuffer(0, CameraBuff);
 		pCtx->SetGraphicsPipelineState(PipelineState);
 		pCtx->SetTexture(0, Tex);
@@ -329,7 +373,24 @@ void Application::Run()
 			pCtx->SetConstantBuffer(1, ConstantBuff, 256 * i);
 			pCtx->DrawIndexed(pMesh->GetIndexCount(), 0, 0);
 		}
-		pCtx->EndPass();
+
+		ITexture2D* TemporaryTexture = pCtx->CreateTemporaryTexture(
+			m_Window->GetWidth(),
+			m_Window->GetHeight(),
+			FORMAT_R8G8B8A8_UNORM,
+			CreateDefaultSamplerDesc(),
+			TEXTURE_USAGE_RENDER_TARGET | TEXTURE_USAGE_SHADER_RESOURCE
+		);
+		IRenderTargetView* TemporaryRenderTarget = pCtx->CreateTemporaryRenderTargetView(TemporaryTexture);
+
+		IVertexBuffer* QuadVB = ApiRuntime::Get()->QuadVB;
+		IIndexBuffer* QuadIB = ApiRuntime::Get()->QuadIB;
+
+		pCtx->SetGraphicsPipelineState(BloomShader);
+		pCtx->SetTexture(0, SceneTex);
+		pCtx->SetVertexBuffer(QuadVB);
+		pCtx->SetIndexBuffer(QuadIB);
+		pCtx->DrawIndexed(4, 0, 0);
 
 		m_SceneRenderer->Present();
 		FrameTime.StartTimer();

@@ -4,7 +4,6 @@
 #include "../Interfaces/ShaderResourceView.h"
 
 typedef struct CAMERA_DATA {
-	IRenderTargetInfo* CurrentRenderPass;
 	fmat4x4 View;
 	fmat4x4 Projection;
 	vec3 Position;

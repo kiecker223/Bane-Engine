@@ -28,7 +28,7 @@ public:
 class IBuffer : public IGPUResource
 {
 public:
-	virtual uint32 GetSizeInBytes() const = 0;
+	virtual uint64 GetSizeInBytes() const = 0;
 	virtual EBUFFER_USAGE GetUsage() const = 0;
 };
 

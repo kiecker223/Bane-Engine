@@ -90,9 +90,7 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 		m_BackBuffer = CreateRenderTargetView(Bases);
 
 		ITexture2D* DepthTexture = CreateTexture2D(RenderingWindow->GetWidth(), RenderingWindow->GetHeight(), FORMAT_UNKNOWN, CreateDefaultSamplerDesc(), TEXTURE_USAGE_DEPTH_STENCIL, nullptr);
-		IDepthStencilView* DepthStencil = CreateDepthStencilView(DepthTexture);
-
-		m_BasicRenderPass = (D3D12RenderPassInfo*)IGraphicsDevice::CreateRenderPass(m_BackBuffer, DepthStencil, fvec4(0.1f, 0.1f, 0.1f, 0.f));
+		m_DepthStencil = CreateDepthStencilView(DepthTexture);
 	}
 	
 	for (uint32 i = 0; i < COMMAND_CONTEXT_TYPE_NUM_TYPES; i++)
@@ -132,6 +130,36 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 	m_CommandQueues[0].SetParentDevice(this);
 	m_CommandQueues[1].SetParentDevice(this);
 	m_CommandQueues[2].SetParentDevice(this);
+	
+	for (uint32 i = 0; i < 3; i++)
+	{
+		ID3D12Heap* pHeap = nullptr;
+		D3D12_HEAP_DESC HeapDesc = { };
+		/*
+		UINT64 SizeInBytes;
+		D3D12_HEAP_PROPERTIES Properties;
+		UINT64 Alignment;
+		D3D12_HEAP_FLAGS Flags;
+		*/
+		HeapDesc.SizeInBytes = MEGABYTE(16);
+		/*
+		D3D12_HEAP_TYPE Type;
+		D3D12_CPU_PAGE_PROPERTY CPUPageProperty;
+		D3D12_MEMORY_POOL MemoryPoolPreference;
+		UINT CreationNodeMask;
+		UINT VisibleNodeMask;
+		*/
+		HeapDesc.Properties.Type = D3D12_HEAP_TYPE_DEFAULT;
+		HeapDesc.Properties.CPUPageProperty = 
+
+		D3D12ERRORCHECK(
+			Device->CreateHeap(
+				&HeapDesc,
+				IID_PPV_ARGS(&pHeap)
+			)
+		);
+	}
+
 	InitializeD3D12Translator();
 	InitializeD3D12ShaderSignatureLibrary(m_Device);
 }
@@ -525,6 +553,59 @@ ITexture2D* D3D12GraphicsDevice::CreateTexture2D(uint32 Width, uint32 Height, EF
 	return Result;
 }
 
+D3D12TextureBase* D3D12GraphicsDevice::CreateTemporaryRenderTexture(uint32 Width, uint32 Height, EFORMAT Format, const SAMPLER_DESC& InSamplerDesc, ETEXTURE_USAGE Usage)
+{
+	D3D12TextureBase* Result;
+	D3D12_SAMPLER_DESC D3DSamplerDesc = D3D12_TranslateSamplerDesc(InSamplerDesc);
+	BANE_CHECK(Usage & TEXTURE_USAGE_RENDER_TARGET); // It has to be a render target
+	Result = new D3D12TextureBase(this, Width, Height, 1U, 1U, Format, InSamplerDesc, D3DSamplerDesc, Usage, GetTemporaryTextureHeap());
+	Result->Resource.SRVDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	Result->Resource.UAVDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+	return Result;
+}
+
+D3D12RenderTargetView* D3D12GraphicsDevice::CreateTemporaryRenderTargetView(D3D12TextureBase* Texture)
+{
+	D3D12RenderTargetView* Result = new D3D12RenderTargetView();
+#if DEBUG
+	if (!Texture->IsRenderTarget())
+	{
+		BaneLog() << "The texture: " << Texture->GetDebugName() << " is not a valid resource for making a render target view";
+		return nullptr;
+	}
+#endif
+	D3D12DescriptorAllocation Allocation = m_RtvAllocator.AllocateDescriptor();
+	m_Device->CreateRenderTargetView(Texture->Resource.D3DResource, nullptr, Allocation.CpuHandle);
+	
+	// Just stuff it in all 3 frames, it will be deleted
+	for (uint32 i = 0; i < 3; i++)
+	{
+		Result->FrameData[i] = { Texture, Allocation.CpuHandle, Allocation.GpuHandle };
+	}
+	return Result;
+}
+
+D3D12DepthStencilView* D3D12GraphicsDevice::CreateTemporaryDepthStencilView(D3D12TextureBase* Texture)
+{
+	D3D12DepthStencilView* Result = new D3D12DepthStencilView();
+#if DEBUG
+	if (!Texture->IsDepthStencil())
+	{
+		BaneLog() << "The texture: " << Texture->GetDebugName() << " is not a valid resource for making a depth stencil view";
+		return nullptr;
+	}
+#endif
+	D3D12DescriptorAllocation Allocation = m_RtvAllocator.AllocateDescriptor();
+	m_Device->CreateDepthStencilView(Texture->Resource.D3DResource, nullptr, Allocation.CpuHandle);
+
+	// Just stuff it in all 3 frames, it will be deleted
+	for (uint32 i = 0; i < 3; i++)
+	{
+		Result->FrameData[i] = { Texture, Allocation.CpuHandle, Allocation.GpuHandle };
+	}
+	return Result;
+}
+
 ITexture2DArray* D3D12GraphicsDevice::CreateTexture2DArray(uint32 Width, uint32 Height, uint32 Count, EFORMAT Format, const SAMPLER_DESC& InSampleDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data)
 {
 	D3D12_SAMPLER_DESC D3DSampleDesc = D3D12_TranslateSamplerDesc(InSampleDesc);
@@ -585,8 +666,6 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 	}
 	else
 	{
-		PreviousRenderPass = DirectContext->CurrentCommandBuffer->CurrentRenderPass;
-		DirectContext->EndPass();
 		DirectContext->Flush();
 		DirectContext->Begin();
 	}
@@ -765,13 +844,12 @@ void D3D12GraphicsDevice::GenerateMips(ITextureBase* InTexture)
 			DirectCL->ResourceBarrier(1, Barriers);
 		}
 
-		DirectContext->End();
 		DirectContext->Flush();
 		delete ConstBuff;
 	}
 	if (bDirectContextHasBegun)
 	{
-		DirectContext->BeginPass(PreviousRenderPass);
+		DirectContext->Begin();
 	}
 
 	while (CopyRes->Release() > 0) { }
@@ -783,22 +861,16 @@ IInputLayout* D3D12GraphicsDevice::CreateInputLayout(const GFX_INPUT_LAYOUT_DESC
 	return new D3D12InputLayout(Desc, CreationDesc);
 }
 
-IRenderTargetInfo* D3D12GraphicsDevice::CreateRenderPass(const IRenderTargetView** RenderTargets, uint32 NumRenderTargets, const IDepthStencilView* DepthStencil, const fvec4& ClearColor)
-{
-	// Consider making this store the command list too? That would make alot of the task submission easier, but potentially less performant
-	D3D12RenderPassInfo* RenderPassInfo = new D3D12RenderPassInfo(RenderTargets, NumRenderTargets, DepthStencil, ClearColor);
-	return RenderPassInfo;
-}
-
-IRenderTargetInfo* D3D12GraphicsDevice::GetBackBufferTargetPass()
-{
-	return m_BasicRenderPass;
-}
-
 IRenderTargetView* D3D12GraphicsDevice::GetBackBuffer()
 {
 	return m_BackBuffer;
 }
+
+IDepthStencilView* D3D12GraphicsDevice::GetDepthStencilForBackBuffer()
+{
+	return m_DepthStencil;
+}
+
 // 
 // void D3D12GraphicsDevice::CreateConstantBufferView(IShaderResourceTable* InDestTable, IBuffer* InBuffer, uint32 InSlot, uint64 InOffset)
 // {
@@ -1012,8 +1084,10 @@ D3D12CommandList* D3D12GraphicsDevice::GetCommandList(ECOMMAND_CONTEXT_TYPE Cont
 void D3D12GraphicsDevice::UpdateCurrentFrameInfo()
 {
 	GCurrentFrameIndex = m_SwapChain->SwapChain->GetCurrentBackBufferIndex();
-	m_SrvAllocator.Reset();
-	m_SmpAllocator.Reset();
+	//m_SrvAllocator.Reset();
+	//m_SmpAllocator.Reset();
+	reinterpret_cast<D3D12GraphicsCommandContext*>(GetGraphicsContext())->Begin();
+	m_RTHeaps[GCurrentFrameIndex].ResetHeap();
 }
 
 void D3D12GraphicsDevice::EnsureAllUploadsOccured()
@@ -1024,7 +1098,6 @@ void D3D12GraphicsDevice::EnsureAllUploadsOccured()
 		{
 			D3D12GraphicsCommandBuffer* CmdBuff = m_UploadList->CurrentCommandBuffer;
 			D3D12CommandList* CommandList = CmdBuff->CommandList;
-			CmdBuff->EndPass();
 			CmdBuff->CloseCommandBuffer();
 			D3D12CommandQueue& CmdQueue = GetCopyQueue();
 			CmdQueue.ExecuteImmediate(CommandList, true);

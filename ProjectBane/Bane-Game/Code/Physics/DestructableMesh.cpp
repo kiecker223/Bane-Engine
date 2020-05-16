@@ -76,10 +76,9 @@ void DestructableMesh::Initialize(Mesh* pMesh)
 		IboUploadData->Unmap();
 	}
 	IGraphicsCommandContext* Ctx = Device->GetGraphicsContext();
-	Ctx->BeginPass(nullptr);
 	Ctx->CopyBuffers(VboUploadData, VboGpuData);
 	Ctx->CopyBuffers(IboUploadData, IboGpuData);
-	Ctx->EndPass();
+	Ctx->Flush();
 }
 
 bool DestructableMesh::TestCollision(const DestructableMesh& Other, CollisionData& OutData)

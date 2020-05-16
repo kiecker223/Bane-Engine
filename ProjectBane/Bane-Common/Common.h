@@ -20,3 +20,4 @@ inline uint32 NextPowerOfTwo(uint32 Value)
 	Value++;
 	return Value;
 }
+

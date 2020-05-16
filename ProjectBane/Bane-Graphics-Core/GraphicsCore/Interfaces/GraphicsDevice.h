@@ -58,11 +58,6 @@ public:
 	{
 		return CreateConstantBuffer(sizeof(T));
 	}
-
-	inline const IDepthStencilView* GetDefaultDepthStencil()
-	{
-		return GetBackBufferTargetPass()->GetDepthStencil();
-	}
 	
 	virtual ITexture2D* CreateTexture2D(uint32 Width, uint32 Height, EFORMAT Format, const SAMPLER_DESC& SampleDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
 	virtual ITexture2DArray* CreateTexture2DArray(uint32 Width, uint32 Height, uint32 Count, EFORMAT Format, const SAMPLER_DESC& SampleDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) = 0;
@@ -71,18 +66,11 @@ public:
 
 	virtual IInputLayout* CreateInputLayout(const GFX_INPUT_LAYOUT_DESC& Desc) = 0;
 
-	virtual IRenderTargetInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint32 NumRenderTargets, const IDepthStencilView* DepthStencil, const fvec4& ClearColor) = 0;
-	
-	inline IRenderTargetInfo* CreateRenderPass(const IRenderTargetView* RenderTarget, const IDepthStencilView* DepthStencil, const fvec4& ClearColor)
-	{
-		return CreateRenderPass(&RenderTarget, 1U, DepthStencil, ClearColor);
-	}
-
 	// Warn, On d3d12 and vulkan this will flush any state that was set previously on the main thread command list and the compute command list
 	virtual void GenerateMips(ITextureBase* Texture) = 0;
 
-	virtual IRenderTargetInfo* GetBackBufferTargetPass() = 0; // This just returns the screen target
 	virtual IRenderTargetView* GetBackBuffer() = 0;
+	virtual IDepthStencilView* GetDepthStencilForBackBuffer() = 0;
 
 	virtual IRenderTargetView* CreateRenderTargetView(ITexture2D* InTexture) = 0;
 	virtual IDepthStencilView* CreateDepthStencilView(ITexture2D* InTexture) = 0;

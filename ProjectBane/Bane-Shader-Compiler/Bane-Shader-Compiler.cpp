@@ -1887,8 +1887,10 @@ COMPUTE_PIPELINE_DESC ParseComputeShader(const std::string& InFile, const std::s
 FULL_PIPELINE_DESCRIPTOR LoadGraphicsPipeline(const std::string& ShaderFile)
 {
 	std::string File = ReadEntireFile(ShaderFile);
+	std::cout << "Read the file " << "Filesize: " << File.size() << std::endl;
 	BANE_CHECK(File.size() != 0);
 	FULL_PIPELINE_DESCRIPTOR PipelineDesc = ParseGraphicsShader(File, ShaderFile);
+	std::cout << "Parsed graphics shader" << std::endl;
 	return PipelineDesc;
 }
 
@@ -1905,8 +1907,12 @@ json RootObject;
 
 int DoCompileGraphics(const std::string& SourceFile, const std::string& SearchedFolder, std::string& DstCompiledFile)
 {
+	std::cout << "Compiling file: " << SourceFile << std::endl;
+	
 	FULL_PIPELINE_DESCRIPTOR FullDesc = LoadGraphicsPipeline(SearchedFolder + '/' + SourceFile);
 	
+	std::cout << "Loaded the graphics pipeline" << std::endl;
+
 	if (CompilationMode == DXIL)
 	{
 		uint8* Buff;

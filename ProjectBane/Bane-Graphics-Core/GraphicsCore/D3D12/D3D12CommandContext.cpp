@@ -23,7 +23,8 @@ void D3D12CommandList::FlushDestructionQueue()
 
 ///--------- D3D12GraphicsCommandBuffer ---------///
 
-void D3D12GraphicsCommandBuffer::BeginPass(IRenderTargetInfo* InRenderPass)
+/*
+void D3D12GraphicsCommandBuffer::BeginPass(IRenderPass* InRenderPass)
 {
 	if (CommandList == nullptr)
 	{
@@ -59,9 +60,85 @@ void D3D12GraphicsCommandBuffer::EndPass()
 	GraphicsPipelineState = nullptr;
 	ComputePipelineState = nullptr;
 }
+*/
+
+void D3D12GraphicsCommandBuffer::Begin()
+{
+	if (CommandList == nullptr)
+	{
+		FetchNewCommandList();
+	}
+	if (CommandList->bCanReset)
+	{
+		CommandList->Reset();
+	}
+	if (ContextType == COMMAND_CONTEXT_TYPE_GRAPHICS)
+	{
+		ID3D12DescriptorHeap* ppHeaps[] = { ParentDevice->m_SrvAllocator.DescriptorHeap, ParentDevice->m_SmpAllocator.DescriptorHeap };
+		D3DCL->SetDescriptorHeaps(2, ppHeaps);
+		D3DCL->RSSetScissorRects(1, &ScissorRect);
+		D3DCL->RSSetViewports(1, &Viewport);
+	}
+	NumCurrentRenderTargetViews = 0;
+}
+
+void D3D12GraphicsCommandBuffer::SetRenderTarget(IRenderTargetView* pRenderTargetView, IDepthStencilView* pDepthStencilView)
+{
+	SetRenderTargets({ pRenderTargetView }, pDepthStencilView);
+}
+
+void D3D12GraphicsCommandBuffer::SetRenderTargets(const std::vector<IRenderTargetView*>& RenderTargetViews, IDepthStencilView* pDepthStencilView)
+{
+	if (NumCurrentRenderTargetViews > 0)
+	{
+		TransitionRenderTargetsToRead(CurrentRenderTargetViews, NumCurrentRenderTargetViews, CurrentDepthStencilView);
+	}
+
+	D3D12_CPU_DESCRIPTOR_HANDLE CpuDescriptors[32] = { };
+	for (uint32 i = 0; i < RenderTargetViews.size(); i++)
+	{
+		CurrentRenderTargetViews[i] = reinterpret_cast<D3D12RenderTargetView*>(RenderTargetViews[i]);
+		CpuDescriptors[i] = CurrentRenderTargetViews[i]->GetCurrentFrame().CpuHandle;
+	}
+	CurrentDepthStencilView = reinterpret_cast<D3D12DepthStencilView*>(pDepthStencilView);
+
+	NumCurrentRenderTargetViews = static_cast<uint32>(RenderTargetViews.size());
+
+	D3D12_CPU_DESCRIPTOR_HANDLE* DsvCpuDescriptor = nullptr;
+	if (CurrentDepthStencilView)
+	{
+		DsvCpuDescriptor = &CurrentDepthStencilView->GetCurrentFrame().CpuHandle;
+	}
+	TransitionRenderTargetsToWrite(CurrentRenderTargetViews, NumCurrentRenderTargetViews, CurrentDepthStencilView);
+	D3DCL->OMSetRenderTargets(NumCurrentRenderTargetViews, CpuDescriptors, FALSE, DsvCpuDescriptor);
+}
+
+void D3D12GraphicsCommandBuffer::ClearRenderTargets()
+{
+	BANE_CHECK(NumCurrentRenderTargetViews > 0);
+
+	for (uint32 i = 0; i < NumCurrentRenderTargetViews; i++)
+	{
+		D3DCL->ClearRenderTargetView(CurrentRenderTargetViews[i]->GetCurrentFrame().CpuHandle, DirectX::Colors::Black, 0, nullptr);
+	}
+
+	if (CurrentDepthStencilView)
+	{
+		D3DCL->ClearDepthStencilView(CurrentDepthStencilView->GetCurrentFrame().CpuHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+	}
+}
 
 void D3D12GraphicsCommandBuffer::CloseCommandBuffer()
 {
+	if (NumCurrentRenderTargetViews > 0)
+	{
+		TransitionRenderTargetsToRead(CurrentRenderTargetViews, NumCurrentRenderTargetViews, CurrentDepthStencilView);
+		for (uint32 i = 0; i < NumCurrentRenderTargetViews; i++)
+		{
+			CurrentRenderTargetViews[i] = nullptr;
+		}
+	}
+
 	if (CommandList->bCanClose)
 	{
 		CommandList->Close();
@@ -69,6 +146,8 @@ void D3D12GraphicsCommandBuffer::CloseCommandBuffer()
 	NumDrawCalls = 0;
 	NumCopies = 0;
 	NumDispatches = 0;
+	NumCurrentRenderTargetViews = 0;
+	CurrentDepthStencilView = nullptr;
 }
 
 void D3D12GraphicsCommandBuffer::SetGraphicsPipelineState(const IGraphicsPipelineState* InPipelineState)
@@ -347,6 +426,36 @@ void D3D12GraphicsCommandBuffer::SetComputeConstantBuffer(uint32 Slot, const IBu
 	ComputeResources.SetCBV(Buffer, Offset, Slot);
 }
 
+ITexture2D* D3D12GraphicsCommandBuffer::CreateTemporaryTexture(uint32 Width, uint32 Height, EFORMAT Format, const SAMPLER_DESC& SampleDesc, ETEXTURE_USAGE Usage)
+{
+	return ParentDevice->CreateTemporaryRenderTexture(Width, Height, Format, SampleDesc, Usage);
+}
+
+IRenderTargetView* D3D12GraphicsCommandBuffer::CreateTemporaryRenderTargetView(ITexture2D* InTexture)
+{
+	return ParentDevice->CreateTemporaryRenderTargetView(reinterpret_cast<D3D12TextureBase*>(InTexture));
+}
+
+IDepthStencilView* D3D12GraphicsCommandBuffer::CreateTemporaryDepthStencilView(ITexture2D* InTexture)
+{
+	return ParentDevice->CreateTemporaryDepthStencilView(reinterpret_cast<D3D12TextureBase*>(InTexture));
+}
+
+void D3D12GraphicsCommandBuffer::DestroyTemporaryTexture(ITexture2D* pTexture)
+{
+	CommandList->TemporaryTextures.push_back({ reinterpret_cast<D3D12TextureBase*>(pTexture) });
+}
+
+void D3D12GraphicsCommandBuffer::DestroyTemporaryRenderTargetView(IRenderTargetView* pView)
+{
+	delete pView;
+}
+
+void D3D12GraphicsCommandBuffer::DestroyTemporaryDepthStencilView(IDepthStencilView* pView)
+{
+	delete pView;
+}
+
 // void D3D12GraphicsCommandBuffer::SetComputeResourceTable(const IShaderResourceTable* InTable)
 // {
 // 	D3D12ShaderResourceTable* Table = (D3D12ShaderResourceTable*)InTable;
@@ -412,13 +521,13 @@ void D3D12GraphicsCommandBuffer::InitializeAllocators(D3D12LinearDescriptorAlloc
 	SrvDescriptorAllocator.InitializeSubAllocator(
 		SrvAllocation.BaseCpuHandle,
 		ParentSrvAllocator.IncrementSize,
-		{ SrvAllocation.BaseCpuHandle.ptr + static_cast<SIZE_T>(ParentSrvAllocator.IncrementSize * 512) },
+		{ SrvAllocation.BaseCpuHandle.ptr + (static_cast<SIZE_T>(ParentSrvAllocator.IncrementSize) * 512) },
 		SrvAllocation.GpuHandle
 	);
 	SmpDescriptorAllocator.InitializeSubAllocator(
 		SmpAllocation.BaseCpuHandle,
 		ParentSmpAllocator.IncrementSize,
-		{ SmpAllocation.BaseCpuHandle.ptr + static_cast<SIZE_T>(ParentSmpAllocator.IncrementSize * 512) },
+		{ SmpAllocation.BaseCpuHandle.ptr + (static_cast<SIZE_T>(ParentSmpAllocator.IncrementSize) * 512) },
 		SmpAllocation.GpuHandle
 	);
 }
@@ -489,28 +598,92 @@ void D3D12GraphicsCommandBuffer::ReturnCommandList()
 	D3DCL = nullptr;
 }
 
+void D3D12GraphicsCommandBuffer::TransitionRenderTargetsToRead(D3D12RenderTargetView** ppViews, uint32 NumRenderTargets, D3D12DepthStencilView* pDepthStencilView)
+{
+	for (uint32 i = 0; i < NumRenderTargets; i++)
+	{
+		D3D12RenderTargetView* View = ppViews[i];
+		D3D12TextureBase* Tex = View->GetCurrentFrame().Texture;
+		Tex->TransitionResource(this, D3D12_RESOURCE_STATE_PRESENT);
+		Tex->PromotedState = D3D12_RESOURCE_STATE_PRESENT;
+	}
+	if (pDepthStencilView)
+	{
+		D3D12TextureBase* Tex = pDepthStencilView->GetCurrentFrame().Texture;
+		Tex->TransitionResource(this, D3D12_RESOURCE_STATE_DEPTH_READ);
+		Tex->PromotedState = D3D12_RESOURCE_STATE_DEPTH_READ;
+	}
+	FlushResourceTransitions();
+}
+
+void D3D12GraphicsCommandBuffer::TransitionRenderTargetsToWrite(D3D12RenderTargetView** ppViews, uint32 NumRenderTargets, D3D12DepthStencilView* pDepthStencilView)
+{
+	for (uint32 i = 0; i < NumRenderTargets; i++)
+	{
+		D3D12RenderTargetView* View = ppViews[i];
+		D3D12TextureBase* Tex = View->GetCurrentFrame().Texture;
+		Tex->TransitionResource(this, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		Tex->PromotedState = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	}
+	if (pDepthStencilView)
+	{
+		D3D12TextureBase* Tex = pDepthStencilView->GetCurrentFrame().Texture;
+		Tex->TransitionResource(this, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		Tex->PromotedState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+	}
+	FlushResourceTransitions();
+}
+
 ///--------- End D3D12GraphicsCommandBuffer ---------///
 
-void D3D12GraphicsCommandContext::BeginPass(IRenderTargetInfo* InRenderPass)
+// void D3D12GraphicsCommandContext::BeginPass(IRenderPass* InRenderPass)
+// {
+// 	if (InRenderPass)
+// 	{
+// 		CurrentCommandBuffer->InitializeAllocators(ParentDevice->GetSrvAllocator(), ParentDevice->GetSmpAllocator());
+// 	}
+// 	CurrentCommandBuffer->BeginPass(InRenderPass);
+// }
+// 
+// void D3D12GraphicsCommandContext::EndPass()
+// {
+// 	ParentDevice->EnsureAllUploadsOccured();
+// 	CurrentCommandBuffer->EndPass();
+// 	CurrentCommandBuffer->CloseCommandBuffer();
+// 	ParentDevice->GetCommandQueue(ContextType).ExecuteImmediate(CurrentCommandBuffer->CommandList);
+// 	CurrentCommandBuffer->FetchNewCommandList();
+// }
+
+void D3D12GraphicsCommandContext::Begin()
 {
-	if (InRenderPass)
+	CurrentCommandBuffer->Begin();
+	if (ContextType == COMMAND_CONTEXT_TYPE_GRAPHICS)
 	{
 		CurrentCommandBuffer->InitializeAllocators(ParentDevice->GetSrvAllocator(), ParentDevice->GetSmpAllocator());
 	}
-	CurrentCommandBuffer->BeginPass(InRenderPass);
 }
 
-void D3D12GraphicsCommandContext::EndPass()
+void D3D12GraphicsCommandContext::SetRenderTarget(IRenderTargetView* pRenderTarget, IDepthStencilView* pDepthStencil)
 {
-	ParentDevice->EnsureAllUploadsOccured();
-	CurrentCommandBuffer->EndPass();
-	CurrentCommandBuffer->CloseCommandBuffer();
-	ParentDevice->GetCommandQueue(ContextType).ExecuteImmediate(CurrentCommandBuffer->CommandList);
-	CurrentCommandBuffer->FetchNewCommandList();
+	CurrentCommandBuffer->SetRenderTarget(pRenderTarget, pDepthStencil);
+}
+
+void D3D12GraphicsCommandContext::SetRenderTargets(const std::vector<IRenderTargetView*>& RenderTargetViews, IDepthStencilView* pDepthStencil)
+{
+	CurrentCommandBuffer->SetRenderTargets(RenderTargetViews, pDepthStencil);
+}
+
+void D3D12GraphicsCommandContext::ClearRenderTargets()
+{
+	CurrentCommandBuffer->ClearRenderTargets();
 }
 
 void D3D12GraphicsCommandContext::Flush()
 {
+	ParentDevice->EnsureAllUploadsOccured();
+	CurrentCommandBuffer->CloseCommandBuffer();
+	ParentDevice->GetCommandQueue(ContextType).ExecuteImmediate(CurrentCommandBuffer->CommandList);
+	CurrentCommandBuffer->FetchNewCommandList();
 	ParentDevice->GetCommandQueue(ContextType).StallForFinish();
 }
 
@@ -530,6 +703,7 @@ IGraphicsCommandBuffer* D3D12GraphicsCommandContext::CreateCommandBuffer()
 	}
 	Result = CommandPool.Pop();
 	Result->InitializeAllocators(ParentDevice->GetSrvAllocator(), ParentDevice->GetSmpAllocator());
+	Result->Begin();
 	return Result;
 }
 
@@ -688,6 +862,36 @@ void D3D12GraphicsCommandContext::SetComputeUnorderedAccessView(uint32 Slot, con
 void D3D12GraphicsCommandContext::SetComputeConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset)
 {
 	CurrentCommandBuffer->SetComputeConstantBuffer(Slot, InBuffer, Offset);
+}
+
+ITexture2D* D3D12GraphicsCommandContext::CreateTemporaryTexture(uint32 Width, uint32 Height, EFORMAT Format, const SAMPLER_DESC& SampleDesc, ETEXTURE_USAGE Usage)
+{
+	return CurrentCommandBuffer->CreateTemporaryTexture(Width, Height, Format, SampleDesc, Usage);
+}
+
+IRenderTargetView* D3D12GraphicsCommandContext::CreateTemporaryRenderTargetView(ITexture2D* InTexture)
+{
+	return CurrentCommandBuffer->CreateTemporaryRenderTargetView(InTexture);
+}
+
+IDepthStencilView* D3D12GraphicsCommandContext::CreateTemporaryDepthStencilView(ITexture2D* InTexture)
+{
+	return CurrentCommandBuffer->CreateTemporaryDepthStencilView(InTexture);
+}
+
+void D3D12GraphicsCommandContext::DestroyTemporaryTexture(ITexture2D* pTexture)
+{
+	CurrentCommandBuffer->DestroyTemporaryTexture(pTexture);
+}
+
+void D3D12GraphicsCommandContext::DestroyTemporaryRenderTargetView(IRenderTargetView* pView)
+{
+	CurrentCommandBuffer->DestroyTemporaryRenderTargetView(pView);
+}
+
+void D3D12GraphicsCommandContext::DestroyTemporaryDepthStencilView(IDepthStencilView* pView)
+{
+	CurrentCommandBuffer->DestroyTemporaryDepthStencilView(pView);
 }
 
 void D3D12GraphicsCommandContext::Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) 

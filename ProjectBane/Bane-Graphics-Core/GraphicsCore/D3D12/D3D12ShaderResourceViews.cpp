@@ -15,11 +15,11 @@ D3D12RenderTargetView::FRAME_DATA& D3D12RenderTargetView::GetCurrentFrame()
 }
 
 
-D3D12_CPU_DESCRIPTOR_HANDLE* D3D12RenderPassInfo::GetDSV()
-{
-	if (DepthStencil)
-	{
-		return &DepthStencil->FrameData[D3D12GraphicsDevice::GetCurrentFrameIndex()].CpuHandle;
-	}
-	return nullptr;
-}
+// D3D12_CPU_DESCRIPTOR_HANDLE* D3D12RenderPassInfo::GetDSV()
+// {
+// 	if (DepthStencil)
+// 	{
+// 		return &DepthStencil->FrameData[D3D12GraphicsDevice::GetCurrentFrameIndex()].CpuHandle;
+// 	}
+// 	return nullptr;
+// }

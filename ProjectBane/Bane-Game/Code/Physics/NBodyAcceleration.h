@@ -25,7 +25,7 @@ private:
 	{
 	public:
 
-		TreeBuilder() : ThreadCount(0), ThreadStack(nullptr), pOperatingData(nullptr) { }
+		TreeBuilder() : ThreadCount(0), ThreadStack(nullptr), pOperatingData(nullptr), Topmost(nullptr) { }
 
 		void Initialize(uint32 InThreadCount, NBodyNode* InTopmost, LinearAllocator& ParentAllocator, std::vector<PhysicsData>& InOutPhysicsData);
 

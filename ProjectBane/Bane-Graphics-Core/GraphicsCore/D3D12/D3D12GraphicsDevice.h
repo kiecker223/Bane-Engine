@@ -6,6 +6,7 @@
 #include "D3D12CommandContext.h"
 #include "D3D12ShaderResourceViews.h"
 #include "D3D12DescriptorAllocator.h"
+#include "D3D12Heap.h"
 #include <Platform/System/Window.h>
 #include <mutex>
 
@@ -52,6 +53,11 @@ public:
 	virtual IBuffer* CreateStagingBuffer(uint32 ByteCount) final override;
 
 	virtual ITexture2D* CreateTexture2D(uint32 Width, uint32 Height, EFORMAT Format, const SAMPLER_DESC& InSamplerDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
+
+	D3D12TextureBase* CreateTemporaryRenderTexture(uint32 Width, uint32 Height, EFORMAT Format, const SAMPLER_DESC& InSamplerDesc, ETEXTURE_USAGE Usage);
+	D3D12RenderTargetView* CreateTemporaryRenderTargetView(D3D12TextureBase* InTexture);
+	D3D12DepthStencilView* CreateTemporaryDepthStencilView(D3D12TextureBase* InTexture);
+
 	virtual ITexture2DArray* CreateTexture2DArray(uint32 Width, uint32 Height, uint32 Count, EFORMAT Format, const SAMPLER_DESC& InSamplerDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
 	virtual ITexture3D* CreateTexture3D(uint32 Width, uint32 Height, uint32 Depth, EFORMAT Format, const SAMPLER_DESC& InSamplerDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
 	virtual ITextureCube* CreateTextureCube(uint32 CubeSize, EFORMAT Format, const SAMPLER_DESC& InSamplerDesc, ETEXTURE_USAGE Usage, const SUBRESOURCE_DATA* Data) final override;
@@ -60,9 +66,8 @@ public:
 
 	virtual IInputLayout* CreateInputLayout(const GFX_INPUT_LAYOUT_DESC& Desc) final override;
 
-	virtual IRenderTargetInfo* CreateRenderPass(const IRenderTargetView** RenderTargets, uint32 NumRenderTargets, const IDepthStencilView* DepthStencil, const fvec4& ClearColor) final override;
-	virtual IRenderTargetInfo* GetBackBufferTargetPass() final override;
 	virtual IRenderTargetView* GetBackBuffer() final override;
+	virtual IDepthStencilView* GetDepthStencilForBackBuffer() final override;
 
 	virtual IRenderTargetView* CreateRenderTargetView(ITexture2D* InTexture) final override;
 	virtual IDepthStencilView* CreateDepthStencilView(ITexture2D* InTexture) final override;
@@ -111,6 +116,11 @@ public:
 	{
 		return m_CommandQueues[ContextType];
 	}
+
+	inline ID3D12ManagedHeapObject* GetTemporaryTextureHeap()
+	{
+		return reinterpret_cast<ID3D12ManagedHeapObject*>(&m_RTHeaps[GetCurrentFrameIndex()]);
+	}
 	
 private:
 
@@ -132,12 +142,14 @@ private:
 	D3D12LinearDescriptorAllocator m_SmpAllocator;
 
 	IRenderTargetView* m_BackBuffer;
+	IDepthStencilView* m_DepthStencil;
 	D3D12_RECT m_Rect;
 	D3D12_VIEWPORT m_ViewPort;
 	EMULTISAMPLE_LEVEL m_MaxMultisampleLevel;
 	D3D12SwapChain* m_SwapChain;
-	D3D12RenderPassInfo* m_BasicRenderPass;
 	ID3D12Device1* m_Device;
+
+	D3D12LinearHeapAllocator m_RTHeaps[3];
 };
 
 

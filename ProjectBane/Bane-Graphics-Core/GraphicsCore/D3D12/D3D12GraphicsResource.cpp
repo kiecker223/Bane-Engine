@@ -3,8 +3,14 @@
 #include "D3D12Translator.h"
 #include "Platform/System/Logging/Logger.h"
 #include "D3D12Helper.h"
+#include "D3D12Heap.h"
 
 
+
+void D3D12ResourceLocation::FreeFromHeap()
+{
+	OwningHeap->DeAllocateResource(HeapPointer);
+}
 
 void D3D12GPUResource::TransitionResource(D3D12GraphicsCommandBuffer* Ctx, D3D12_RESOURCE_STATES NewState)
 {
@@ -156,15 +162,22 @@ bool D3D12Buffer::CheckResourceTransitionValid(D3D12_RESOURCE_STATES NewState)
 	return true;
 }
 
+uint64 D3D12GetNumBytesForTexture2D(uint32 Width, uint32 Height, EFORMAT Format)
+{
+	uint64 dWidth(Width);
+	uint64 dHeight(Height);
+	uint64 ByteWidthForFormat = GetFormatBitWidth(Format) / 4;
+	return dWidth * dHeight * ByteWidthForFormat;
+}
 
-D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth, uint32 InHeight, uint32 InDepth, uint32 InCount, 
-									EFORMAT InFormat, const SAMPLER_DESC& InSampleDesc, const D3D12_SAMPLER_DESC& InD3DSampler, ETEXTURE_USAGE InUsage) :
+D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth, uint32 InHeight, uint32 InDepth, uint32 InCount,
+	EFORMAT InFormat, const SAMPLER_DESC& InSamplerDesc, const D3D12_SAMPLER_DESC& InD3DSampler, ETEXTURE_USAGE InUsage, ID3D12ManagedHeapObject* pParentHeap) :
 	Width(InWidth),
 	Height(InHeight),
 	Depth(InDepth),
 	ArrayCount(InCount),
 	Format(InFormat),
-	SamplerDesc(InSampleDesc),
+	SamplerDesc(InSamplerDesc),
 	D3DSampleDesc(InD3DSampler),
 	Usage(InUsage)
 {
@@ -174,7 +187,7 @@ D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth
 	D3D12_RESOURCE_FLAGS AdditionalFlags = D3D12_RESOURCE_FLAG_NONE;
 	D3D12_RESOURCE_STATES InitialState = D3D12_RESOURCE_STATE_COMMON;
 
-	D3D12_CLEAR_VALUE ClearValue;
+	D3D12_CLEAR_VALUE ClearValue = { };
 
 	if (IsShaderResource())
 	{
@@ -200,9 +213,9 @@ D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth
 		ClearValue = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D24_UNORM_S8_UINT, 1.0f, 0);
 	}
 
+	uint32 DepthOrArraySize = 0;
 	if (InDepth == 1)
 	{
-		uint32 DepthOrArraySize;
 		if (InCount > 1)
 		{
 			DepthOrArraySize = InCount;
@@ -223,19 +236,39 @@ D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth
 
 	D3D12_HEAP_PROPERTIES HeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 
-	D3D12_CLEAR_VALUE* pClearValue = ((Usage & TEXTURE_USAGE_DEPTH_STENCIL) == TEXTURE_USAGE_DEPTH_STENCIL || 
-									 ((Usage & TEXTURE_USAGE_RENDER_TARGET) == TEXTURE_USAGE_RENDER_TARGET)) ? &ClearValue : nullptr;
-	
- 	D3D12ERRORCHECK(
- 		Device->CreateCommittedResource(
- 			&HeapProps,
- 			D3D12_HEAP_FLAG_NONE,
- 			&ResourceDesc,
- 			InitialState,
- 			pClearValue,
- 			IID_PPV_ARGS(&Resource.D3DResource)
- 		)
- 	);
+	D3D12_CLEAR_VALUE* pClearValue = ((Usage & TEXTURE_USAGE_DEPTH_STENCIL) == TEXTURE_USAGE_DEPTH_STENCIL ||
+		((Usage & TEXTURE_USAGE_RENDER_TARGET) == TEXTURE_USAGE_RENDER_TARGET)) ? &ClearValue : nullptr;
+
+	if (InDepth == 1 && DepthOrArraySize == 1)
+	{
+		Resource.SizeInBytes = D3D12GetNumBytesForTexture2D(Width, Height, Format);
+	}
+	if (pParentHeap)
+	{
+		D3D12ERRORCHECK(
+			Device->CreatePlacedResource(
+				pParentHeap->GetHeap(),
+				pParentHeap->AllocateResource(Resource.SizeInBytes),
+				&ResourceDesc,
+				InitialState,
+				pClearValue,
+				IID_PPV_ARGS(&Resource.D3DResource)
+			)
+		);
+	}
+	else
+	{
+		D3D12ERRORCHECK(
+			Device->CreateCommittedResource(
+				&HeapProps,
+				D3D12_HEAP_FLAG_NONE,
+				&ResourceDesc,
+				InitialState,
+				pClearValue,
+				IID_PPV_ARGS(&Resource.D3DResource)
+			)
+		);
+	}
 	CurrentState = InitialState;
 	PromotedState = InitialState;
 }

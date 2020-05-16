@@ -12,6 +12,8 @@ typedef struct ALIGN_FOR_GPU_BUFFER CAMERA_CONSTANT_BUFFER_DATA {
 	float FarPlane;
 } CAMERA_CONSTANT_BUFFER_DATA;
 
+/* Consider leaving this for IRenderTargetInfo instead, not that it doesn't make sense but having these names all fucked up
+ like this can lead to confusion
 class IRenderPass
 {
 	struct RenderUserData
@@ -32,4 +34,4 @@ class IRenderPass
 
 	virtual void PostFrame(IGraphicsDevice* pDevice, IGraphicsCommandContext* CommandContext) = 0;
 };
-
+*/

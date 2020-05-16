@@ -20,6 +20,10 @@ void D3D12CommandQueue::CompleteExecution()
 				m_ExecutionQueue[i]->CommitQueueLock.unlock();
 			}
 		}
+		if (!m_ExecutionQueue[i]->TemporaryTextures.empty())
+		{
+			
+		}
 		if (m_ExecutionQueue[i]->ResetLock.try_lock())
 		{
 			m_ExecutionQueue[i]->Reset();
@@ -32,6 +36,15 @@ void D3D12CommandQueue::CompleteExecution()
 	{
 		m_ExecutionQueue.AppendToOther(m_GraphicsDevice->m_AvailableCLs[m_ContextType]);
 		m_ExecutionQueue.Reset();
+	}
+
+	
+	// Lets try reseting the descriptor memory when the GPU has finished doing work
+	// rather than when we move to the next frame
+	if (m_ContextType == COMMAND_CONTEXT_TYPE_GRAPHICS)
+	{
+		m_GraphicsDevice->GetSmpAllocator().Reset();
+		m_GraphicsDevice->GetSrvAllocator().Reset();
 	}
 }
 

@@ -9,8 +9,10 @@
 class D3D12ResourceLocation;
 class D3D12GraphicsDevice;
 class D3D12RenderPassInfo;
+class D3D12RenderTargetView;
+class D3D12DepthStencilView;
 
-class D3D12CommandList : D3D12DeviceChild
+class D3D12CommandList : public D3D12DeviceChild
 {
 public:
 
@@ -20,6 +22,16 @@ public:
 		void Destroy()
 		{
 			delete Resource;
+		}
+	};
+
+	struct TemporaryTextureAllocation
+	{
+		D3D12TextureBase* Texture;
+
+		void Destroy()
+		{
+			delete Texture;
 		}
 	};
 
@@ -101,6 +113,15 @@ public:
 		}
 	}
 
+	inline void DestroyRenderTargets()
+	{
+		for (uint32 i = 0; i < TemporaryTextures.size(); i++)
+		{
+			TemporaryTextures[i].Destroy();
+		}
+		TemporaryTextures.clear();
+	}
+
 	inline ID3D12GraphicsCommandList* GetGraphicsCommandList()
 	{
 		return (ID3D12GraphicsCommandList*)CommandList;
@@ -111,6 +132,8 @@ public:
 
 	std::vector<UploadResource> UploadResourcesToDestroy;
 	std::vector<DedicatedResource> CommitedResources;
+	std::vector<TemporaryTextureAllocation> TemporaryTextures;
+
 	std::mutex DeletionQueueLock;
 	std::mutex CommitQueueLock;
 	std::mutex ResetLock;
@@ -130,9 +153,11 @@ public:
 		CommandList(nullptr),
 		ParentDevice(InDevice),
 		ContextType(InContextType),
-		CurrentRenderPass(nullptr),
 		ScissorRect(InRect),
 		Viewport(InViewport),
+		NumCurrentRenderTargetViews(0),
+		CurrentRenderTargetViews{ nullptr },
+		CurrentDepthStencilView(nullptr),
 		NumDrawCalls(0),
 		NumDispatches(0),
 		NumCopies(0)
@@ -141,8 +166,13 @@ public:
 	}
 
 	inline bool HasBegun() { return CommandList != nullptr; }
-	virtual void BeginPass(IRenderTargetInfo* InRenderPass) override final;
-	virtual void EndPass() override final; 
+
+	void Begin();
+
+	virtual void SetRenderTarget(IRenderTargetView* pRenderTargetView, IDepthStencilView* pDepthStencilView) override final;
+	virtual void SetRenderTargets(const std::vector<IRenderTargetView*>& RenderTargetViews, IDepthStencilView* pDepthStencilView) override final;
+
+	virtual void ClearRenderTargets() override final;
 
 	virtual void CloseCommandBuffer() override final;
 
@@ -179,6 +209,14 @@ public:
 	virtual void SetComputeUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
 	virtual void SetComputeConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset) override final;
 
+	virtual ITexture2D* CreateTemporaryTexture(uint32 Width, uint32 Height, EFORMAT Format, const SAMPLER_DESC& SampleDesc, ETEXTURE_USAGE Usage) override final;
+	virtual IRenderTargetView* CreateTemporaryRenderTargetView(ITexture2D* InTexture) override final;
+	virtual IDepthStencilView* CreateTemporaryDepthStencilView(ITexture2D* InTexture) override final;
+
+	virtual void DestroyTemporaryTexture(ITexture2D* pTexture) override final;
+	virtual void DestroyTemporaryRenderTargetView(IRenderTargetView* pView) override final;
+	virtual void DestroyTemporaryDepthStencilView(IDepthStencilView* pView) override final;
+
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) final override;
 
 	void InitializeAllocators(D3D12LinearDescriptorAllocator& ParentSrvAllocator, D3D12LinearDescriptorAllocator& ParentSmpAllocator);
@@ -191,6 +229,9 @@ public:
 
 	void FetchNewCommandList();
 	void ReturnCommandList();
+
+	void TransitionRenderTargetsToRead(D3D12RenderTargetView** ppViews, uint32 NumRenderTargets, D3D12DepthStencilView* pDepthStencilView);
+	void TransitionRenderTargetsToWrite(D3D12RenderTargetView** ppViews, uint32 NumRenderTargets, D3D12DepthStencilView* pDepthStencilView);
 
 	uint32 NumDrawCalls;
 	uint32 NumDispatches;
@@ -207,7 +248,9 @@ public:
 	D3D12GraphicsPipelineState* GraphicsPipelineState;
 	D3D12ComputePipelineState* ComputePipelineState;
 	
-	D3D12RenderPassInfo* CurrentRenderPass;
+	D3D12RenderTargetView* CurrentRenderTargetViews[32];
+	uint32 NumCurrentRenderTargetViews;
+	D3D12DepthStencilView* CurrentDepthStencilView;
 	ID3D12GraphicsCommandList* D3DCL;
 	
 	D3D12ShaderSignature RootSignature;
@@ -237,7 +280,7 @@ public:
 		ScissorRect(InRect),
 		Viewport(InViewport)
 	{
-		uint32 NumCommandListsAllowed;
+		uint32 NumCommandListsAllowed = 0;
 		switch (ContextType)
 		{
 		case COMMAND_CONTEXT_TYPE_GRAPHICS: NumCommandListsAllowed = max(std::thread::hardware_concurrency() - 1, 6); break;
@@ -260,8 +303,12 @@ public:
 		return false;
 	}
 
-	virtual void BeginPass(IRenderTargetInfo* InRenderPass) override final;
-	virtual void EndPass() override final; // This will submit our handle and grab a new one
+	void Begin();
+
+	virtual void SetRenderTarget(IRenderTargetView* pRenderTarget, IDepthStencilView* pDepthStencil) override final;
+	virtual void SetRenderTargets(const std::vector<IRenderTargetView*>& RenderTargetViews, IDepthStencilView* pDepthStencil) override final;
+
+	virtual void ClearRenderTargets() override final;
 
 	virtual void Flush() override final;
 
@@ -302,6 +349,14 @@ public:
 	virtual void SetComputeUnorderedAccessView(uint32 Slot, const ITextureBase* InResource, uint32 Subresource) override final;
 	virtual void SetComputeUnorderedAccessView(uint32 Slot, const IBuffer* InResource, uint32 IndexToStart, uint32 NumElements, uint32 StructureByteStride) override final;
 	virtual void SetComputeConstantBuffer(uint32 Slot, const IBuffer* InBuffer, uint64 Offset) override final;
+
+	virtual ITexture2D* CreateTemporaryTexture(uint32 Width, uint32 Height, EFORMAT Format, const SAMPLER_DESC& SampleDesc, ETEXTURE_USAGE Usage) override final;
+	virtual IRenderTargetView* CreateTemporaryRenderTargetView(ITexture2D* InTexture) override final;
+	virtual IDepthStencilView* CreateTemporaryDepthStencilView(ITexture2D* InTexture) override final;
+
+	virtual void DestroyTemporaryTexture(ITexture2D* pTexture) override final;
+	virtual void DestroyTemporaryRenderTargetView(IRenderTargetView* pView) override final;
+	virtual void DestroyTemporaryDepthStencilView(IDepthStencilView* pView) override final;
 
 	virtual void Dispatch(uint32 ThreadX, uint32 ThreadY, uint32 ThreadZ) final override;
 

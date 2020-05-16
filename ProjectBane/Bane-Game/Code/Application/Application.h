@@ -36,6 +36,8 @@ typedef struct RENDERING_SETTINGS {
 
 
 class ISceneRenderer;
+class IGraphicsCommandBuffer;
+class Mesh;
 
 typedef void(*PFNApplicationStartCallback)();
 typedef void(*PFNApplicationUpdateCallback)();
@@ -93,6 +95,9 @@ public:
 	void OpenApplicationWindow(const std::string& Name, uint32 Width, uint32 Height);
 
 	void InitSystems();
+
+	// Assumes that the pass info, etc is already setup
+	void RenderGameToTarget(Mesh* pMesh, IGraphicsCommandBuffer* CMDBuff);
 
 	void Run();
 

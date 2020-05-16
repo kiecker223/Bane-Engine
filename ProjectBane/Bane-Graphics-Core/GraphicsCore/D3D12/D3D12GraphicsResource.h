@@ -5,6 +5,7 @@
 #include "../Interfaces/GraphicsCommandList.h"
 #include "D3D12PipelineState.h"
 #include "D3D12Translator.h"
+#include "D3D12Heap.h"
 #include <iostream>
 
 
@@ -77,6 +78,7 @@ class D3D12GraphicsCommandContext;
 class D3D12GraphicsCommandBuffer;
 class D3D12ComputeCommandContext;
 class D3D12GPUResource;
+class D3D12Heap;
 
 typedef struct D3D12_RESOURCE_TRANSITION
 {
@@ -116,11 +118,13 @@ class D3D12ResourceLocation : public D3D12DeviceChild
 
 public:
 
-	D3D12ResourceLocation() : D3DResource(nullptr) { }
+	D3D12ResourceLocation() : D3DResource(nullptr), OwningHeap(nullptr), HeapPointer(0), SizeInBytes(0) { }
 
-	D3D12ResourceLocation(uint32 InSizeInBytes, ID3D12Resource* InResource, D3D12GraphicsDevice* InDevice) :
+	D3D12ResourceLocation(uint64 InSizeInBytes, ID3D12Resource* InResource, D3D12GraphicsDevice* InDevice) :
 		SizeInBytes(InSizeInBytes),
 		D3DResource(InResource),
+		OwningHeap(nullptr),
+		HeapPointer(0),
 		D3D12DeviceChild(InDevice)
 	{
 	}
@@ -129,6 +133,10 @@ public:
 	{
 		if (D3DResource)
 		{
+			if (OwningHeap != nullptr)
+			{
+				FreeFromHeap();
+			}
 			ULONG RefCount = D3DResource->Release();
 			while (RefCount) 
 			{
@@ -139,6 +147,8 @@ public:
 			std::cout << "Destroying" << std::endl;
 		}
 	}
+
+	void FreeFromHeap();
 
 	inline void SetResource(ID3D12Resource* InResource)
 	{
@@ -163,7 +173,9 @@ public:
 	D3D12_SRV_DIMENSION SRVDimension;
 	D3D12_UAV_DIMENSION UAVDimension;
 	ID3D12Resource* D3DResource;
-	uint32 SizeInBytes;
+	D3D12Heap* OwningHeap;
+	uint64 HeapPointer;
+	uint64 SizeInBytes;
 
 	std::string DebugName;
 };
@@ -265,7 +277,7 @@ public:
 	void Unmap() final override;
 
 	virtual EBUFFER_USAGE GetUsage() const final override { return Usage; }
-	virtual uint32 GetSizeInBytes() const final override { return static_cast<uint32>(SizeInBytes); }
+	virtual uint64 GetSizeInBytes() const final override { return static_cast<uint64>(SizeInBytes); }
 
 	void SetDebugName(const std::string& DebugName) override
 	{
@@ -313,7 +325,7 @@ public:
 	{
 		D3D12_VERTEX_BUFFER_VIEW View = { };
 		View.BufferLocation = GetGPUVirtualAddress();
-		View.SizeInBytes = GetSizeInBytes();
+		View.SizeInBytes = static_cast<UINT>(GetSizeInBytes());
 		View.StrideInBytes = GetLayoutStride(Layout);
 		return View;
 	}
@@ -323,7 +335,7 @@ public:
 		D3D12_INDEX_BUFFER_VIEW View = { };
 		View.BufferLocation = GetGPUVirtualAddress();
 		View.Format = DXGI_FORMAT_R32_UINT;
-		View.SizeInBytes = GetSizeInBytes();
+		View.SizeInBytes = static_cast<UINT>(GetSizeInBytes());
 		return View;
 	}
 
@@ -337,6 +349,7 @@ public:
 };
 
 
+uint64 D3D12GetNumBytesForTexture2D(uint32 Width, uint32 Height, EFORMAT Format);
 
 class D3D12TextureBase : public ITextureBase, public D3D12GPUResource
 {
@@ -349,7 +362,7 @@ class D3D12TextureBase : public ITextureBase, public D3D12GPUResource
 public:
 	
 	D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth, uint32 InHeight, uint32 InDepth, uint32 InCount, 
-					 EFORMAT InFormat, const SAMPLER_DESC& InSamplerDesc, const D3D12_SAMPLER_DESC& InD3DSampler, ETEXTURE_USAGE InUsage);
+					 EFORMAT InFormat, const SAMPLER_DESC& InSamplerDesc, const D3D12_SAMPLER_DESC& InD3DSampler, ETEXTURE_USAGE InUsage, ID3D12ManagedHeapObject* pParentHeap = nullptr);
 
 	void UploadToGPU(D3D12GraphicsCommandContext* Ctx, const void* Pointer, const uint32 Width, const uint32 Height, const uint32 Depth, const uint32 StepSize);
 

@@ -583,15 +583,11 @@ inline mat4x4 matScale(const vec3& Scale)
 	return Result;
 }
 
-inline vec3 RandomVec3(double Magnitude = -1.0)
+inline vec3 RandomVec3(double Min, double Max)
 {
 	std::random_device Dev;
 	std::mt19937 Gen(Dev());
-	std::uniform_real_distribution<double> Dist;
+	std::uniform_real_distribution<double> Dist(Min, Max);
 	vec3 Result = vec3(Dist(Gen), Dist(Gen), Dist(Gen));
-	if (Magnitude > 0.0)
-	{
-		normalize(Result) * Magnitude;
-	}
 	return Result;
 }

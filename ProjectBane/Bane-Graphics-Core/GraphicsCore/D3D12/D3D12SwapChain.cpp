@@ -38,7 +38,7 @@ void D3D12SwapChain::SetSwapInterval(uint32 SyncInterval)
 
 void D3D12SwapChain::Present()
 {
-	// Gross
+	Device->GetGraphicsContext()->Flush();
 	Device->GetComputeQueue().StallForFinish();
 	Device->GetCommandQueue(COMMAND_CONTEXT_TYPE_GRAPHICS).StallForFinish();
 	SwapChain->Present(SyncRate, 0);

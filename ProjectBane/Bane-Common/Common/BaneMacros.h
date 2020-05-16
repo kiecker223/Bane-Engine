@@ -8,11 +8,11 @@
 #include <stdlib.h>
 #define BANE_CHECK(x) if (!(x)) {  __debugbreak(); abort(); }
 #else
-#define BANE_CHECK(x) if (!(x)) { abort(); }
+#define BANE_CHECK(x) x
 #endif
 
 #define KILOBYTE(x) x * 1024
-#define MEGABYTE(x) KILOBYTE(x) * 1024
+#define MEGABYTE(x) KILOBYTE(x) * 1000
 
 #define MAKE_ALIGN(x) __declspec(align(x))
 #define SHADER_ALIGNMENT MAKE_ALIGN(sizeof(fvec4))
