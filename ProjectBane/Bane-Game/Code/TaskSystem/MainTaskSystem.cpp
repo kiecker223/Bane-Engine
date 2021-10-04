@@ -13,7 +13,7 @@ TaskSystem* TaskSystem::Get()
 
 void TaskSystem::Initialize()
 {
-	uint32 ThreadCount = 4;//std::thread::hardware_concurrency() - 2;
+	uint32 ThreadCount = 2;//std::thread::hardware_concurrency() - 2;
 	m_bRunning = true;
 	m_Threads.reserve(ThreadCount);
 	ThreadStats.resize(ThreadCount);
@@ -34,11 +34,7 @@ void TaskSystem::Initialize()
 	}
 	for (uint32 i = 0; i < ThreadCount; i++)
 	{
-		m_Threads.push_back(std::move(
-			std::thread([&]() {
-				ThreadFunc(i);
-			})
-		));
+		m_Threads.push_back(new std::thread([i, this]() { this->ThreadFunc(i); }));
 	}
 }
 
@@ -114,7 +110,12 @@ void TaskSystem::UpdateSchedule()
 				{
 					for (uint32 i = 0; i < pTask->GetDispatchCount(); i++)
 					{
-						(*ThreadStats[CurrentDispatchThreadId % (m_ThreadCount)]->WorkQueue.SafeGetFront())->Commands.Add(pTask->GetTaskExecutionHandle(i));
+						auto** ThreadWorkQueueFront = ThreadStats[CurrentDispatchThreadId % (m_ThreadCount)]->WorkQueue.SafeGetFront();
+						
+						if (ThreadWorkQueueFront)
+						{
+							(*ThreadWorkQueueFront)->Commands.Add(pTask->GetTaskExecutionHandle(i));
+						}
 						CurrentDispatchThreadId++;
 					}
 					pTask = NewTaskGroup->Commands.SafePop();
@@ -157,21 +158,13 @@ TaskExecutionHandle* TaskSystem::StealTask(uint64 CurrentFenceValue, uint32 Call
 
 void TaskSystem::ThreadFunc(uint32 ThreadIdx)
 {
-	// Wait for the stack??
-	// This is a really weird hack I have to setup but if I don't do this then values are 
-	// seemingly corrupted
-	while (true)
-	{
-		if (ThreadIdx < m_Threads.size())
-		{
-			break;
-		}
-	}
 	if (!SetThreadAffinityMask(GetCurrentThread(), (uint64(1) << uint64(ThreadIdx + 2))))
 	{
 		__debugbreak();
 	}
-	
+
+	std::cout << "Thread index: " << ThreadIdx << std::endl;
+
 	ThreadStatus* Stats = ThreadStats[ThreadIdx];
 	while (m_bRunning)
 	{
@@ -179,6 +172,7 @@ void TaskSystem::ThreadFunc(uint32 ThreadIdx)
 			TaskExecutionGroup* ExecutionGroup = Stats->WorkQueue.Pop();
 			if (ExecutionGroup)
 			{
+				//std::lock_guard<std::mutex> Lock2(ExecutionGroup->Commands.Lock);
 				Stats->CurrentGroup.store(ExecutionGroup);
 				TaskExecutionHandle* Handle = ExecutionGroup->Commands.Pop();
 				if (Handle)
@@ -239,7 +233,7 @@ void TaskSystem::ThreadFunc(uint32 ThreadIdx)
 			}
 			if (!bFinished)
 			{
-				std::this_thread::yield();
+				Sleep(0);
 			}
 			else
 			{

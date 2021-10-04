@@ -118,7 +118,15 @@ class D3D12ResourceLocation : public D3D12DeviceChild
 
 public:
 
-	D3D12ResourceLocation() : D3DResource(nullptr), OwningHeap(nullptr), HeapPointer(0), SizeInBytes(0) { }
+	D3D12ResourceLocation() : 
+		D3DResource(nullptr), 
+		OwningHeap(nullptr), 
+		HeapPointer(0), 
+		SizeInBytes(0), 
+		Location(0),
+		SRVDimension(D3D12_SRV_DIMENSION_UNKNOWN),
+		UAVDimension(D3D12_UAV_DIMENSION_UNKNOWN),
+		D3D12DeviceChild(nullptr) { }
 
 	D3D12ResourceLocation(uint64 InSizeInBytes, ID3D12Resource* InResource, D3D12GraphicsDevice* InDevice) :
 		SizeInBytes(InSizeInBytes),
@@ -355,9 +363,7 @@ class D3D12TextureBase : public ITextureBase, public D3D12GPUResource
 {
 	friend class D3D12GraphicsDevice;
 
-	D3D12TextureBase() 
-	{
-	}
+	D3D12TextureBase() {}
 
 public:
 	

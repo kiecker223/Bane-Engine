@@ -237,7 +237,7 @@ public:
 		m_bRunning = false;
 		for (uint32 i = 0; i < m_ThreadCount; i++)
 		{
-			m_Threads[i].join();
+			m_Threads[i]->join();
 		}
 	}
 
@@ -259,7 +259,7 @@ private:
 
 	uint32 m_ThreadCount;
 	bool m_bRunning;
-	std::vector<std::thread> m_Threads;
+	std::vector<std::thread*> m_Threads;
 };
 
 

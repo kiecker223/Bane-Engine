@@ -42,7 +42,7 @@ struct imat4x4
 
 	imat4x4(const imat4x4& Rhs)
 	{
-		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
+		memcpy(p, (void*)&Rhs, sizeof(*this));
 	}
 
 	imat4x4(const T* Values)
@@ -214,7 +214,7 @@ struct umat4x4
 
 	umat4x4(const umat4x4& Rhs)
 	{
-		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
+		memcpy(p, (void*)&Rhs, sizeof(*this));
 	}
 
 	umat4x4(const T* Values)

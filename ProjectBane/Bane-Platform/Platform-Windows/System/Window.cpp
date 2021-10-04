@@ -64,7 +64,7 @@ Window::WindowHandle* OsWindowsHandle::Create(LPCSTR className, const char* name
 		className, name, WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 		CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, instance, nullptr
 	);
-
+	ShowWindow(windows, 1);
 	return new OsWindowsHandle(windows);
 }
 

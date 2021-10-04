@@ -150,14 +150,14 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 		UINT VisibleNodeMask;
 		*/
 		HeapDesc.Properties.Type = D3D12_HEAP_TYPE_DEFAULT;
-		HeapDesc.Properties.CPUPageProperty = 
+		HeapDesc.Properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
 
-		D3D12ERRORCHECK(
-			Device->CreateHeap(
-				&HeapDesc,
-				IID_PPV_ARGS(&pHeap)
-			)
-		);
+// 		D3D12ERRORCHECK(
+// 			Device->CreateHeap(
+// 				&HeapDesc,
+// 				IID_PPV_ARGS(&pHeap)
+// 			)
+// 		);
 	}
 
 	InitializeD3D12Translator();

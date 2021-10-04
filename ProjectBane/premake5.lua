@@ -64,8 +64,7 @@ workspace "ProjectBane"
 
     flags {
       "MultiProcessorCompile",
-      "StaticRuntime",
-      "FatalWarnings",
+      "StaticRuntime"
     }
 
     exceptionhandling "Off"
@@ -87,7 +86,7 @@ project "BuildFiles"
 
 project("Regenerate premake")
     kind "Utility"
-    prebuildcommands("%{prj.location}../Tools/premake5.exe --file=%{prj.location}../premake5.lua vs2017")
+    prebuildcommands("%{prj.location}../Tools/premake5.exe --file=%{prj.location}../premake5.lua vs2019")
 
 include "Bane-Common/bane_common.lua"
 include "Bane-Core/bane_core.lua"

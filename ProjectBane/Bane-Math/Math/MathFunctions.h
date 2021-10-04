@@ -523,7 +523,7 @@ inline matrix matRotZ(float Radians)
 	);
 }
 
-enum NoName
+enum class NoName
 {
 	Name
 };

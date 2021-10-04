@@ -248,7 +248,7 @@ D3D12TextureBase::D3D12TextureBase(D3D12GraphicsDevice* InDevice, uint32 InWidth
 		D3D12ERRORCHECK(
 			Device->CreatePlacedResource(
 				pParentHeap->GetHeap(),
-				pParentHeap->AllocateResource(Resource.SizeInBytes),
+				pParentHeap->AllocateResource(Resource.D3DResource->GetDesc()),
 				&ResourceDesc,
 				InitialState,
 				pClearValue,

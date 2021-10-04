@@ -7,7 +7,7 @@
 #define USE_WARP 0
 #define USE_DEBUG_INTERFACE 0
 
-#define PLEASE_HELP_I_BROKE_THE_THING_AGAIN 1
+#define PLEASE_HELP_I_BROKE_THE_THING_AGAIN 0
 
 void D3D12Runtime::Initialize(const Window* pWindow)
 {
@@ -43,7 +43,7 @@ void D3D12Runtime::Initialize(const Window* pWindow)
 	ID3D12CommandQueue* CommandQueue = nullptr;
 	Device->CreateCommandQueue(&CmdDesc, IID_PPV_ARGS(&CommandQueue));
 
-	m_SwapChain->Initialize(DxgiFactory, Adapter, CommandQueue, pWindow);
+	BANE_CHECK(m_SwapChain->Initialize(DxgiFactory, Adapter, CommandQueue, pWindow));
 	m_Device = new D3D12GraphicsDevice(m_SwapChain, pWindow, Device, CommandQueue);
 
 	struct Vertex

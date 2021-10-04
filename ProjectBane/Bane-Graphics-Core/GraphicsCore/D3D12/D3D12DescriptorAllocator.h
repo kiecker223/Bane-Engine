@@ -32,7 +32,7 @@ public:
 
 	inline void Increment()
 	{
-		if (CpuHandle.ptr + IncrementSize > (BaseCpuHandle.ptr + (DescriptorCount * IncrementSize)))
+		if (CpuHandle.ptr + IncrementSize > (BaseCpuHandle.ptr + (static_cast<uint64>(DescriptorCount) * static_cast<uint64>(IncrementSize))))
 		{
 			return;
 		}
@@ -41,11 +41,11 @@ public:
 
 	inline void Increment(uint32 Count)
 	{
-		if (CpuHandle.ptr + (IncrementSize * Count) > (BaseCpuHandle.ptr + static_cast<SIZE_T>(DescriptorCount * IncrementSize)))
+		if (CpuHandle.ptr + (static_cast<uint64>(IncrementSize) * static_cast<uint64>(Count)) > (BaseCpuHandle.ptr + (static_cast<uint64>(DescriptorCount) * static_cast<uint64>(IncrementSize))))
 		{
 			return;
 		}
-		CpuHandle.ptr += (IncrementSize * Count);
+		CpuHandle.ptr += (static_cast<uint64>(IncrementSize) * static_cast<uint64>(Count));
 	}
 
 	inline void Decrement()

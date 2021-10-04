@@ -12,7 +12,8 @@ public:
 	typedef TStack<TType, MAX_SIZE> ThisType;
 
 	TStack() : 
-		NumUsed(0)
+		NumUsed(0),
+		Data{}
 	{
 	}
 

@@ -38,7 +38,7 @@ struct imat3x3
 
 	imat3x3(const imat3x3& Rhs)
 	{
-		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
+		memcpy(p, (void*)&Rhs, sizeof(*this));
 	}
 
 	imat3x3(const T* Values)
@@ -188,7 +188,7 @@ struct umat3x3
 
 	umat3x3(const umat3x3& Rhs)
 	{
-		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
+		memcpy(p, (void*)&Rhs, sizeof(*this));
 	}
 
 	umat3x3(const T* Values)
@@ -489,7 +489,7 @@ struct mat3x3
 
 	mat3x3(const mat3x3& Rhs)
 	{
-		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
+		memcpy(p, (void*)&Rhs, sizeof(*this));
 	}
 
 	mat3x3(const T* Values)

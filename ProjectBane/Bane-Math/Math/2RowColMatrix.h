@@ -34,7 +34,7 @@ struct imat2x2
 
 	imat2x2(const TT& Rhs)
 	{
-		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
+		memcpy(p, (void*)&Rhs, sizeof(*this));
 	}
 
 	imat2x2(const T* Values)
@@ -157,7 +157,7 @@ struct umat2x2
 
 	umat2x2(const TT& Rhs)
 	{
-		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
+		memcpy(p, (void*)&Rhs, sizeof(*this));
 	}
 
 	umat2x2(const T* Values)
@@ -280,7 +280,7 @@ struct fmat2x2
 
 	fmat2x2(const TT& Rhs)
 	{
-		memcpy((void*)this, (void*)&Rhs, sizeof(*this));
+		memcpy(p, (void*)&Rhs, sizeof(*this));
 	}
 
 	fmat2x2(const T* Values)

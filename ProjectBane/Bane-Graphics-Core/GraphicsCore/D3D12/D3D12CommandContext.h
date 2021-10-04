@@ -147,7 +147,7 @@ class D3D12GraphicsCommandBuffer : public IGraphicsCommandBuffer
 {
 public:
 
-	D3D12GraphicsCommandBuffer() { }
+	D3D12GraphicsCommandBuffer() = delete;
 
 	D3D12GraphicsCommandBuffer(D3D12GraphicsDevice* InDevice, ECOMMAND_CONTEXT_TYPE InContextType, D3D12_RECT InRect, D3D12_VIEWPORT InViewport) :
 		CommandList(nullptr),

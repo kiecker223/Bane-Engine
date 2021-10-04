@@ -19,7 +19,7 @@
 
 #pragma warning(disable:4049)
 
-#define NUM_OBJECTS 5
+#define NUM_OBJECTS 500
 
 
 Application* Application::GApplication = nullptr;
@@ -186,7 +186,7 @@ void Application::Run()
 
 	vec3 CameraPosition = PhysicsData[3].Position;
 
-	Task* ApplyNBodyAccelerationTask = new Task(TASK_DISPATCH_ON_ALL_THREADS, [&PhysicsData, &ConstantBuffMappedRef, &CameraPosition](uint32 DispatchSize, uint32 DispatchIndex)
+	Task* ApplyNBodyAccelerationTask = new Task(TASK_DISPATCH_ON_ALL_THREADS, [&PhysicsData](uint32 DispatchSize, uint32 DispatchIndex)
 	{
 		uint32 NumToIterate = NUM_OBJECTS / DispatchSize;
 		uint32 StartIndex = NumToIterate * DispatchIndex;
@@ -242,45 +242,47 @@ void Application::Run()
 	Quaternion LookDirection(fvec3(0.0f, 0.0f, 0.0f));
 	SIMDMEMZERO(CameraBuff->Map(), static_cast<uint32>(CameraBuff->GetSizeInBytes()));
 
-	IGraphicsCommandBuffer* BloomCommandBuffer;
+//	IGraphicsCommandBuffer* BloomCommandBuffer;
 // 	IGraphicsCommandBuffer* SomeOtherWeirdEffect;
 // 	IGraphicsCommandBuffer* InversionCommandBuffer;
 
 	ITexture2D* BloomResult = Device->CreateTexture2D(m_Window->GetWidth(), m_Window->GetHeight(), FORMAT_R8G8B8A8_UNORM, CreateDefaultSamplerDesc(), TEXTURE_USAGE_RENDER_TARGET | TEXTURE_USAGE_SHADER_RESOURCE, nullptr); 
 	IRenderTargetView* BloomResultRT = Device->CreateRenderTargetView(BloomResult);
 
-	ITexture2D* SceneTex = Device->CreateTexture2D(m_Window->GetWidth(), m_Window->GetHeight(), FORMAT_R8G8B8A8_UNORM, CreateDefaultSamplerDesc(), TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET);
+	ITexture2D* SceneTex = Device->CreateTexture2D(m_Window->GetWidth(), m_Window->GetHeight(), FORMAT_R8G8B8A8_UNORM, CreateDefaultSamplerDesc(), TEXTURE_USAGE_SHADER_RESOURCE | TEXTURE_USAGE_RENDER_TARGET, nullptr);
 	IRenderTargetView* SceneRtv = Device->CreateRenderTargetView(SceneTex);
 
-	ITexture2D* SceneDepth = Device->CreateTexture2D(m_Window->GetWidth(), m_Window->GetHeight(), FORMAT_D24_UNORM_S8_UINT, CreateDefaultSamplerDesc(), TEXTURE_USAGE_DEPTH_STENCIL | TEXTURE_USAGE_SHADER_RESOURCE);
-	IDepthStencilView* SceneDepth = Device->CreateDepthStencilView(SceneDepth);
+	ITexture2D* SceneDepth = Device->CreateTexture2D(m_Window->GetWidth(), m_Window->GetHeight(), FORMAT_D24_UNORM_S8_UINT, CreateDefaultSamplerDesc(), TEXTURE_USAGE_DEPTH_STENCIL | TEXTURE_USAGE_SHADER_RESOURCE, nullptr);
+	IDepthStencilView* SceneDepthView = Device->CreateDepthStencilView(SceneDepth);
 
-	IGraphicsPipelineState* BloomShader = GetShaderCache()->LoadGraphicsPipeline("Bloom.gfx");
+//	IGraphicsPipelineState* BloomShader = GetShaderCache()->LoadGraphicsPipeline("Bloom.gfx");
 
-	Task* ApplyBloomTask = new Task(1, [&](uint32 DispatchSize, uint32 DispatchIndex)
-	{
-		ITexture2D* TemporaryTexture = BloomCommandBuffer->CreateTemporaryTexture(
-			m_Window->GetWidth(), 
-			m_Window->GetHeight(), 
-			FORMAT_R8G8B8A8_UNORM, 
-			CreateDefaultSamplerDesc(), 
-			TEXTURE_USAGE_RENDER_TARGET | TEXTURE_USAGE_SHADER_RESOURCE
-		);
-		IRenderTargetView* TemporaryRenderTarget = BloomCommandBuffer->CreateTemporaryRenderTargetView(TemporaryTexture);
-
-		IVertexBuffer* QuadVB = ApiRuntime::Get()->QuadVB;
-		IIndexBuffer* QuadIB = ApiRuntime::Get()->QuadIB;
-
-		BloomCommandBuffer->SetGraphicsPipelineState(BloomShader);
-		BloomCommandBuffer->SetTexture(0, SceneTex);
-		BloomCommandBuffer->SetVertexBuffer(QuadVB);
-		BloomCommandBuffer->SetIndexBuffer(QuadIB);
-		BloomCommandBuffer->DrawIndexed(4, 0, 0);
-	});
+// 	Task* ApplyBloomTask = new Task(1, [&](uint32 DispatchSize, uint32 DispatchIndex)
+// 	{
+// 		ITexture2D* TemporaryTexture = BloomCommandBuffer->CreateTemporaryTexture(
+// 			m_Window->GetWidth(), 
+// 			m_Window->GetHeight(), 
+// 			FORMAT_R8G8B8A8_UNORM, 
+// 			CreateDefaultSamplerDesc(), 
+// 			TEXTURE_USAGE_RENDER_TARGET | TEXTURE_USAGE_SHADER_RESOURCE
+// 		);
+// 		IRenderTargetView* TemporaryRenderTarget = BloomCommandBuffer->CreateTemporaryRenderTargetView(TemporaryTexture);
+// 
+// 		IVertexBuffer* QuadVB = ApiRuntime::Get()->QuadVB;
+// 		IIndexBuffer* QuadIB = ApiRuntime::Get()->QuadIB;
+// 
+// 		BloomCommandBuffer->SetGraphicsPipelineState(BloomShader);
+// 		BloomCommandBuffer->SetTexture(0, SceneTex);
+// 		BloomCommandBuffer->SetVertexBuffer(QuadVB);
+// 		BloomCommandBuffer->SetIndexBuffer(QuadIB);
+// 		BloomCommandBuffer->DrawIndexed(4, 0, 0);
+// 	});
 
 //	Task* ApplyInversionFilterTask = new Task(1, [](uint32 DispatchSize, uint32 DispatchIndex) {});
+	uint32 frame = 0;
 	while (!m_Window->QuitRequested())
 	{
+		frame++;
 		// Allow for moving around
 		ConstantBuffMappedRef.pPointer = ConstantBuff->MapT<ConstantBuffMappedPointerRef::Reference>();
 		SIMDMEMZERO(ConstantBuffMappedRef.pPointer, static_cast<uint32>(ConstantBuff->GetSizeInBytes()));
@@ -332,22 +334,16 @@ void Application::Run()
 		//AccelerationStructure.Construct(PhysicsData);
 		//AccelerationStructure.Simulate(PhysicsData, 1.0 / 60.0);
 
-// 		for (uint32 i = 0; i < PhysicsData.size(); i++)
-// 		{
-// 			PhysicsData[i].Velocity = vec3(0.5, 0.0, 0.5);
-// 		}
-
-		/*CameraPosition = PhysicsData[3].Position + vec3(0.0, 0.0, 100.0);*/
 
 		Dispatcher::DispatchTask(CalculateNBodyAccelerationTask);
 		Dispatcher::DispatchTask(ApplyNBodyAccelerationTask);
-		Dispatcher::WaitOnTask(ApplyNBodyAccelerationTask);
+		//Dispatcher::WaitOnTask(ApplyNBodyAccelerationTask);
 
 		for (uint32 i = 0; i < PhysicsData.size(); i++)
 		{
 			vec3 TransformedPosition = PhysicsData[i].Position - CameraPosition;
 			if (isNan(TransformedPosition)) { __debugbreak(); }
-			matrix Mat = matTranslation(fromDouble3(TransformedPosition)) * matScale(fvec3(300.0f, 300.0f, 300.0f));
+			matrix Mat = matTranslation(fromDouble3(TransformedPosition)) * matScale(fvec3(3.0f, 3.0f, 3.0f));
 			ConstantBuffMappedRef.pPointer[i].Mat = Mat;
 		}
 
@@ -374,24 +370,7 @@ void Application::Run()
 			pCtx->DrawIndexed(pMesh->GetIndexCount(), 0, 0);
 		}
 
-		ITexture2D* TemporaryTexture = pCtx->CreateTemporaryTexture(
-			m_Window->GetWidth(),
-			m_Window->GetHeight(),
-			FORMAT_R8G8B8A8_UNORM,
-			CreateDefaultSamplerDesc(),
-			TEXTURE_USAGE_RENDER_TARGET | TEXTURE_USAGE_SHADER_RESOURCE
-		);
-		IRenderTargetView* TemporaryRenderTarget = pCtx->CreateTemporaryRenderTargetView(TemporaryTexture);
-
-		IVertexBuffer* QuadVB = ApiRuntime::Get()->QuadVB;
-		IIndexBuffer* QuadIB = ApiRuntime::Get()->QuadIB;
-
-		pCtx->SetGraphicsPipelineState(BloomShader);
-		pCtx->SetTexture(0, SceneTex);
-		pCtx->SetVertexBuffer(QuadVB);
-		pCtx->SetIndexBuffer(QuadIB);
-		pCtx->DrawIndexed(4, 0, 0);
-
+		pCtx->Flush();
 		m_SceneRenderer->Present();
 		FrameTime.StartTimer();
 	}

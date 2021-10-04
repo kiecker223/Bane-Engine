@@ -6,7 +6,7 @@
 void TaskSegmentExecutor::InternalExecute()
 {
 	Func(DispatchSize, DispatchIndex);
-	CompletedValue++;
+	CompletedValue.fetch_add(1);
 	if (pOwningTask->AllHandlesFinished())
 	{
 		pOwningTask->SetupForNextDispatch();

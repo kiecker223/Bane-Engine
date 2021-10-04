@@ -2128,6 +2128,7 @@ int main(int argc, char** argv)
 	for (auto& File : AllFiles)
 	{
 		std::string FileExtension = GetFileExtension(File);
+		std::cout << File << std::endl;
 		std::string AdditionalCompiledLocation;
 		if (CompilationMode == DXIL)
 		{

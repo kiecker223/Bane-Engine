@@ -46,7 +46,7 @@ public:
 
 	uint64 AllocateResource(const D3D12_RESOURCE_DESC& ResourceDesc) override final
 	{
-		uint64 NewSize = RoundUpToNextMultipleOf(Alignment, Size);
+		uint64 NewSize = RoundUpToNextMultipleOf(Alignment, HeapSize);
 		uint64 Result = CurrentPointer;
 		CurrentPointer += NewSize;
 		return Result;

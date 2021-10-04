@@ -1,4 +1,5 @@
 #pragma once
+#include <string.h>
 #include "Common/Types.h"
 #include <vector>
 
