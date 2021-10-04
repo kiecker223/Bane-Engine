@@ -13,7 +13,7 @@ TaskSystem* TaskSystem::Get()
 
 void TaskSystem::Initialize()
 {
-	uint32 ThreadCount = 2;//std::thread::hardware_concurrency() - 2;
+	uint32 ThreadCount = 4;//std::thread::hardware_concurrency() - 2;
 	m_bRunning = true;
 	m_Threads.reserve(ThreadCount);
 	ThreadStats.resize(ThreadCount);

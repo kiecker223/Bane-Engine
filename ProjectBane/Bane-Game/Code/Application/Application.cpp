@@ -132,7 +132,7 @@ void NBodyCalculation(uint32 StartIndex, uint32 EndIndex, std::vector<PhysicsDat
 			vec3 ForceDir = InOutPhysicsData[i].Position - InOutPhysicsData[x].Position;
 			double DistanceSqrd = lengthSqrd(ForceDir);
 			normalize(ForceDir);
-			double Force = M_GRAV_CONST * (100000.0 * 100000.0) / (DistanceSqrd);
+			double Force = M_GRAV_CONST * (InOutPhysicsData[i].Mass * InOutPhysicsData[x].Mass) / (DistanceSqrd);
 			if (isnan(Force)) { continue; }
 			InOutPhysicsData[x].Velocity += ForceDir * Force * (1.0 / 60.0);
 		}
@@ -280,6 +280,7 @@ void Application::Run()
 
 //	Task* ApplyInversionFilterTask = new Task(1, [](uint32 DispatchSize, uint32 DispatchIndex) {});
 	uint32 frame = 0;
+	bool bUseAccelerationStructure = true;
 	while (!m_Window->QuitRequested())
 	{
 		frame++;
@@ -315,6 +316,7 @@ void Application::Run()
 		if (GetInput()->Keyboard.GetKeyDown(KEY_SPACE))
 		{
 			ResetVelocities(PhysicsData);
+			bUseAccelerationStructure = !bUseAccelerationStructure;
 		}
 
 		vec2 Diff = GetInput()->Mouse.GetMouseDelta();
@@ -331,13 +333,18 @@ void Application::Run()
 		//Velocity = LookDirection.RotationMatrix3x3Doubles() * Velocity;
 		CameraPosition += Velocity;
 		// Schedule the tasks to be executed
-		//AccelerationStructure.Construct(PhysicsData);
-		//AccelerationStructure.Simulate(PhysicsData, 1.0 / 60.0);
 
-
-		Dispatcher::DispatchTask(CalculateNBodyAccelerationTask);
+		if (bUseAccelerationStructure)
+		{
+			AccelerationStructure.Construct(PhysicsData);
+			AccelerationStructure.Simulate(PhysicsData, 1.0 / 60.0);
+		}
+		else
+		{
+			Dispatcher::DispatchTask(CalculateNBodyAccelerationTask);
+		}
 		Dispatcher::DispatchTask(ApplyNBodyAccelerationTask);
-		//Dispatcher::WaitOnTask(ApplyNBodyAccelerationTask);
+		Dispatcher::WaitOnTask(ApplyNBodyAccelerationTask);
 
 		for (uint32 i = 0; i < PhysicsData.size(); i++)
 		{

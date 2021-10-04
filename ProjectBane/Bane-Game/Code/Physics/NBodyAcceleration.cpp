@@ -3,7 +3,7 @@
 #include <iostream>
 
 
-const uint32 NumNodesAllocated = 65537;
+const uint32 NumNodesAllocated = 65536;
 const double Theta = 1.0;
 
 
@@ -13,6 +13,26 @@ void NBodyAcceleration::Construct(std::vector<PhysicsData>& InOutPhysicsData)
 	double Infinity = std::numeric_limits<double>::infinity();
 	double Min = Infinity;
 	double Max = -Infinity;
+
+	
+
+	Max += 20.0;
+	Min -= 20.0;
+
+	if (m_MemoryPool.GetNumBytes() == 0)
+	{
+		m_MemoryPool.Initialize(sizeof(NBodyNode) * (NumNodesAllocated + 1));
+	}
+	m_MemoryPool.Reset();
+
+	if (!Topmost)
+	{
+		Topmost = m_MemoryPool.Allocate<NBodyNode>();
+	}
+	else
+	{
+		Topmost->~NBodyNode();
+	}
 
 	for (PhysicsData& Data : InOutPhysicsData)
 	{
@@ -27,34 +47,12 @@ void NBodyAcceleration::Construct(std::vector<PhysicsData>& InOutPhysicsData)
 				Max = Data.Position.p[i];
 			}
 		}
-	}
 
-	Max += 20.0;
-	Min -= 20.0;
-
-	if (m_MemoryPool.GetNumBytes() == 0)
-	{
-		m_MemoryPool.Initialize(sizeof(NBodyNode) * NumNodesAllocated);
-	}
-	m_MemoryPool.Reset();
-
-	if (!Topmost)
-	{
-		Topmost = m_MemoryPool.Allocate<NBodyNode>();
-	}
-	else
-	{
-		Topmost->~NBodyNode();
+		Topmost->Bodies.push_back(&Data);
 	}
 
 	Topmost->Bounds.Min = vec3(Min, Min, Min);
 	Topmost->Bounds.Max = vec3(Max, Max, Max);
-
-	for (PhysicsData& Data : InOutPhysicsData)
-	{
-		Topmost->Bodies.push_back(&Data);
-	}
-
 	Topmost->CalculateCenterOfMass();
 	Topmost->CalculateForce();
 	Topmost->Parent = nullptr;

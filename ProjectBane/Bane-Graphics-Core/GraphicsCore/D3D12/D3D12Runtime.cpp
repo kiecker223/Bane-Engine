@@ -28,7 +28,7 @@ void D3D12Runtime::Initialize(const Window* pWindow)
 #if USE_WARP || PLEASE_HELP_I_BROKE_THE_THING_AGAIN
 	DxgiFactory->EnumWarpAdapter(IID_PPV_ARGS(&Adapter));
 #else
-	DxgiFactory->EnumAdapters(0, &Adapter);
+	DxgiFactory->EnumAdapters(1, &Adapter);
 #endif
 
 	DXGI_ADAPTER_DESC AdapterDesc;
