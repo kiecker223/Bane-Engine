@@ -6,25 +6,7 @@
 #include <functional>
 #include "TaskSystemCommand.h"
 
-class SharedTaskResourceHandle
-{
-public:
 
-	void* Pointer;
-	
-	template<typename T>
-	inline T* Get()
-	{
-		return reinterpret_cast<T*>(Pointer);
-	}
-
-	template<typename T>
-	inline void Set(T* InPointer)
-	{
-		Pointer = reinterpret_cast<void*>(InPointer);
-	}
-
-};
 
 typedef enum ERESOURCE_LOCK_STATE {
 	RESOURCE_LOCK_STATE_UNLOCKED,
@@ -39,44 +21,6 @@ typedef enum ETASK_EXECUTION_TYPE {
 	TASK_EXECUTION_TYPE_PARALLEL_FOR = 1,
 	TASK_EXECUTION_TYPE_SINGLE,
 } ETASK_EXECUTION_TYPE;
-
-class SharedTaskResource
-{
-public:
-
-	struct ProtectionRange
-	{
-		uint32 StartIndex, EndIndex;
-
-		inline bool Overlap(const ProtectionRange& Rhs)
-		{
-			return Rhs.StartIndex <= EndIndex || Rhs.EndIndex >= StartIndex;
-		}
-	};
-
-	SharedTaskResourceHandle ResourceHandle;
-	ERESOURCE_LOCK_STATE CurrentState;
-	ERESOURCE_LOCK_STATE PendingState;
-
-// 	bool BeginRead(uint32 StartIndex, uint32 EndIndex, bool bLockTillReady = false);
-// 	bool EndRead(uint32 StartIndex, uint32 EndIndex, bool bLockTillReady = false);
-// 	bool BeginWrite(uint32 StartIndex, uint32 EndIndex, bool bLockTillReady = false);
-// 	bool EndWrite(uint32 StartIndex, uint32 EndIndex, bool bLockTillReady = false);
-// 
-// 	bool BeginRead(bool bLockTillReady = false);
-// 	bool EndRead(bool bLockTillReady = false);
-// 
-// 	bool BeginWrite(bool bLockTillReady = false);
-// 	bool EndWrite(bool bLockTillReady = false);
-// 
-// 	bool AddWriteProtection(uint32 StartIndex, uint32 EndIndex, bool bLockTillReady = false);
-// 	bool AddReadProtection(uint32 StartIndex, uint32 EndIndex, bool bLockTillReady = false);
-// 	bool WriteProtect(bool bLockTillReady = false);
-// 	bool ReadProtect(bool bLockTillReady = false);
-// 
-// 	std::vector<ProtectionRange> WriteProtectedRanges;
-// 	std::vector<ProtectionRange> ReadProtectedRanges;
-};
 
 
 class TaskSegmentExecutor : public TaskExecutionHandle
@@ -130,7 +74,6 @@ public:
 	inline bool IsCompleted()
 	{
 		return AllHandlesFinished();
-		//return NextValue.load() == CurrentValue.load();
 	}
 
 	inline bool HasDispatched()

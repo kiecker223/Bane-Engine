@@ -98,7 +98,7 @@ D3D12GraphicsDevice::D3D12GraphicsDevice(D3D12SwapChain* SwapChain, const Window
 		uint32 NumCommandListsAllowed;
 		switch (i)
 		{
-			case COMMAND_CONTEXT_TYPE_GRAPHICS: NumCommandListsAllowed = max(AvailableThreadCount - 1, 6); break;
+			case COMMAND_CONTEXT_TYPE_GRAPHICS: NumCommandListsAllowed = min(AvailableThreadCount - 1, 6); break;
 			case COMMAND_CONTEXT_TYPE_COMPUTE: NumCommandListsAllowed = 3; break;
 			case COMMAND_CONTEXT_TYPE_COPY: NumCommandListsAllowed = 5; break;
 		}

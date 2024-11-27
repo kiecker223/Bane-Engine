@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../KieckerMath.h"
+#include "../BaneMath.h"
 #include <numeric>
 
 class BoundingBox

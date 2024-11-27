@@ -1,12 +1,4 @@
--- premake5.lua
-
-newoption {
- 
-  trigger = "andrew",
-  description = "Make shit suck less",
- 
-}
- 
+-- premake5.lua 
 
 function SetupWinSDK()
   if os.getversion().majorversion == 10 then
@@ -23,16 +15,6 @@ workspace "ProjectBane"
     configurations { "Debug", "Release" }
     platforms { "x64" }
     warnings "Default"
-
-    if _OPTIONS["ANDREW"] then
-      location "Generated/"
---	  files {"../Tools/Formatting/.clang-format"}
---	  vpaths {
---		["Source"] = "**.cpp",
---		["Headers"] = "**.h",
---		["Formatting"] = "../Tools/Formatting/.clang-format",
---	  }
-    end
 
     filter "platforms:x64"
       architecture "x86_64"
@@ -86,7 +68,7 @@ project "BuildFiles"
 
 project("Regenerate premake")
     kind "Utility"
-    prebuildcommands("%{prj.location}../Tools/premake5.exe --file=%{prj.location}../premake5.lua vs2019")
+    prebuildcommands("%{prj.location}../Tools/premake5.exe --file=%{prj.location}../premake5.lua vs2022")
 
 include "Bane-Common/bane_common.lua"
 include "Bane-Core/bane_core.lua"

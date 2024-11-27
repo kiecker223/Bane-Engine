@@ -1,9 +1,6 @@
 #include "Application.h"
-#include "Rendering/RendererInterface.h"
-#include "Rendering/BasicForwardRenderer.h"
 #include "GraphicsCore/IO/TextureCache.h"
 #include "GraphicsCore/IO/ShaderCache.h"
-#include "Physics/NBodyAcceleration.h"
 #include <Platform/System/Logging/Logger.h>
 #include <Core/Data/Timer.h>
 #include <random>
@@ -13,9 +10,10 @@
 #include <iostream>
 #include <sys/timeb.h>
 #include <sys/utime.h>
-#include "../Physics/PhysicsObjectPools.h"
 #include <sstream>
-#include "../Game/PlanetInfo.h"
+#include <GraphicsCore/Graphics.h>
+#include <GraphicsCore/D3D12/D3D12Runtime.h>
+#include <GraphicsCore/Data/Mesh.h>
 
 #pragma warning(disable:4049)
 
@@ -98,20 +96,6 @@ void Application::InitSystems()
  	
 	InitShaderCache("CompiledShaders/ShaderPipelines.json");
 	InitializeTextureCache();
-
-	if (m_SceneRenderer == nullptr)
-	{
-		m_SceneRenderer = new BasicForwardRenderer();
-	}
-	m_SceneRenderer->Initialize(m_Window);
-	
-	CollisionShapeObjectPool::Initialize();
-	PhysicsDataObjectPool::Initialize();
-}
-
-void Application::RenderGameToTarget(Mesh* pMesh, IGraphicsCommandBuffer* CMDBuff)
-{
-
 }
 
 void ResetVelocities(std::vector<CurrentPhysicsData>& InPhysicsData)
@@ -144,6 +128,7 @@ void Application::Run()
 	Timer FrameTime;
 	bool bLimitFrames = false;
 	double DT = 0.;
+	InputSystem* inp = GetInput();
 	
 	// Setup data needed for Tasks
 	std::vector<CurrentPhysicsData> PhysicsData;
@@ -224,27 +209,12 @@ void Application::Run()
 		}
 	});
 
-	Task* ApplyTransforms = new Task(TASK_DISPATCH_ON_ALL_THREADS, [&PhysicsData, &ConstantBuffMappedRef](uint32 DispatchSize, uint32 DispatchIndex)
-	{
-		uint32 NumToIterate = NUM_OBJECTS / DispatchSize;
-		uint32 StartIndex = NumToIterate * DispatchIndex;
-		uint32 EndIndex = StartIndex + NumToIterate;
-		for (uint32 x = StartIndex; x < EndIndex; x++)
-		{
-			//ConstantBuffMappedRef.pPointer[x] = matTranslation(fromDouble3(PhysicsData[x].Position)) * matScale(fvec3(3000.0f, 3000.0f, 3000.0f));
-		}
-	});
-
 	NBodyAcceleration AccelerationStructure;
 
 	double MovementSpeed = 1.0;
 
 	Quaternion LookDirection(fvec3(0.0f, 0.0f, 0.0f));
 	SIMDMEMZERO(CameraBuff->Map(), static_cast<uint32>(CameraBuff->GetSizeInBytes()));
-
-//	IGraphicsCommandBuffer* BloomCommandBuffer;
-// 	IGraphicsCommandBuffer* SomeOtherWeirdEffect;
-// 	IGraphicsCommandBuffer* InversionCommandBuffer;
 
 	ITexture2D* BloomResult = Device->CreateTexture2D(m_Window->GetWidth(), m_Window->GetHeight(), FORMAT_R8G8B8A8_UNORM, CreateDefaultSamplerDesc(), TEXTURE_USAGE_RENDER_TARGET | TEXTURE_USAGE_SHADER_RESOURCE, nullptr); 
 	IRenderTargetView* BloomResultRT = Device->CreateRenderTargetView(BloomResult);
@@ -255,30 +225,6 @@ void Application::Run()
 	ITexture2D* SceneDepth = Device->CreateTexture2D(m_Window->GetWidth(), m_Window->GetHeight(), FORMAT_D24_UNORM_S8_UINT, CreateDefaultSamplerDesc(), TEXTURE_USAGE_DEPTH_STENCIL | TEXTURE_USAGE_SHADER_RESOURCE, nullptr);
 	IDepthStencilView* SceneDepthView = Device->CreateDepthStencilView(SceneDepth);
 
-//	IGraphicsPipelineState* BloomShader = GetShaderCache()->LoadGraphicsPipeline("Bloom.gfx");
-
-// 	Task* ApplyBloomTask = new Task(1, [&](uint32 DispatchSize, uint32 DispatchIndex)
-// 	{
-// 		ITexture2D* TemporaryTexture = BloomCommandBuffer->CreateTemporaryTexture(
-// 			m_Window->GetWidth(), 
-// 			m_Window->GetHeight(), 
-// 			FORMAT_R8G8B8A8_UNORM, 
-// 			CreateDefaultSamplerDesc(), 
-// 			TEXTURE_USAGE_RENDER_TARGET | TEXTURE_USAGE_SHADER_RESOURCE
-// 		);
-// 		IRenderTargetView* TemporaryRenderTarget = BloomCommandBuffer->CreateTemporaryRenderTargetView(TemporaryTexture);
-// 
-// 		IVertexBuffer* QuadVB = ApiRuntime::Get()->QuadVB;
-// 		IIndexBuffer* QuadIB = ApiRuntime::Get()->QuadIB;
-// 
-// 		BloomCommandBuffer->SetGraphicsPipelineState(BloomShader);
-// 		BloomCommandBuffer->SetTexture(0, SceneTex);
-// 		BloomCommandBuffer->SetVertexBuffer(QuadVB);
-// 		BloomCommandBuffer->SetIndexBuffer(QuadIB);
-// 		BloomCommandBuffer->DrawIndexed(4, 0, 0);
-// 	});
-
-//	Task* ApplyInversionFilterTask = new Task(1, [](uint32 DispatchSize, uint32 DispatchIndex) {});
 	uint32 frame = 0;
 	bool bUseAccelerationStructure = true;
 	while (!m_Window->QuitRequested())
@@ -287,39 +233,39 @@ void Application::Run()
 		// Allow for moving around
 		ConstantBuffMappedRef.pPointer = ConstantBuff->MapT<ConstantBuffMappedPointerRef::Reference>();
 		SIMDMEMZERO(ConstantBuffMappedRef.pPointer, static_cast<uint32>(ConstantBuff->GetSizeInBytes()));
-		GetInput()->Update();
+		inp->Update();
 		vec3 Velocity;
-		if (GetInput()->Keyboard.GetKey(KEY_S))
+		if (inp->Keyboard.GetKey(KEY_S))
 		{
 			Velocity.z -= MovementSpeed;
 		}
-		if (GetInput()->Keyboard.GetKey(KEY_W))
+		if (inp->Keyboard.GetKey(KEY_W))
 		{
 			Velocity.z += MovementSpeed;
 		}
-		if (GetInput()->Keyboard.GetKey(KEY_A))
+		if (inp->Keyboard.GetKey(KEY_A))
 		{
 			Velocity.x -= MovementSpeed;
 		}
-		if (GetInput()->Keyboard.GetKey(KEY_D))
+		if (inp->Keyboard.GetKey(KEY_D))
 		{
 			Velocity.x += MovementSpeed;
 		}
-		if (GetInput()->Mouse.GetScrollWheel() > 0.0f)
+		if (inp->Mouse.GetScrollWheel() > 0.0f)
 		{
 			MovementSpeed *= 10.0f;
 		}
-		if (GetInput()->Mouse.GetScrollWheel() < 0.0f)
+		if (inp->Mouse.GetScrollWheel() < 0.0f)
 		{
 			MovementSpeed /= 10.0f;
 		}
-		if (GetInput()->Keyboard.GetKeyDown(KEY_SPACE))
+		if (inp->Keyboard.GetKeyDown(KEY_SPACE))
 		{
 			ResetVelocities(PhysicsData);
 			bUseAccelerationStructure = !bUseAccelerationStructure;
 		}
 
-		vec2 Diff = GetInput()->Mouse.GetMouseDelta();
+		vec2 Diff = inp->Mouse.GetMouseDelta();
 		if (abs(Diff.y) > 0.0)
 		{
 			vec3 Right = fromFloat3(LookDirection.RotationMatrix3x3() * fvec3(1.0f, 0.0f, 0.0f));
@@ -330,7 +276,7 @@ void Application::Run()
 			LookDirection *= Quaternion::FromAxisAngle(vec3(0.0, 1.0, 0.0), Diff.x / 1000.0);
 		}
 
-		//Velocity = LookDirection.RotationMatrix3x3Doubles() * Velocity;
+		Velocity = LookDirection.RotationMatrix3x3Doubles() * Velocity;
 		CameraPosition += Velocity;
 		// Schedule the tasks to be executed
 
@@ -356,12 +302,9 @@ void Application::Run()
 
 		// Setup the constant buffer data
 		matrix* pMats = CameraBuff->MapT<matrix>();
-		//*pMats = matView(fvec3(0.0, 0.0, 0.0), fvec3(0.0f, 0.0f, 1.0f), fvec3(0.0f, 1.0f, 0.0f)) * matProjection(m_Window->AspectXY(), 60.f, 0.001f, 1e+23f);
-		//*pMats = matProjection(m_Window->AspectXY(), 60.f, 0.001f, 1e+23f) * matView(fvec3(0.0, 0.0, 0.0), fvec3(0.0f, 0.0f, 1.0f), fvec3(0.0f, 1.0f, 0.0f));
 		*pMats = matProjection(m_Window->AspectXY(), 60.f, 0.001f, 1e+23f) * matView(fvec3(0.0f, 0.0f, 0.0f), LookDirection * fvec3(0.0f, 0.0f, 1.0f), fvec3(0.0f, 1.0f, 0.0f));
-		//pMats[1] = matView(fvec3(0.0, 0.0, 0.0), fvec3(0.0f, 0.0f, 1.0f), fvec3(0.0f, 1.0f, 0.0f));
 
-		// Draw the shit
+		// Draw the circles
 		IGraphicsCommandContext* pCtx = Device->GetGraphicsContext();
 		pCtx->SetRenderTarget(Device->GetBackBuffer(), Device->GetDepthStencilForBackBuffer());
 		pCtx->ClearRenderTargets();
@@ -378,7 +321,7 @@ void Application::Run()
 		}
 
 		pCtx->Flush();
-		m_SceneRenderer->Present();
+		m_ApiRuntime->Get()->GetSwapChain()->Present();
 		FrameTime.StartTimer();
 	}
 	m_TaskSystem->Shutdown();
@@ -388,7 +331,6 @@ void Application::Shutdown()
 {
 	DestroyShaderCache();
 	DestroyTextureCache();
-	m_SceneRenderer->Shutdown();
 	delete m_SceneRenderer;
 	GlobalLog::Cleanup();
 }

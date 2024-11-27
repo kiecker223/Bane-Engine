@@ -283,7 +283,7 @@ public:
 		uint32 NumCommandListsAllowed = 0;
 		switch (ContextType)
 		{
-		case COMMAND_CONTEXT_TYPE_GRAPHICS: NumCommandListsAllowed = max(std::thread::hardware_concurrency() - 1, 6); break;
+		case COMMAND_CONTEXT_TYPE_GRAPHICS: NumCommandListsAllowed = min(std::thread::hardware_concurrency() - 1, 6); break;
 		case COMMAND_CONTEXT_TYPE_COMPUTE: NumCommandListsAllowed = 3; break;
 		case COMMAND_CONTEXT_TYPE_COPY: NumCommandListsAllowed = 5; break;
 		}

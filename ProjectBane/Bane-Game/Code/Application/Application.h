@@ -4,6 +4,7 @@
 #include "Platform/System/Window.h"
 #include "Platform/System/AssemblyLoader.h"
 #include "TaskSystem/MainTaskSystem.h"
+#include "GraphicsCore/Interfaces/ApiRuntime.h"
 
 
 typedef enum EMESH_QUALITY {
@@ -96,9 +97,6 @@ public:
 
 	void InitSystems();
 
-	// Assumes that the pass info, etc is already setup
-	void RenderGameToTarget(Mesh* pMesh, IGraphicsCommandBuffer* CMDBuff);
-
 	void Run();
 
 	void Shutdown();
@@ -106,11 +104,6 @@ public:
 	inline TaskSystem* GetTaskSystem() const
 	{
 		return m_TaskSystem;
-	}
-	
-	inline void SetSceneRenderer(ISceneRenderer* InSceneRenderer)
-	{
-		m_SceneRenderer = InSceneRenderer;
 	}
 
 private:
@@ -125,7 +118,7 @@ private:
 	TaskSystem* m_TaskSystem;
 	ISceneRenderer* m_SceneRenderer;
 	Window* m_Window = nullptr;
-
+	ApiRuntime* m_ApiRuntime = nullptr;
 };
 
 inline Application* GetApplicationInstance()

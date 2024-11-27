@@ -1,6 +1,6 @@
 #include <Platform/System/File/PlatformFile.h>
 #include <IL/devil_cpp_wrapper.hpp>
-#include <KieckerMath.h>
+#include "BaneMath.h"
 #include <Common/BaneMacros.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H

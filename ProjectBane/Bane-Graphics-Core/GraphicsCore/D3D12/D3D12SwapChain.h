@@ -19,7 +19,7 @@ public:
 		Adapter->Release();
 	}
 
-	bool Initialize(IDXGIFactory2* Factory, IDXGIAdapter* Adapter, ID3D12CommandQueue* MainQueue, const Window* RenderingWindow);
+	bool Initialize(IDXGIFactory2* Factory, IDXGIAdapter* Adapter, ID3D12CommandQueue* MainQueue, const Window* RenderingWindow, uint32 InBackBufferCount);
 
 	virtual void SetSwapInterval(uint32 SyncInterval) override final;
 
@@ -32,6 +32,7 @@ public:
 	IDXGISwapChain4* SwapChain;
 	IDXGIAdapter* Adapter;
 
+	uint32 BackBufferCount;
 	uint32 SyncRate;
 
 };

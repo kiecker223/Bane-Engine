@@ -43,7 +43,7 @@ void D3D12Runtime::Initialize(const Window* pWindow)
 	ID3D12CommandQueue* CommandQueue = nullptr;
 	Device->CreateCommandQueue(&CmdDesc, IID_PPV_ARGS(&CommandQueue));
 
-	BANE_CHECK(m_SwapChain->Initialize(DxgiFactory, Adapter, CommandQueue, pWindow));
+	BANE_CHECK(m_SwapChain->Initialize(DxgiFactory, Adapter, CommandQueue, pWindow, 3));
 	m_Device = new D3D12GraphicsDevice(m_SwapChain, pWindow, Device, CommandQueue);
 
 	struct Vertex

@@ -2,8 +2,9 @@
 #include "D3D12GraphicsDevice.h"
 
 
-bool D3D12SwapChain::Initialize(IDXGIFactory2* Factory, IDXGIAdapter* InAdapter, ID3D12CommandQueue* MainQueue, const Window* RenderingWindow)
+bool D3D12SwapChain::Initialize(IDXGIFactory2* Factory, IDXGIAdapter* InAdapter, ID3D12CommandQueue* MainQueue, const Window* RenderingWindow, uint32 InBackBufferCount)
 {
+	BackBufferCount = InBackBufferCount;
 	Adapter = InAdapter;
 	const uint32 Width = RenderingWindow->GetWidth();
 	const uint32 Height = RenderingWindow->GetHeight();
@@ -15,7 +16,7 @@ bool D3D12SwapChain::Initialize(IDXGIFactory2* Factory, IDXGIAdapter* InAdapter,
 	Desc.Stereo = FALSE;
 	Desc.SampleDesc = { 1, 0 };
 	Desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	Desc.BufferCount = 3;
+	Desc.BufferCount = InBackBufferCount;
 	Desc.Scaling = DXGI_SCALING_STRETCH;
 	Desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 	Desc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;

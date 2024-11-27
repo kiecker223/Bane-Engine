@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 #include "Common.h"
-#include "KieckerMath.h"
+#include "BaneMath.h"
 #include "../Interfaces/GraphicsResources.h"
 #include "../Interfaces/PipelineState.h"
 

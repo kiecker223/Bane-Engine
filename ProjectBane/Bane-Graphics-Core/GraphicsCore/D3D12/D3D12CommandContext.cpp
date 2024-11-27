@@ -23,45 +23,6 @@ void D3D12CommandList::FlushDestructionQueue()
 
 ///--------- D3D12GraphicsCommandBuffer ---------///
 
-/*
-void D3D12GraphicsCommandBuffer::BeginPass(IRenderPass* InRenderPass)
-{
-	if (CommandList == nullptr)
-	{
-		FetchNewCommandList();
-	}
-	if (CommandList->bCanReset)
-	{
-		CommandList->Reset();
-	}
-	if (InRenderPass)
-	{
-		D3D12RenderPassInfo* RenderPass = (D3D12RenderPassInfo*)InRenderPass;
-		ID3D12DescriptorHeap* ppHeaps[] = { ParentDevice->m_SrvAllocator.DescriptorHeap, ParentDevice->m_SmpAllocator.DescriptorHeap };
-		D3DCL->SetDescriptorHeaps(2, ppHeaps);
-		RenderPass->TransitionResourcesToWrite(this);
-		FlushResourceTransitions();
-		RenderPass->SetRenderTargets(D3DCL);
-		RenderPass->Clear(D3DCL);
-		D3DCL->RSSetScissorRects(1, &ScissorRect);
-		D3DCL->RSSetViewports(1, &Viewport);
-		CurrentRenderPass = RenderPass;
-	}
-}
-
-void D3D12GraphicsCommandBuffer::EndPass()
-{
-	if (CurrentRenderPass)
-	{
-		CurrentRenderPass->TransitionResourcesToRead(this);
-		FlushResourceTransitions();
-		CurrentRenderPass = nullptr;
-	}
-	GraphicsPipelineState = nullptr;
-	ComputePipelineState = nullptr;
-}
-*/
-
 void D3D12GraphicsCommandBuffer::Begin()
 {
 	if (CommandList == nullptr)
