@@ -1,1 +1,1 @@
-Tools\premake5.exe vs2019 %*
+Tools\premake5.exe vs2022 %*
